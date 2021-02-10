@@ -53,8 +53,8 @@ begin
 
      do kk = 0,dimsizes(seasons) - 1
 
-        fnam                                   = systemfunc("ls $TPATH/*"+seasons(kk)+"_means.nc")
-        f1                                     = addfile(fnam,"r")
+        f                                   = systemfunc("ls $TPATH/*"+seasons(kk)+"_means.nc")
+        f1                                     = addfile(f,"r")
         ps1                                    = f1->PS
         ha1                                    = doubletofloat(f1->hyam)
         hb1                                    = doubletofloat(f1->hybm)
@@ -63,8 +63,8 @@ begin
         p1                                     = p1/100.
         gw1                                    = doubletofloat(f1->gw)
 
-        fnam                                   = systemfunc("ls $CPATH/*"+seasons(kk)+"_means.nc")
-        f2                                     = addfile(fnam,"r")
+        f                                   = systemfunc("ls $CPATH/*"+seasons(kk)+"_means.nc")
+        f2                                     = addfile(f,"r")
         ps2                                    = f2->PS
         ha2                                    = doubletofloat(f2->hyam)
         hb2                                    = doubletofloat(f2->hybm)

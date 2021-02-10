@@ -457,8 +457,8 @@ begin
         ;wtype@wkWidth                = 2500
         ;wtype@wkHeight               = 2500
          figdir                       = casedir+"/Regression_Contour_Maps/"
-         fname                        = eofnam(n)+"_regression_on_"+modvars(jj)+"_"+seasons(kk)
-         wks                          = gsn_open_wks(wtype, figdir + fname)
+         fe                        = eof(n)+"_regression_on_"+modvars(jj)+"_"+seasons(kk)
+         wks                          = gsn_open_wks(wtype, figdir + fe)
  
          plot      = new((/4/),graphic)
          tsmap1    = new((/4/),graphic)
@@ -536,14 +536,14 @@ begin
           res@gsnPolarLabelFontHeightF     = FontHeightF
 
           ;---Draw first plot in upper left corner
-          res@gsnLeftString     = "Regression ("+eofnam(n)+")";(EOF "+(n+1)+")"
+          res@gsnLeftString     = "Regression ("+eof(n)+")";(EOF "+(n+1)+")"
           res@gsnRightString    = sprintf("%5.1f", jet1@pcvar(n)) +"%"
           res@gsnCenterString   = "" ;case1name
           res@tiMainString      = "Case: "+case1name
           plot(0)   = gsn_csm_contour_map_polar(wks,jet1_regres(n,:,:),res)
 
           ;---Draw second plot in upper right corner
-          res@gsnLeftString     = "Regression ("+eofnam(n)+")";(EOF "+(n+1)+")"
+          res@gsnLeftString     = "Regression ("+eof(n)+")";(EOF "+(n+1)+")"
           res@gsnRightString    = sprintf("%5.1f", jet2@pcvar(n)) +"%"
           res@gsnCenterString   = "" ;case2name
           res@tiMainString      = "Case: "+case2name
@@ -627,7 +627,7 @@ begin
 
          ;create individual plots
          ;---Draw third plot in lower left corner
-          rts@gsnLeftString     = eofnam(n)+" index" ;(EOF "+(n+1)+")"
+          rts@gsnLeftString     = eof(n)+" index" ;(EOF "+(n+1)+")"
           rts@gsnRightString    = sprintf("%5.1f", jet1@pcvar(n)) +"%"
           rts@tiMainString      = "" ;"Case: "+case1name
           plot(2) = gsn_csm_xy (wks,yyyy1,jet1_ts(n,:),rts)
@@ -646,7 +646,7 @@ begin
 
 
           ;---Draw fourth plot in upper right corner
-          rts@gsnLeftString        = eofnam(n)+" index" ;(EOF "+(n+1)+")"
+          rts@gsnLeftString        = eof(n)+" index" ;(EOF "+(n+1)+")"
           rts@gsnRightString       = sprintf("%5.1f", jet2@pcvar(n)) +"%"
           rts@tiMainString         = "" ;"Case: "+case2name
           plot(3) = gsn_csm_xy (wks,yyyy2,jet2_ts(n,:),rts)
@@ -678,8 +678,8 @@ begin
          ;gsn_panel(wks,plot(2:3),(/1,2/),pres2)       ; create first panel
  
           ;if (wtype .eq. "png") then
-          ;   tmpa = systemfunc("convert "+fname+".png -trim del.png")
-          ;   tmpb = systemfunc("mv del.png "+fname+".png")
+          ;   tmpa = systemfunc("convert "+fe+".png -trim del.png")
+          ;   tmpb = systemfunc("mv del.png "+fe+".png")
           ;end if
       
           frame(wks)                                   ; draw both on same page

@@ -18,7 +18,7 @@ begin
   case1name                                  = getenv("TEST_NAME")
   case2name                                  = getenv("CTRL_NAME")
   casedir                                    = getenv("CASEDIR")
-  weightfile                                 = getenv("RGDWGT_FILE_NAME")
+  opath                                      = getenv("DIAG_DATA_ROOT")
  
 ;define regions for jet position analysi
   latS                                         = -70.  ;negative for southern hemisphere
@@ -44,7 +44,7 @@ begin
 
   do ll = 0,dimsizes(preslev) - 1
 
-        f                                      = systemfunc("ls $TPATH/*_monthly_means.nc")
+        f                                      = systemfunc("ls "+tpath+"/*_monthly_means.nc")
         f1                                     = addfile(f,"r")
         ps1                                    = f1->PS
         ha1                                    = doubletofloat(f1->hyam)
@@ -56,11 +56,11 @@ begin
         landmsk                                = f1->LANDFRAC(0,:,:) 
                                
         if(compare.eq."Model_vs_OBS") then
-          f                                    = systemfunc("ls $CPATH/*_prelev_monthly_analysis_*.nc")
+          f                                    = systemfunc("ls "+cpath+"/*_prelev_monthly_analysis_*.nc")
           f2                                   = addfile(f,"r")
           gw2                                  = doubletofloat(f2->gw)
         else
-          f                                    = systemfunc("ls $CPATH/*_monthly_means.nc")
+          f                                    = systemfunc("ls "+cpath+"/*_monthly_means.nc")
           f2                                   = addfile(f,"r")
           ps2                                  = f2->PS
           ha2                                  = doubletofloat(f2->hyai)
@@ -158,13 +158,15 @@ begin
        ; ====================================================================
        ; First step: regrid the data to 0.1x0.1 within 70S and 20S region
        ;=====================================================================
+       weightfile = systemfunc("ls "+opath+"/1deg_to_0.1deg.nc")
+      ;print(weightfile)
        exists = isfilepresent(weightfile)
 
        if(.not.exists) then
+
          print("OPeNDAP test unsuccessful.")
          print("Either the file doesn't exist, or NCL does")
          print("not have OPeNDAP cabilities on this system.")
-       else
          print("Generate weighting files on the fly")
          Opt                = True
          Opt@SrcFileName    = "src_SCRIP.nc"
@@ -176,10 +178,13 @@ begin
          Opt@DstURCorner    = (/ latN, 359.75d/)
          vp1x               = ESMF_regrid(vp1,Opt)
          vp2x               = ESMF_regrid(vp2,Opt)
-        end if 
 
-        vp1x               = ESMF_regrid(vp1,Opt)
-        vp2x               = ESMF_regrid(vp2,Opt)
+       else
+         
+         vp1x = ESMF_regrid_with_weights(vp1,weightfile,False)
+         vp2x = ESMF_regrid_with_weights(vp2,weightfile,False)
+
+       end if 
 
        ; ======================================================================
        ; Second step: Calculate the zonal mean zonal wind at 850hPa
@@ -207,11 +212,40 @@ begin
           y1_pos(ix) = tofloat(y1&lat(ymax_ind(ix)))
          end do
 
-         ;print(min(x1_ins)+ " " +max(x1_ins))
-         ;print(min(y1_ins)+ " " +max(y1_ins))
-         ;print(min(x1_pos)+ " " +max(x1_pos))
-         ;print(min(y1_pos)+ " " +max(y1_pos))
+        ;======================================================================
+        ;Third step: save the data for the regression analysis 
+        ;==================================================================
+         setfileoption("nc", "Format",  "NetCDF4")
+         out_file1  = opath +"/"+"Jet_index_"+case1name+"_monthly_mean_"+mvarnam+"_at_"+toint(preslev(ll))+"hPa.nc"
+         out_file2  = opath +"/"+"Jet_index_"+case2name+"_monthly_mean_"+mvarnam+"_at_"+toint(preslev(ll))+"hPa.nc"
 
+         system("rm " + out_file1)
+         system("rm " + out_file2)
+
+         fout1 = addfile(out_file1,"c")
+         fout2 = addfile(out_file2,"c")
+
+         time1 = x1_ins&time
+         time2 = y1_ins&time
+         time1!0 = "time"
+         time2!0 = "time"
+         time1&time = time1
+         time2&time = time2
+
+         fout1->time         = time1
+         fout2->time         = time2
+
+         x1_ins@description = "jet strength"
+         y1_ins@description = "jet strength"
+         x1_pos@description = "jet position"
+         y1_pos@description = "jet position"
+
+         fout1->jet_ins   = x1_ins
+         fout2->jet_ins   = y1_ins
+         fout1->jet_pos   = x1_pos
+         fout2->jet_pos   = y1_pos
+
+         delete([/time1,time2,fout1,fout2,out_file1,out_file2/])
 
        ;;;;loop the season and do the plot;;;;
  
@@ -254,14 +288,15 @@ begin
          y_ins = y1_ins(indx2)
          x_pos = x1_pos(indx1)
          y_pos = y1_pos(indx2)
+       
          xAnom = xAnom1(indx1,:,:)
          yAnom = yAnom1(indx2,:,:)
          delete([/indx1,indx2,utc_date1,utc_date2,monthx1,monthx2/])
 
-         print(min(x_ins)+ " " +max(x_ins))
-         print(min(y_ins)+ " " +max(y_ins))
-         print(min(x_pos)+ " " +max(x_pos))
-         print(min(y_pos)+ " " +max(y_pos))
+         print(min(x_ins)+ " " +max(x_ins)+" "+ avg(x_ins))
+         print(min(y_ins)+ " " +max(y_ins)+" "+ avg(y_ins))
+         print(min(x_pos)+ " " +max(x_pos)+" "+ avg(x_pos))
+         print(min(y_pos)+ " " +max(y_pos)+" "+ avg(y_pos))
 
        ; =================================================================
        ; Regress
@@ -282,7 +317,6 @@ begin
 
        ; =================================================================
        ; Extract the YYYYMM from the time coordinate 
-       ; associated with eof_ts [same as x&time] 
        ; =================================================================
 
          utc_date1 = cd_calendar(x_ins&time,-1)
@@ -297,10 +331,11 @@ begin
         ;wtype@wkWidth                = 2500
         ;wtype@wkHeight               = 2500
          figdir                       = casedir+"/Jet_Index_Analysis/"
-         fname                        = "Jet_analysis_"+modvars(jj)+"_"+seasons(kk)+"_"+preslev(ll) 
-         wks                                 = gsn_open_wks(wtype, figdir + fname)
+         fe                        = "Jet_analysis_monthly_mean_"+modvars(jj)+"_"+seasons(kk)+"_"+preslev(ll) 
+         wks                                 = gsn_open_wks(wtype, figdir + fe)
 
          plot      = new((/6/),graphic)
+         tsmapx    = new((/6/),graphic)
          tsmap1    = new((/6/),graphic)
          tsmap2    = new((/6/),graphic)
       
@@ -395,12 +430,14 @@ begin
           rts@vpXF      = 0.10        ; change start locations
           rts@vpYF      = 0.75        ; the plot
 
-          rts@gsnYRefLine           = 0.              ; reference line   
           rts@gsnXYBarChart         = False            ; create bar chart 
          ;rts@gsnAboveYRefLineColor = "red"           ; above ref line fill red
          ;rts@gsnBelowYRefLineColor = "blue"          ; below ref line fill blue
-          rts@xyLineThicknesses            = 3
+          rts@xyLineThicknesses            = 3.0
           rts@xyLineColors                 = "Black"
+          rts@gsnYRefLineThicknesses       = 3.0
+          rts@gsnYRefLineColors            = "Red"
+          rts@gsnXRefLineDashPatterns      = 5.0
 
           rts@tmXTOn                       = False
           rts@tmYLLabelFontHeightF         = 0.025
@@ -419,14 +456,42 @@ begin
 
          ;create individual plots
          ;---Draw third plot in lower left corner
-          rts@gsnLeftString     = "Jet strength"
-          rts@gsnRightString    = "Case: "+case2name
+          rts@xyLineThicknesses     = 3.0
+          rts@xyLineColors          = "Black"
+          rts@gsnLeftString         = "Jet strength"
+          rts@gsnRightString        = "Case: "+case2name
+          rts@gsnYRefLine           = avg(x_pos)   ; reference line
           plot(2) = gsn_csm_xy (wks,yyyy1,x_ins,rts)
+
+          rtsx1 = rts
+          rtsx1@gsnXYBarChart       = False
+          rtsx1@gsnLeftString       = ""
+          rtsx1@gsnRightString      = ""
+          rtsx1@gsnCenterString     = ""
+          rtsx1@xyLineThicknesses   = 3
+          rtsx1@xyLineColors       := "red"
+          xyarrx1                   = wgt_runave_Wrap(x_ins,(/1.,3,5,6,5,3,1/), 0)
+          tsmapx(2)                 = gsn_csm_xy(wks,yyyy1,xyarrx1,rtsx1)
+         ;overlay(plot(2),tsmapx(2))
+          delete([/xyarrx1,rtsx1/])
            
           ;---Draw fourth plot in lower right corner
-          rts@gsnLeftString        = "Jet strength"
-          rts@gsnRightString       = "Case: "+case2name
+          rts@gsnLeftString         = "Jet strength"
+          rts@gsnRightString        = "Case: "+case2name
+          rts@gsnYRefLine          = avg(y_ins)   ; reference line
           plot(3) = gsn_csm_xy (wks,yyyy2,y_ins,rts)
+
+          rtsx1 = rts
+          rtsx1@gsnXYBarChart       = False
+          rtsx1@gsnLeftString       = ""
+          rtsx1@gsnRightString      = ""
+          rtsx1@gsnCenterString     = ""
+          rtsx1@xyLineThicknesses   = 3
+          rtsx1@xyLineColors       := "red"
+          xyarrx1                   = wgt_runave_Wrap(y_ins,(/1.,3,5,6,5,3,1/), 0)
+          tsmapx(3)                 = gsn_csm_xy(wks,yyyy2,xyarrx1,rtsx1)
+         ;overlay(plot(3),tsmapx(3))
+          delete([/xyarrx1,rtsx1/])
 
        ;*******************************************
        ; second plot: Jet Position
@@ -439,55 +504,82 @@ begin
           rts1@tiYAxisString                = "Degree"
 
           rts1@gsnXYBarChart                = False
-          rts1@xyLineThicknesses            = 3
+          rts1@xyLineThicknesses            = 3.0
           rts1@xyLineColors                 = "Black"
 
          ;create individual plots
          ;---Draw fifth plot in lower left corner
-          rts1@gsnLeftString       = "Jet position"
-          rts1@gsnRightString      = "Case: "+case2name
+          rts1@gsnLeftString        = "Jet position"
+          rts1@gsnRightString       = "Case: "+case2name
+          rts1@gsnYRefLine          = avg(x_pos)   ; reference line
           plot(4) = gsn_csm_xy (wks,yyyy1,x_pos,rts1)
 
+          rtsx1 = rts
+          rtsx1@gsnXYBarChart       = False
+          rtsx1@gsnLeftString       = ""
+          rtsx1@gsnRightString      = ""
+          rtsx1@gsnCenterString     = ""
+          rtsx1@xyLineThicknesses   = 3
+          rtsx1@xyLineColors       := "red"
+          xyarrx1                   = wgt_runave_Wrap(x_pos,(/1.,3,5,6,5,3,1/), 0)
+          tsmapx(4)                 = gsn_csm_xy(wks,yyyy1,xyarrx1,rtsx1)
+         ;overlay(plot(4),tsmapx(4))
+          delete([/xyarrx1,rtsx1/])
+
+
          ;---Draw sixth plot in lower right corner
-          rts1@gsnLeftString       = "Jet position"
-          rts1@gsnRightString      = "Case: "+case2name
+          rts1@gsnLeftString        = "Jet position"
+          rts1@gsnRightString       = "Case: "+case2name
+          rts1@gsnYRefLine          = avg(y_pos)   ; reference line
           plot(5) = gsn_csm_xy (wks,yyyy2,y_pos,rts1)
+
+          rtsx1 = rts
+          rtsx1@gsnXYBarChart       = False
+          rtsx1@gsnLeftString       = ""
+          rtsx1@gsnRightString      = ""
+          rtsx1@gsnCenterString     = ""
+          rtsx1@xyLineThicknesses   = 3
+          rtsx1@xyLineColors       := "red"
+          xyarrx1                   = wgt_runave_Wrap(y_pos,(/1.,3,5,6,5,3,1/), 0)
+          tsmapx(5)                 = gsn_csm_xy(wks,yyyy2,xyarrx1,rtsx1)
+         ;overlay(plot(5),tsmapx(5))
+          delete([/xyarrx1,rtsx1/])
 
        ; panel plot only resources
           pres1                          = True                ; mods desired
           pres1@gsnFrame                 = False               ; save panel until both ready
-          pres1@gsnPanelBottom           = 0.6    ; space for label bar
           pres1@gsnPanelTop              = 0.95     ; only panel on lower half of page
+          pres1@gsnPanelBottom           = 0.60     ; space for label bar
           pres1@gsnPanelXF               = (/0.07,0.57/)
           gsn_panel(wks,plot(0:1),(/1,2/),pres1)          ; create first panel
           
           pres2                           = True                ; mods desired
           pres2@gsnFrame                  = False               ; save panel until both ready
-          pres2@gsnPanelBottom            = 0.35                ; draw from center to right edge
-          pres2@gsnPanelTop               = 0.65		       ; draw from center to right edge 
+          pres2@gsnPanelTop               = 0.58                 ; draw from center to right edge
+          pres2@gsnPanelBottom            = 0.33                ; draw from center to right edge
           gsn_panel(wks,plot(2:3),(/1,2/),pres2)       ; create first panel
 
-          pres3                           = True                ; mods desired
-          pres3@gsnFrame                  = False               ; save panel until both ready
-          pres3@gsnPanelBottom            = 0.05                ; draw from center to right edge
-          pres3@gsnPanelTop               = 0.35                ; draw from center to right edge
+          pres3                           = True       ; mods desired
+          pres3@gsnFrame                  = False      ; save panel until both ready
+          pres3@gsnPanelTop               = 0.30       ; draw from center to right edge
+          pres3@gsnPanelBottom            = 0.05       ; draw from center to right edge
           gsn_panel(wks,plot(4:5),(/1,2/),pres3)       ; create first panel
        
           frame(wks)                                   ; draw both on same page
 
           ;if (wtype .eq. "png") then
-          ;   tmpa = systemfunc("convert "+fname+".png -trim del.png")
-          ;   tmpb = systemfunc("mv del.png "+fname+".png")
+          ;   tmpa = systemfunc("convert "+fe+".png -trim del.png")
+          ;   tmpb = systemfunc("mv del.png "+fe+".png")
           ;end if
 
           ;delete([/xyarr1,xyarr2,tsmap1,tsmap2/])
           delete([/x_ins,y_ins,x_pos,y_pos,jet_ins1,jet_ins2,jet_pos1,jet_pos2,yyyy1,yyyy2/])
           delete([/jet_ins1_regres,jet_ins2_regres,jet_pos1_regres,jet_pos2_regres/])
+          delete([/xAnom,yAnom/])
 
        end do 
 
-         delete([/xAnom1,yAnom1,x1_ins,y1_ins,x1_pos,y1_pos/])
-         delete([/xAnom,yAnom,xClm1,yClm1,xClm,yClm,x1,y1/])
+         delete([/xAnom1,yAnom1,xClm1,yClm1,xClm,yClm,x1,y1,x1_ins,y1_ins,x1_pos,y1_pos/])
 
      end do                                              ; end of looping over variables
      

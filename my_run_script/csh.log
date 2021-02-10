@@ -1,0 +1,37 @@
+nohup: ignoring input
+EOF_Mode_Time_Series/
+Jet_Index_Analysis/
+Latitude-Longitude_Contour_Maps_20S-90S/
+Latitude-Longitude_Contour_Maps_55S-90S/
+Polar_Votex/
+Pressure-Latitude_Zonal_Mean_Contour/
+Regression_Contour_Maps/
+tables/
+---------------------------------------------
+eof_sfc_monthly.ncl is running!
+---------------------------------------------
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/polar_diag/data/EOF_PCS_beta1_01_monthly_mean_TS_at_Surface_ANN.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/polar_diag/data/EOF_PCS_ERA5_monthly_mean_TS_at_Surface_ANN.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/polar_diag/data/EOF_PCS_beta1_01_monthly_mean_TS_at_Surface_DJF.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/polar_diag/data/EOF_PCS_ERA5_monthly_mean_TS_at_Surface_DJF.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/polar_diag/data/EOF_PCS_beta1_01_monthly_mean_TS_at_Surface_JJA.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/polar_diag/data/EOF_PCS_ERA5_monthly_mean_TS_at_Surface_JJA.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/polar_diag/data/EOF_PCS_beta1_01_monthly_mean_TREFHT_at_Surface_ANN.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/polar_diag/data/EOF_PCS_ERA5_monthly_mean_TREFHT_at_Surface_ANN.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/polar_diag/data/EOF_PCS_beta1_01_monthly_mean_TREFHT_at_Surface_DJF.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/polar_diag/data/EOF_PCS_ERA5_monthly_mean_TREFHT_at_Surface_DJF.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/polar_diag/data/EOF_PCS_beta1_01_monthly_mean_TREFHT_at_Surface_JJA.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/polar_diag/data/EOF_PCS_ERA5_monthly_mean_TREFHT_at_Surface_JJA.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/polar_diag/data/EOF_PCS_beta1_01_monthly_mean_U10_at_Surface_ANN.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/polar_diag/data/EOF_PCS_ERA5_monthly_mean_U10_at_Surface_ANN.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/polar_diag/data/EOF_PCS_beta1_01_monthly_mean_U10_at_Surface_DJF.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/polar_diag/data/EOF_PCS_ERA5_monthly_mean_U10_at_Surface_DJF.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/polar_diag/data/EOF_PCS_beta1_01_monthly_mean_U10_at_Surface_JJA.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/polar_diag/data/EOF_PCS_ERA5_monthly_mean_U10_at_Surface_JJA.nc': No such file or directory
+ Copyright (C) 1995-2018 - All Rights Reserved
+ University Corporation for Atmospheric Research
+ NCAR Command Language Version 6.5.0
+ The use of this software is governed by a License Agreement.
+ See http://www.ncl.ucar.edu/ for more details.
+
+

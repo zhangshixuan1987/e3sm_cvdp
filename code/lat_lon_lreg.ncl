@@ -52,7 +52,7 @@ begin
 
      do kk = 0, dimsizes(seas)-1
 
-        f 			   		= systemfunc("ls $TPATH/*"+seas(kk)+"_means.nc")
+        f 			   		= systemfunc("ls $TPATH/*"+seasons(kk)+"_means.nc")
         f1			   		= addfile(f,"r")
         ps1   	                                = f1->PS
         ha1   	                                = doubletofloat(f1->hyai)
@@ -62,12 +62,12 @@ begin
         gw1                                     = doubletofloat(f1->gw)
 
         if(compare.eq."Model_vs_OBS") then
-          f                                       = systemfunc("ls $CPATH/*_siglev_analysis_*_"+seas(kk)+".nc")
+          f                                       = systemfunc("ls $CPATH/*_siglev_analysis_*_"+seasons(kk)+".nc")
           f2                                      = addfile(f,"r")
           ps2                                     = f2->sp
           gw2                                     = doubletofloat(f2->gw)
         else
-          f                                       = systemfunc("ls $CPATH/*"+seas(kk)+"_means.nc")
+          f                                       = systemfunc("ls $CPATH/*"+seasons(kk)+"_means.nc")
           f2                                      = addfile(f,"r")
           ps2                                     = f2->PS
           ha2                                     = doubletofloat(f2->hyai)
@@ -655,8 +655,8 @@ begin
            ;wtype@wkWidth                = 2500
            ;wtype@wkHeight               = 2500
            figdir                       = casedir+"/Latitude-Longitude_Contour_Maps_"+pout(ll)+"/"
-           fname                        = mvarnam+"_"+seas(kk)+"_latlon_"+pout(ll) 
-           wks                          = gsn_open_wks(wtype,figdir+ fname)
+           fe                        = mvarnam+"_"+seasons(kk)+"_latlon_"+pout(ll) 
+           wks                          = gsn_open_wks(wtype,figdir+ fe)
 
            gsn_merge_colormaps(wks,"amwg","amwg_blueyellowred")  ; merge two color maps
 
@@ -739,13 +739,13 @@ begin
               pres@txFontThicknessF             = 2.
               pres@gsnPanelXWhiteSpacePercent   = 3.
               pres@gsnPanelYWhiteSpacePercent   = 5.
-              pres@txString                     = str_upper(mvarnam)+ " ("+seas(kk)+"; unit: "+unit+")"
+              pres@txString                     = str_upper(mvarnam)+ " ("+seasons(kk)+"; unit: "+unit+")"
               gsn_panel(wks,plot(:),(/2,2/),pres)
 
               ;convert the figure 
               ;if (wtype .eq. "png") then
-              ;  tmpa = systemfunc("convert "+figdir+fname+".png -trim del.png")
-              ;  tmpb = systemfunc("mv del.png "+fname+".png")
+              ;  tmpa = systemfunc("convert "+figdir+fe+".png -trim del.png")
+              ;  tmpb = systemfunc("mv del.png "+fe+".png")
               ;end if
 
               delete([/vp1a,vp2a,adiff,rdiff,vp1b,vp2b/])

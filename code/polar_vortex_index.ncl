@@ -42,8 +42,8 @@ begin
 
      do kk = 0,dimsizes(seasons) - 1
 
-        fnam                                   = systemfunc("ls $TPATH/*"+seasons(kk)+"_means.nc")
-        f1                                     = addfile(fnam,"r")
+        f                                   = systemfunc("ls $TPATH/*"+seasons(kk)+"_means.nc")
+        f1                                     = addfile(f,"r")
         ps1                                    = f1->PS
         ha1                                    = doubletofloat(f1->hyam)
         hb1                                    = doubletofloat(f1->hybm)
@@ -57,7 +57,7 @@ begin
           f2                                      = addfile(f,"r")
           gw2                                     = doubletofloat(f2->gw)
         else
-          f                                       = systemfunc("ls $CPATH/*"+seas(kk)+"_means.nc")
+          f                                       = systemfunc("ls $CPATH/*"+seasons(kk)+"_means.nc")
           f2                                      = addfile(f,"r")
           ps2                                     = f2->PS
           ha2                                     = doubletofloat(f2->hyai)
@@ -205,8 +205,8 @@ begin
          wtype                        = "eps"
         ;wtype@wkWidth                = 2500
         ;wtype@wkHeight               = 2500
-         fname                        = modvars(jj)+"_"+seasons(kk)+"_eof"+sprinti("%02d",n+1)+"_"+preslev(ll)+"hPa"
-         wks                                 = gsn_open_wks(wtype,casedir+"/EOF_Mode_Time_Series/" + fname)
+         fe                        = modvars(jj)+"_"+seasons(kk)+"_eof"+sprinti("%02d",n+1)+"_"+preslev(ll)+"hPa"
+         wks                                 = gsn_open_wks(wtype,casedir+"/EOF_Mode_Time_Series/" + fe)
 
          plot      = new((/4/),graphic)
          tsmap1    = new((/4/),graphic)
@@ -390,8 +390,8 @@ begin
           frame(wks)                                   ; draw both on same page
 
          ; if (wtype .eq. "png") then
-         ;    tmpa = systemfunc("convert "+fname+".png -trim del.png")
-         ;    tmpb = systemfunc("mv del.png "+fname+".png")
+         ;    tmpa = systemfunc("convert "+fe+".png -trim del.png")
+         ;    tmpb = systemfunc("mv del.png "+fe+".png")
          ; end if
 
         end do                                              ; end of looping over variables
