@@ -49,7 +49,7 @@ begin
 
      do kk = 0, dimsizes(seas)-1
 
-        f 			   		= systemfunc("ls $TPATH/*"+seas(kk)+"_climo.nc")
+        f 			   		= systemfunc("ls $TPATH/*"+seasons(kk)+"_climo.nc")
         f1			   		= addfile(f,"r")
         ps1   	                                = f1->PS
         ha1   	                                = doubletofloat(f1->hyai)
@@ -58,7 +58,7 @@ begin
         p1    	                                = pres_hybrid_ccm(ps1,p0,ha1,hb1)
         gw1                                     = doubletofloat(f1->gw)
 
-        f                                       = systemfunc("ls $CPATH/*"+seas(kk)+"_climo.nc")
+        f                                       = systemfunc("ls $CPATH/*"+seasons(kk)+"_climo.nc")
         f2                                      = addfile(f,"r")
         ps2                                     = f2->PS
         ha2                                     = doubletofloat(f2->hyai)
@@ -105,7 +105,7 @@ begin
 	   ddd1  			= dimsizes(var1)
 	   ddd2  			= dimsizes(var2)
 
-           wks                          = gsn_open_wks("eps",casedir+"/set02/"+varnam+"_"+seas(kk)+"_latlon_"+pout(ll))
+           wks                          = gsn_open_wks("eps",casedir+"/set02/"+varnam+"_"+seasons(kk)+"_latlon_"+pout(ll))
 
            gsn_merge_colormaps(wks,"amwg","amwg_blueyellowred")  ; merge two color maps
 
@@ -465,7 +465,7 @@ begin
               pres@txFontThicknessF             = 2.
               pres@gsnPanelXWhiteSpacePercent   = 3.
               pres@gsnPanelYWhiteSpacePercent   = 5.
-              pres@txString                     = str_upper(varnam)+ " ("+seas(kk)+"; unit: "+unit+")"
+              pres@txString                     = str_upper(varnam)+ " ("+seasons(kk)+"; unit: "+unit+")"
               gsn_panel(wks,plot(:),(/2,2/),pres)
 
               delete([/vp1a,vp2a,adiff,rdiff,vp1,vp2,vp1b,vp2b/])

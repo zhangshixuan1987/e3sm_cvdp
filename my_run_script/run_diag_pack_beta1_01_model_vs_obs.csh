@@ -1,10 +1,11 @@
 #!/bin/tcsh 
 
 setenv POST            "/global/cfs/cdirs/e3sm/zhan391"
-setenv WKROOT          "${POST}/diagnostic_package"
+setenv WKROOT          "${POST}/polar_diag"
 setenv MODEL_DATA_ROOT "/global/cfs/cdirs/e3sm/zhan391/data/E3SM"
 setenv OBS_DATA_ROOT   "/global/cfs/cdirs/e3sm/zhan391/data/ERA5/1979-2020/regrid"
 
+setenv DIAG_DATA_ROOT  "$WKROOT/data" 
 setenv COMPARE          "Model_vs_OBS"
 
 ############################
@@ -30,7 +31,7 @@ setenv L_SAVE_JET_INDEX  "TRUE"
 #Weighting file used for the regridding required by the 
 #scripts for jet location and strength 
 ###########################################################
-setenv RGDWGT_FILE_NAME "$WKROOT/data/1deg_to_0.1deg.nc"
+setenv JET_RGDWGT_FILE "$DIAG_DATA_ROOT/1deg_to_0.1deg.nc"
 
 ###########################################################
 #flag to control if the time series from eof anaysis should 

@@ -1,0 +1,19 @@
+nohup: ignoring input
+EOF_Mode_Time_Series/
+Jet_Index_Analysis/
+Latitude-Longitude_Contour_Maps_20S-90S/
+Latitude-Longitude_Contour_Maps_55S-90S/
+Polar_Votex/
+Pressure-Latitude_Zonal_Mean_Contour/
+Regression_Contour_Maps/
+tables/
+---------------------------------------------
+polar_vortex_monthly.ncl is running!
+---------------------------------------------
+ Copyright (C) 1995-2018 - All Rights Reserved
+ University Corporation for Atmospheric Research
+ NCAR Command Language Version 6.5.0
+ The use of this software is governed by a License Agreement.
+ See http://www.ncl.ucar.edu/ for more details.
+
+

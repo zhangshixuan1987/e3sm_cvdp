@@ -39,11 +39,11 @@ begin
 
   do kk = 0, dimsizes(seas)-1
  
-     f                          = systemfunc("ls $CPATH/*"+seas(kk)+"_climo.nc")
+     f                          = systemfunc("ls $CPATH/*"+seasons(kk)+"_climo.nc")
      f2                         = addfile(f,"r")
      print(" input file: "+f) 
      
-     f                          = systemfunc("ls $TPATH/*"+seas(kk)+"_climo.nc")
+     f                          = systemfunc("ls $TPATH/*"+seasons(kk)+"_climo.nc")
      f1                         = addfile(f,"r")
      print(" input file: "+f) 
   
@@ -51,7 +51,7 @@ begin
 
      do jj = 0, dimsizes(vars)-1
  
-        output_file             = (casedir+"/tables/"+vars(jj)+"_"+seas(kk)+".txt")
+        output_file             = (casedir+"/tables/"+vars(jj)+"_"+seasons(kk)+".txt")
 
 ;MAM4
 

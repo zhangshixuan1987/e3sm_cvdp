@@ -1,13 +1,42 @@
 #!/bin/tcsh 
 
 setenv POST            "/global/cfs/cdirs/e3sm/zhan391"
-setenv WKROOT          "${POST}/diagnostic_package"
+setenv WKROOT          "${POST}/polar_diag"
 setenv MODEL_DATA_ROOT "/global/cfs/cdirs/e3sm/zhan391/data/E3SM"
 setenv OBS_DATA_ROOT   "/global/cfs/cdirs/e3sm/zhan391/data/ERA5/1979-2020/regrid"
 
+setenv DIAG_DATA_ROOT  "$WKROOT/data" 
 setenv COMPARE          "Model_vs_OBS"
-setenv DIFFERENCE_TEST  "TRUE"           
+
+############################
+#flag to control if significance test should be performed 
+#for the bias plot 
+############################
+setenv DIFFERENCE_TEST  "TRUE" 
+
+###########################################################
+#flag to control if significance test should be performed 
+#for the bias plot 
+###########################################################
 setenv REGRESSION_TEST  "TRUE"
+
+###########################################################
+#flag to control if the time series from eof anaysis etc. 
+#should be saved for the regression plot 
+###########################################################
+setenv L_SAVE_EOF_PC     "TRUE"
+setenv L_SAVE_JET_INDEX  "TRUE"
+
+###########################################################
+#Weighting file used for the regridding required by the 
+#scripts for jet location and strength 
+###########################################################
+setenv JET_RGDWGT_FILE "$DIAG_DATA_ROOT/1deg_to_0.1deg.nc"
+
+###########################################################
+#flag to control if the time series from eof anaysis should 
+#be saved for the regression plot 
+###########################################################
 
 setenv CTRL   "OBS"
 setenv TEST   "20201211.beta1_01.piControl.compy"
@@ -35,7 +64,7 @@ rm -f figs.tar
 cd $WKROOT
 
 cd code
-foreach f (jet_index_zonal_wind.ncl) #strength_position_taux.ncl) #eof_regression_sfc_monthly.ncl) #(eof_regression_sfc_seasonal.ncl) #(enso_regression_sfc_monthly.ncl)#strength_position_taux.ncl) #lat_hgt.ncl) #lat_lon_lreg.ncl lat_lon_sreg.ncl)#eof_regression_sfc.ncl) #eof_sfc.ncl, eof_hgt.ncl lat_lon_lreg.ncl lat_lon_sreg.ncl) #(eof_hgt.ncl eof_sfc.ncl lat_hgt.ncl) #(*.ncl)
+foreach f (eof_sfc_monthly.ncl) #strength_position_taux.ncl) #eof_regression_sfc_monthly.ncl) #(eof_regression_sfc_seasonal.ncl) #(enso_regression_sfc_monthly.ncl)#strength_position_taux.ncl) #lat_hgt.ncl) #lat_lon_lreg.ncl lat_lon_sreg.ncl)#eof_regression_sfc.ncl) #eof_sfc.ncl, eof_hgt.ncl lat_lon_lreg.ncl lat_lon_sreg.ncl) #(eof_hgt.ncl eof_sfc.ncl lat_hgt.ncl) #(*.ncl)
 echo "---------------------------------------------"
 echo $f "is running!"
 echo "---------------------------------------------"

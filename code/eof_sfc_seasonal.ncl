@@ -17,6 +17,7 @@ begin
   case1name                                  = getenv("TEST_NAME")
   case2name                                  = getenv("CTRL_NAME")
   casedir                                    = getenv("CASEDIR")
+  opath                                      = getenv("DIAG_DATA_ROOT")
 
 ;define regions for eof analysis
   latS                                         = -90.  ;negative for southern hemisphere
@@ -52,8 +53,8 @@ begin
 
      do kk = 0,dimsizes(seasons) - 1
 
-        fnam                                   = systemfunc("ls $TPATH/*"+seasons(kk)+"_means.nc")
-        f1                                     = addfile(fnam,"r")
+        f                                   = systemfunc("ls "+tpath+"/*"+seasons(kk)+"_means.nc")
+        f1                                     = addfile(f,"r")
         ps1                                    = f1->PS
         ha1                                    = doubletofloat(f1->hyam)
         hb1                                    = doubletofloat(f1->hybm)
@@ -63,11 +64,11 @@ begin
         gw1                                    = doubletofloat(f1->gw)
 
         if(compare.eq."Model_vs_OBS") then
-          f                                       = systemfunc("ls $CPATH/*_siglev_analysis_*_"+seasons(kk)+".nc")
+          f                                       = systemfunc("ls "+cpath+"/*_siglev_analysis_*_"+seasons(kk)+".nc")
           f2                                      = addfile(f,"r")
           gw2                                     = doubletofloat(f2->gw)
         else
-          f                                       = systemfunc("ls $CPATH/*"+seas(kk)+"_means.nc")
+          f                                       = systemfunc("ls "+cpath+"/*"+seasons(kk)+"_means.nc")
           f2                                      = addfile(f,"r")
           ps2                                     = f2->PS
           ha2                                     = doubletofloat(f2->hyai)
@@ -174,6 +175,40 @@ begin
          ;printVarSummary( eof2 )                         ; examine EOF variables
          ;printVarSummary( eof2_ts )
 
+        ;======================================================================
+        ;Save the data for the regression analysis
+        ;==================================================================
+         setfileoption("nc", "Format",  "NetCDF4")
+         out_file1  = opath +"/"+"EOF_PCS_"+case1name+"_seasonal_mean_"+mvarnam+"_at_"+preslev(ll)+"_"+seasons(kk)+".nc"
+         out_file2  = opath +"/"+"EOF_PCS_"+case2name+"_seasonal_mean_"+mvarnam+"_at_"+preslev(ll)+"_"+seasons(kk)+".nc"
+
+         system("rm " + out_file1)
+         system("rm " + out_file2)
+
+         fout1 = addfile(out_file1,"c")
+         fout2 = addfile(out_file2,"c")
+
+         time1 = eof1_ts&time
+         time2 = eof2_ts&time
+         time1!0 = "time"
+         time2!0 = "time"
+         time1&time = time1
+         time2&time = time2
+
+         fout1->time         = time1
+         fout2->time         = time2
+         eof1@description    = "EOF pattern"
+         eof2@description    = "EOF pattern"
+         eof1_ts@description = "EOF PCs (standardized)"
+         eof2_ts@description = "EOF PCs (standardized)"
+       
+         fout1->eof      = eof1
+         fout2->eof      = eof2
+         fout1->eof_ts   = eof1_ts
+         fout2->eof_ts   = eof2_ts
+
+         delete([/time1,time2,fout1,fout2,out_file1,out_file2/])
+
        ; =================================================================
        ; Regress
        ; =================================================================
@@ -202,8 +237,8 @@ begin
         ;wtype@wkWidth                = 2500
         ;wtype@wkHeight               = 2500
          figdir                        = casedir+"/EOF_Mode_Time_Series/"
-         fname                        = modvars(jj)+"_"+seasons(kk)+"_eof"+sprinti("%02d",n+1)+"_"+preslev(ll) 
-         wks                                 = gsn_open_wks(wtype, figdir + fname)
+         fe                        = modvars(jj)+"_"+seasons(kk)+"_seasonal_mean_eof"+sprinti("%02d",n+1)+"_"+preslev(ll) 
+         wks                                 = gsn_open_wks(wtype, figdir + fe)
 
          plot      = new((/4/),graphic)
          tsmap1    = new((/4/),graphic)
@@ -384,8 +419,8 @@ begin
           frame(wks)                                   ; draw both on same page
 
           ;if (wtype .eq. "png") then
-          ;   tmpa = systemfunc("convert "+fname+".png -trim del.png")
-          ;   tmpb = systemfunc("mv del.png "+fname+".png")
+          ;   tmpa = systemfunc("convert "+fe+".png -trim del.png")
+          ;   tmpb = systemfunc("mv del.png "+fe+".png")
           ;end if
 
          ;delete([/xyarr1,xyarr2,tsmap1,tsmap2/])

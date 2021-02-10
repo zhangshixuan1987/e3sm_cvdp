@@ -41,11 +41,11 @@ begin
 
   do kk = 0, dimsizes(seas)-1
  
-     f                                        = systemfunc("ls $CPATH/*"+seas(kk)+"_climo.nc")
+     f                                        = systemfunc("ls $CPATH/*"+seasons(kk)+"_climo.nc")
      f2                                       = addfile(f,"r")
      print(" input file: "+f) 
      
-     f                                        = systemfunc("ls $TPATH/*"+seas(kk)+"_climo.nc")
+     f                                        = systemfunc("ls $TPATH/*"+seasons(kk)+"_climo.nc")
      f1                                       = addfile(f,"r")
      print(" input file: "+f) 
   
@@ -131,7 +131,7 @@ begin
 
 ; output file name and location
 
-              output_file                     = (casedir+"/tables/"+vaer+"_"+seas(kk)+".txt")
+              output_file                     = (casedir+"/tables/"+vaer+"_"+seasons(kk)+".txt")
 
 ; define empty arrays to store the variables from data
 

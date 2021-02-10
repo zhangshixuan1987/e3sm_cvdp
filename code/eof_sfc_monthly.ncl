@@ -17,6 +17,7 @@ begin
   case1name                                  = getenv("TEST_NAME")
   case2name                                  = getenv("CTRL_NAME")
   casedir                                    = getenv("CASEDIR")
+  opath                                      = getenv("DIAG_DATA_ROOT")
 
 ;define regions for eof analysis
   latS                                       = -90.  ;negative for southern hemisphere
@@ -50,9 +51,7 @@ begin
 
   do ll = 0,dimsizes(preslev) - 1
 
-     do kk = 0,dimsizes(seasons) - 1
-
-        f                                      = systemfunc("ls $TPATH/*_monthly_means.nc")
+        f                                      = systemfunc("ls "+tpath+"/*_monthly_means.nc")
         f1                                     = addfile(f,"r")
         ps1                                    = f1->PS
         ha1                                    = doubletofloat(f1->hyam)
@@ -63,11 +62,11 @@ begin
         gw1                                    = doubletofloat(f1->gw)
 
         if(compare.eq."Model_vs_OBS") then
-          f                                    = systemfunc("ls $CPATH/*_siglev_monthly_analysis*.nc")
+          f                                    = systemfunc("ls "+cpath+"/*_siglev_monthly_analysis*.nc")
           f2                                   = addfile(f,"r")
           gw2                                  = doubletofloat(f2->gw)
         else
-          f                                    = systemfunc("ls $CPATH/*_monthly_means.nc")
+          f                                    = systemfunc("ls "+cpath+"/*_monthly_means.nc")
           f2                                   = addfile(f,"r")
           ps2                                  = f2->PS
           ha2                                  = doubletofloat(f2->hyai)
@@ -143,6 +142,8 @@ begin
          copy_VarMeta(y1, yw1) 
          xw1@long_name = "Wgt: "+x1@long_name
          yw1@long_name = "Wgt: "+y1@long_name
+
+        do kk = 0,dimsizes(seasons) - 1
          
        ; =================================================================
        ; Select different season for the eof 
@@ -182,7 +183,7 @@ begin
          xAnom = xAnom1(indx1,:,:)
          yAnom = yAnom1(indx2,:,:)
 
-         delete([/indx1,indx2,xAnom1,yAnom1,xw1,yw1,utc_date1,utc_date2,monthx1,monthx2/])
+         delete([/indx1,indx2,utc_date1,utc_date2,monthx1,monthx2/])
 
        ; =================================================================
        ; Compute EOFs & Standardize time series
@@ -211,6 +212,40 @@ begin
 
          ;printVarSummary( eof2 )                         ; examine EOF variables
          ;printVarSummary( eof2_ts )
+
+        ;======================================================================
+        ;Save the data for the regression analysis
+        ;==================================================================
+         setfileoption("nc", "Format",  "NetCDF4")
+         out_file1  = opath +"/"+"EOF_PCS_"+case1name+"_monthly_mean_"+mvarnam+"_at_"+preslev(ll)+"_"+seasons(kk)+".nc"
+         out_file2  = opath +"/"+"EOF_PCS_"+case2name+"_monthly_mean_"+mvarnam+"_at_"+preslev(ll)+"_"+seasons(kk)+".nc"
+
+         system("rm " + out_file1)
+         system("rm " + out_file2)
+
+         fout1 = addfile(out_file1,"c")
+         fout2 = addfile(out_file2,"c")
+
+         time1 = eof1_ts&time
+         time2 = eof2_ts&time
+         time1!0 = "time"
+         time2!0 = "time"
+         time1&time = time1
+         time2&time = time2
+
+         fout1->time         = time1
+         fout2->time         = time2
+         eof1@description    = "EOF pattern"
+         eof2@description    = "EOF pattern"
+         eof1_ts@description = "EOF PCs (standardized)"
+         eof2_ts@description = "EOF PCs (standardized)"
+
+         fout1->eof      = eof1
+         fout2->eof      = eof2
+         fout1->eof_ts   = eof1_ts
+         fout2->eof_ts   = eof2_ts
+
+         delete([/time1,time2,fout1,fout2,out_file1,out_file2/])
 
        ; =================================================================
        ; Regress
@@ -244,8 +279,8 @@ begin
         ;wtype@wkWidth                = 2500
         ;wtype@wkHeight               = 2500
          figdir                        = casedir+"/EOF_Mode_Time_Series/"
-         fname                        = modvars(jj)+"_"+seasons(kk)+"_eof"+sprinti("%02d",n+1)+"_"+preslev(ll) 
-         wks                                 = gsn_open_wks(wtype, figdir + fname)
+         fe                        = modvars(jj)+"_"+seasons(kk)+"_monthly_mean_eof"+sprinti("%02d",n+1)+"_"+preslev(ll) 
+         wks                                 = gsn_open_wks(wtype, figdir + fe)
 
          plot      = new((/4/),graphic)
          tsmap1    = new((/4/),graphic)
@@ -430,23 +465,29 @@ begin
           frame(wks)                                   ; draw both on same page
 
           ;if (wtype .eq. "png") then
-          ;   tmpa = systemfunc("convert "+fname+".png -trim del.png")
-          ;   tmpb = systemfunc("mv del.png "+fname+".png")
+          ;   tmpa = systemfunc("convert "+fe+".png -trim del.png")
+          ;   tmpb = systemfunc("mv del.png "+fe+".png")
           ;end if
 
         ;delete([/xyarr1,xyarr2,tsmap1,tsmap2/])
          end do ; end of eof mods 
-         delete([/xw,yw,xAnom,yAnom,x1,y1,xclat,yclat,eof1,eof2,eof1_ts,eof2_ts/])
 
-        end do                                              ; end of looping over variables
+         delete([/eof1_regres,eof2_regres,yyyy1,yyyy2/])
+         delete([/xw,yw,xAnom,yAnom,eof1,eof2,eof1_ts,eof2_ts/])
+
+        end do                                              ; end of looping over seasons
+
+        delete([/xAnom1,yAnom1,xw1,yw1,x1,y1,xclat,yclat/])
+
+        end do                                                 ; end of looping over variables
+
         delete([/f1,ps1,ha1,hb1,p0,p1,gw1/])
-        delete([/yyyy1,yyyy2/])
+
         if(compare.eq."Model_vs_OBS") then
            delete([/f2,gw2/])
         else
            delete([/f2,ps2,ha2,hb2,p2/])
         end if
-     end do                                                 ; end of looping over seasons
 
   end do                                                    ; end of looping over pressure levels
 

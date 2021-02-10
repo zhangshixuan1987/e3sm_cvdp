@@ -1,0 +1,31 @@
+nohup: ignoring input
+EOF_Mode_Time_Series/
+Jet_Index_Analysis/
+Latitude-Longitude_Contour_Maps_20S-90S/
+Latitude-Longitude_Contour_Maps_55S-90S/
+Polar_Votex/
+Pressure-Latitude_Zonal_Mean_Contour/
+Regression_Contour_Maps/
+tables/
+---------------------------------------------
+jet_index_zonal_wind.ncl is running!
+---------------------------------------------
+ Copyright (C) 1995-2018 - All Rights Reserved
+ University Corporation for Atmospheric Research
+ NCAR Command Language Version 6.5.0
+ The use of this software is governed by a License Agreement.
+ See http://www.ncl.ucar.edu/ for more details.
+(0)	9.29186 17.7549 13.7183
+(0)	9.32749 16.4558 12.9343
+(0)	-58.5772 -35.5311 -48.567
+(0)	-58.477 -39.5391 -51.2099
+(0)	11.1577 16.984 14.2881
+(0)	10.35 15.5028 13.3525
+(0)	-54.4689 -41.4429 -46.5972
+(0)	-55.4709 -44.5491 -50.4918
+(0)	9.29186 16.2169 12.4012
+(0)	9.32749 15.5952 11.8399
+(0)	-58.5772 -37.5351 -48.489
+(0)	-58.477 -39.5391 -50.8659
+
+

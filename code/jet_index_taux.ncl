@@ -296,8 +296,8 @@ begin
         ;wtype@wkWidth                = 2500
         ;wtype@wkHeight               = 2500
          figdir                        = casedir+"/EOF_Mode_Time_Series/"
-         fname                        = modvars(jj)+"_"+seasons(kk)+"_eof"+sprinti("%02d",n+1)+"_"+preslev(ll) 
-         wks                                 = gsn_open_wks(wtype, figdir + fname)
+         fe                        = modvars(jj)+"_"+seasons(kk)+"_eof"+sprinti("%02d",n+1)+"_"+preslev(ll) 
+         wks                                 = gsn_open_wks(wtype, figdir + fe)
 
          plot      = new((/4/),graphic)
          tsmap1    = new((/4/),graphic)
@@ -478,8 +478,8 @@ begin
           frame(wks)                                   ; draw both on same page
 
           ;if (wtype .eq. "png") then
-          ;   tmpa = systemfunc("convert "+fname+".png -trim del.png")
-          ;   tmpb = systemfunc("mv del.png "+fname+".png")
+          ;   tmpa = systemfunc("convert "+fe+".png -trim del.png")
+          ;   tmpb = systemfunc("mv del.png "+fe+".png")
           ;end if
 
          ;delete([/xyarr1,xyarr2,tsmap1,tsmap2/])

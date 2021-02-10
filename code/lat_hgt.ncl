@@ -163,8 +163,8 @@ begin
        ;wtype@wkWidth                       = 2500
        ;wtype@wkHeight                      = 2500
         figdir                              = casedir+"/Pressure-Latitude_Zonal_Mean_Contour/"
-        fname                               = vars(jj)+"_"+seasons(kk)+"_lathgt"+"_"+figstr
-        wks                                 = gsn_open_wks(wtype, figdir + fname)
+        fe                               = vars(jj)+"_"+seasons(kk)+"_lathgt"+"_"+figstr
+        wks                                 = gsn_open_wks(wtype, figdir + fe)
 
         gsn_merge_colormaps(wks,"amwg","amwg_blueyellowred")             ; merge two color maps
 
@@ -303,8 +303,8 @@ begin
            gsn_panel(wks,(/plot(:)/),(/2,2/),pres)
 
           ;if (wtype .eq. "png") then
-          ;   tmpa = systemfunc("convert "+fname+".png -trim del.png")
-          ;   tmpb = systemfunc("mv del.png "+fname+".png")
+          ;   tmpa = systemfunc("convert "+fe+".png -trim del.png")
+          ;   tmpb = systemfunc("mv del.png "+fe+".png")
           ;end if
 
            delete([/var1,var2,vp1a,vp2a,adiff,rdiff,vp1,vp2,vp1b,vp2b,wks/])
