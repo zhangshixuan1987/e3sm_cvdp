@@ -2,7 +2,7 @@
 Atmospheric diagnostics package used to facillitate the analysis for the large-scale circlulation 
 over the Southern Polar region (NCL). 
 
-#The struction of the diagnostic package:
+# The struction of the diagnostic package:
 1. code: the directory saves ncl scripts used by this diagnostic package package 
 
 2. run_script: the directory saves the run scripts to exacuate this diagnostic package, 
@@ -18,7 +18,7 @@ over the Southern Polar region (NCL).
 5. work: output figures from this diagnostic package. 
 
 
-#The diagnostics generate by this package: 
+# The diagnostics generate by this package: 
 1. The horizonal distribution of selected physical quantities, three sets of the figures are generated:
    a. polar_diag/work/$Casename/Latitude-Longitude_Contour_Maps_20S-90S: horizonal distribution within [20S,90S] polar region   
    b. polar_diag/work/$Casename/Latitude-Longitude_Contour_Maps_55S-90S: horizonal distribution within [55S,90S] polar region   
@@ -40,5 +40,5 @@ over the Southern Polar region (NCL).
    a. polar_diag/work/$Casename/Polar_Votex/
  
 
-#Planned extensions (by E3SM Cryosphere group) 
+# Planned extensions (by E3SM Cryosphere group) 
 1. Weather regime analysis, including blockings, polar vortex.
