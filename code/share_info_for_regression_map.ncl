@@ -14,7 +14,9 @@
   panelstr1      = case1name
   panelstr2      = case2name
 
-  if((compare.eq."Model_vs_OBS").and.(case2name.eq."ERA5").or.(case2name.eq."ERA20C")) then
+  if(compare.eq."Model_vs_OBS") then
+
+   if((case2name.eq."ERA5").or.(case2name.eq."ERA20C")) then
 
      obsregvars  = (/  "msl",            "skt",          "t2m",         "si10",      \
                        "mtpr",           "lcc",          "hcc",         "tcc",       \
@@ -26,7 +28,7 @@
                        1.0/86400.0,      1.0/86400.0                                 /)
      panelstr2                                 = case2name + " ("+obstimtag+")"
 
-  else if (case2name.eq."NOAA20C")
+   else if (case2name.eq."NOAA20C")
 
      obsregvars  = (/  "prmsl",          "skt",          "t2m",         "si10",      \
                        "prate",          "lcc",          "hcc",         "tcc",       \
@@ -38,13 +40,15 @@
                        1.0,              1.0                                         /)
      panelstr2   = case2name + " ("+obstimtag+")"
 
-  else
+   else
 
     print("The observational source are not available; only allow ERA5, ERA20C or NOAA20C")
     exit
 
-  end if
-  end if
+   end if
+   end if
+
+  end if 
 
 ;;;;;;;range for the plot corresponding to each variable;;;;
   if (l_regress .eq. "l_regress_enso") then 

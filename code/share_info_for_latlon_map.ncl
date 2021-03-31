@@ -35,7 +35,9 @@
   panelstr1  = case1name
   panelstr2  = case2name
 
-  if((compare.eq."Model_vs_OBS").and.(case2name.eq."ERA5").or.(case2name.eq."ERA20C")) then
+  if(compare.eq."Model_vs_OBS") then
+
+   if((case2name.eq."ERA5").or.(case2name.eq."ERA20C")) then
 
      obsvars = (/  "tcc",     "lcc",      "hcc",        "tclw",         "tciw",      \
                    "mcpr",    "mlspr",    "mtpr",       "sf",                        \
@@ -61,7 +63,7 @@
 
      panelstr2 = case2name + " ("+obstimtag+")"
 
-  else if (case2name.eq."NOAA20C") then
+   else if (case2name.eq."NOAA20C") then
 
       obsvars = (/ "tcc",     "lcc",      "hcc",        "tclw",          "tciw",      \
                    "pcpr",    "plspr",    "prate",      "PRECST",                     \
@@ -87,13 +89,15 @@
 
      panelstr2   = case2name + " ("+obstimtag+")"
 
-  else
+   else
 
     print("The observational source are not available; only allow ERA5, ERA20C or NOAA20C")
     print("Error occurs at share_info_for_latlon_map.ncl")
     exit
 
-  end if
-  end if
+   end if
+   end if
+
+ end if 
 
 
