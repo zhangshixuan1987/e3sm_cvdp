@@ -1,4 +1,4 @@
-# SH_diag
+# Polar_diag
 Atmospheric diagnostics package used to facillitate the analysis for the large-scale circlulation 
 over the Southern Polar region (NCL). 
 
