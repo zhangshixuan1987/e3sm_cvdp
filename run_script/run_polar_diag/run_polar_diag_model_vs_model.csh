@@ -36,6 +36,7 @@ setenv CPATH  "${MODEL_DATA_ROOT}/$CTRL/climo"
 setenv TPATH  "${MODEL_DATA_ROOT}/$TEST/climo"
 setenv CTRL_NAME "Beta1"
 setenv TEST_NAME "Beta1_SI_SORRMr4"
+setenv DOUT_NAME "${TEST_NAME}_vs_${CTRL_NAME}"
 
 ###########################################################
 #Weighting file used for the regridding required by the 
@@ -48,7 +49,6 @@ if ( ! -d $DIAG_DATA_ROOT ) then
 endif 
 setenv REF_PRE_LEV     "$WKROOT/data/pres_lev.txt"
 setenv JET_RGDWGT_FILE "$WKROOT/data/1deg_to_0.1deg.nc"
-setenv DOUT_NAME "${TEST_NAME}_vs_${CTRL_NAME}"
 
 ############################
 # END OF USER MODIFICATION #

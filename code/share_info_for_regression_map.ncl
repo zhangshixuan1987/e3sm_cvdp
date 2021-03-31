@@ -14,7 +14,7 @@
   panelstr1      = case1name
   panelstr2      = case2name
 
-  if((case2name.eq."ERA5").or.(case2name.eq."ERA20C"))
+  if((compare.eq."Model_vs_OBS").and.(case2name.eq."ERA5").or.(case2name.eq."ERA20C")) then
 
      obsregvars  = (/  "msl",            "skt",          "t2m",         "si10",      \
                        "mtpr",           "lcc",          "hcc",         "tcc",       \
