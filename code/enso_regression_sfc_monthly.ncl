@@ -55,15 +55,20 @@ begin
 
  ;variable name in for caclulating nino index 
   modninovar   = ("TS")
-  if((case2name.eq."ERA5").or.(case2name.eq."ERA20C")) then
-    obsninovar = ("sst")
-  else if (case2name.eq."NOAA20C") then
-    obsninovar = ("skt")
-  else
-    print("The observational source are not available; only allow ERA5, ERA20C or NOAA20C")
-    exit
-  end if
-  end if
+
+  if(compare.eq."Model_vs_OBS")then
+
+   if((case2name.eq."ERA5").or.(case2name.eq."ERA20C")) then
+     obsninovar = ("sst")
+   else if (case2name.eq."NOAA20C") then
+     obsninovar = ("skt")
+   else
+     print("The observational source are not available; only allow ERA5, ERA20C or NOAA20C")
+     exit
+   end if
+   end if
+
+  end if 
 
 ;read in two files
 

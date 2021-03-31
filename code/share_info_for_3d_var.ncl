@@ -5,7 +5,7 @@
   panelstr1                                  = case1name
   panelstr2                                  = case2name
 
-  if((compare.eq."Model_vs_OBS"))then 
+  if(compare.eq."Model_vs_OBS")then 
 
    if((case2name.eq."ERA5").or.(case2name.eq."ERA20C")) then
 

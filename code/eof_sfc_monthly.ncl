@@ -40,19 +40,23 @@ begin
   panelstr1                                  = case1name
   panelstr2                                  = case2name
 
-  if((case2name.eq."ERA5").or.(case2name.eq."ERA20C")) then
+  if(compare.eq."Model_vs_OBS")then
+
+   if((case2name.eq."ERA5").or.(case2name.eq."ERA20C")) then
      obsvars                                 = (/"msl","skt","t2m","si10"/)
      facobs                                  = (/1.0,1.0,1.0,1.0/)
      panelstr2                               = case2name + " ("+obstimtag+")"
-  else if (case2name.eq."NOAA20C") then
+   else if (case2name.eq."NOAA20C") then
      obsvars                                 = (/"prmsl","skt","t2m","si10"/)
      facobs                                  = (/1.0,1.0,1.0,1.0/)
      panelstr2                               = case2name + " ("+obstimtag+")"
-  else
+   else
     print("The observational source are not available; only allow ERA5, ERA20C or NOAA20C")
     exit
-  end if
-  end if
+   end if
+   end if
+  
+  end if 
 
 ;declear the season or annual mean data to be used;;;;;
   seasons                                    = (/"ANN","DJF","JJA"/)
