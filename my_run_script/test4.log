@@ -1,325 +1,0 @@
-nohup: ignoring input
-EOF_Mode_Time_Series/
-Jet_Index_Analysis/
-Latitude-Longitude_Contour_Maps_20S-90S/
-Latitude-Longitude_Contour_Maps_55S-90S/
-Polar_Votex/
-Pressure-Latitude_Zonal_Mean_Contour/
-Regression_Contour_Maps/
-tables/
----------------------------------------------
-lat_hgt.ncl is running!
----------------------------------------------
- Copyright (C) 1995-2018 - All Rights Reserved
- University Corporation for Atmospheric Research
- NCAR Command Language Version 6.5.0
- The use of this software is governed by a License Agreement.
- See http://www.ncl.ucar.edu/ for more details.
-fatal:asciiread: Unable to open input file (pres_lev.txt)
-fatal:["Execute.c":8635]:Execute: Error occurred at or near line 35
-
-
-
----------------------------------------------
-lat_lon_sreg.ncl is running!
----------------------------------------------
- Copyright (C) 1995-2018 - All Rights Reserved
- University Corporation for Atmospheric Research
- NCAR Command Language Version 6.5.0
- The use of this software is governed by a License Agreement.
- See http://www.ncl.ucar.edu/ for more details.
-(0)	working on variable CLDTOT
-(0)	working on variable CLDLOW
-warning:ttest: encountered 1644 cases where var1 and/or var2 were less than or equal to 0. Output set to missing values in these cases
-(0)	working on variable CLDHGH
-(0)	working on variable TGCLDCWP
-(0)	working on variable TGCLDLWP
-(0)	working on variable TGCLDIWP
-(0)	working on variable PRECC
-warning:ttest: encountered 2492 cases where var1 and/or var2 were less than or equal to 0. Output set to missing values in these cases
-(0)	working on variable PRECL
-(0)	working on variable PRECT
-(0)	working on variable LWCF
-(0)	working on variable SWCF
-(0)	working on variable NETCF
-(0)	working on variable FLUT
-(0)	working on variable FSNTOA
-(0)	working on variable FSNTOAC
-(0)	working on variable FSUTOA
-(0)	working on variable FSUTOAC
-(0)	working on variable FSDS
-(0)	working on variable FSNS
-(0)	working on variable FLNS
-(0)	working on variable FLDS
-(0)	working on variable RESTOM
-(0)	working on variable QNET
-(0)	working on variable LHFLX
-(0)	working on variable SHFLX
-(0)	working on variable TMQ
-(0)	working on variable TS
-(0)	working on variable U10
-(0)	working on variable PSL
-(0)	working on variable TREFHT
-(0)	working on variable TAUX
-fatal:ContourPlotDraw: CPCLAM - CONTRADICTORY AREA-IDENTIFIER INFORMATION
-fatal:ContourPlotDraw: draw error
-fatal:ContourPlotDraw: draw error
-fatal:PlotManagerDraw: error in plot draw
-fatal:_NhlPlotManagerDraw: Draw error
-(0)	working on variable TAUY
-fatal:ContourPlotDraw: CPCLAM - CONTRADICTORY AREA-IDENTIFIER INFORMATION
-fatal:ContourPlotDraw: draw error
-fatal:ContourPlotDraw: draw error
-fatal:PlotManagerDraw: error in plot draw
-fatal:_NhlPlotManagerDraw: Draw error
-(0)	working on variable CLDTOT
-(0)	working on variable CLDLOW
-warning:ttest: encountered 1652 cases where var1 and/or var2 were less than or equal to 0. Output set to missing values in these cases
-(0)	working on variable CLDHGH
-(0)	working on variable TGCLDCWP
-(0)	working on variable TGCLDLWP
-(0)	working on variable TGCLDIWP
-(0)	working on variable PRECC
-warning:ttest: encountered 2552 cases where var1 and/or var2 were less than or equal to 0. Output set to missing values in these cases
-(0)	working on variable PRECL
-(0)	working on variable PRECT
-(0)	working on variable LWCF
-warning:ContourPlotSetValues: Data values out of range of levels set by EXPLICITLEVELS mode
-warning:ContourPlotSetValues: Data values out of range of levels set by EXPLICITLEVELS mode
-(0)	working on variable SWCF
-(0)	working on variable NETCF
-(0)	working on variable FLUT
-(0)	working on variable FSNTOA
-(0)	working on variable FSNTOAC
-(0)	working on variable FSUTOA
-(0)	working on variable FSUTOAC
-(0)	working on variable FSDS
-(0)	working on variable FSNS
-(0)	working on variable FLNS
-(0)	working on variable FLDS
-(0)	working on variable RESTOM
-(0)	working on variable QNET
-(0)	working on variable LHFLX
-(0)	working on variable SHFLX
-(0)	working on variable TMQ
-(0)	working on variable TS
-(0)	working on variable U10
-(0)	working on variable PSL
-(0)	working on variable TREFHT
-(0)	working on variable TAUX
-fatal:ContourPlotDraw: CPCLAM - CONTRADICTORY AREA-IDENTIFIER INFORMATION
-fatal:ContourPlotDraw: draw error
-fatal:ContourPlotDraw: draw error
-fatal:PlotManagerDraw: error in plot draw
-fatal:_NhlPlotManagerDraw: Draw error
-(0)	working on variable TAUY
-fatal:ContourPlotDraw: CPCLAM - CONTRADICTORY AREA-IDENTIFIER INFORMATION
-fatal:ContourPlotDraw: draw error
-fatal:ContourPlotDraw: draw error
-fatal:PlotManagerDraw: error in plot draw
-fatal:_NhlPlotManagerDraw: Draw error
-(0)	working on variable CLDTOT
-(0)	working on variable CLDLOW
-warning:ttest: encountered 1697 cases where var1 and/or var2 were less than or equal to 0. Output set to missing values in these cases
-(0)	working on variable CLDHGH
-(0)	working on variable TGCLDCWP
-(0)	working on variable TGCLDLWP
-warning:ttest: encountered 302 cases where var1 and/or var2 were less than or equal to 0. Output set to missing values in these cases
-(0)	working on variable TGCLDIWP
-(0)	working on variable PRECC
-warning:ttest: encountered 4372 cases where var1 and/or var2 were less than or equal to 0. Output set to missing values in these cases
-(0)	working on variable PRECL
-(0)	working on variable PRECT
-(0)	working on variable LWCF
-(0)	working on variable SWCF
-warning:ttest: encountered 3240 cases where var1 and/or var2 were less than or equal to 0. Output set to missing values in these cases
-(0)	working on variable NETCF
-(0)	working on variable FLUT
-(0)	working on variable FSNTOA
-warning:ttest: encountered 3240 cases where var1 and/or var2 were less than or equal to 0. Output set to missing values in these cases
-(0)	working on variable FSNTOAC
-warning:ttest: encountered 3240 cases where var1 and/or var2 were less than or equal to 0. Output set to missing values in these cases
-(0)	working on variable FSUTOA
-warning:ttest: encountered 3202 cases where var1 and/or var2 were less than or equal to 0. Output set to missing values in these cases
-(0)	working on variable FSUTOAC
-warning:ttest: encountered 3202 cases where var1 and/or var2 were less than or equal to 0. Output set to missing values in these cases
-(0)	working on variable FSDS
-warning:ttest: encountered 3218 cases where var1 and/or var2 were less than or equal to 0. Output set to missing values in these cases
-(0)	working on variable FSNS
-warning:ttest: encountered 3262 cases where var1 and/or var2 were less than or equal to 0. Output set to missing values in these cases
-(0)	working on variable FLNS
-(0)	working on variable FLDS
-(0)	working on variable RESTOM
-(0)	working on variable QNET
-(0)	working on variable LHFLX
-(0)	working on variable SHFLX
-(0)	working on variable TMQ
-(0)	working on variable TS
-(0)	working on variable U10
-(0)	working on variable PSL
-(0)	working on variable TREFHT
-(0)	working on variable TAUX
-fatal:ContourPlotDraw: CPCLAM - CONTRADICTORY AREA-IDENTIFIER INFORMATION
-fatal:ContourPlotDraw: draw error
-fatal:ContourPlotDraw: draw error
-fatal:PlotManagerDraw: error in plot draw
-fatal:_NhlPlotManagerDraw: Draw error
-(0)	working on variable TAUY
-fatal:ContourPlotDraw: CPCLAM - CONTRADICTORY AREA-IDENTIFIER INFORMATION
-fatal:ContourPlotDraw: draw error
-fatal:ContourPlotDraw: draw error
-fatal:PlotManagerDraw: error in plot draw
-fatal:_NhlPlotManagerDraw: Draw error
-
-
----------------------------------------------
-lat_lon_lreg.ncl is running!
----------------------------------------------
- Copyright (C) 1995-2018 - All Rights Reserved
- University Corporation for Atmospheric Research
- NCAR Command Language Version 6.5.0
- The use of this software is governed by a License Agreement.
- See http://www.ncl.ucar.edu/ for more details.
-(0)	working on variable CLDTOT
-(0)	working on variable CLDLOW
-warning:ttest: encountered 1659 cases where var1 and/or var2 were less than or equal to 0. Output set to missing values in these cases
-(0)	working on variable CLDHGH
-(0)	working on variable TGCLDCWP
-(0)	working on variable TGCLDLWP
-(0)	working on variable TGCLDIWP
-(0)	working on variable PRECC
-warning:ttest: encountered 2492 cases where var1 and/or var2 were less than or equal to 0. Output set to missing values in these cases
-(0)	working on variable PRECL
-(0)	working on variable PRECT
-(0)	working on variable LWCF
-(0)	working on variable SWCF
-(0)	working on variable NETCF
-(0)	working on variable FLUT
-(0)	working on variable FSNTOA
-(0)	working on variable FSNTOAC
-(0)	working on variable FSUTOA
-(0)	working on variable FSUTOAC
-(0)	working on variable FSDS
-(0)	working on variable FSNS
-(0)	working on variable FLNS
-(0)	working on variable FLDS
-(0)	working on variable RESTOM
-(0)	working on variable QNET
-(0)	working on variable LHFLX
-(0)	working on variable SHFLX
-(0)	working on variable TMQ
-(0)	working on variable TS
-(0)	working on variable U10
-(0)	working on variable PSL
-(0)	working on variable TREFHT
-(0)	working on variable TAUX
-fatal:ContourPlotDraw: CPCLAM - CONTRADICTORY AREA-IDENTIFIER INFORMATION
-fatal:ContourPlotDraw: draw error
-fatal:ContourPlotDraw: draw error
-fatal:PlotManagerDraw: error in plot draw
-fatal:_NhlPlotManagerDraw: Draw error
-(0)	working on variable TAUY
-fatal:ContourPlotDraw: CPCLAM - CONTRADICTORY AREA-IDENTIFIER INFORMATION
-fatal:ContourPlotDraw: draw error
-fatal:ContourPlotDraw: draw error
-fatal:PlotManagerDraw: error in plot draw
-fatal:_NhlPlotManagerDraw: Draw error
-(0)	working on variable CLDTOT
-(0)	working on variable CLDLOW
-warning:ttest: encountered 1667 cases where var1 and/or var2 were less than or equal to 0. Output set to missing values in these cases
-(0)	working on variable CLDHGH
-(0)	working on variable TGCLDCWP
-(0)	working on variable TGCLDLWP
-(0)	working on variable TGCLDIWP
-(0)	working on variable PRECC
-warning:ttest: encountered 2552 cases where var1 and/or var2 were less than or equal to 0. Output set to missing values in these cases
-(0)	working on variable PRECL
-(0)	working on variable PRECT
-(0)	working on variable LWCF
-warning:ContourPlotSetValues: Data values out of range of levels set by EXPLICITLEVELS mode
-(0)	working on variable SWCF
-(0)	working on variable NETCF
-(0)	working on variable FLUT
-(0)	working on variable FSNTOA
-(0)	working on variable FSNTOAC
-(0)	working on variable FSUTOA
-(0)	working on variable FSUTOAC
-(0)	working on variable FSDS
-(0)	working on variable FSNS
-(0)	working on variable FLNS
-(0)	working on variable FLDS
-(0)	working on variable RESTOM
-(0)	working on variable QNET
-(0)	working on variable LHFLX
-(0)	working on variable SHFLX
-(0)	working on variable TMQ
-(0)	working on variable TS
-(0)	working on variable U10
-(0)	working on variable PSL
-(0)	working on variable TREFHT
-(0)	working on variable TAUX
-fatal:ContourPlotDraw: CPCLAM - CONTRADICTORY AREA-IDENTIFIER INFORMATION
-fatal:ContourPlotDraw: draw error
-fatal:ContourPlotDraw: draw error
-fatal:PlotManagerDraw: error in plot draw
-fatal:_NhlPlotManagerDraw: Draw error
-(0)	working on variable TAUY
-fatal:ContourPlotDraw: CPCLAM - CONTRADICTORY AREA-IDENTIFIER INFORMATION
-fatal:ContourPlotDraw: draw error
-fatal:ContourPlotDraw: draw error
-fatal:PlotManagerDraw: error in plot draw
-fatal:_NhlPlotManagerDraw: Draw error
-(0)	working on variable CLDTOT
-(0)	working on variable CLDLOW
-warning:ttest: encountered 1717 cases where var1 and/or var2 were less than or equal to 0. Output set to missing values in these cases
-(0)	working on variable CLDHGH
-(0)	working on variable TGCLDCWP
-(0)	working on variable TGCLDLWP
-warning:ttest: encountered 302 cases where var1 and/or var2 were less than or equal to 0. Output set to missing values in these cases
-(0)	working on variable TGCLDIWP
-(0)	working on variable PRECC
-warning:ttest: encountered 4372 cases where var1 and/or var2 were less than or equal to 0. Output set to missing values in these cases
-(0)	working on variable PRECL
-(0)	working on variable PRECT
-(0)	working on variable LWCF
-(0)	working on variable SWCF
-warning:ttest: encountered 3240 cases where var1 and/or var2 were less than or equal to 0. Output set to missing values in these cases
-(0)	working on variable NETCF
-(0)	working on variable FLUT
-(0)	working on variable FSNTOA
-warning:ttest: encountered 3240 cases where var1 and/or var2 were less than or equal to 0. Output set to missing values in these cases
-(0)	working on variable FSNTOAC
-warning:ttest: encountered 3240 cases where var1 and/or var2 were less than or equal to 0. Output set to missing values in these cases
-(0)	working on variable FSUTOA
-warning:ttest: encountered 3202 cases where var1 and/or var2 were less than or equal to 0. Output set to missing values in these cases
-(0)	working on variable FSUTOAC
-warning:ttest: encountered 3202 cases where var1 and/or var2 were less than or equal to 0. Output set to missing values in these cases
-(0)	working on variable FSDS
-warning:ttest: encountered 3218 cases where var1 and/or var2 were less than or equal to 0. Output set to missing values in these cases
-(0)	working on variable FSNS
-warning:ttest: encountered 3262 cases where var1 and/or var2 were less than or equal to 0. Output set to missing values in these cases
-(0)	working on variable FLNS
-(0)	working on variable FLDS
-(0)	working on variable RESTOM
-(0)	working on variable QNET
-(0)	working on variable LHFLX
-(0)	working on variable SHFLX
-(0)	working on variable TMQ
-(0)	working on variable TS
-(0)	working on variable U10
-(0)	working on variable PSL
-(0)	working on variable TREFHT
-(0)	working on variable TAUX
-fatal:ContourPlotDraw: CPCLAM - CONTRADICTORY AREA-IDENTIFIER INFORMATION
-fatal:ContourPlotDraw: draw error
-fatal:ContourPlotDraw: draw error
-fatal:PlotManagerDraw: error in plot draw
-fatal:_NhlPlotManagerDraw: Draw error
-(0)	working on variable TAUY
-fatal:ContourPlotDraw: CPCLAM - CONTRADICTORY AREA-IDENTIFIER INFORMATION
-fatal:ContourPlotDraw: draw error
-fatal:ContourPlotDraw: draw error
-fatal:PlotManagerDraw: error in plot draw
-fatal:_NhlPlotManagerDraw: Draw error
-
-
