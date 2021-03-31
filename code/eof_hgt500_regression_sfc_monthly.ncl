@@ -2,7 +2,7 @@
   load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/gsn_csm.ncl"
   load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/contributed.ncl"
 
-; Purpose: A tempolate to make a enso plot for AAO patterns 
+; Purpose: A tempolate to make a eof plot for AAO patterns 
 ;          Data is vertically interpolated to pressure levels
 ;          1st panel: EOFs for the first three modes
 ;          2nd panel: time series plot
@@ -17,17 +17,24 @@ begin
   case1name                                  = getenv("TEST_NAME")
   case2name                                  = getenv("CTRL_NAME")
   casedir                                    = getenv("CASEDIR")
+  opath                                      = getenv("DIAG_DATA_ROOT")
   obstimtag                                  = getenv("OBS_TIME_TAG")
   statistical_test                           = getenv("REGRESSION_TEST")
   statistical_siglev                         = 0.1
-  l_regress                                  = "l_regress_enso"
+  l_regress                                  = "l_regress_z500"
 
-;define regions for enso analysis
+;define regions for eof analysis
   latS                                       = -90.  ;negative for southern hemisphere
   latN                                       = -20.  ;negative for southern hemisphere
 
 ;declear the season or annual mean data to be used;;;;;
   seasons                                      = (/"ANN","DJF","JJA"/)
+
+;define # of desired EOFs
+  neof                                       = 3     ; Leading EOF only
+  eof                                        = (/"SAM", "PSA1", "PSA2"/)
+  eofmodvar                                  = ("Z3")
+  eofplev                                    = ("500")
 
 ;define color for the plot of signiticant test 
   FillColor           = "Black";"Grey75" ;"Grey65";"Grey28";"Grey";"Black"
@@ -36,39 +43,11 @@ begin
   FillDotSizeF        = 0.00002    ; increase dot size of contours
   FillOpacityF        = 0.5 ;0.15
 
-;define # of desired nino indices
-;Niño 3 (5N-5S, 150W-90W):  This region was once the primary focus for monitoring and predicting El Niño, 
-;but researchers later learned that the key region for coupled ocean-atmosphere interactions for ENSO lies 
-;further west (Trenberth, 1997).  Hence, the Niño 3.4 and ONI became favored for defining El Niño and La Niña events.
-;Niño 3.4 (5N-5S, 170W-120W):  The  Niño 3.4 anomalies may be thought of as representing the
-;average equatorial SSTs across the Pacific from about the dateline to the South American coast. 
-;The Niño 3.4 index typically uses a 5-month running mean, and El Niño or La  Niña events are
-;defined when the  Niño 3.4 SSTs exceed +/- 0.4C for a period of six months or more.
-;Niño 4 (5N-5S, 160E-150W): The  Niño 4 index captures SST anomalies in the central equatorial Pacific. 
-;This region tends to have less variance than the other Niño regions.
-  nenso        = 3     ; Leading EOF only
-  ninoreg      = (/"Nino 3", "Nino 3.4", "Nino 4"/)
-  ninolats     = (/ -5,  -5,  -5/)
-  ninolate     = (/  5,   5,   5/)
-  ninolons     = (/210, 190, 160/)     
-  ninolone     = (/270, 240, 210/)
-
- ;variable name in for caclulating nino index 
-  modninovar   = ("TS")
-  if((case2name.eq."ERA5").or.(case2name.eq."ERA20C")) then
-    obsninovar = ("sst")
-  else if (case2name.eq."NOAA20C") then
-    obsninovar = ("skt")
-  else
-    print("The observational source are not available; only allow ERA5, ERA20C or NOAA20C")
-    exit
-  end if
-  end if
-
-;read in two files
-
+ ;read in two files
   f                                      = systemfunc("ls $TPATH/*_monthly_means.nc")
   f1                                     = addfile(f,"r")
+  ps1                                    = f1->PS
+
   if(compare.eq."Model_vs_OBS") then
     f                                    = systemfunc("ls $CPATH/*_siglev_analysis*monthly*.nc")
     f2                                   = addfile(f,"r")
@@ -76,96 +55,19 @@ begin
     f                                    = systemfunc("ls $CPATH/*_monthly_means.nc")
     f2                                   = addfile(f,"r")
   end if
-   
- ;;;;read and calculate nino indices;;;;;;;;;;;;;;;;;;;;
-  ensovar1                            = f1->$modninovar$
-  if(compare.eq."Model_vs_OBS") then
-    ensovar2                          = f2->$obsninovar$
-  else
-    ensovar2                          = f2->$modninovar$
-  end if
- ;printVarSummary(ensovar1)
- ;printVarSummary(ensovar2)
 
-  ensovar1@_FillValue                  = -9999.
-  ensovar2@_FillValue                  = -9999.
-  edd1                                = dimsizes(ensovar1)
-  edd2                                = dimsizes(ensovar2)
-
- ;;check the two comparing files and see if they are in the same grid, otherwise, return the error message;;;;
-  if ((edd1(1).ne.edd2(1)).or.(edd1(2).ne.edd2(2)))then
-   print("Error: this scripts requires the two files must in the same grid to run!!!")
-   return
-  end if
-
- ; ==============================================================
- ; Nino X Index computation:
- ;(a) Compute area averaged total SST from Niño X region;
- ;(b) Compute monthly climatology (e.g., 1950-1979) for area averaged total SST from Niño X region,
- ;    and subtract climatology from area averaged total SST time series to obtain anomalies;
- ;(c) Smooth the anomalies with a 5-month running mean;
- ;(d) Normalize the smoothed values by its standard deviation over the climatological period.
- ; ==============================================================
-  enso_ind1  = new((/nenso,edd1(0)/),typeof(ensovar1))
-  enso_ind2  = new((/nenso,edd2(0)/),typeof(ensovar2))
-  enso_ind1!0 = "nenso"
-  enso_ind1!1 = "time"
-  enso_ind2!0 = "nenso"
-  enso_ind2!1 = "time"
-  enso_ind1&time = ensovar1&time
-  enso_ind2&time = ensovar2&time
-
-  do ienso   = 0,nenso-1,1
-
-   latm1     = ninolats(ienso)
-   latm2     = ninolate(ienso)
-   lonm1     = ninolons(ienso)
-   lonm2     = ninolone(ienso)
-
-   ensox     = ensovar1(:,{latm1:latm2},{lonm1:lonm2})
-   ensoy     = ensovar2(:,{latm1:latm2},{lonm1:lonm2})
-
-   ensoxClm  = clmMonTLL(ensox) ;(iClmStrt:iClmLast,:,:))
-   ensoyClm  = clmMonTLL(ensoy) ;(iClmStrt:iClmLast,:,:))
-
-   ensoxAnom = calcMonAnomTLL (ensox, ensoxClm )  ;ensox1
-   ensoyAnom = calcMonAnomTLL (ensoy, ensoyClm )  ;ensoy1
-
-   rad      = get_d2r("float")
-   ensoxclat = ensox&lat
-   ensoxclat = sqrt( cos(rad*ensoxclat) )                 ; gw for gaussian grid
-   ensoyclat = ensoy&lat
-   ensoyclat = sqrt( cos(rad*ensoyclat) )                 ; gw for gaussian grid
-
-   ensox1    = wgt_areaave_Wrap(ensoxAnom,ensoxclat,1.0,0)
-   ensoy1    = wgt_areaave_Wrap(ensoyAnom,ensoyclat,1.0,0)
-
-   nave      = 5
-   opt       = 1
-   ;print(min(ensox1)+ " " +max(ensox1))
-   ensox1    = runave_n_Wrap (ensox1, nave, opt, 0)
-   ensoy1    = runave_n_Wrap (ensoy1, nave, opt, 0)
-   ;print(min(ensox1)+ " " +max(ensox1))
-
-   ;printVarSummary(ensox1)
-   enso_ind1(ienso,:) = dim_standardize_n(ensox1,1,0)
-   enso_ind2(ienso,:) = dim_standardize_n(ensoy1,1,0)
-   delete([/ensox,ensoy,ensoxClm,ensoyClm,ensoxAnom,ensoyAnom,ensoxclat/])
-   delete([/ensoyclat,ensox1,ensoy1,ensox1,ensoy1/])
-  ;print(min(enso_ind1)+ " " +max(enso_ind2))
-
-  end do
-
+ ; =================================================================
   ;;;;;;start to do the regression;;;;
-  print ("Start to regress enso index on selected variables ")
+  print ("Start to regress z500 eof index on selected variables ")
   load "./share_info_for_regression_map.ncl"
 
   do jj = 0, dimsizes(modregvars)-1
 
-     mvarnam                             = modregvars(jj)
+     mvarnam  = modregvars(jj)
+     print("working on variable "+ mvarnam)
      load "./function_read_model_var.ncl"
 
-     if(compare.eq."Model_vs_OBS") then
+     if (compare.eq."Model_vs_OBS") then
        ovarnam  = obsregvars(jj)
        load "./function_read_obs_var.ncl"
      end if
@@ -188,37 +90,42 @@ begin
      ;printVarSummary(var1)
      ;printVarSummary(var2)
 
-     ;;check the two comparing files and see if they are in the same grid, otherwise, return the error message;;;;
-     if ((ddd1(1).ne.ddd2(1)).or.(ddd1(2).ne.ddd2(2)))then
+     ;;check the two comparing files and see if they are in the same grid, 
+     ;;otherwise, return the error message;;;;
+     if ((ddd1(1).ne.ddd2(1)).or.(ddd1(2).ne.ddd2(2))) then 
       print("Error: this scripts requires the two files must in the same grid to run!!!")
       return
      end if
 
-  ;;;;;;start to process the regression variable ;;;;
-
+ ; ==============================================================
+ ; User defined parameters that specify region of globe and
+ ; ==============================================================
    regx1  = var1(:,{latS:latN},:)
    regy1  = var2(:,{latS:latN},:)
+
+   latx1  = regx1&lat
+   lonx1  = regx1&lon
+   latx2  = regy1&lat
+   lonx2  = regy1&lon
 
  ; ==============================================================
  ; compute climatology and Anomalies
  ; ==============================================================
-   regxClm1  = clmMonTLL(regx1) 
-   regyClm1  = clmMonTLL(regy1) 
+   regxClm1   = clmMonTLL(regx1)                      ; (12,lat,lon)
+   regyClm1   = clmMonTLL(regy1)
 
-   regxAnom1 = calcMonAnomTLL (regx1, regxClm1 )  
-   regyAnom1 = calcMonAnomTLL (regy1, regyClm1 )  
+   regxAnom1  = calcMonAnomTLL (regx1, regxClm1 )
+   regyAnom1  = calcMonAnomTLL (regy1, regyClm1 )
 
-   delete([/regxClm1,regyClm1, regx1, regy1/])
+  do kk = 0,dimsizes(seasons) - 1
+
  ; =================================================================
- ; Select different season for the enso
+ ; Select different season for the eof regression
  ; =================================================================
    utc_date1 = cd_calendar(regxAnom1&time,0)
    utc_date2 = cd_calendar(regyAnom1&time,0)
    monthx1   = tointeger(utc_date1(:,1))
    monthx2   = tointeger(utc_date2(:,1))
-   delete([/utc_date1,utc_date2/])
-
-   do kk = 0,dimsizes(seasons) - 1
 
    if(seasons(kk).eq."ANN")then
 
@@ -247,57 +154,54 @@ begin
 
    regxAnom = regxAnom1(indx1,:,:)
    regyAnom = regyAnom1(indx2,:,:)
-   ensox    = enso_ind1(:,indx1)
-   ensoy    = enso_ind2(:,indx2)
 
-   delete([/indx1,indx2/])
-
-   ;printVarSummary(regxClm)
-   ;printVarSummary(regxAnom)         
-   ;printMinMax(regxAnom, True)
-
-   latx1  = doubletofloat(regxAnom&lat)
-   lonx1  = doubletofloat(regxAnom&lon)
-
-   latx2  = doubletofloat(regyAnom&lat)
-   lonx2  = doubletofloat(regyAnom&lon)
+   delete([/indx1,indx2,utc_date1,utc_date2,monthx1,monthx2/])
 
  ; =================================================================
  ; Regress
  ; =================================================================
-   ddenso1      = dimsizes(regxAnom)
-   ddenso2      = dimsizes(regyAnom) 
-   enso1_lat    = new((/nenso,ddenso1(1)*ddenso1(2)/),typeof(regxAnom))
-   enso1_lon    = new((/nenso,ddenso1(1)*ddenso1(2)/),typeof(regxAnom))
-   enso2_lat    = new((/nenso,ddenso2(1)*ddenso2(2)/),typeof(regyAnom))
-   enso2_lon    = new((/nenso,ddenso2(1)*ddenso2(2)/),typeof(regyAnom))
-   enso1_lat@_FillValue = -9999.
-   enso1_lon@_FillValue = -9999.
-   enso2_lat@_FillValue = -9999.
-   enso2_lon@_FillValue = -9999.
+  
+ ; read PC time series for regression
+   eof_file1  = opath +"/"+"EOF_PCS_"+case1name+"_monthly_mean_"+eofmodvar+"_at_"+eofplev+"hPa_"+seasons(kk)+".nc"
+   eof_file2  = opath +"/"+"EOF_PCS_"+case2name+"_monthly_mean_"+eofmodvar+"_at_"+eofplev+"hPa_"+seasons(kk)+".nc"
+   feof1      = addfile(eof_file1,"r")
+   feof2      = addfile(eof_file2,"r")
+   eof1_ts    = feof1->eof_ts
+   eof2_ts    = feof2->eof_ts
+   eof1       = feof1->eof
+   eof2       = feof2->eof 
+   delete([/eof_file1,eof_file2,feof1,feof2/])
 
-   enso1_regres = new((/nenso,ddenso1(1),ddenso1(2)/),typeof(regxAnom))     ; create an array w meta data
-   enso2_regres = new((/nenso,ddenso2(1),ddenso2(2)/),typeof(regyAnom))     ; create an array w meta data
-   enso1_regres@_FillValue = -9999.
-   enso2_regres@_FillValue = -9999.
-   enso1_regres!0 = "nenso"
-   enso1_regres!1 = "lat"
-   enso1_regres!2 = "lon"
-   enso1_regres&lat = regxAnom&lat
-   enso1_regres&lon = regxAnom&lon
-   enso2_regres!0 = "nenso"
-   enso2_regres!1 = "lat"
-   enso2_regres!2 = "lon"
-   enso2_regres&lat = regyAnom&lat
-   enso2_regres&lon = regyAnom&lon
+   ddeof1      = dimsizes(regxAnom)
+   ddeof2      = dimsizes(regyAnom) 
+   eof1_lat    = new((/neof,ddeof1(1)*ddeof1(2)/),typeof(latx1))
+   eof1_lon    = new((/neof,ddeof1(1)*ddeof1(2)/),typeof(lonx1))
+   eof2_lat    = new((/neof,ddeof2(1)*ddeof2(2)/),typeof(latx2))
+   eof2_lon    = new((/neof,ddeof2(1)*ddeof2(2)/),typeof(lonx2))
+   eof1_lat@_FillValue = -9999.
+   eof1_lon@_FillValue = -9999.
+   eof2_lat@_FillValue = -9999.
+   eof2_lon@_FillValue = -9999.
 
-   delete([/ddenso1,ddenso2/])
+   eof1_regres = new((/neof,ddeof1(1),ddeof1(2)/),typeof(regxAnom))     ; create an array w meta data
+   eof2_regres = new((/neof,ddeof2(1),ddeof2(2)/),typeof(regyAnom))     ; create an array w meta data
+   eof1_regres@_FillValue = -9999.
+   eof2_regres@_FillValue = -9999.
+   eof1_regres!0 = "neof"
+   eof1_regres!1 = "lat"
+   eof1_regres!2 = "lon"
+   eof1_regres&lat = regxAnom&lat
+   eof1_regres&lon = regxAnom&lon
+   eof2_regres!0 = "neof"
+   eof2_regres!1 = "lat"
+   eof2_regres!2 = "lon"
+   eof2_regres&lat = regyAnom&lat
+   eof2_regres&lon = regyAnom&lon
 
-   do ne=0,nenso-1
+   do ne=0,neof-1
 
-      rc1   = regCoef_n(ensox(ne,:), regxAnom, 0, 0)
-      rc2   = regCoef_n(ensoy(ne,:), regyAnom, 0, 0)
-
+      rc1   = regCoef_n(eof1_ts(ne,:), regxAnom, 0, 0)
+      rc2   = regCoef_n(eof2_ts(ne,:), regyAnom, 0, 0)
       rc1@_FillValue = -9999.
       rc2@_FillValue = -9999.
 
@@ -312,16 +216,13 @@ begin
        pb1   = betainc(df1/(df1+tval1^2),df1/2.0,xb1)
        lat11 = ndtooned(conform(rc1,latx1,0)) 
        lon11 = ndtooned(conform(rc1,lonx1,1))
-       ;printVarSummary(lon11)
-       ;printVarSummary(lat11)
-       ;printVarSummary(enso1_lon)
        lat11 = where(pb1.le.statistical_siglev,lat11,rc1@_FillValue)
        lon11 = where(pb1.le.statistical_siglev,lon11,rc1@_FillValue)
-       enso1_lat(ne,:) = lat11
-       enso1_lon(ne,:) = lon11 
+       eof1_lat(ne,:) = lat11
+       eof1_lon(ne,:) = lon11 
       ;prob1 = reshape(pb1,(/drc1(0),drc1(1)/))
       ;prob1 = where(prob1.le.statistical_siglev,rc1,rc1@_FillValue)
-      ;enso1_prob(ne,:,:) = (/ prob1 /)
+      ;eof1_prob(ne,:,:) = (/ prob1 /)
        delete([/drc1,df1,tval1,xb1,pb1,lat11,lon11/])
 
        drc2  = dimsizes(rc2)
@@ -334,38 +235,42 @@ begin
        lon12 = ndtooned(conform(rc2,lonx2,1))
        lat12 = where(pb2.le.statistical_siglev,lat12,rc2@_FillValue)
        lon12 = where(pb2.le.statistical_siglev,lon12,rc2@_FillValue)
-       enso2_lat(ne,:) = lat12
-       enso2_lon(ne,:) = lon12
+       eof2_lat(ne,:) = lat12
+       eof2_lon(ne,:) = lon12
       ;prob2 = reshape(pb2,(/drc2(0),drc2(1)/))
       ;prob2 = where(prob2.le.statistical_siglev,rc2,rc2@_FillValue)
-      ;enso2_prob(ne,:,:) = (/ prob2 /)
+      ;eof2_prob(ne,:,:) = (/ prob2 /)
        delete([/drc2,df2,tval2,xb2,pb2,lat12,lon12/])
       end if 
 
-      enso1_regres(ne,:,:) = (/ rc1 /)
-      enso2_regres(ne,:,:) = (/ rc2 /)
+      eof1_regres(ne,:,:) = (/ doubletofloat(rc1) /)
+      eof2_regres(ne,:,:) = (/ doubletofloat(rc2) /)
       delete([/rc1,rc2/])
 
    end do
 
  ; =================================================================
  ; Extract the YYYYMM from the time coordinate 
- ; associated with enso_ts [same as x&time] 
+ ; associated with eof_ts [same as x&time] 
  ; =================================================================
 
-   utc_date1 = cd_calendar(regxAnom&time,-1)  
-   utc_date2 = cd_calendar(regyAnom&time,-1)
-   
+   utc_date1 = cd_calendar(eof1_ts&time,-1)
+   utc_date2 = cd_calendar(eof2_ts&time,-1)
+
    yyyy1     = yyyymm_to_yyyyfrac(utc_date1, 0.0) ;utc_date1(:,0)
    yyyy2     = yyyymm_to_yyyyfrac(utc_date2, 0.0) ;utc_date2(:,0)
 
-  ;print(yyyy1)
+   delete([/utc_date1,utc_date2/])
 
- do n = 0, nenso-1
+ do n = 0, neof-1
 
-   fildir    = casedir+"/Regression_Contour_Maps/"
-   filname   = str_sub_str(ninoreg(n)," ","")+"_regression_on_"+modregvars(jj) +"_"+seasons(kk)
-   wks       = gsn_open_wks("eps",fildir+filname)
+   wtype                        = "eps"
+  ;wtype@wkWidth                = 2500
+  ;wtype@wkHeight               = 2500
+   figdir                       = casedir+"/Regression_Contour_Maps/"
+   fe                           = eof(n)+"_from_monthly_mean_Z500_regression_on_"+modregvars(jj)+"_"+seasons(kk)
+   wks                          = gsn_open_wks(wtype, figdir + fe)
+
    plot      = new((/4/),graphic)
    tsmap1    = new((/4/),graphic)
    tsmap2    = new((/4/),graphic)
@@ -415,17 +320,17 @@ begin
    res@tmYRMinorThicknessF      = 1.0
 
   ;set symmetric plot min/ma
-  ;tmpdat = (/enso1_regres,enso2_regres/)
+  ;tmpdat = (/eof1_regres,eof2_regres/)
   ;symMinMaxPlt(tmpdat, 16, False, res)      ; contributed.ncl
   ;delete(tmpdat)
 
   res@cnLevelSelectionMode = "ManualLevels"  ; manually set the contour levels with the following 3 resources
   if(n.eq.0)then
-    mnmxint = nice_mnmxintvl( -lev_enso1(jj), lev_enso1(jj), maxlev, False)
+    mnmxint = nice_mnmxintvl( -lev_eof1(jj), lev_eof1(jj), maxlev, False)
   else if (n.eq.1)then 
-    mnmxint = nice_mnmxintvl( -lev_enso2(jj), lev_enso2(jj), maxlev, False)
+    mnmxint = nice_mnmxintvl( -lev_eof2(jj), lev_eof2(jj), maxlev, False)
   else
-    mnmxint = nice_mnmxintvl( -lev_enso3(jj), lev_enso3(jj), maxlev, False)
+    mnmxint = nice_mnmxintvl( -lev_eof3(jj), lev_eof3(jj), maxlev, False)
   end if 
   end if
 
@@ -442,18 +347,18 @@ begin
     res@gsnPolarLabelFontHeightF     = FontHeightF
 
     ;---Draw first plot in upper left corner
-    res@gsnLeftString     = "Regression ("+ninoreg(n)+")"
-   ;res@gsnRightString    = sprintf("%5.1f", enso1@pcvar(n)) +"%"
-    res@gsnCenterString   = "" ;panelstr1 
+    res@gsnLeftString     = "Regression ("+eof(n)+")";(EOF "+(n+1)+")"
+    res@gsnRightString    = sprintf("%5.1f", eof1@pcvar(n)) +"%"
+    res@gsnCenterString   = "" ;panelstr1
     res@tiMainString      = "Case: "+panelstr1
-    plot(0)   = gsn_csm_contour_map_polar(wks,enso1_regres(n,:,:),res)
+    plot(0)   = gsn_csm_contour_map_polar(wks,eof1_regres(n,:,:),res)
 
     ;---Draw second plot in upper right corner
-    res@gsnLeftString     = "Regression ("+ninoreg(n)+")"
-    res@gsnRightString    = "" ;sprintf("%5.1f", enso2@pcvar(n)) +"%"
+    res@gsnLeftString     = "Regression ("+eof(n)+")";(EOF "+(n+1)+")"
+    res@gsnRightString    = sprintf("%5.1f", eof2@pcvar(n)) +"%"
     res@gsnCenterString   = "" ;panelstr2
     res@tiMainString      = "Case: "+panelstr2
-    plot(1) = gsn_csm_contour_map_polar(wks,enso2_regres(n,:,:),res)
+    plot(1) = gsn_csm_contour_map_polar(wks,eof2_regres(n,:,:),res)
 
    ;res1=res
    ;res1@cnFillOn              = True     ; color plot desired
@@ -473,10 +378,10 @@ begin
    ;res1@cnInfoLabelOn         = False
    ;str1=unique_string("tmp1")
    ;str2=unique_string("tmp2")
-   ;;wrf_smooth_2d(enso1_regres(n,:,:),3)
-   ;;wrf_smooth_2d(enso2_regres(n,:,:),3)
-   ;plot@str1                = gsn_csm_contour_map_polar(wks,enso1_prob(n,:,:),res1)
-   ;plot@str2                = gsn_csm_contour_map_polar(wks,enso2_prob(n,:,:),res1)
+   ;;wrf_smooth_2d(eof1_regres(n,:,:),3)
+   ;;wrf_smooth_2d(eof2_regres(n,:,:),3)
+   ;plot@str1                = gsn_csm_contour_map_polar(wks,eof1_prob(n,:,:),res1)
+   ;plot@str2                = gsn_csm_contour_map_polar(wks,eof2_prob(n,:,:),res1)
    ;overlay(plot(0),plot@str1)
    ;overlay(plot(1),plot@str2)
    ;delete([/res1/])
@@ -491,10 +396,10 @@ begin
 
     str1=unique_string("tmp1")
     str2=unique_string("tmp2")
-   ;wrf_smooth_2d(enso1_regres(n,:,:),3)
-   ;wrf_smooth_2d(enso2_regres(n,:,:),3)
-    plot@str1                = gsn_add_polymarker(wks,plot(0),enso2_lon(n,:),enso2_lat(n,:),mkres)
-    plot@str2                = gsn_add_polymarker(wks,plot(1),enso2_lon(n,:),enso2_lat(n,:),mkres)
+   ;wrf_smooth_2d(eof1_regres(n,:,:),3)
+   ;wrf_smooth_2d(eof2_regres(n,:,:),3)
+    plot@str1                = gsn_add_polymarker(wks,plot(0),eof2_lon(n,:),eof2_lat(n,:),mkres)
+    plot@str2                = gsn_add_polymarker(wks,plot(1),eof2_lon(n,:),eof2_lat(n,:),mkres)
 
  ;*******************************************
  ; second plot
@@ -507,37 +412,36 @@ begin
     rts@gsnScale  = True        ; force text scaling               
 
     rts@tiYAxisString = "Standardized"          ; y-axis label      
-    rts@tiXAxisString = "Year"
 
     rts@vpHeightF = 0.40        ; Changes the aspect ratio
     rts@vpWidthF  = 0.85
     rts@vpXF      = 0.10        ; change start locations
     rts@vpYF      = 0.75        ; the plot
- 
+
     rts@gsnYRefLine           = 0.              ; reference line   
-   ;rts@gsnXYBarChart         = True            ; create bar chart 
+    rts@gsnXYBarChart         = True            ; create bar chart 
     rts@gsnAboveYRefLineColor = "red"           ; above ref line fill red
     rts@gsnBelowYRefLineColor = "blue"          ; below ref line fill blue
 
-    rts@tmXTOn                = False
-    rts@tmYLLabelFontHeightF  = 0.025
-    rts@tmBorderThicknessF    = 1.0
-    rts@tmXBMajorThicknessF   = 1.0
-    rts@tmXBMinorThicknessF   = 1.0
-    rts@tmYLMajorThicknessF   = 1.0
-    rts@tmYLMinorThicknessF   = 1.0
-    rts@tmYRMajorThicknessF   = 1.0
-    rts@tmYRMinorThicknessF   = 1.0
+    rts@tmXTOn                       = False
+    rts@tmYLLabelFontHeightF         = 0.025
+    rts@tmBorderThicknessF           = 1.0
+    rts@tmXBMajorThicknessF          = 1.0
+    rts@tmXBMinorThicknessF          = 1.0
+    rts@tmYLMajorThicknessF          = 1.0
+    rts@tmYLMinorThicknessF          = 1.0
+    rts@tmYRMajorThicknessF          = 1.0
+    rts@tmYRMinorThicknessF          = 1.0
 
-    rts@trYMinF               = -4.0
-    rts@trYMaxF               =  4.0
+    rts@trYMinF                      = -3.0
+    rts@trYMaxF                      =  3.0
 
    ;create individual plots
    ;---Draw third plot in lower left corner
-    rts@gsnLeftString        = ninoreg(n)+" index"
-    rts@gsnRightString       = "" ;sprintf("%5.1f", enso1_regres@pcvar(n)) +"%"
-    rts@tiMainString         = "" ;"Case: "+panelstr1
-    plot(2) = gsn_csm_xy (wks,yyyy1,ensox(n,:),rts)
+    rts@gsnLeftString     = eof(n)+" index" ;(EOF "+(n+1)+")"
+    rts@gsnRightString    = sprintf("%5.1f", eof1@pcvar(n)) +"%"
+    rts@tiMainString      = "" ;"Case: "+panelstr1
+    plot(2) = gsn_csm_xy (wks,yyyy1,eof1_ts(n,:),rts)
      
     rts1 = rts
     rts1@gsnXYBarChart       = False
@@ -546,17 +450,17 @@ begin
     rts1@gsnCenterString     = ""
     rts1@xyLineThicknesses   = 3            
     rts1@xyLineColors        = "Black"
-    xyarr1                   = wgt_runave_Wrap(ensox(n,:),(/1.,3,5,6,5,3,1/), 0)   
+    xyarr1                   = wgt_runave_Wrap(eof1_ts(n,:),(/1.,3,5,6,5,3,1/), 0)   
     tsmap1(2)            = gsn_csm_xy(wks,yyyy1,xyarr1,rts1) 
     overlay(plot(2),tsmap1(2))
     delete([/xyarr1/])
 
 
     ;---Draw fourth plot in upper right corner
-    rts@gsnLeftString        = ninoreg(n)+" index"
-    rts@gsnRightString       = "";sprintf("%5.1f", enso2_regres@pcvar(n)) +"%"
-    rts@tiMainString         = "" ;"Case: "+panelstr1
-    plot(3) = gsn_csm_xy (wks,yyyy2,ensoy(n,:),rts)
+    rts@gsnLeftString        = eof(n)+" index" ;(EOF "+(n+1)+")"
+    rts@gsnRightString       = sprintf("%5.1f", eof2@pcvar(n)) +"%"
+    rts@tiMainString         = "" ;"Case: "+panelstr2
+    plot(3) = gsn_csm_xy (wks,yyyy2,eof2_ts(n,:),rts)
 
     rts2 = rts
     rts2@gsnXYBarChart       = False
@@ -565,7 +469,7 @@ begin
     rts2@gsnCenterString     = ""
     rts2@xyLineThicknesses   = 3 
     rts2@xyLineColors        = "Black"
-    xyarr2                   = wgt_runave_Wrap(ensoy(n,:),(/1.,3,5,6,5,3,1/), 0) 
+    xyarr2                   = wgt_runave_Wrap(eof2_ts(n,:),(/1.,3,5,6,5,3,1/), 0) 
     tsmap2(3)            = gsn_csm_xy(wks,yyyy2,xyarr2,rts2)
     overlay(plot(3),tsmap2(3))
     delete([/xyarr2/])
@@ -582,24 +486,26 @@ begin
     pres2@gsnFrame                  = False               ; save panel until both ready
     pres2@gsnPanelBottom            = 0.05                ; draw from center to right edge
     pres2@gsnPanelTop               = 0.5		       ; draw from center to right edge 
-    gsn_panel(wks,plot(2:3),(/1,2/),pres2)       ; create first panel
- 
+   ;gsn_panel(wks,plot(2:3),(/1,2/),pres2)       ; create first panel
+
+    ;if (wtype .eq. "png") then
+    ;   tmpa = systemfunc("convert "+fe+".png -trim del.png")
+    ;   tmpb = systemfunc("mv del.png "+fe+".png")
+    ;end if
+
     frame(wks)                                   ; draw both on same page
 
-  ;delete([/xyarr1,xyarr2,tsmap1,tsmap2/])
-   end do ; end of enso modes
-   delete([/utc_date1,utc_date2,yyyy1,yyyy2/])
+   end do ; end of eof mods 
+
    delete([/regxAnom,regyAnom/])
-  ;delete([/f1,ps1,ha1,hb1,p0,p1,f2,ps2,ha2,hb2,p2/])
-   delete([/ensox,ensoy,enso1_regres,enso2_regres/])
+   delete([/eof1_regres,eof2_regres,eof1,eof2,eof1_ts,eof2_ts/])
+   delete([/yyyy1,yyyy2/])
 
-  end do                                              ; end of looping over seasons
+  end do        
 
-  delete([/regxAnom1,regyAnom1,monthx1,monthx2/])
-
-  end do                                              ; end of looping over variables
-
-  delete([/enso_ind1,enso_ind2/])
+   delete([/regxAnom1,regyAnom1,regx1,regy1,regxClm1,regyClm1/])
+    
+ end do                                              ; end of looping over variables
 
 end
 

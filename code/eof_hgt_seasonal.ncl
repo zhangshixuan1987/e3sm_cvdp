@@ -18,6 +18,7 @@ begin
   case2name                                  = getenv("CTRL_NAME")
   casedir                                    = getenv("CASEDIR")
   opath                                      = getenv("DIAG_DATA_ROOT")
+  obstimtag                                  = getenv("OBS_TIME_TAG")
 
 ;define regions for eof analysis
   latS                                         = -90.  ;negative for southern hemisphere
@@ -31,11 +32,32 @@ begin
   rearth                                       = 6.37122e6
   grav                                         = 9.80665
 
+ print(case1name + " " +case2name)
 ;variable name in the climo file
-  modvars                                      = (/"Z3"/)
-  obsvars                                      = (/"z"/) 
+  modvars                                    = (/"Z3"/)
+  facmod                                     = (/1.0/)
+  varunt                                     = (/"m"/)
+  panelstr1                                  = case1name
+  panelstr2                                  = case2name
+
+  if((case2name.eq."ERA5").or.(case2name.eq."ERA20C")) then
+     obsvars                                 = (/"z"/)
+     facobs                                  = (/1.0/grav/)
+     panelstr2                               = case2name + " ("+obstimtag+")"
+  else if (case2name.eq."NOAA20C") then
+     obsvars                                 = (/"hgt"/)
+     facobs                                  = (/1.0/)
+     panelstr2                               = case2name + " ("+obstimtag+")"
+  else
+    print("The observational source are not available; only allow ERA5, ERA20C or NOAA20C")
+    exit
+  end if
+  end if
+
+;declear the season or annual mean data to be used;;;;;
   seasons                                      = (/"ANN","DJF","JJA"/)
-  preslev                                      = (/700,500/)
+  preslev                                      = (/700,500,200/)
+  intyp                                        = 2
 
 ;read in two files
 
@@ -43,63 +65,65 @@ begin
 
      do kk = 0,dimsizes(seasons) - 1
 
-        f                                   = systemfunc("ls "+tpath+"/*"+seasons(kk)+"_means.nc")
+        f                                      = systemfunc("ls "+tpath+"/*"+seasons(kk)+"_means.nc")
         f1                                     = addfile(f,"r")
-        ps1                                    = f1->PS
-        ha1                                    = doubletofloat(f1->hyam)
-        hb1                                    = doubletofloat(f1->hybm)
-        p0                                     = doubletofloat(f1->P0)
-        p1                                     = pres_hybrid_ccm(ps1,p0,ha1,hb1)
-        p1                                     = p1/100.
-        gw1                                    = doubletofloat(f1->gw)
 
         if(compare.eq."Model_vs_OBS") then
-          f                                       = systemfunc("ls "+cpath+"/*_prelev_analysis_*_"+seasons(kk)+".nc")
-          f2                                      = addfile(f,"r")
-          gw2                                     = doubletofloat(f2->gw)
+          f                                    = systemfunc("ls "+cpath+"/*_prelev_analysis_*_"+seasons(kk)+".nc")
+          f2                                   = addfile(f,"r")
         else
-          f                                       = systemfunc("ls "+cpath+"/*"+seasons(kk)+"_means.nc")
-          f2                                      = addfile(f,"r")
-          ps2                                     = f2->PS
-          ha2                                     = doubletofloat(f2->hyai)
-          hb2                                     = doubletofloat(f2->hybi)
-          p2                                      = pres_hybrid_ccm(ps2,p0,ha2,hb2)
-          gw2                                     = doubletofloat(f2->gw)
+          f                                    = systemfunc("ls "+cpath+"/*"+seasons(kk)+"_means.nc")
+          f2                                   = addfile(f,"r")
         end if
 
         do jj = 0, dimsizes(modvars)-1
 
            mvarnam                             = modvars(jj)
            var1                                = f1->$mvarnam$
-           tmp1                                = int2p_n_Wrap(p1,var1,preslev(ll),2,1)
+           tmp1                                = vinth2p(var1,f1->hyam,f1->hybm,preslev(ll),f1->PS,intyp,f1->P0/100.0,1,False)
            vp1                                 = tmp1(:,0,:,:)
            delete([/tmp1/])
- 
+
+           if(compare.ne."Model_vs_OBS") then
+             var2                              = f2->$mvarnam$
+             tmp2                              = vinth2p(var2,f2->hyam,f2->hybm,preslev(ll),f2->PS,intyp,f2->P0/100.0,1,False)
+             vp2                               = tmp2(:,0,:,:)
+             delete([/tmp2/])
+           end if
+
            if(compare.eq."Model_vs_OBS") then
               ovarnam                          = obsvars(jj)
               var2                             = f2->$ovarnam$
-              vp2                              = var2(:,{preslev(ll)},:,:)
-              if(ovarnam.eq."z")then
-                 vp2                           = vp2/grav ; covert geopoential to geoptential height
-              end if 
-           else
-              var2                             = f2->$mvarnam$
-              tmp2                             = int2p_n_Wrap(p1,var2,preslev(ll),2,1)
-              vp2                              = tmp2(:,0,:,:)
-              delete([/tmp2/])
-           end if  
- 
-           if  ( preslev(ll) .eq. 1013. ) then
-               vp1(:,0,:,:)                    = (/var1(:,ddd1(1)-1,:,:)/)
-               vp2(:,0,:,:)                    = (/var2(:,ddd2(1)-1,:,:)/)
+              lev                              = f2->lev
+              indl                             = ind(lev.eq.preslev(ll))
+              if(.not.ismissing(indl)) then
+                vp2                            = var2(:,indl,:,:)
+              else
+                tmp                            = int2p_n_Wrap(lev, var2, preslev(ll), 2, 1)
+                vp2                            = tmp(:,0,:,:)
+                delete([/tmp/])
+              end if
+              delete([/lev,indl/])
            end if
+
            delete([/var1,var2/])
 
            vp1@_FillValue                      = -9999.
            vp2@_FillValue                      = -9999.
+
+           if(compare.eq."Model_vs_OBS") then
+             vp1                               = vp1*facmod(jj)
+             vp2                               = vp2*facobs(jj)
+           else
+             vp1                               = vp1*facmod(jj)
+             vp2                               = vp2*facmod(jj)
+           end if
+
+           vp1@units                           = varunt(jj)
+           vp2@units                           = varunt(jj)
+
            ddd1                                = dimsizes(vp1)
            ddd2                                = dimsizes(vp2)
-
 
            ;printVarSummary(vp1)
            ;printVarSummary(vp2)
@@ -148,8 +172,6 @@ begin
          yw     = yAnom*conform(yAnom, yclat, 1)
          copy_VarMeta(x1, xw)
          copy_VarMeta(y1, yw) 
-         xw@long_name = "Wgt: "+x1@long_name
-         yw@long_name = "Wgt: "+y1@long_name
        
        ; =================================================================
        ; Compute EOFs & Standardize time series
@@ -237,11 +259,11 @@ begin
  
        do n = 0, neof-1
 
-         wtype                        = "eps"
-        ;wtype@wkWidth                = 2500
-        ;wtype@wkHeight               = 2500
+         wtype                     = "eps"
+        ;wtype@wkWidth             = 2500
+        ;wtype@wkHeight            = 2500
          fe                        = modvars(jj)+"_"+seasons(kk)+"_seasonal_mean_eof"+sprinti("%02d",n+1)+"_"+preslev(ll)+"hPa"
-         wks                                 = gsn_open_wks(wtype,casedir+"/EOF_Mode_Time_Series/" + fe)
+         wks                       = gsn_open_wks(wtype,casedir+"/EOF_Mode_Time_Series/" + fe)
 
          plot      = new((/4/),graphic)
          tsmap1    = new((/4/),graphic)
@@ -273,7 +295,7 @@ begin
 
          res@lbLabelBarOn             = True
          res@lbOrientation            = "Vertical"
-         res@lbTitleString            = "Z"+preslev(ll)+" (gpm)" ;Geopential height (gpm)";
+         res@lbTitleString            = "" ;"Z"+preslev(ll)+" (gpm)" ;Geopential height (gpm)";
          res@lbTitlePosition          = "Right"                           ; title location
          res@lbTitleDirection         = "Across"                          ; letter angle
          res@lbTitleAngleF            = 90.                               ; title angle
@@ -322,17 +344,17 @@ begin
           res@gsnPolarLabelFontHeightF     = FontHeightF
 
           ;---Draw first plot in upper left corner
-          res@gsnLeftString     = "EOF "+(n+1)
-          res@gsnRightString    = sprintf("%5.1f", eof1@pcvar(n)) +"%"
-          res@gsnCenterString   = "" ;case1name
-          res@tiMainString      = "Case: "+case1name
+          res@gsnLeftString     = "EOF "+(n+1)+ " ("+sprintf("%4.1f", eof1@pcvar(n)) +"%)"
+          res@gsnRightString    = "Z"+preslev(ll)+" (gpm)" ;sprintf("%4.1f", eof1@pcvar(n)) +"%"
+          res@gsnCenterString   = "" ;panelstr1
+          res@tiMainString      = "Case: "+panelstr1
           plot(0)   = gsn_csm_contour_map_polar(wks,eof1_regres(n,:,:),res)
 
           ;---Draw second plot in upper right corner
-          res@gsnLeftString     = "EOF "+(n+1)
-          res@gsnRightString    = sprintf("%5.1f", eof2@pcvar(n)) +"%"
-          res@gsnCenterString   = "" ;case2name
-          res@tiMainString      = "Case: "+case2name
+          res@gsnLeftString     = "EOF "+(n+1)+ " ("+sprintf("%4.1f", eof2@pcvar(n)) +"%)"
+          res@gsnRightString    = "Z"+preslev(ll)+" (gpm)" ;sprintf("%4.1f", eof2@pcvar(n)) +"%"
+          res@gsnCenterString   = "" ;panelstr2
+          res@tiMainString      = "Case: "+panelstr2
           plot(1) = gsn_csm_contour_map_polar(wks,eof2_regres(n,:,:),res)
       
        ;*******************************************
@@ -372,9 +394,9 @@ begin
 
          ;create individual plots
          ;---Draw third plot in lower left corner
-          rts@gsnLeftString     = "EOF "+(n+1)
-          rts@gsnRightString    = sprintf("%5.1f", eof1_regres@pcvar(n)) +"%"
-          rts@tiMainString      = "" ;"Case: "+case1name
+          rts@gsnLeftString     = "EOF "+(n+1)+ " ("+sprintf("%4.1f", eof1@pcvar(n)) +"%)"
+          rts@gsnRightString    = "unitless" ;sprintf("%4.1f", eof1_regres@pcvar(n)) +"%"
+          rts@tiMainString      = "" ;"Case: "+panelstr1
           plot(2) = gsn_csm_xy (wks,yyyy1,eof1_ts(n,:),rts)
            
           rts1 = rts
@@ -391,9 +413,9 @@ begin
 
 
           ;---Draw fourth plot in upper right corner
-          rts@gsnLeftString        = "EOF "+(n+1)
-          rts@gsnRightString       = sprintf("%5.1f", eof2_regres@pcvar(n)) +"%"
-          rts@tiMainString         = "" ;"Case: "+case2name
+          rts@gsnLeftString        = "EOF "+(n+1)+ " ("+sprintf("%4.1f", eof2@pcvar(n)) +"%)"
+          rts@gsnRightString       = "unitless" ;sprintf("%4.1f", eof2_regres@pcvar(n)) +"%"
+          rts@tiMainString         = "" ;"Case: "+panelstr2
           plot(3) = gsn_csm_xy (wks,yyyy2,eof2_ts(n,:),rts)
 
           rts2 = rts
@@ -435,12 +457,7 @@ begin
         end do ; end of eof mods 
  
         delete([/xAnom,yAnom,x1,y1,xclat,yclat,eof1,eof2/])
-        delete([/f1,ps1,ha1,hb1,p0,p1,gw1/])
-        if(compare.eq."Model_vs_OBS") then
-           delete([/f2,gw2/])
-        else
-           delete([/f2,ps2,ha2,hb2,p2/])
-        end if          
+        delete([/f1,f2/])
      end do                                                 ; end of looping over seasons
 
   end do                                                    ; end of looping over pressure levels

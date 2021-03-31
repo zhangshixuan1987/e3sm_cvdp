@@ -25,7 +25,7 @@ begin
   latN                                       = -20.  ;negative for southern hemisphere
 
 ;define # of desired EOFs
-  neof                                       = 1     ; Leading EOF only
+  neof                                       = 3     ; Leading EOF only
 
 ;define constants for unit conversion
   pi                                         = 3.14159265
@@ -34,19 +34,19 @@ begin
 
  print(case1name + " " +case2name)
 ;variable name in the climo file
-  modvars                                    = (/"Z3"/)
-  facmod                                     = (/1.0/)
-  varunt                                     = (/"m"/)
+  modvars                                    = (/"PSL"/)
+  facmod                                     = (/1.0/100.0/)
+  varunt                                     = (/"hPa"/)
   panelstr1                                  = case1name
   panelstr2                                  = case2name
 
-  if((case2name.eq."ERA5").or.(case2name.eq."ERA20C")) then
-     obsvars                                 = (/"z"/)
-     facobs                                  = (/1.0/grav/)
+  if((case2name.eq."ERA5").or.(case2name.eq."ERA20C"))
+     obsvars                                 = (/"msl"/)
+     facobs                                  = (/1.0/100.0/)
      panelstr2                               = case2name + " ("+obstimtag+")"
-  else if (case2name.eq."NOAA20C") then
-     obsvars                                 = (/"hgt"/)
-     facobs                                  = (/1.0/)
+  else if (case2name.eq."NOAA20C")
+     obsvars                                 = (/"prmsl"/)
+     facobs                                  = (/1.0/100.0/)
      panelstr2                               = case2name + " ("+obstimtag+")"
   else
     print("The observational source are not available; only allow ERA5, ERA20C or NOAA20C")
@@ -56,80 +56,72 @@ begin
 
 ;declear the season or annual mean data to be used;;;;;
   seasons                                    = (/"ANN","DJF","JJA"/)
-  preslev                                    = (/300,50/)
-  intyp                                      = 2
+  preslev                                    = (/"Surface"/)
 
+  maxlev                                     = 11 
+  minlev_eof1                                = (/-200.,-0.5, -0.5, -0.5/)              
+  maxlev_eof1                                = (/ 200., 0.5,  0.5,  0.5/)
+    
+  minlev_eof2                                = (/-100.,-0.5, -0.5, -0.5/)
+  maxlev_eof2                                = (/ 100., 0.5,  0.5,  0.5/)
+
+  minlev_eof3                                = (/-100.,-0.5, -0.5, -0.5/)
+  maxlev_eof3                                = (/ 100., 0.5,  0.5,  0.5/)
+ 
 ;read in two files
 
   do ll = 0,dimsizes(preslev) - 1
 
         f                                      = systemfunc("ls "+tpath+"/*_monthly_means.nc")
         f1                                     = addfile(f,"r")
+        gw1                                    = doubletofloat(f1->gw)
 
         if(compare.eq."Model_vs_OBS") then
-          f                                    = systemfunc("ls "+cpath+"/*_prelev_analysis_*monthly*.nc")
+          f                                    = systemfunc("ls "+cpath+"/*_siglev_analysis_*monthly*.nc")
           f2                                   = addfile(f,"r")
+          gw2                                  = doubletofloat(f2->gw)
         else
           f                                    = systemfunc("ls "+cpath+"/*_monthly_means.nc")
           f2                                   = addfile(f,"r")
+          gw2                                  = doubletofloat(f2->gw)
         end if
+
 
         do jj = 0, dimsizes(modvars)-1
 
            mvarnam                             = modvars(jj)
-           var1                                = f1->$mvarnam$
-           tmp1                                = vinth2p(var1,f1->hyam,f1->hybm,preslev(ll),f1->PS,intyp,f1->P0/100.0,1,False)
-           vp1                                 = tmp1(:,0,:,:)
-           delete([/tmp1/])
+           vp1                                 = f1->$mvarnam$
 
            if(compare.ne."Model_vs_OBS") then
-             var2                              = f2->$mvarnam$
-             tmp2                              = vinth2p(var2,f2->hyam,f2->hybm,preslev(ll),f2->PS,intyp,f2->P0/100.0,1,False)
-             vp2                               = tmp2(:,0,:,:)
-             delete([/tmp2/])
-           end if
+             vp2                               = f2->$mvarnam$(:,{latS:latN},:)
+           end if 
 
            if(compare.eq."Model_vs_OBS") then
-              ovarnam                          = obsvars(jj)
-              var2                             = f2->$ovarnam$
-              lev                              = f2->lev
-              indl                             = ind(lev.eq.preslev(ll))
-              if(.not.ismissing(indl)) then
-                vp2                            = var2(:,indl,:,:)
-              else
-                tmp                            = int2p_n_Wrap(lev, var2, preslev(ll), 2, 1)
-                vp2                            = tmp(:,0,:,:)
-                delete([/tmp/])
-              end if
-              delete([/lev,indl/])
-           end if
-           delete([/var1,var2/])
-
-           if(compare.eq."Model_vs_OBS") then
-             vp1                               = vp1*facmod(jj)
-             vp2                               = vp2*facobs(jj)
-           else
-             vp1                               = vp1*facmod(jj)
-             vp2                               = vp2*facmod(jj)
+             ovarnam                           = obsvars(jj)
+             vp2                               = f2->$ovarnam$
            end if
 
+           vp1@_FillValue                      = -9999.
+           vp2@_FillValue                      = -9999.
            vp1@units                           = varunt(jj)
            vp2@units                           = varunt(jj)
-
            ddd1                                = dimsizes(vp1)
            ddd2                                = dimsizes(vp2)
 
            ;printVarSummary(vp1)
            ;printVarSummary(vp2)
-         
-           ;;check the two comparing files and see if they are in the same grid, otherwise, return the error message;;;;
+
+
+           ;;check the two comparing files and see if they are in the same grid, 
+           ;;otherwise, return the error message;;;;
            if ((ddd1(1).ne.ddd2(1)).or.(ddd1(2).ne.ddd2(2)))then
             print("Error: this scripts requires the two files must in the same grid to run!!!")
             return
            end if
 
+
        ; ==============================================================
-       ; User defined parameters that specify region of globe
+       ; User defined parameters that specify region of globe and
        ; ==============================================================
          x1     = vp1(:,{latS:latN},:)
          y1     = vp2(:,{latS:latN},:)
@@ -143,10 +135,7 @@ begin
 
          xAnom1 = calcMonAnomTLL(x1, xClm1)
          yAnom1 = calcMonAnomTLL(y1, yClm1)
-
-         ;printVarSummary(xAnom1)
-         ;printMinMax(xAnom1, True)
-
+        
          ;printVarSummary(xAnom1)         
          ;printMinMax(xAnom1, True)
 
@@ -162,19 +151,21 @@ begin
        ; =================================================================
        ; weight all data 
        ; =================================================================
-         xw1     = xAnom1*conform(xAnom1, xclat, 1)
-         yw1     = yAnom1*conform(yAnom1, yclat, 1)
+         xw1    = xAnom1*conform(xAnom1, xclat, 1)
+         yw1    = yAnom1*conform(yAnom1, yclat, 1)
          copy_VarMeta(x1, xw1)
          copy_VarMeta(y1, yw1) 
+         xw1@long_name = "Wgt: "+x1@long_name
+         yw1@long_name = "Wgt: "+y1@long_name
 
-     do kk = 0,dimsizes(seasons) - 1
-
+        do kk = 0,dimsizes(seasons) - 1
+         
        ; =================================================================
-       ; Select different season for the eof
+       ; Select different season for the eof 
        ; =================================================================
          utc_date1 = cd_calendar(xw1&time,0)
          utc_date2 = cd_calendar(yw1&time,0)
-         monthx1   = tointeger(utc_date1(:,1))
+         monthx1   = tointeger(utc_date1(:,1)) 
          monthx2   = tointeger(utc_date2(:,1))
 
          if(seasons(kk).eq."ANN")then
@@ -186,8 +177,8 @@ begin
 
            indx1 = ind ((monthx1.eq.12).or.(monthx1.eq.1).or.(monthx1.eq.2))
            indx2 = ind ((monthx2.eq.12).or.(monthx2.eq.1).or.(monthx2.eq.2))
-  
-         else if (seasons(kk).eq."JJA") then
+
+         else if (seasons(kk).eq."JJA") then 
 
            indx1 = ind ((monthx1.eq.6).or.(monthx1.eq.7).or.(monthx1.eq.8))
            indx2 = ind ((monthx2.eq.6).or.(monthx2.eq.7).or.(monthx2.eq.8))
@@ -198,17 +189,14 @@ begin
            indx1 = ind ((monthx1.ge.1).and.(monthx1.le.12))
            indx2 = ind ((monthx2.ge.1).and.(monthx2.le.12))
 
-         end if
-         end if
-         end if
+         end if 
+         end if 
+         end if 
 
          xw    = xw1(indx1,:,:)
          yw    = yw1(indx2,:,:)
          xAnom = xAnom1(indx1,:,:)
          yAnom = yAnom1(indx2,:,:)
-
-         xClm  = dim_avg_n_Wrap(x1(indx1,:,:),0) 
-         yClm  = dim_avg_n_Wrap(y1(indx2,:,:),0)
 
          delete([/indx1,indx2,utc_date1,utc_date2,monthx1,monthx2/])
 
@@ -242,10 +230,10 @@ begin
 
         ;======================================================================
         ;Save the data for the regression analysis
-        ;======================================================================
+        ;==================================================================
          setfileoption("nc", "Format",  "NetCDF4")
-         out_file1  = opath +"/"+"Polar_vortex_PCS_"+case1name+"_monthly_mean_"+mvarnam+"_at_"+toint(preslev(ll))+"hPa_"+seasons(kk)+".nc"
-         out_file2  = opath +"/"+"Polar_vortex_PCS_"+case2name+"_monthly_mean_"+mvarnam+"_at_"+toint(preslev(ll))+"hPa_"+seasons(kk)+".nc"
+         out_file1  = opath +"/"+"EOF_PCS_"+case1name+"_monthly_mean_"+mvarnam+"_at_"+preslev(ll)+"_"+seasons(kk)+".nc"
+         out_file2  = opath +"/"+"EOF_PCS_"+case2name+"_monthly_mean_"+mvarnam+"_at_"+preslev(ll)+"_"+seasons(kk)+".nc"
 
          system("rm " + out_file1)
          system("rm " + out_file2)
@@ -292,24 +280,26 @@ begin
        ; associated with eof_ts [same as x&time] 
        ; =================================================================
 
-
-         utc_date1 = cd_calendar(eof1_ts&time,-1)
+         utc_date1 = cd_calendar(eof1_ts&time,-1)  
          utc_date2 = cd_calendar(eof2_ts&time,-1)
-
+         
          yyyy1     = yyyymm_to_yyyyfrac(utc_date1, 0.0) ;utc_date1(:,0)
          yyyy2     = yyyymm_to_yyyyfrac(utc_date2, 0.0) ;utc_date2(:,0)
 
          delete([/utc_date1,utc_date2/])
- 
+
+       do n = 0, neof-1
+
          wtype                        = "eps"
         ;wtype@wkWidth                = 2500
         ;wtype@wkHeight               = 2500
-         fe                        = modvars(jj)+"_"+seasons(kk)+"_monthly_mean_" + preslev(ll)+"hPa"
-         wks                          = gsn_open_wks(wtype,casedir+"/Polar_Votex/"   + fe)
+         figdir                        = casedir+"/EOF_Mode_Time_Series/"
+         fe                        = modvars(jj)+"_"+seasons(kk)+"_monthly_mean_eof"+sprinti("%02d",n+1)+"_"+preslev(ll) 
+         wks                                 = gsn_open_wks(wtype, figdir + fe)
 
-         plot      = new((/6/),graphic)
-         tsmap1    = new((/6/),graphic)
-         tsmap2    = new((/6/),graphic)
+         plot      = new((/4/),graphic)
+         tsmap1    = new((/4/),graphic)
+         tsmap2    = new((/4/),graphic)
       
        ;============================================================
        ; PLOTS
@@ -331,12 +321,13 @@ begin
          res@gsnStringFontHeightF     = FontHeightF*1.2
 
          res@cnFillOn                 = True         ; turn on color fill
+         res@cnFillPalette            = "BlueWhiteOrangeRed"  
          res@cnLinesOn                = False        ; True is default
          res@cnLineLabelsOn           = False        ; True is default
 
          res@lbLabelBarOn             = True
          res@lbOrientation            = "Vertical"
-         res@lbTitleString            = "Z"+preslev(ll)+" (gpm)" ;Geopential height (gpm)";
+         res@lbTitleString            = "" ;mvarnam +" ("+xAnom@units+")" ;Geopential height (gpm)";
          res@lbTitlePosition          = "Right"                           ; title location
          res@lbTitleDirection         = "Across"                          ; letter angle
          res@lbTitleAngleF            = 90.                               ; title angle
@@ -354,94 +345,46 @@ begin
          res@tmYRMajorThicknessF      = 1.0
          res@tmYRMinorThicknessF      = 1.0
 
-        res@mpLabelFontHeightF           = FontHeightF*2.0
-        res@gsnPolarLabelFontHeightF     = FontHeightF
+        ;set symmetric plot min/ma
+        ;tmpdat = (/eof1_regres,eof2_regres/)
+        ;symMinMaxPlt(tmpdat, 16, False, res)      ; contributed.ncl
+        ;delete(tmpdat)
+
+        res@cnLevelSelectionMode = "ManualLevels"  ; manually set the contour levels with the following 3 resources
+        if(n.eq.0)then
+          mnmxint = nice_mnmxintvl( minlev_eof1(jj), maxlev_eof1(jj), maxlev, False)
+        else if (n.eq.1)then 
+          mnmxint = nice_mnmxintvl( minlev_eof2(jj), maxlev_eof2(jj), maxlev, False)
+        else
+          mnmxint = nice_mnmxintvl( minlev_eof3(jj), maxlev_eof3(jj), maxlev, False)
+        end if 
+        end if
+  
+        res@cnMinLevelValF           = mnmxint(0) ; set the minimum contour level
+        res@cnMaxLevelValF           = mnmxint(1) ; set the maximum contour level     
+        res@cnLevelSpacingF          = mnmxint(2) ; *special* match CPC
+
+        delete([/mnmxint/])
 
        ;*******************************************
        ; first plot
        ;*******************************************
+          res@mpLabelFontHeightF           = FontHeightF*2.0
+          res@gsnPolarLabelFontHeightF     = FontHeightF
 
-        res@cnFillPalette  = "amwg256"
-        res@lbBoxLinesOn   = False
-        ;set symmetric plot min/ma
-        tmpdat  = array_append_record (xClm, yClm, 0)
-        mnmxint = nice_mnmxintvl (min(tmpdat),max(tmpdat),41,False)
-        res@cnLevelSelectionMode = "ManualLevels"
-        res@cnMinLevelValF       = mnmxint(0)
-        res@cnMaxLevelValF       = mnmxint(1)
-        res@cnLevelSpacingF      = mnmxint(2)
-        res@lbLabelStride        = 2
-        
-        ;if(preslev(ll).eq.300)then
-        ;  res@lbLabelStride            = 10
-        ;  res@cnMinLevelValF           = 8000.                ; set the minimum contour level
-        ;  res@cnMaxLevelValF           = 9680.             ; set the maximum contour level
-        ;  res@cnLevelSpacingF          =   20.                ; *special* match CPC
-        ;else
-        ;  res@lbLabelStride            = 4
-        ;  res@cnMinLevelValF           = 19000.                ; set the minimum contour level
-        ;  res@cnMaxLevelValF           = 20680.             ; set the maximum contour level
-        ;  res@cnLevelSpacingF          =    40.                ; *special* match CPC
-        ;end if
-        delete(tmpdat)
+          ;---Draw first plot in upper left corner
+          res@gsnLeftString     = "EOF "+(n+1)+ " ("+sprintf("%5.1f", eof1@pcvar(n)) +"%)"
+          res@gsnRightString    = mvarnam +" ("+xAnom@units+")" ;sprintf("%5.1f", eof1@pcvar(n)) +"%"
+          res@gsnCenterString   = "" ;panelstr1
+          res@tiMainString      = "Case: "+panelstr1
+          plot(0)   = gsn_csm_contour_map_polar(wks,eof1_regres(n,:,:),res)
 
-        ;---Draw first plot in upper left corner
-        res@gsnLeftString     = "Geopotential height"
-        res@gsnRightString    = toint(preslev(ll))+ " hPa"
-        res@gsnCenterString   = "" ;panelstr1
-        res@tiMainString      = "Case: "+panelstr1
-        plot(0)   = gsn_csm_contour_map_polar(wks,xClm,res)
-
-        ;---Draw second plot in upper right corner
-        res@gsnLeftString     = "Geopotential height"
-        res@gsnRightString    = toint(preslev(ll))+ " hPa"
-        res@gsnCenterString   = "" ;panelstr2
-        res@tiMainString      = "Case: "+panelstr2
-        plot(1) = gsn_csm_contour_map_polar(wks,yClm,res)
-
-       ;*******************************************
-       ; second plot
-       ;*******************************************
-        res@cnFillPalette            = "amwg_blueyellowred";"BlueWhiteOrangeRed"
-        res@lbBoxLinesOn   = True
-        res@lbLabelStride  = 1
-
-        ;set symmetric plot min/ma
-        ;tmpdat = (/eof1_regres,eof2_regres/)
-        ;symMinMaxPlt(tmpdat, 16, False, res)           ; contributed.ncl
-        res@cnLevelSelectionMode     = "ManualLevels"   ; manually set the contour levels with the following 3 resources
-
-        if(preslev(ll).eq.300)then
-
-         res@cnMinLevelValF           = -25.             ; set the minimum contour level
-         res@cnMaxLevelValF           =  25.             ; set the maximum contour level
-         res@cnLevelSpacingF          =   5.             ; *special* match CPC
-
-        else
-
-         res@cnMinLevelValF           = -50.             ; set the minimum contour level
-         res@cnMaxLevelValF           =  50.             ; set the maximum contour level
-         res@cnLevelSpacingF          =  10.             ; *special* match CPC
-
-        end if 
-       ;delete(tmpdat)
-
-        res@mpLabelFontHeightF           = FontHeightF*2.0
-        res@gsnPolarLabelFontHeightF     = FontHeightF
-
-        ;---Draw first plot in upper left corner
-        res@gsnLeftString     = "EOF 1"
-        res@gsnRightString    = sprintf("%5.1f", eof1@pcvar(0)) +"%"
-        res@gsnCenterString   = "" ;panelstr1
-        res@tiMainString      = "";"Case: "+panelstr1
-        plot(2)   = gsn_csm_contour_map_polar(wks,eof1_regres(0,:,:),res)
-
-        ;---Draw second plot in upper right corner
-        res@gsnLeftString     = "EOF 1"
-        res@gsnRightString    = sprintf("%5.1f", eof2@pcvar(0)) +"%"
-        res@gsnCenterString   = "" ;panelstr2
-        res@tiMainString      = "";"Case: "+panelstr2
-        plot(3) = gsn_csm_contour_map_polar(wks,eof2_regres(0,:,:),res)
+          ;---Draw second plot in upper right corner
+          res@gsnLeftString     = "EOF "+(n+1)+ " ("+sprintf("%5.1f", eof2@pcvar(n)) +"%)"
+          res@gsnRightString    = mvarnam +" ("+xAnom@units+")" ; sprintf("%5.1f", eof2@pcvar(n)) +"%"
+          res@gsnCenterString   = "" ;panelstr2
+          res@tiMainString      = "Case: "+panelstr2
+          plot(1) = gsn_csm_contour_map_polar(wks,eof2_regres(n,:,:),res)
       
        ;*******************************************
        ; second plot
@@ -461,10 +404,11 @@ begin
           rts@vpYF      = 0.75        ; the plot
 
           rts@gsnYRefLine           = 0.              ; reference line   
-         ;rts@gsnXYBarChart         = False ;True            ; create bar chart 
+         ;rts@gsnXYBarChart         = False ;True           ; create bar chart 
           rts@gsnAboveYRefLineColor = "red"           ; above ref line fill red
           rts@gsnBelowYRefLineColor = "blue"          ; below ref line fill blue
-         ;rts@xyLineColors         := (/"red","blue"/)         ; colors for the above/blow
+         ;rts@xyLineColors         := (/"Transparent","Transparent"/)
+                                     ;(/"red","blue"/)         ; colors for the above/blow
 
           rts@tmXTOn                       = False
           rts@tmYLLabelFontHeightF         = 0.025
@@ -476,16 +420,16 @@ begin
           rts@tmYRMajorThicknessF          = 1.0
           rts@tmYRMinorThicknessF          = 1.0
 
-          rts@trYMinF                      = -3.0
-          rts@trYMaxF                      =  3.0
+          rts@trYMinF                      = -4.0
+          rts@trYMaxF                      =  4.0
 
          ;create individual plots
          ;---Draw third plot in lower left corner
-          rts@gsnLeftString     = "EOF 1"
-          rts@gsnRightString    = sprintf("%5.1f", eof1_regres@pcvar(0)) +"%"
+          rts@gsnLeftString     = "EOF "+(n+1) + " ("+sprintf("%5.1f", eof1@pcvar(n)) +"%)"
+          rts@gsnRightString    = "unitless" ;sprintf("%5.1f", eof1_regres@pcvar(n)) +"%"
           rts@tiMainString      = "" ;"Case: "+panelstr1
-          xyarr1                   = wgt_runave_Wrap(eof1_ts(0,:),(/1.,3,5,6,5,3,1/), 0)
-          plot(4) = gsn_csm_xy (wks,yyyy1,xyarr1,rts)
+          xyarr1                   = wgt_runave_Wrap(eof1_ts(n,:),(/1.,3,5,6,5,3,1/), 0)
+          plot(2) = gsn_csm_xy (wks,yyyy1,xyarr1,rts)
            
           rts1 = rts
           rts1@gsnXYBarChart       = False
@@ -494,70 +438,66 @@ begin
           rts1@gsnCenterString     = ""
           rts1@xyLineThicknesses   = 3            
           rts1@xyLineColors       := "Black"
-          xyarr1                   = wgt_runave_Wrap(eof1_ts(0,:),(/1.,3,5,6,5,3,1/), 0)   
-          tsmap1(4)            = gsn_csm_xy(wks,yyyy1,xyarr1,rts1) 
-          overlay(plot(4),tsmap1(4))
+          xyarr1                   = wgt_runave_Wrap(eof1_ts(n,:),(/1.,3,5,6,5,3,1/), 0)   
+          tsmap1(2)            = gsn_csm_xy(wks,yyyy1,xyarr1,rts1) 
+          overlay(plot(2),tsmap1(2))
           delete([/xyarr1/])
 
 
           ;---Draw fourth plot in upper right corner
-          rts@gsnLeftString        = "EOF 1"
-          rts@gsnRightString       = sprintf("%5.1f", eof2_regres@pcvar(0)) +"%"
-          rts@tiMainString         = "" ;"Case: "+panelstr2
-          xyarr2                   = wgt_runave_Wrap(eof2_ts(0,:),(/1.,3,5,6,5,3,1/), 0)
-          plot(5) = gsn_csm_xy (wks,yyyy2,xyarr2,rts)
+          rts@gsnLeftString        = "EOF "+(n+1) + " ("+sprintf("%5.1f", eof2@pcvar(n)) +"%)"
+          rts@gsnRightString       = "unitless" ;sprintf("%5.1f", eof2_regres@pcvar(n)) +"%"
+          rts@tiMainString         = "" ;"Case: "+ panelstr2
+          xyarr2                   = wgt_runave_Wrap(eof2_ts(n,:),(/1.,3,5,6,5,3,1/), 0)
+          plot(3) = gsn_csm_xy (wks,yyyy2,xyarr2,rts)
 
           rts2 = rts
           rts2@gsnXYBarChart       = False
           rts2@gsnLeftString       = ""
           rts2@gsnRightString      = ""
           rts2@gsnCenterString     = ""
-          rts2@xyLineThicknesses   = 3 
+          rts2@xyLineThicknesses   = 3
           rts2@xyLineColors       := "Black"
-          xyarr2                   = wgt_runave_Wrap(eof2_ts(0,:),(/1.,3,5,6,5,3,1/), 0) 
-          tsmap2(5)            = gsn_csm_xy(wks,yyyy2,xyarr2,rts2)
-          overlay(plot(5),tsmap2(5))
+          xyarr2                   = wgt_runave_Wrap(eof2_ts(n,:),(/1.,3,5,6,5,3,1/), 0) 
+          tsmap2(3)            = gsn_csm_xy(wks,yyyy2,xyarr2,rts2)
+          overlay(plot(3),tsmap2(3))
           delete([/xyarr2/])
 
        ; panel plot only resources
           pres1                          = True                ; mods desired
           pres1@gsnFrame                 = False               ; save panel until both ready
-          pres1@gsnPanelBottom           = 0.65    ; space for label bar
-          pres1@gsnPanelTop              = 0.95     ; only panel on lower half of page
-          pres1@gsnPanelXF               = (/0.08,0.58/)
+          pres1@gsnPanelBottom           = 0.45    ; space for label bar
+          pres1@gsnPanelTop              = 0.85     ; only panel on lower half of page
+          pres1@gsnPanelXF               = (/0.07,0.57/)
           gsn_panel(wks,plot(0:1),(/1,2/),pres1)          ; create first panel
- 
-          pres2                          = True                ; mods desired
-          pres2@gsnFrame                 = False               ; save panel until both ready
-          pres2@gsnPanelBottom           = 0.35    ; space for label bar
-          pres2@gsnPanelTop              = 0.65     ; only panel on lower half of page
-          pres2@gsnPanelXF               = (/0.08,0.58/)
-          gsn_panel(wks,plot(2:3),(/1,2/),pres2)          ; create first panel
-         
-          pres3                           = True                ; mods desired
-          pres3@gsnFrame                  = False               ; save panel until both ready
-          pres3@gsnPanelBottom            = 0.05                ; draw from center to right edge
-          pres3@gsnPanelTop               = 0.30		; draw from center to right edge 
-          gsn_panel(wks,plot(4:5),(/1,2/),pres3)       ; create first panel
+          
+          pres2                           = True                ; mods desired
+          pres2@gsnFrame                  = False               ; save panel until both ready
+          pres2@gsnPanelBottom            = 0.05                ; draw from center to right edge
+          pres2@gsnPanelTop               = 0.5		       ; draw from center to right edge 
+          gsn_panel(wks,plot(2:3),(/1,2/),pres2)       ; create first panel
        
           frame(wks)                                   ; draw both on same page
 
-         ; if (wtype .eq. "png") then
-         ;    tmpa = systemfunc("convert "+fe+".png -trim del.png")
-         ;    tmpb = systemfunc("mv del.png "+fe+".png")
-         ; end if
+          ;if (wtype .eq. "png") then
+          ;   tmpa = systemfunc("convert "+fe+".png -trim del.png")
+          ;   tmpb = systemfunc("mv del.png "+fe+".png")
+          ;end if
 
         ;delete([/xyarr1,xyarr2,tsmap1,tsmap2/])
-        delete([/eof1_regres,eof2_regres,yyyy1,yyyy2/])
-        delete([/xClm,yClm/])
-        delete([/xw,yw,xAnom,yAnom,eof1,eof2,eof1_ts,eof2_ts/])
+         end do ; end of eof mods 
+
+         delete([/eof1_regres,eof2_regres,yyyy1,yyyy2/])
+         delete([/xw,yw,xAnom,yAnom,eof1,eof2,eof1_ts,eof2_ts/])
 
         end do                                              ; end of looping over seasons
 
-        delete([/xAnom1,yAnom1,xClm1,yClm1,xw1,yw1,x1,y1,xclat,yclat/])
-        delete([/f1,f2/])
+        delete([/xAnom1,yAnom1,xw1,yw1,x1,y1,xclat,yclat/])
 
-       end do ; end of looping over variables 
+        end do                                                 ; end of looping over variables
+
+        delete([/f1,gw1/])
+        delete([/f2,gw2/])
 
   end do                                                    ; end of looping over pressure levels
 

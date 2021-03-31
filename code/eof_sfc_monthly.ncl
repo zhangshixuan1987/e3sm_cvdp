@@ -18,6 +18,7 @@ begin
   case2name                                  = getenv("CTRL_NAME")
   casedir                                    = getenv("CASEDIR")
   opath                                      = getenv("DIAG_DATA_ROOT")
+  obstimtag                                  = getenv("OBS_TIME_TAG")
 
 ;define regions for eof analysis
   latS                                       = -90.  ;negative for southern hemisphere
@@ -31,9 +32,29 @@ begin
   rearth                                     = 6.37122e6
   grav                                       = 9.80665
 
+ print(case1name + " " +case2name)
 ;variable name in the climo file
   modvars                                    = (/"PSL","TS","TREFHT","U10"/)
-  obsvars                                    = (/"msl","skt","t2m","si10"/)
+  facmod                                     = (/1.0, 1.0, 1.0, 1.0/)
+  varunt                                     = (/"Pa","K","K","m s~S~-1~N~"/)
+  panelstr1                                  = case1name
+  panelstr2                                  = case2name
+
+  if((case2name.eq."ERA5").or.(case2name.eq."ERA20C")) then
+     obsvars                                 = (/"msl","skt","t2m","si10"/)
+     facobs                                  = (/1.0,1.0,1.0,1.0/)
+     panelstr2                               = case2name + " ("+obstimtag+")"
+  else if (case2name.eq."NOAA20C") then
+     obsvars                                 = (/"prmsl","skt","t2m","si10"/)
+     facobs                                  = (/1.0,1.0,1.0,1.0/)
+     panelstr2                               = case2name + " ("+obstimtag+")"
+  else
+    print("The observational source are not available; only allow ERA5, ERA20C or NOAA20C")
+    exit
+  end if
+  end if
+
+;declear the season or annual mean data to be used;;;;;
   seasons                                    = (/"ANN","DJF","JJA"/)
   preslev                                    = (/"Surface"/)
 
@@ -53,49 +74,44 @@ begin
 
         f                                      = systemfunc("ls "+tpath+"/*_monthly_means.nc")
         f1                                     = addfile(f,"r")
-        ps1                                    = f1->PS
-        ha1                                    = doubletofloat(f1->hyam)
-        hb1                                    = doubletofloat(f1->hybm)
-        p0                                     = doubletofloat(f1->P0)
-        p1                                     = pres_hybrid_ccm(ps1,p0,ha1,hb1)
-        p1                                     = p1/100.
-        gw1                                    = doubletofloat(f1->gw)
 
         if(compare.eq."Model_vs_OBS") then
-          f                                    = systemfunc("ls "+cpath+"/*_siglev_monthly_analysis*.nc")
+          f                                    = systemfunc("ls "+cpath+"/*_siglev_analysis_*monthly*.nc")
           f2                                   = addfile(f,"r")
-          gw2                                  = doubletofloat(f2->gw)
         else
           f                                    = systemfunc("ls "+cpath+"/*_monthly_means.nc")
           f2                                   = addfile(f,"r")
-          ps2                                  = f2->PS
-          ha2                                  = doubletofloat(f2->hyai)
-          hb2                                  = doubletofloat(f2->hybi)
-          p2                                   = pres_hybrid_ccm(ps2,p0,ha2,hb2)
-          gw2                                  = doubletofloat(f2->gw)
         end if
 
 
         do jj = 0, dimsizes(modvars)-1
 
-           mvarnam                             = modvars(jj)
-           vp1                                 = f1->$mvarnam$
- 
-           if(compare.eq."Model_vs_OBS") then
-              ovarnam                          = obsvars(jj)
-              vp2                              = f2->$ovarnam$
-           else
-              vp2                              = f2->$mvarnam$
+           mvarnam  = modvars(jj)
+           print("working on variable "+ mvarnam)
+           load "./function_read_model_var.ncl"
+
+           if (compare.eq."Model_vs_OBS") then
+             ovarnam  = obsvars(jj)
+             load "./function_read_obs_var.ncl"
            end if
 
-           vp1@_FillValue                      = -9999.
-           vp2@_FillValue                      = -9999.
-           ddd1                                = dimsizes(vp1)
-           ddd2                                = dimsizes(vp2)
+           var1@_FillValue                      = -9999.
+           var2@_FillValue                      = -9999.
 
-           ;printVarSummary(vp1)
-           ;printVarSummary(vp2)
+           if(compare.eq."Model_vs_OBS") then
+             var1                               = var1*facmod(jj)
+             var2                               = var2*facobs(jj)
+           else
+             var1                               = var1*facmod(jj)
+             var2                               = var2*facmod(jj)
+           end if
 
+           var1@units                           = varunt(jj)
+           var2@units                           = varunt(jj)
+           ddd1                                = dimsizes(var1)
+           ddd2                                = dimsizes(var2)
+           ;printVarSummary(var1)
+           ;printVarSummary(var2)
 
            ;;check the two comparing files and see if they are in the same grid, 
            ;;otherwise, return the error message;;;;
@@ -104,13 +120,12 @@ begin
             return
            end if
 
-
        ; ==============================================================
        ; User defined parameters that specify region of globe and
        ; ==============================================================
-         x1     = vp1(:,{latS:latN},:)
-         y1     = vp2(:,{latS:latN},:)
-         delete([/vp1,vp2/])
+         x1     = var1(:,{latS:latN},:)
+         y1     = var2(:,{latS:latN},:)
+         delete([/var1,var2/])
 
        ; ==============================================================
        ; compute climatology and Anomalies
@@ -312,7 +327,7 @@ begin
 
          res@lbLabelBarOn             = True
          res@lbOrientation            = "Vertical"
-         res@lbTitleString            = mvarnam +" ("+xAnom@units+")" ;Geopential height (gpm)";
+         res@lbTitleString            = "" ;mvarnam +" ("+xAnom@units+")" ;Geopential height (gpm)";
          res@lbTitlePosition          = "Right"                           ; title location
          res@lbTitleDirection         = "Across"                          ; letter angle
          res@lbTitleAngleF            = 90.                               ; title angle
@@ -358,17 +373,17 @@ begin
           res@gsnPolarLabelFontHeightF     = FontHeightF
 
           ;---Draw first plot in upper left corner
-          res@gsnLeftString     = "EOF "+(n+1)
-          res@gsnRightString    = sprintf("%5.1f", eof1@pcvar(n)) +"%"
-          res@gsnCenterString   = "" ;case1name
-          res@tiMainString      = "Case: "+case1name
+          res@gsnLeftString     = "EOF "+(n+1)+ " ("+sprintf("%4.1f", eof1@pcvar(n)) +"%)"
+          res@gsnRightString    = mvarnam +" ("+xAnom@units+")" ;sprintf("%4.1f", eof1@pcvar(n)) +"%"
+          res@gsnCenterString   = "" ;panelstr1
+          res@tiMainString      = "Case: "+panelstr1
           plot(0)   = gsn_csm_contour_map_polar(wks,eof1_regres(n,:,:),res)
 
           ;---Draw second plot in upper right corner
-          res@gsnLeftString     = "EOF "+(n+1)
-          res@gsnRightString    = sprintf("%5.1f", eof2@pcvar(n)) +"%"
-          res@gsnCenterString   = "" ;case2name
-          res@tiMainString      = "Case: "+case2name
+          res@gsnLeftString     = "EOF "+(n+1)+ " ("+sprintf("%4.1f", eof2@pcvar(n)) +"%)"
+          res@gsnRightString    = mvarnam +" ("+xAnom@units+")" ; sprintf("%4.1f", eof2@pcvar(n)) +"%"
+          res@gsnCenterString   = "" ;panelstr2
+          res@tiMainString      = "Case: "+panelstr2
           plot(1) = gsn_csm_contour_map_polar(wks,eof2_regres(n,:,:),res)
       
        ;*******************************************
@@ -410,9 +425,9 @@ begin
 
          ;create individual plots
          ;---Draw third plot in lower left corner
-          rts@gsnLeftString     = "EOF "+(n+1)
-          rts@gsnRightString    = sprintf("%5.1f", eof1_regres@pcvar(n)) +"%"
-          rts@tiMainString      = "" ;"Case: "+case1name
+          rts@gsnLeftString     = "EOF "+(n+1) + " ("+sprintf("%4.1f", eof1@pcvar(n)) +"%)"
+          rts@gsnRightString    = "unitless" ;sprintf("%4.1f", eof1_regres@pcvar(n)) +"%"
+          rts@tiMainString      = "" ;"Case: "+panelstr1
           xyarr1                   = wgt_runave_Wrap(eof1_ts(n,:),(/1.,3,5,6,5,3,1/), 0)
           plot(2) = gsn_csm_xy (wks,yyyy1,xyarr1,rts)
            
@@ -430,9 +445,9 @@ begin
 
 
           ;---Draw fourth plot in upper right corner
-          rts@gsnLeftString        = "EOF "+(n+1)
-          rts@gsnRightString       = sprintf("%5.1f", eof2_regres@pcvar(n)) +"%"
-          rts@tiMainString         = "" ;"Case: "+case2name
+          rts@gsnLeftString        = "EOF "+(n+1) + " ("+sprintf("%4.1f", eof2@pcvar(n)) +"%)"
+          rts@gsnRightString       = "unitless" ;sprintf("%4.1f", eof2_regres@pcvar(n)) +"%"
+          rts@tiMainString         = "" ;"Case: "+ panelstr2
           xyarr2                   = wgt_runave_Wrap(eof2_ts(n,:),(/1.,3,5,6,5,3,1/), 0)
           plot(3) = gsn_csm_xy (wks,yyyy2,xyarr2,rts)
 
@@ -481,13 +496,8 @@ begin
 
         end do                                                 ; end of looping over variables
 
-        delete([/f1,ps1,ha1,hb1,p0,p1,gw1/])
-
-        if(compare.eq."Model_vs_OBS") then
-           delete([/f2,gw2/])
-        else
-           delete([/f2,ps2,ha2,hb2,p2/])
-        end if
+        delete([/f1/])
+        delete([/f2/])
 
   end do                                                    ; end of looping over pressure levels
 
