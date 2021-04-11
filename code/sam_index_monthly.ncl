@@ -19,10 +19,11 @@ begin
   casedir                                    = getenv("CASEDIR")
   opath                                      = getenv("DIAG_DATA_ROOT")
   obstimtag                                  = getenv("OBS_TIME_TAG")
+  sampath                                    = getenv("STA_DATA_ROOT")
 
 ;define regions for eof analysis
-  latS                                       = -90.  ;negative for southern hemisphere
-  latN                                       = -20.  ;negative for southern hemisphere
+  latS                                       = -65.  ;negative for southern hemisphere
+  latN                                       = -40.  ;negative for southern hemisphere
 
 ;define # of desired EOFs
   neof                                       = 3     ; Leading EOF only
@@ -55,7 +56,7 @@ begin
   end if
 
 ;declear the season or annual mean data to be used;;;;;
-  seasons                                    = (/"ANN","DJF","JJA"/)
+  seasons                                    = (/"monthly"/)
   preslev                                    = (/"Surface"/)
 
   maxlev                                     = 11 
@@ -67,21 +68,30 @@ begin
 
   minlev_eof3                                = (/-100.,-0.5, -0.5, -0.5/)
   maxlev_eof3                                = (/ 100., 0.5,  0.5,  0.5/)
- 
+
+;read the sam index file constructed by observational data;;;;
+  fx1    = sampath+"/Marshall_mslp_monthly_"+toint(abs(latN))+"S.txt"
+  fx2    = sampath+"/Marshall_mslp_monthly_"+toint(abs(latS))+"S.txt"
+  ncol   = 13
+  marshall_slp65 = readAsciiTable(fx1, ncol, "float", (/1/))
+  marshall_slp40 = readAsciiTable(fx2, ncol, "float", (/1/))
+
 ;read in two files
 
   do ll = 0,dimsizes(preslev) - 1
+ 
+    do kk = 0, dimsizes(seasons)-1
 
-        f                                      = systemfunc("ls "+tpath+"/*_monthly_means.nc")
+        f                                      = systemfunc("ls "+tpath+"/*"+seasons(kk)+"_means.nc")
         f1                                     = addfile(f,"r")
         gw1                                    = doubletofloat(f1->gw)
 
         if(compare.eq."Model_vs_OBS") then
-          f                                    = systemfunc("ls "+cpath+"/*_siglev_analysis_*monthly*.nc")
+          f                                    = systemfunc("ls "+cpath+"/*_siglev_analysis_*_"+seasons(kk)+".nc")
           f2                                   = addfile(f,"r")
           gw2                                  = doubletofloat(f2->gw)
         else
-          f                                    = systemfunc("ls "+cpath+"/*_monthly_means.nc")
+          f                                    = systemfunc("ls "+cpath+"/*"+seasons(kk)+"_means.nc")
           f2                                   = addfile(f,"r")
           gw2                                  = doubletofloat(f2->gw)
         end if
@@ -100,6 +110,9 @@ begin
              ovarnam                           = obsvars(jj)
              vp2                               = f2->$ovarnam$
            end if
+
+           vp1                                 = vp1*facmod(jj)
+           vp2                                 = vp2*facobs(jj)
 
            vp1@_FillValue                      = -9999.
            vp2@_FillValue                      = -9999.
@@ -121,185 +134,127 @@ begin
 
 
        ; ==============================================================
-       ; User defined parameters that specify region of globe and
+       ; Zonal mean SLP at 40S and 65S 
        ; ==============================================================
-         x1     = vp1(:,{latS:latN},:)
-         y1     = vp2(:,{latS:latN},:)
+         x1_slp65  = dim_avg_n_Wrap(vp1(:,{latS},:),1)
+         x1_slp40  = dim_avg_n_Wrap(vp1(:,{latN},:),1)
+         y1_slp65  = dim_avg_n_Wrap(vp2(:,{latS},:),1)
+         y1_slp40  = dim_avg_n_Wrap(vp2(:,{latN},:),1)
          delete([/vp1,vp2/])
+       ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+       ;select the data to consturct the sam index 
+       ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        marshall_year = marshall_slp65(:,0)
+        utc_date1 = cd_calendar(x1_slp65&time,0)
+        utc_date2 = cd_calendar(y1_slp65&time,0)
+        year1     = utc_date1(:,0)
+        year2     = utc_date2(:,0)
 
-       ; ==============================================================
-       ; compute climatology and Anomalies
-       ; ==============================================================
-         xClm1  = clmMonTLL(x1)                      ; (12,lat,lon)
-         yClm1  = clmMonTLL(y1)
+        utc_datex1 = cd_calendar(x1_slp65&time,-1)
+        utc_datex2 = cd_calendar(y1_slp65&time,-1)
+        yyyy1     = yyyymm_to_yyyyfrac(utc_datex1, 0.0)
+        yyyy2     = yyyymm_to_yyyyfrac(utc_datex2, 0.0)
 
-         xAnom1 = calcMonAnomTLL(x1, xClm1)
-         yAnom1 = calcMonAnomTLL(y1, yClm1)
+        print(year1 + "  "+year2)
+        if (max(year1).lt.1957.and.max(year2).ge.1957)then
+          index   = ind(marshall_year.ge.min(year2).and.marshall_year.le.max(year2))
+          nyear   = dimsizes(index)
+          year    = yyyy2
+          z_slp65 = ndtooned(marshall_slp65(index,1:))
+          z_slp40 = ndtooned(marshall_slp40(index,1:)) 
+          x_slp65 = x1_slp65(0:dimsizes(year2)-1)
+          x_slp40 = x1_slp40(0:dimsizes(year2)-1)
+          y_slp65 = y1_slp65(0:dimsizes(year2)-1)
+          y_slp40 = y1_slp40(0:dimsizes(year2)-1)
+          delete([/x1_slp40,x1_slp65,y1_slp65,y1_slp40,index/])
+        else if (max(year1).ge.1957.and.max(year2).lt.1957)then
+          index = ind(marshall_year.ge.min(year1).and.marshall_year.le.max(year1))         
+          nyear = dimsizes(index)
+          year  = yyyy1
+          z_slp65 = ndtooned(marshall_slp65(index,1:))
+          z_slp40 = ndtooned(marshall_slp40(index,1:))
+          x_slp65 = x1_slp65(0:dimsizes(year1)-1)
+          x_slp40 = x1_slp40(0:dimsizes(year1)-1)
+          y_slp65 = y1_slp65(0:dimsizes(year1)-1)
+          y_slp40 = y1_slp40(0:dimsizes(year1)-1)
+          delete([/x1_slp40,x1_slp65,y1_slp65,y1_slp40,index/])  
+        else if (max(year1).ge.1957.and.max(year2).ge.1957)then
+          minyear = max((/min(year1),min(year2)/))
+          maxyear = min((/max(year1),max(year2)/))
+          index1  = ind(marshall_year.ge.minyear.and.marshall_year.le.maxyear)
+          nyear   = dimsizes(index1)
+          year    = yyyy2
+          index2  = ind(year1.ge.minyear.and.year1.le.maxyear)
+          index3  = ind(year2.ge.minyear.and.year2.le.maxyear)
+          z_slp65 = ndtooned(marshall_slp65(index1,1:))
+          z_slp40 = ndtooned(marshall_slp40(index1,1:))
+          x_slp65 = x1_slp65(index2)
+          x_slp40 = x1_slp40(index2)
+          y_slp65 = y1_slp65(index3)
+          y_slp40 = y1_slp40(index3)
+          delete([/x1_slp40,x1_slp65,y1_slp65,y1_slp40,index1,index2,index3,minyear,maxyear/] )
+        else
+          print("The data are out of time range for comparison, exit" )
+          exit
+        end if 
+        end if 
+        end if 
+        delete([/utc_date1,utc_date2,utc_datex1,utc_datex2,year1,year2,yyyy1,yyyy2,marshall_year,marshall_slp65,marshall_slp40/])
         
-         ;printVarSummary(xAnom1)         
-         ;printMinMax(xAnom1, True)
+        printVarSummary(z_slp65)
+        printVarSummary(y_slp65)
+        printVarSummary(x_slp65)
+        
+       ; ================================================================================================
+       ; compute sam indices 
+       ; Based on the numerical definition of the SAM by Gong and Wang (1999), which is:
+       ; SAM = P*40�S -  P*65°S
+       ; where P*40°S and P*65°S are the normalized monthly zonal sea level pressur(SLP) at 40°S and 65�
+       ; ================================================================================================
+         a1 = reshape(x_slp40,(/nyear,12/))
+         b1 = reshape(x_slp65,(/nyear,12/))
+         x_samid = ndtooned(dim_standardize_n_Wrap(a1, 0, 0) - dim_standardize_n_Wrap(b1, 0, 0))
+         a1 = reshape(y_slp40,(/nyear,12/))
+         b1 = reshape(y_slp65,(/nyear,12/))
+         y_samid = ndtooned(dim_standardize_n_Wrap(a1, 0, 0) - dim_standardize_n_Wrap(b1, 0, 0))
+         a1 = reshape(z_slp40,(/nyear,12/))
+         b1 = reshape(z_slp65,(/nyear,12/))
+         z_samid = ndtooned(dim_standardize_n_Wrap(a1, 0, 0) - dim_standardize_n_Wrap(b1, 0, 0))
+         delete([/a1,b1/]) 
+ 
+       ; =================================================================
+       ; Extract the data for plot 
+       ; ================================================================
+        legends  = "  "+(/case1name,case2name,"Obs. (Marshall)"/)
+        pltdat1  = new((/3,dimsizes(year)/),typeof(x_slp40))
+        pltdat2  = new((/3,dimsizes(year)/),typeof(x_slp40))
+        pltdat3  = new((/3,dimsizes(year)/),typeof(x_slp40))
+        pltdat1(0,:) = (/x_slp40/)
+        pltdat1(1,:) = (/y_slp40/)
+        pltdat1(2,:) = (/z_slp40/)
+        pltdat2(0,:) = (/x_slp65/)
+        pltdat2(1,:) = (/y_slp65/)
+        pltdat2(2,:) = (/z_slp65/)
+        pltdat3(0,:) = (/x_samid/)
+        pltdat3(1,:) = (/y_samid/)
+        pltdat3(2,:) = (/z_samid/)
+        delete([/x_slp40,y_slp40,z_slp40/])
+        delete([/x_slp65,y_slp65,z_slp65/])
+        delete([/x_samid,y_samid,z_samid/])
 
        ; =================================================================
-       ; create weights:  sqrt(cos(lat))   [or sqrt(gw) ]
+       ; Start to do plot
        ; =================================================================
-         rad    = get_d2r("float")
-         xclat  = xAnom1&lat            
-         xclat  = sqrt( cos(rad*xclat) )                 ; gw for gaussian grid
-         yclat  = yAnom1&lat 
-         yclat  = sqrt( cos(rad*yclat) )                 ; gw for gaussian grid
-   
-       ; =================================================================
-       ; weight all data 
-       ; =================================================================
-         xw1    = xAnom1*conform(xAnom1, xclat, 1)
-         yw1    = yAnom1*conform(yAnom1, yclat, 1)
-         copy_VarMeta(x1, xw1)
-         copy_VarMeta(y1, yw1) 
-         xw1@long_name = "Wgt: "+x1@long_name
-         yw1@long_name = "Wgt: "+y1@long_name
-
-        do kk = 0,dimsizes(seasons) - 1
-         
-       ; =================================================================
-       ; Select different season for the eof 
-       ; =================================================================
-         utc_date1 = cd_calendar(xw1&time,0)
-         utc_date2 = cd_calendar(yw1&time,0)
-         monthx1   = tointeger(utc_date1(:,1)) 
-         monthx2   = tointeger(utc_date2(:,1))
-
-         if(seasons(kk).eq."ANN")then
-
-           indx1 = ind ((monthx1.ge.1).and.(monthx1.le.12))
-           indx2 = ind ((monthx2.ge.1).and.(monthx2.le.12))
-
-         else if (seasons(kk).eq."DJF")then
-
-           indx1 = ind ((monthx1.eq.12).or.(monthx1.eq.1).or.(monthx1.eq.2))
-           indx2 = ind ((monthx2.eq.12).or.(monthx2.eq.1).or.(monthx2.eq.2))
-
-         else if (seasons(kk).eq."JJA") then 
-
-           indx1 = ind ((monthx1.eq.6).or.(monthx1.eq.7).or.(monthx1.eq.8))
-           indx2 = ind ((monthx2.eq.6).or.(monthx2.eq.7).or.(monthx2.eq.8))
-
-         else
-
-           print("User did not specify the season, use all of the monthly data")
-           indx1 = ind ((monthx1.ge.1).and.(monthx1.le.12))
-           indx2 = ind ((monthx2.ge.1).and.(monthx2.le.12))
-
-         end if 
-         end if 
-         end if 
-
-         xw    = xw1(indx1,:,:)
-         yw    = yw1(indx2,:,:)
-         xAnom = xAnom1(indx1,:,:)
-         yAnom = yAnom1(indx2,:,:)
-
-         delete([/indx1,indx2,utc_date1,utc_date2,monthx1,monthx2/])
-
-       ; =================================================================
-       ; Compute EOFs & Standardize time series
-       ; =================================================================
-         optEOF  = True
-         optETS  = False
-
-         eof1    = eofunc_n_Wrap(xw, neof, optEOF, 0)      
-         eof2    = eofunc_n_Wrap(yw, neof, optEOF, 0)
-    
-         do n = 0,neof-1
-          pcor = pattern_cor(eof1(n,:,:),eof2(n,:,:),1.0,0)
-          if(pcor.lt.0)then
-            eof1(n,:,:) = eof1(n,:,:) * -1.0
-          end if
-         end do 
-
-         eof1_ts = eofunc_ts_n_Wrap (xw, eof1, optETS, 0)
-         eof2_ts = eofunc_ts_n_Wrap (yw, eof2, optETS, 0)
-
-         eof1_ts = dim_standardize_n( eof1_ts, 0, 1)      ; normalize
-         eof2_ts = dim_standardize_n( eof2_ts, 0, 1)      ; normalize
-
-         ;printVarSummary( eof1 )                         ; examine EOF variables
-         ;printVarSummary( eof1_ts )
-
-         ;printVarSummary( eof2 )                         ; examine EOF variables
-         ;printVarSummary( eof2_ts )
-
-        ;======================================================================
-        ;Save the data for the regression analysis
-        ;==================================================================
-         setfileoption("nc", "Format",  "NetCDF4")
-         out_file1  = opath +"/"+"EOF_PCS_"+case1name+"_monthly_mean_"+mvarnam+"_at_"+preslev(ll)+"_"+seasons(kk)+".nc"
-         out_file2  = opath +"/"+"EOF_PCS_"+case2name+"_monthly_mean_"+mvarnam+"_at_"+preslev(ll)+"_"+seasons(kk)+".nc"
-
-         system("rm " + out_file1)
-         system("rm " + out_file2)
-
-         fout1 = addfile(out_file1,"c")
-         fout2 = addfile(out_file2,"c")
-
-         time1 = eof1_ts&time
-         time2 = eof2_ts&time
-         time1!0 = "time"
-         time2!0 = "time"
-         time1&time = time1
-         time2&time = time2
-
-         fout1->time         = time1
-         fout2->time         = time2
-         eof1@description    = "EOF pattern"
-         eof2@description    = "EOF pattern"
-         eof1_ts@description = "EOF PCs (standardized)"
-         eof2_ts@description = "EOF PCs (standardized)"
-
-         fout1->eof      = eof1
-         fout2->eof      = eof2
-         fout1->eof_ts   = eof1_ts
-         fout2->eof_ts   = eof2_ts
-
-         delete([/time1,time2,fout1,fout2,out_file1,out_file2/])
-
-       ; =================================================================
-       ; Regress
-       ; =================================================================
-
-         eof1_regres = eof1                               ; create an array w meta data
-         eof2_regres = eof2                               ; create an array w meta data
-         do ne=0,neof-1
-
-            eof1_regres(ne,:,:) = (/ regCoef_n(eof1_ts(ne,:), xAnom, 0, 0) /)
-            eof2_regres(ne,:,:) = (/ regCoef_n(eof2_ts(ne,:), yAnom, 0, 0) /)
-
-         end do
-
-       ; =================================================================
-       ; Extract the YYYYMM from the time coordinate 
-       ; associated with eof_ts [same as x&time] 
-       ; =================================================================
-
-         utc_date1 = cd_calendar(eof1_ts&time,-1)  
-         utc_date2 = cd_calendar(eof2_ts&time,-1)
-         
-         yyyy1     = yyyymm_to_yyyyfrac(utc_date1, 0.0) ;utc_date1(:,0)
-         yyyy2     = yyyymm_to_yyyyfrac(utc_date2, 0.0) ;utc_date2(:,0)
-
-         delete([/utc_date1,utc_date2/])
-
-       do n = 0, neof-1
-
          wtype                        = "eps"
         ;wtype@wkWidth                = 2500
         ;wtype@wkHeight               = 2500
-         figdir                        = casedir+"/EOF_Mode_Time_Series/"
-         fe                        = modvars(jj)+"_"+seasons(kk)+"_monthly_mean_eof"+sprinti("%02d",n+1)+"_"+preslev(ll) 
-         wks                                 = gsn_open_wks(wtype, figdir + fe)
+         figdir                       = casedir+"/tables/"
+         fe                           = modvars(jj)+"_"+seasons(kk)+"_sam_index_40S_65S_slp_"+preslev(ll) 
+         wks                          = gsn_open_wks(wtype, figdir + fe)
 
-         plot      = new((/4/),graphic)
-         tsmap1    = new((/4/),graphic)
-         tsmap2    = new((/4/),graphic)
+         plot      = new((/3/),graphic)
+         tsmap1    = new((/3/),graphic)
+         tsmap2    = new((/3/),graphic)
       
        ;============================================================
        ; PLOTS
@@ -307,33 +262,17 @@ begin
          res                      = True         
          res@gsnDraw              = False        ; don't draw yet
          res@gsnFrame             = False        ; don't advance frame yet
-         res@gsnPolar             = "SH"
- 
-         res@mpFillOn             = False        ; turn off map fill
-         res@mpMaxLatF            = latN
-        ;res@mpCenterLonF         = 180
+         res@gsnScale             = True        ; force text scaling
+         res@vpHeightF            = 0.3         ; Changes the aspect ratio
+         res@vpWidthF             = 0.9
+         res@vpXF                 = 0.10        ; change start locations
+         res@vpYF                 = 0.75        ; the plot
 
          FontHeightF = 0.018
          res@tiMainFontHeightF        = FontHeightF*1.5
          res@tmYLLabelFontHeightF     = FontHeightF
          res@tmXBLabelFontHeightF     = FontHeightF
-         res@lbLabelFontHeightF       = FontHeightF
          res@gsnStringFontHeightF     = FontHeightF*1.2
-
-         res@cnFillOn                 = True         ; turn on color fill
-         res@cnFillPalette            = "BlueWhiteOrangeRed"  
-         res@cnLinesOn                = False        ; True is default
-         res@cnLineLabelsOn           = False        ; True is default
-
-         res@lbLabelBarOn             = True
-         res@lbOrientation            = "Vertical"
-         res@lbTitleString            = "" ;mvarnam +" ("+xAnom@units+")" ;Geopential height (gpm)";
-         res@lbTitlePosition          = "Right"                           ; title location
-         res@lbTitleDirection         = "Across"                          ; letter angle
-         res@lbTitleAngleF            = 90.                               ; title angle
-         res@lbTitleFontHeightF       = FontHeightF                    ; font height
-        ;res@pmLabelBarParallelPosF   = 0.61
-         res@pmLabelBarOrthogonalPosF = 0.15
 
          res@tmXTOn                   = False
          res@tmYLLabelFontHeightF     = 0.025
@@ -345,154 +284,109 @@ begin
          res@tmYRMajorThicknessF      = 1.0
          res@tmYRMinorThicknessF      = 1.0
 
-        ;set symmetric plot min/ma
-        ;tmpdat = (/eof1_regres,eof2_regres/)
-        ;symMinMaxPlt(tmpdat, 16, False, res)      ; contributed.ncl
-        ;delete(tmpdat)
+         res@gsnYRefLine              = 0.              ; reference line
+         res@gsnXYBarChart            = False ;True     ; create bar chart
+        ;res@gsnAboveYRefLineColor    = "red"           ; above ref line fill red
+        ;res@gsnBelowYRefLineColor    = "blue"          ; below ref line fill blue
+         res@xyLineColors             = (/"blue", "red", "green4"/) 
+         res@xyDashPatterns           = (/0,0,0/)
+         res@xyLineThicknesses        = (/3,3,3/)
+         res@tiXAxisString            = "Year"          ; y-axis label
 
-        res@cnLevelSelectionMode = "ManualLevels"  ; manually set the contour levels with the following 3 resources
-        if(n.eq.0)then
-          mnmxint = nice_mnmxintvl( minlev_eof1(jj), maxlev_eof1(jj), maxlev, False)
-        else if (n.eq.1)then 
-          mnmxint = nice_mnmxintvl( minlev_eof2(jj), maxlev_eof2(jj), maxlev, False)
-        else
-          mnmxint = nice_mnmxintvl( minlev_eof3(jj), maxlev_eof3(jj), maxlev, False)
-        end if 
-        end if
-  
-        res@cnMinLevelValF           = mnmxint(0) ; set the minimum contour level
-        res@cnMaxLevelValF           = mnmxint(1) ; set the maximum contour level     
-        res@cnLevelSpacingF          = mnmxint(2) ; *special* match CPC
+         res@pmLegendDisplayMode      = "Always"   ; Display a legend.
+         res@lgPerimOn                = False      ; No legend perimeter.
+         res@pmLegendSide             = "Top"
+         res@pmLegendOrthogonalPosF   = -0.75      ; Move closer to plot
+         res@pmLegendParallelPosF     = 1.25      ; Move closer to plot
+         res@pmLegendWidthF           = 0.24                ; Change width and
+         res@pmLegendHeightF          = 0.18                ; height of legend.
+         res@lgBoxMinorExtentF        = 0.4
+         res@lgLabelFontHeightF       = FontHeightF*1.2
+         res@xyExplicitLegendLabels   = legends 
 
-        delete([/mnmxint/])
-
-       ;*******************************************
-       ; first plot
-       ;*******************************************
-          res@mpLabelFontHeightF           = FontHeightF*2.0
-          res@gsnPolarLabelFontHeightF     = FontHeightF
-
-          ;---Draw first plot in upper left corner
-          res@gsnLeftString     = "EOF "+(n+1)+ " ("+sprintf("%5.1f", eof1@pcvar(n)) +"%)"
-          res@gsnRightString    = mvarnam +" ("+xAnom@units+")" ;sprintf("%5.1f", eof1@pcvar(n)) +"%"
-          res@gsnCenterString   = "" ;panelstr1
-          res@tiMainString      = "Case: "+panelstr1
-          plot(0)   = gsn_csm_contour_map_polar(wks,eof1_regres(n,:,:),res)
-
-          ;---Draw second plot in upper right corner
-          res@gsnLeftString     = "EOF "+(n+1)+ " ("+sprintf("%5.1f", eof2@pcvar(n)) +"%)"
-          res@gsnRightString    = mvarnam +" ("+xAnom@units+")" ; sprintf("%5.1f", eof2@pcvar(n)) +"%"
-          res@gsnCenterString   = "" ;panelstr2
-          res@tiMainString      = "Case: "+panelstr2
-          plot(1) = gsn_csm_contour_map_polar(wks,eof2_regres(n,:,:),res)
-      
-       ;*******************************************
-       ; second plot
-       ;*******************************************
-        ; EOF time series  [bar form]
-
-          rts           = True
-          rts@gsnDraw   = False       ; don't draw yet
-          rts@gsnFrame  = False       ; don't advance frame yet
-          rts@gsnScale  = True        ; force text scaling               
-
-          rts@tiYAxisString = "Standardized"          ; y-axis label      
-
-          rts@vpHeightF = 0.40        ; Changes the aspect ratio
-          rts@vpWidthF  = 0.85
-          rts@vpXF      = 0.10        ; change start locations
-          rts@vpYF      = 0.75        ; the plot
-
-          rts@gsnYRefLine           = 0.              ; reference line   
-         ;rts@gsnXYBarChart         = False ;True           ; create bar chart 
-          rts@gsnAboveYRefLineColor = "red"           ; above ref line fill red
-          rts@gsnBelowYRefLineColor = "blue"          ; below ref line fill blue
-         ;rts@xyLineColors         := (/"Transparent","Transparent"/)
-                                     ;(/"red","blue"/)         ; colors for the above/blow
-
-          rts@tmXTOn                       = False
-          rts@tmYLLabelFontHeightF         = 0.025
-          rts@tmBorderThicknessF           = 1.0
-          rts@tmXBMajorThicknessF          = 1.0
-          rts@tmXBMinorThicknessF          = 1.0
-          rts@tmYLMajorThicknessF          = 1.0
-          rts@tmYLMinorThicknessF          = 1.0
-          rts@tmYRMajorThicknessF          = 1.0
-          rts@tmYRMinorThicknessF          = 1.0
-
-          rts@trYMinF                      = -4.0
-          rts@trYMaxF                      =  4.0
-
-         ;create individual plots
-         ;---Draw third plot in lower left corner
-          rts@gsnLeftString     = "EOF "+(n+1) + " ("+sprintf("%5.1f", eof1@pcvar(n)) +"%)"
-          rts@gsnRightString    = "unitless" ;sprintf("%5.1f", eof1_regres@pcvar(n)) +"%"
-          rts@tiMainString      = "" ;"Case: "+panelstr1
-          xyarr1                   = wgt_runave_Wrap(eof1_ts(n,:),(/1.,3,5,6,5,3,1/), 0)
-          plot(2) = gsn_csm_xy (wks,yyyy1,xyarr1,rts)
+        ;*******************************************
+        ; First plot
+        ;*******************************************
+          res0 = res
+          res0@tiYAxisString           = "(hPa)"          ; y-axis label      
+          res0@trYMinF                 = min(pltdat1) - max(abs(pltdat1))/100.0
+          res0@trYMaxF                 = max(pltdat1) + max(abs(pltdat1))/100.0
+          res0@gsnLeftString           = "Zonal mean MSLP at 40~S~o~N~S"
+          res0@gsnRightString          = "hPa" 
+          res0@tiMainString            = "" ;"Case: "+panelstr1
+          res0@xyLineOpacities         = (/0.4,0.4,0.4/)
+          res0@xyLineThicknesses       = (/1,1,1/)
+          plot(0)                      = gsn_csm_xy (wks,year,pltdat1,res0)
            
-          rts1 = rts
-          rts1@gsnXYBarChart       = False
-          rts1@gsnLeftString       = ""
-          rts1@gsnRightString      = ""
-          rts1@gsnCenterString     = ""
-          rts1@xyLineThicknesses   = 3            
-          rts1@xyLineColors       := "Black"
-          xyarr1                   = wgt_runave_Wrap(eof1_ts(n,:),(/1.,3,5,6,5,3,1/), 0)   
-          tsmap1(2)            = gsn_csm_xy(wks,yyyy1,xyarr1,rts1) 
-          overlay(plot(2),tsmap1(2))
+          res1 = res
+          res1@gsnXYBarChart          = False
+          res1@gsnLeftString          = ""
+          res1@gsnRightString         = ""
+          res1@gsnCenterString        = ""
+          xyarr1                      = wgt_runave_Wrap(pltdat1,(/1.,3,5,6,5,3,1/), 0)   
+          tsmap1(0)                   = gsn_csm_xy(wks,year,xyarr1,res1) 
+          overlay(plot(0),tsmap1(0))
+          delete([/xyarr1/])
+
+        ;*******************************************
+        ; Second plot
+        ;*******************************************
+          res0 = res
+          res0@tiYAxisString           = "(hPa)"          ; y-axis label
+          res0@trYMinF                 = min(pltdat2) - max(abs(pltdat2))/100.0
+          res0@trYMaxF                 = max(pltdat2) + max(abs(pltdat2))/100.0
+          res0@gsnLeftString           = "Zonal mean MSLP at 65~S~o~N~S"
+          res0@gsnRightString          = "hPa"
+          res0@tiMainString            = "" ;"Case: "+panelstr1
+          res0@xyLineOpacities         = (/0.4,0.4,0.4/)
+          res0@xyLineThicknesses       = (/1,1,1/)
+          plot(1)                      = gsn_csm_xy (wks,year,pltdat2,res0)
+
+          res1 = res
+          res1@gsnXYBarChart          = False
+          res1@gsnLeftString          = ""
+          res1@gsnRightString         = ""
+          res1@gsnCenterString        = ""
+          xyarr1                      = wgt_runave_Wrap(pltdat2,(/1.,3,5,6,5,3,1/), 0)
+          tsmap1(1)                   = gsn_csm_xy(wks,year,xyarr1,res1)
+          overlay(plot(1),tsmap1(1))
           delete([/xyarr1/])
 
 
-          ;---Draw fourth plot in upper right corner
-          rts@gsnLeftString        = "EOF "+(n+1) + " ("+sprintf("%5.1f", eof2@pcvar(n)) +"%)"
-          rts@gsnRightString       = "unitless" ;sprintf("%5.1f", eof2_regres@pcvar(n)) +"%"
-          rts@tiMainString         = "" ;"Case: "+ panelstr2
-          xyarr2                   = wgt_runave_Wrap(eof2_ts(n,:),(/1.,3,5,6,5,3,1/), 0)
-          plot(3) = gsn_csm_xy (wks,yyyy2,xyarr2,rts)
+        ;*******************************************
+        ; Thrid plot
+        ;*******************************************
+          res0 = res
+          res0@tiYAxisString           = "(Standardize)"          ; y-axis label
+          res0@trYMinF                 = min(pltdat3) - max(abs(pltdat3))/10.0
+          res0@trYMaxF                 = max(pltdat3) + max(abs(pltdat3))/10.0
+          res0@gsnLeftString           = "Sam index (normalized)"
+          res0@gsnRightString          = "Unitless"
+          res0@tiMainString            = "" ;"Case: "+panelstr1
+          res0@xyLineOpacities         = (/0.4,0.4,0.4/)
+          res0@xyLineThicknesses       = (/1,1,1/)
+          plot(2)                     = gsn_csm_xy (wks,year,pltdat3,res0)
 
-          rts2 = rts
-          rts2@gsnXYBarChart       = False
-          rts2@gsnLeftString       = ""
-          rts2@gsnRightString      = ""
-          rts2@gsnCenterString     = ""
-          rts2@xyLineThicknesses   = 3
-          rts2@xyLineColors       := "Black"
-          xyarr2                   = wgt_runave_Wrap(eof2_ts(n,:),(/1.,3,5,6,5,3,1/), 0) 
-          tsmap2(3)            = gsn_csm_xy(wks,yyyy2,xyarr2,rts2)
-          overlay(plot(3),tsmap2(3))
-          delete([/xyarr2/])
+          res1 = res
+          res1@gsnXYBarChart          = False
+          res1@gsnLeftString          = ""
+          res1@gsnRightString         = ""
+          res1@gsnCenterString        = ""
+          xyarr1                      = wgt_runave_Wrap(pltdat3,(/1.,3,5,6,5,3,1/), 0)
+          tsmap1(2)                   = gsn_csm_xy(wks,year,xyarr1,res1)
+          overlay(plot(2),tsmap1(2))
+          delete([/xyarr1/])
 
        ; panel plot only resources
           pres1                          = True                ; mods desired
           pres1@gsnFrame                 = False               ; save panel until both ready
-          pres1@gsnPanelBottom           = 0.45    ; space for label bar
-          pres1@gsnPanelTop              = 0.85     ; only panel on lower half of page
-          pres1@gsnPanelXF               = (/0.07,0.57/)
-          gsn_panel(wks,plot(0:1),(/1,2/),pres1)          ; create first panel
-          
-          pres2                           = True                ; mods desired
-          pres2@gsnFrame                  = False               ; save panel until both ready
-          pres2@gsnPanelBottom            = 0.05                ; draw from center to right edge
-          pres2@gsnPanelTop               = 0.5		       ; draw from center to right edge 
-          gsn_panel(wks,plot(2:3),(/1,2/),pres2)       ; create first panel
-       
+         ;pres1@gsnPanelBottom           = 0.45    ; space for label bar
+         ;pres1@gsnPanelTop              = 0.85     ; only panel on lower half of page
+         ;pres1@gsnPanelXF               = (/0.07,0.57/)
+          gsn_panel(wks,plot,(/3,1/),pres1)          ; create first panel
           frame(wks)                                   ; draw both on same page
 
-          ;if (wtype .eq. "png") then
-          ;   tmpa = systemfunc("convert "+fe+".png -trim del.png")
-          ;   tmpb = systemfunc("mv del.png "+fe+".png")
-          ;end if
-
-        ;delete([/xyarr1,xyarr2,tsmap1,tsmap2/])
-         end do ; end of eof mods 
-
-         delete([/eof1_regres,eof2_regres,yyyy1,yyyy2/])
-         delete([/xw,yw,xAnom,yAnom,eof1,eof2,eof1_ts,eof2_ts/])
-
         end do                                              ; end of looping over seasons
-
-        delete([/xAnom1,yAnom1,xw1,yw1,x1,y1,xclat,yclat/])
 
         end do                                                 ; end of looping over variables
 
