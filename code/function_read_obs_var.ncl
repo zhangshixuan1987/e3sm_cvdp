@@ -147,7 +147,7 @@
   else if (ovarnam.eq."FSNTOAC") then
 
     if (isfilevar(f2, "tsrc")) then
-      var2                          = f2->tsr
+      var2                          = f2->tsrc
     else if (isfilevar(f2, "rsdt").and.isfilevar(f2, "rsutc")) then
       var2                          = f2->rsdt
       var2                          = f2->rsdt - f2->rsutc
