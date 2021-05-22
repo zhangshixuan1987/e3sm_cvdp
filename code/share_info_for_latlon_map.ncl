@@ -40,7 +40,7 @@
    if((case2name.eq."ERA5").or.(case2name.eq."ERA20C")) then
 
      obsvars = (/  "tcc",     "lcc",      "hcc",        "tclw",         "tciw",      \
-                   "mcpr",    "mlspr",    "mtpr",       "sf",                        \
+                   "mcpr",    "mlspr",    "mtpr",       "msr",                       \
                    "LWCF",    "SWCF",     "NETCF",      "slhf",         "sshf",     \
                    "LWCF_SRF","SWCF_SRF", "NETCF_SRF",  "NET_FLUX_SRF",              \
                    "FLUT",    "FSUTOA",   "FSUTOAC",    "FLNT",         "FLUTC",     \
