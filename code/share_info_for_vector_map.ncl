@@ -5,14 +5,12 @@
   varunt     = (/"10~S~-2~N~ N m~S~-2~N~",  "m s~S~-1~N~",   "m s~S~-1~N~",    "m s~S~-1~N~",    "m s~S~-1~N~" /)
   intyp      = 2 ;
 
-  panelstr1  = case1name
-  panelstr2  = case2name
+  panelstr1  = tname + " ("+tttag+")"
+  panelstr2  = cname + " ("+cttag+")"
 
   if(compare.eq."Model_vs_OBS") then
 
-   if((case2name.eq."ERA5").or.(case2name.eq."ERA20C")) then
-     panelstr2 = case2name + " ("+obstimtag+")"
-   else
+   if((cname.ne."ERA5").and.(cname.ne."ERA20C")) then
      print("The observational source are not available; only allow ERA5, ERA20C or NOAA20C")
      print("Error occurs at share_info_for_latlon_map.ncl")
      exit

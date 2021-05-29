@@ -12,14 +12,21 @@
 begin
 
   compare                                    = getenv("COMPARE")
+  outdir                                     = getenv("CASEDIR")
+  opath                                      = getenv("DIAG_DATA_ROOT")
+  sampath                                    = getenv("WKROOT")
+
   tpath                                      = getenv("TPATH")
   cpath                                      = getenv("CPATH")
-  case1name                                  = getenv("TEST_NAME")
-  case2name                                  = getenv("CTRL_NAME")
-  casedir                                    = getenv("CASEDIR")
-  opath                                      = getenv("DIAG_DATA_ROOT")
-  obstimtag                                  = getenv("OBS_TIME_TAG")
-  sampath                                    = getenv("STA_DATA_ROOT")
+
+  tcase                                      = getenv("TEST")
+  ccase                                      = getenv("CTRL")
+
+  tname                                      = getenv("TNAME")
+  cname                                      = getenv("CNAME")
+
+  tttag                                      = getenv("TTTAG")
+  cttag                                      = getenv("CTTAG")
 
 ;define regions for eof analysis
   latS                                       = -65.  ;negative for southern hemisphere
@@ -33,22 +40,20 @@ begin
   rearth                                     = 6.37122e6
   grav                                       = 9.80665
 
- print(case1name + " " +case2name)
+ print(cname + " " +tname)
 ;variable name in the climo file
   modvars                                    = (/"PSL"/)
   facmod                                     = (/1.0/100.0/)
   varunt                                     = (/"hPa"/)
-  panelstr1                                  = case1name
-  panelstr2                                  = case2name
+  panelstr1                                  = tname + " ("+tttag+")"
+  panelstr2                                  = cname + " ("+cttag+")"
 
-  if((case2name.eq."ERA5").or.(case2name.eq."ERA20C"))
+  if((cname.eq."ERA5").or.(cname.eq."ERA20C"))
      obsvars                                 = (/"msl"/)
      facobs                                  = (/1.0/100.0/)
-     panelstr2                               = case2name + " ("+obstimtag+")"
-  else if (case2name.eq."NOAA20C")
+  else if (cname.eq."NOAA20C")
      obsvars                                 = (/"prmsl"/)
      facobs                                  = (/1.0/100.0/)
-     panelstr2                               = case2name + " ("+obstimtag+")"
   else
     print("The observational source are not available; only allow ERA5, ERA20C or NOAA20C")
     exit
@@ -57,7 +62,7 @@ begin
 
 ;declear the season or annual mean data to be used;;;;;
   seasons                                    = (/"monthly"/)
-  preslev                                    = (/"Surface"/)
+  pout                                    = (/"Surface"/)
 
   maxlev                                     = 11 
   minlev_eof1                                = (/-200.,-0.5, -0.5, -0.5/)              
@@ -70,31 +75,25 @@ begin
   maxlev_eof3                                = (/ 100., 0.5,  0.5,  0.5/)
 
 ;read the sam index file constructed by observational data;;;;
-  fx1    = sampath+"/Marshall_mslp_monthly_"+toint(abs(latN))+"S.txt"
-  fx2    = sampath+"/Marshall_mslp_monthly_"+toint(abs(latS))+"S.txt"
+  fx1    = sampath+"/pobs/Marshall_mslp_monthly_"+toint(abs(latS))+"S.txt"
+  fx2    = sampath+"/pobs/Marshall_mslp_monthly_"+toint(abs(latN))+"S.txt"
   ncol   = 13
   marshall_slp65 = readAsciiTable(fx1, ncol, "float", (/1/))
   marshall_slp40 = readAsciiTable(fx2, ncol, "float", (/1/))
 
 ;read in two files
 
-  do ll = 0,dimsizes(preslev) - 1
+  do ll = 0,dimsizes(pout) - 1
  
-    do kk = 0, dimsizes(seasons)-1
+      f                                       = systemfunc("ls "+tpath+"/"+tcase+"*"+tttag+".nc")
+      f1                                      = addfile(f,"r")
+      gw1                                     = f1->gw
 
-        f                                      = systemfunc("ls "+tpath+"/*"+seasons(kk)+"_means.nc")
-        f1                                     = addfile(f,"r")
-        gw1                                    = doubletofloat(f1->gw)
+      f                                       = systemfunc("ls "+cpath+"/"+ccase+"*"+cttag+".nc")
+      f2                                      = addfile(f,"r")
+      gw2                                     = f2->gw
 
-        if(compare.eq."Model_vs_OBS") then
-          f                                    = systemfunc("ls "+cpath+"/*_siglev_analysis_*_"+seasons(kk)+".nc")
-          f2                                   = addfile(f,"r")
-          gw2                                  = doubletofloat(f2->gw)
-        else
-          f                                    = systemfunc("ls "+cpath+"/*"+seasons(kk)+"_means.nc")
-          f2                                   = addfile(f,"r")
-          gw2                                  = doubletofloat(f2->gw)
-        end if
+      do kk = 0, dimsizes(seasons)-1
 
 
         do jj = 0, dimsizes(modvars)-1
@@ -118,92 +117,72 @@ begin
            vp2@_FillValue                      = -9999.
            vp1@units                           = varunt(jj)
            vp2@units                           = varunt(jj)
-           ddd1                                = dimsizes(vp1)
-           ddd2                                = dimsizes(vp2)
-
-           ;printVarSummary(vp1)
-           ;printVarSummary(vp2)
-
 
            ;;check the two comparing files and see if they are in the same grid, 
            ;;otherwise, return the error message;;;;
+           ddd1                                = dimsizes(vp1)
+           ddd2                                = dimsizes(vp2)
            if ((ddd1(1).ne.ddd2(1)).or.(ddd1(2).ne.ddd2(2)))then
             print("Error: this scripts requires the two files must in the same grid to run!!!")
             return
            end if
 
-
        ; ==============================================================
        ; Zonal mean SLP at 40S and 65S 
        ; ==============================================================
-         x1_slp65  = dim_avg_n_Wrap(vp1(:,{latS},:),1)
-         x1_slp40  = dim_avg_n_Wrap(vp1(:,{latN},:),1)
-         y1_slp65  = dim_avg_n_Wrap(vp2(:,{latS},:),1)
-         y1_slp40  = dim_avg_n_Wrap(vp2(:,{latN},:),1)
-         delete([/vp1,vp2/])
-       ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-       ;select the data to consturct the sam index 
-       ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-        marshall_year = marshall_slp65(:,0)
-        utc_date1 = cd_calendar(x1_slp65&time,0)
-        utc_date2 = cd_calendar(y1_slp65&time,0)
-        year1     = utc_date1(:,0)
-        year2     = utc_date2(:,0)
+         marshall_year = toint(marshall_slp65(:,0))
+         time = yyyymm_time(min(marshall_year), max(marshall_year), "integer")
+         marshall_time = yyyymm_to_yyyyfrac(time, 0.0)
+         delete([/marshall_year,time/])
 
-        utc_datex1 = cd_calendar(x1_slp65&time,-1)
-        utc_datex2 = cd_calendar(y1_slp65&time,-1)
-        yyyy1     = yyyymm_to_yyyyfrac(utc_datex1, 0.0)
-        yyyy2     = yyyymm_to_yyyyfrac(utc_datex2, 0.0)
-
-        print(year1 + "  "+year2)
-        if (max(year1).lt.1957.and.max(year2).ge.1957)then
-          index   = ind(marshall_year.ge.min(year2).and.marshall_year.le.max(year2))
-          nyear   = dimsizes(index)
-          year    = yyyy2
-          z_slp65 = ndtooned(marshall_slp65(index,1:))
-          z_slp40 = ndtooned(marshall_slp40(index,1:)) 
-          x_slp65 = x1_slp65(0:dimsizes(year2)-1)
-          x_slp40 = x1_slp40(0:dimsizes(year2)-1)
-          y_slp65 = y1_slp65(0:dimsizes(year2)-1)
-          y_slp40 = y1_slp40(0:dimsizes(year2)-1)
-          delete([/x1_slp40,x1_slp65,y1_slp65,y1_slp40,index/])
-        else if (max(year1).ge.1957.and.max(year2).lt.1957)then
-          index = ind(marshall_year.ge.min(year1).and.marshall_year.le.max(year1))         
-          nyear = dimsizes(index)
-          year  = yyyy1
-          z_slp65 = ndtooned(marshall_slp65(index,1:))
-          z_slp40 = ndtooned(marshall_slp40(index,1:))
-          x_slp65 = x1_slp65(0:dimsizes(year1)-1)
-          x_slp40 = x1_slp40(0:dimsizes(year1)-1)
-          y_slp65 = y1_slp65(0:dimsizes(year1)-1)
-          y_slp40 = y1_slp40(0:dimsizes(year1)-1)
-          delete([/x1_slp40,x1_slp65,y1_slp65,y1_slp40,index/])  
-        else if (max(year1).ge.1957.and.max(year2).ge.1957)then
-          minyear = max((/min(year1),min(year2)/))
-          maxyear = min((/max(year1),max(year2)/))
-          index1  = ind(marshall_year.ge.minyear.and.marshall_year.le.maxyear)
-          nyear   = dimsizes(index1)
-          year    = yyyy2
-          index2  = ind(year1.ge.minyear.and.year1.le.maxyear)
-          index3  = ind(year2.ge.minyear.and.year2.le.maxyear)
-          z_slp65 = ndtooned(marshall_slp65(index1,1:))
-          z_slp40 = ndtooned(marshall_slp40(index1,1:))
-          x_slp65 = x1_slp65(index2)
-          x_slp40 = x1_slp40(index2)
-          y_slp65 = y1_slp65(index3)
-          y_slp40 = y1_slp40(index3)
-          delete([/x1_slp40,x1_slp65,y1_slp65,y1_slp40,index1,index2,index3,minyear,maxyear/] )
-        else
-          print("The data are out of time range for comparison, exit" )
-          exit
-        end if 
-        end if 
-        end if 
-        delete([/utc_date1,utc_date2,utc_datex1,utc_datex2,year1,year2,yyyy1,yyyy2,marshall_year,marshall_slp65,marshall_slp40/])
+         z_slp65  = ndtooned(marshall_slp65(:,1:))
+         z_slp40  = ndtooned(marshall_slp40(:,1:))
+         x_slp65  = z_slp65
+         x_slp40  = z_slp40
+         y_slp65  = z_slp65
+         y_slp40  = z_slp40
         
-        printVarSummary(z_slp65)
-        printVarSummary(y_slp65)
-        printVarSummary(x_slp65)
+         x_slp65@_FillValue = -9999.0
+         x_slp40@_FillValue = -9999.0
+         y_slp65@_FillValue = -9999.0
+         y_slp40@_FillValue = -9999.0
+         z_slp65@_FillValue = -9999.0
+         z_slp40@_FillValue = -9999.0
+
+         x_slp65  = -9999.0
+         x_slp40  = -9999.0
+         y_slp65  = -9999.0
+         y_slp40  = -9999.0
+
+       ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+       ;select the data to consturct the sam index
+       ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        utc_date1 = cd_calendar(vp1&time,1)
+        utc_date2 = cd_calendar(vp2&time,1)
+        yyyy1     = yyyymm_to_yyyyfrac(utc_date1, 0.0)
+        yyyy2     = yyyymm_to_yyyyfrac(utc_date2, 0.0)
+        ind1      = get1Dindex(marshall_time,yyyy1)        
+        ind2      = get1Dindex(marshall_time,yyyy2)
+       
+        if(.not.all(ismissing(ind1)))then 
+         x_slp65(ind1) = dim_avg_n_Wrap(vp1(:,{latS},:),1)
+         x_slp40(ind1) = dim_avg_n_Wrap(vp1(:,{latN},:),1)
+        else
+         x_slp65(0:dimsizes(yyyy1)-1)  = dim_avg_n_Wrap(vp1(:,{latS},:),1)
+         x_slp40(0:dimsizes(yyyy1)-1)  = dim_avg_n_Wrap(vp1(:,{latN},:),1)
+        end if 
+
+        if (.not.all(ismissing(ind1)))then
+         y_slp65  = dim_avg_n_Wrap(vp2(:,{latS},:),1)
+         y_slp40  = dim_avg_n_Wrap(vp2(:,{latN},:),1)
+        else 
+         y_slp65(0:dimsizes(yyyy2)-1)  = dim_avg_n_Wrap(vp2(:,{latS},:),1)
+         y_slp40(0:dimsizes(yyyy2)-1)  = dim_avg_n_Wrap(vp2(:,{latN},:),1)
+        end if 
+
+        delete([/vp1,vp2,ind1,ind2,yyyy1,yyyy2/])
+
+        delete([/utc_date1,utc_date2,marshall_slp65,marshall_slp40/])
         
        ; ================================================================================================
        ; compute sam indices 
@@ -211,6 +190,7 @@ begin
        ; SAM = P*40�S -  P*65°S
        ; where P*40°S and P*65°S are the normalized monthly zonal sea level pressur(SLP) at 40°S and 65�
        ; ================================================================================================
+         nyear = dimsizes(marshall_time)/12
          a1 = reshape(x_slp40,(/nyear,12/))
          b1 = reshape(x_slp65,(/nyear,12/))
          x_samid = ndtooned(dim_standardize_n_Wrap(a1, 0, 0) - dim_standardize_n_Wrap(b1, 0, 0))
@@ -225,10 +205,10 @@ begin
        ; =================================================================
        ; Extract the data for plot 
        ; ================================================================
-        legends  = "  "+(/case1name,case2name,"Obs. (Marshall)"/)
-        pltdat1  = new((/3,dimsizes(year)/),typeof(x_slp40))
-        pltdat2  = new((/3,dimsizes(year)/),typeof(x_slp40))
-        pltdat3  = new((/3,dimsizes(year)/),typeof(x_slp40))
+        legends  = "  "+(/tname,cname,"Obs. (Marshall)"/)
+        pltdat1  = new((/3,dimsizes(marshall_time)/),typeof(x_slp40))
+        pltdat2  = new((/3,dimsizes(marshall_time)/),typeof(x_slp40))
+        pltdat3  = new((/3,dimsizes(marshall_time)/),typeof(x_slp40))
         pltdat1(0,:) = (/x_slp40/)
         pltdat1(1,:) = (/y_slp40/)
         pltdat1(2,:) = (/z_slp40/)
@@ -246,10 +226,8 @@ begin
        ; Start to do plot
        ; =================================================================
          wtype                        = "eps"
-        ;wtype@wkWidth                = 2500
-        ;wtype@wkHeight               = 2500
-         figdir                       = casedir+"/tables/"
-         fe                           = modvars(jj)+"_"+seasons(kk)+"_sam_index_40S_65S_slp_"+preslev(ll) 
+         figdir                       = outdir+"/tables/"
+         fe                           = modvars(jj)+"_"+seasons(kk)+"_sam_index_40S_65S_slp_"+pout(ll) 
          wks                          = gsn_open_wks(wtype, figdir + fe)
 
          plot      = new((/3/),graphic)
@@ -275,6 +253,7 @@ begin
          res@gsnStringFontHeightF     = FontHeightF*1.2
 
          res@tmXTOn                   = False
+         res@tmYROn                   = False
          res@tmYLLabelFontHeightF     = 0.025
          res@tmBorderThicknessF       = 1.0
          res@tmXBMajorThicknessF      = 1.0
@@ -316,7 +295,7 @@ begin
           res0@tiMainString            = "" ;"Case: "+panelstr1
           res0@xyLineOpacities         = (/0.4,0.4,0.4/)
           res0@xyLineThicknesses       = (/1,1,1/)
-          plot(0)                      = gsn_csm_xy (wks,year,pltdat1,res0)
+          plot(0)                      = gsn_csm_xy (wks,marshall_time,pltdat1,res0)
            
           res1 = res
           res1@gsnXYBarChart          = False
@@ -324,7 +303,7 @@ begin
           res1@gsnRightString         = ""
           res1@gsnCenterString        = ""
           xyarr1                      = wgt_runave_Wrap(pltdat1,(/1.,3,5,6,5,3,1/), 0)   
-          tsmap1(0)                   = gsn_csm_xy(wks,year,xyarr1,res1) 
+          tsmap1(0)                   = gsn_csm_xy(wks,marshall_time,xyarr1,res1) 
           overlay(plot(0),tsmap1(0))
           delete([/xyarr1/])
 
@@ -340,7 +319,7 @@ begin
           res0@tiMainString            = "" ;"Case: "+panelstr1
           res0@xyLineOpacities         = (/0.4,0.4,0.4/)
           res0@xyLineThicknesses       = (/1,1,1/)
-          plot(1)                      = gsn_csm_xy (wks,year,pltdat2,res0)
+          plot(1)                      = gsn_csm_xy (wks,marshall_time,pltdat2,res0)
 
           res1 = res
           res1@gsnXYBarChart          = False
@@ -348,7 +327,7 @@ begin
           res1@gsnRightString         = ""
           res1@gsnCenterString        = ""
           xyarr1                      = wgt_runave_Wrap(pltdat2,(/1.,3,5,6,5,3,1/), 0)
-          tsmap1(1)                   = gsn_csm_xy(wks,year,xyarr1,res1)
+          tsmap1(1)                   = gsn_csm_xy(wks,marshall_time,xyarr1,res1)
           overlay(plot(1),tsmap1(1))
           delete([/xyarr1/])
 
@@ -365,7 +344,7 @@ begin
           res0@tiMainString            = "" ;"Case: "+panelstr1
           res0@xyLineOpacities         = (/0.4,0.4,0.4/)
           res0@xyLineThicknesses       = (/1,1,1/)
-          plot(2)                     = gsn_csm_xy (wks,year,pltdat3,res0)
+          plot(2)                     = gsn_csm_xy (wks,marshall_time,pltdat3,res0)
 
           res1 = res
           res1@gsnXYBarChart          = False
@@ -373,7 +352,7 @@ begin
           res1@gsnRightString         = ""
           res1@gsnCenterString        = ""
           xyarr1                      = wgt_runave_Wrap(pltdat3,(/1.,3,5,6,5,3,1/), 0)
-          tsmap1(2)                   = gsn_csm_xy(wks,year,xyarr1,res1)
+          tsmap1(2)                   = gsn_csm_xy(wks,marshall_time,xyarr1,res1)
           overlay(plot(2),tsmap1(2))
           delete([/xyarr1/])
 

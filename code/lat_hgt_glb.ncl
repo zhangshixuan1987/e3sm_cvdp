@@ -14,28 +14,41 @@
 begin
 
   compare                                    = getenv("COMPARE")
+  outdir                                     = getenv("CASEDIR")
+
   tpath                                      = getenv("TPATH")
   cpath                                      = getenv("CPATH")
-  case1name                                  = getenv("TEST_NAME")
-  case2name                                  = getenv("CTRL_NAME")
-  casedir                                    = getenv("CASEDIR")
-  obstimtag                                  = getenv("OBS_TIME_TAG")
+
+  tcase                                      = getenv("TEST")
+  ccase                                      = getenv("CTRL")
+
+  tname                                      = getenv("TNAME")
+  cname                                      = getenv("CNAME")
+
+  tttag                                      = getenv("TTTAG")
+  cttag                                      = getenv("CTTAG")
+
   refplev_file                               = getenv("REF_PRE_LEV")
   statistical_test                           = getenv("DIFFERENCE_TEST")
   statistical_siglev                         = 0.05
 
+;define regions for plot
+  latS                                       = -90.  ;negative for southern hemisphere
+  latN                                       =  90.  ;negative for southern hemisphere
+  pout                                       = "Global"
+
+  pi                                         = 3.14159265
+  rearth                                     = 6.37122e6
+  grav                                       = 9.806
+  sigma                                      = 5.67e-8 ; Stefan-Boltzmann constant
+
 ;declear the season or annual mean data to be used;;;;;
   seasons                                   = (/"ANN","DJF","JJA"/)
 
-;define regions for plot
-  latS                                      = -90.  ;negative for southern hemisphere
-  latN                                      =  90.  ;negative for southern hemisphere
-  figstr                                    = "90N-90S"
-
 ;define the pressure levels for cross-section plot 
-  pout                                      = asciiread(refplev_file,-1,"float")
-  pout@longname                             = "lev"
-  pout@units                                = "hPa"
+  pinterp                                      = asciiread(refplev_file,-1,"float")
+  pinterp@longname                             = "lev"
+  pinterp@units                                = "hPa"
   intyp                                     = 2
 
   pi                                        = 3.14159265
@@ -44,21 +57,15 @@ begin
 
 ;read in two files
 
-  do kk = 0, dimsizes(seasons)-1
+  do ll = 0, dimsizes(pout)-1
  
-       f                                       = systemfunc("ls $TPATH/*"+seasons(kk)+"_means.nc")
-       f1                                      = addfile(f,"r")
-       gw1                                     = doubletofloat(f1->gw({latS:latN}))
+      f                                       = systemfunc("ls "+tpath+"/"+tcase+"*"+tttag+".nc")
+      f1                                      = addfile(f,"r")
+      gw1                                     = f1->gw
 
-       if(compare.eq."Model_vs_OBS") then
-         f                                     = systemfunc("ls $CPATH/*_prelev_analysis_*_"+seasons(kk)+".nc")
-         f2                                    = addfile(f,"r")
-         gw2                                   = doubletofloat(f2->gw({latS:latN}))
-       else
-         f                                     = systemfunc("ls $CPATH/*"+seasons(kk)+"_means.nc")
-         f2                                    = addfile(f,"r")
-         gw2                                   = doubletofloat(f2->gw({latS:latN}))
-       end if
+      f                                       = systemfunc("ls "+cpath+"/"+ccase+"*"+cttag+".nc")
+      f2                                      = addfile(f,"r")
+      gw2                                     = f2->gw
 
      ; =================================================================
      print ("Start to process the cross-section of  selected variables ")
@@ -68,12 +75,12 @@ begin
 
         mvarnam                             = modvars(jj)
         tmp1                                = f1->$mvarnam$
-        var1                                = vinth2p(tmp1,f1->hyam,f1->hybm,pout,f1->PS,intyp,f1->P0/100.0,1,False)
+        var1                                = vinth2p(tmp1,f1->hyam,f1->hybm,pinterp,f1->PS,intyp,f1->P0/100.0,1,False)
         delete([/tmp1/])
 
         if(compare.ne."Model_vs_OBS") then
           tmp2                              = f2->$mvarnam$
-          var2                              = vinth2p(tmp2,f2->hyam,f2->hybm,pout,f2->PS,intyp,f2->P0/100.0,1,False)
+          var2                              = vinth2p(tmp2,f2->hyam,f2->hybm,pinterp,f2->PS,intyp,f2->P0/100.0,1,False)
           delete([/tmp2/])
         end if
 
@@ -81,7 +88,7 @@ begin
            ovarnam                          = obsvars(jj)
            tmp2                             = f2->$ovarnam$
            lev                              = f2->lev
-           var2                             = int2p_n_Wrap(lev, tmp2, pout, intyp, 1)
+           var2                             = int2p_n_Wrap(lev, tmp2, pinterp, intyp, 1)
            delete([/tmp2,lev/])
         end if
 
@@ -99,16 +106,25 @@ begin
         var1@units                            = varunt(jj)
         var2@units                            = varunt(jj)
 
+        ;;check the two comparing files and see if they are in the same grid,
         ddd1                                  = dimsizes(var1)
         ddd2                                  = dimsizes(var2)
+        ;;otherwise, return the error message;;;;
+        if ((ddd1(2).ne.ddd2(2)).or.(ddd1(3).ne.ddd2(3)))then
+          print("Error: this scripts requires the two files must in the same grid to run!!!")
+          return
+        end if
 
-        ;printVarSummary(var1)
-        ;printVarSummary(var2)
- 
-        ;interpolate the data to the same pressure levels ;;;;;
-        vp1 = var1(:,:,{latS:latN},:)
-        vp2 = var2(:,:,{latS:latN},:)
+       do kk = 0, dimsizes(seasons)-1
 
+        ;;;;;;select the data for plots;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        if(seasons(kk).eq."ANN")then
+          vp1                          = month_to_annual(var1(:,:,{latS:latN},:),1)
+          vp2                          = month_to_annual(var2(:,:,{latS:latN},:),1)
+        else
+          vp1                          = month_to_season(var1(:,:,{latS:latN},:),seasons(kk))
+          vp2                          = month_to_season(var2(:,:,{latS:latN},:),seasons(kk))
+        end if
         vp1!0="time"
         vp1!1="lev"
         vp1!2="lat"
@@ -119,29 +135,24 @@ begin
         vp2!2="lat"
         vp2!3="lon"
 
-        if(str_lower(statistical_test).eq."true")then
+       if(str_lower(statistical_test).eq."true")then
 
          l_plot_ttest = True
          vpt1 = dim_avg_n_Wrap(vp1,3)
          vpt2 = dim_avg_n_Wrap(vp2,3) 
          xtmp = vpt1(lev|:,lat|:,time|:)       ; reorder but do it only once [temporary]
          ytmp = vpt2(lev|:,lat|:,time|:)
-         ;printVarSummary(xtmp)
          xAve = dim_avg (xtmp)              ; calculate means at each grid point
          yAve = dim_avg (ytmp)
          xVar = dim_variance (xtmp)         ; calculate variances
          yVar = dim_variance (ytmp)
          xEqv = equiv_sample_size (xtmp, statistical_siglev,0)
          yEqv = equiv_sample_size (ytmp, statistical_siglev,0)
-        ;printVarSummary(xEqv)
          xN   = dim_avg_n(dim_avg_wgt_n(xEqv, gw1, 0, 1),0)
          yN   = dim_avg_n(dim_avg_wgt_n(yEqv, gw2, 0, 1),0)
-        ;print(xN+  " "+yN)
          iflag = True                       ; population variance similar
          prob  = ttest(xAve,xVar,xN, yAve,yVar,yN, iflag, False)
-        ;print(min(prob)+ " " +max(prob))
-        ;printVarSummary(prob)
-         delete([/xtmp,ytmp,xAve,yAve,xVar,yVar,xEqv,yEqv,xN,yN/])
+         delete([/vpt1,vpt2,xtmp,ytmp,xAve,yAve,xVar,yVar,xEqv,yEqv,xN,yN/])
 
        end if
 
@@ -162,18 +173,20 @@ begin
        rdiff                               = vp1a
        rdiff                               = (vp1b-vp2b)/abs(vp2b)*100.
 
-       if(l_plot_ttest)then
-        adiff                              = where(prob.le.statistical_siglev,adiff,adiff@_FillValue)
-        rdiff                              = where(prob.le.statistical_siglev,rdiff,rdiff@_FillValue)
-       end if
+       prob0                               = adiff
+       prob0                               = (1.0 - prob)*100.0
+       prob0                               = where(prob.le.statistical_siglev,prob0,prob0@_FillValue)
+
+       ;if(l_plot_ttest)then
+       ; adiff                              = where(prob.le.statistical_siglev,adiff,adiff@_FillValue)
+       ; rdiff                              = where(prob.le.statistical_siglev,rdiff,rdiff@_FillValue)
+       ;end if
 
        ;;;;;;;;;;start to process the figure ;;;;;;;
         plot                                = new((/4/),graphic)
         wtype                               = "eps"
-       ;wtype@wkWidth                       = 2500
-       ;wtype@wkHeight                      = 2500
-        figdir                              = casedir+"/Pressure-Latitude_Zonal_Mean_Contour/"
-        fe                                  = modvars(jj)+"_"+seasons(kk)+"_lathgt"+"_"+figstr
+        figdir                              = outdir+"/Pressure-Latitude_Zonal_Mean_Contour/"
+        fe                                  = modvars(jj)+"_"+seasons(kk)+"_lathgt"+"_"+pout(ll)
         wks                                 = gsn_open_wks(wtype, figdir + fe)
 
         gsn_merge_colormaps(wks,"amwg","amwg_blueyellowred")             ; merge two color maps
@@ -256,6 +269,28 @@ begin
            res@gsnRightString               = "mean: "+sprintf("%5.2f",avg(rdiff(:,:)))
            plot(3)              = gsn_csm_contour(wks,rdiff(:,:),res)
 
+           rescn2 = res
+           rescn2@lbLabelBarOn    = False 
+           rescn2@tiMainString    = ""
+           rescn2@gsnLeftString   = ""
+           rescn2@gsnRightString  = ""
+           rescn2@cnMinLevelValF  = (1.0 - statistical_siglev)*100.0
+           rescn2@cnMaxLevelValF  = 100.0
+           rescn2@cnLevelSpacingF = 10.
+           rescn2@cnMonoFillPattern = True  
+           rescn2@cnMonoFillColor = True 
+           rescn2@cnFillMode      = "AreaFill" ; raster fill significance patterns
+           rescn2@cnFillPattern   = 17
+           rescn2@cnFillDotSizeF  = 0.002
+           rescn2@cnFillColors    = "black"
+           rescn2@cnFillColor     = "black"
+           rescn2@cnFillOpacityF  = 0.5 
+           plotA = gsn_csm_contour(wks,prob0,rescn2) ; contours are at 95,100
+           plotB = gsn_csm_contour(wks,prob0,rescn2) ; contours are at 95,100
+
+           overlay(plot(2),plotA)
+           overlay(plot(3),plotB)
+
            pres                             = True        ; panel plot mods desired
            pres@gsnMaximize                 = False       ; fill the page
            pres@txFontHeightF               = 0.015       
@@ -265,20 +300,19 @@ begin
            pres@txString                    = str_upper(compare)+" ("+seasons(kk)+")"
            gsn_panel(wks,(/plot(:)/),(/2,2/),pres)
 
-          ;if (wtype .eq. "png") then
-          ;   tmpa = systemfunc("convert "+fe+".png -trim del.png")
-          ;   tmpb = systemfunc("mv del.png "+fe+".png")
-          ;end if
+           delete([/plotA,plotB/])
 
-           delete([/var1,var2,vp1a,vp2a,adiff,rdiff,vp1,vp2,vp1b,vp2b,wks/])
+           delete([/vp1a,vp2a,adiff,rdiff,vp1,vp2,vp1b,vp2b,wks/])
 
-        delete([/plot,res,pres,ddd1,ddd2,s1,s2,s3/])
+        delete([/plot,res,pres,s1,s2,s3/])
 
      end do       ; end of looping over variables
 
-     delete([/f1,gw1/])
-     delete([/f2,gw2/])
-
   end do          ; end of looping over seasonsons
 
+     delete([/f1,gw1,var1,ddd1/])
+     delete([/f2,gw2,var2,ddd2/])
+
+ end do
+ 
 end

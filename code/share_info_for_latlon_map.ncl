@@ -32,12 +32,13 @@
                "W m~S~-2~N~",             "W m~S~-2~N~",            "W m~S~-2~N~",      "W m~S~-2~N~",      "W m~S~-2~N~", \
                "K",                       "m~S~-1~N~",              "hPa",              "K",                "kg m~S~-2~N~",\
                "10~S~-2~N~ N m~S~-2~N~",  "10~S~-2~N~ N m~S~-2~N~", "unitless",         "unitless",         "unitless"    /)
-  panelstr1  = case1name
-  panelstr2  = case2name
+
+  panelstr1  = tname + " ("+tttag+")"
+  panelstr2  = cname + " ("+cttag+")"
 
   if(compare.eq."Model_vs_OBS") then
 
-   if((case2name.eq."ERA5").or.(case2name.eq."ERA20C")) then
+   if((cname.eq."ERA5").or.(cname.eq."ERA20C")) then
 
      obsvars = (/  "tcc",     "lcc",      "hcc",        "tclw",         "tciw",      \
                    "mcpr",    "mlspr",    "mtpr",       "msr",                       \
@@ -48,7 +49,7 @@
                    "FLUS",    "FLDSC",    "FSNS",       "FSNSC",        "FSDS",      \
                    "FSUS",    "FSUSC",    "FSDSC",      "RESTOM",       "RESTOA",    \
                    "skt",     "si10",     "msl",        "t2m",          "tcwv",      \
-                   "mntss",   "metss",    "ALBEDO",     "ALBEDOC",      "ALBEDO_SRF" /)
+                   "metss",   "mntss",    "ALBEDO",     "ALBEDOC",      "ALBEDO_SRF" /)
 
      facobs  = (/  1,              1,             1,            1e3,          1e3,      \
                    24*3600,        24*3600,       24*3600,      24*3600,                \
@@ -59,11 +60,9 @@
                    1/86400.0,      1/86400.0,     1/86400.0,    1/86400.0,    1/86400.0,\
                    1/86400.0,      1/86400.0,     1/86400.0,    1/86400.0,    1/86400.0,\
                    1,              1,             1e-2,         1,            1,        \
-                   -1e2,           -1e2,          1,            1,            1         /)
+                   1e2,            1e2,          1,            1,            1         /)
 
-     panelstr2 = case2name + " ("+obstimtag+")"
-
-   else if (case2name.eq."NOAA20C") then
+   else if (cname.eq."NOAA20C") then
 
       obsvars = (/ "tcc",     "lcc",      "hcc",        "tclw",          "tciw",      \
                    "pcpr",    "plspr",    "prate",      "PRECST",                     \
@@ -74,7 +73,7 @@
                    "FLUS",    "FLDSC",    "FSNS",       "FSNSC",        "FSDS",      \
                    "FSUS",    "FSUSC",    "FSDSC",      "RESTOM",       "RESTOA",    \
                    "skt",     "si10",     "prmsl",      "t2m",          "pr_wtr",      \
-                   "mntss",   "metss",    "ALBEDO",     "ALBEDOC",      "ALBEDO_SRF" /)
+                   "metss",   "mntss",    "ALBEDO",     "ALBEDOC",      "ALBEDO_SRF" /)
 
       facobs  = (/1e-2,           1e-2,         1e-2,         1e3,          1e3,      \
                   24*3600,        24*3600,      24*3600,      24*3600,             \
@@ -85,9 +84,7 @@
                   1,              1,            1,            1,            1,     \
                   1,              1,            1,            1,            1,     \
                   1,              1,            1e-2,         1,            1,     \
-               -1e2,           -1e2,            1,            1,            1      /)
-
-     panelstr2   = case2name + " ("+obstimtag+")"
+                1e2,            1e2,            1,            1,            1      /)
 
    else
 

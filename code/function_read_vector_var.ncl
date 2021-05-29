@@ -3,6 +3,8 @@
 
      vmsvar                           := (/"TAUX","TAUY"/)
      vmsign                           := (/-1,-1/)
+     vosvar                           := (/"TAUX","TAUY"/)
+     vosign                           := (/-1,-1/)
 
      if (compare.eq."Model_vs_OBS") then
 
@@ -24,6 +26,8 @@
 
      vmsvar                           := (/"U","V"/)
      vmsign                           := (/1,1/)
+     vosvar                           := (/"U","V"/)
+     vosign                           := (/1,1/)
 
      if (compare.eq."Model_vs_OBS") then
 
@@ -56,23 +60,16 @@
      tmp1_c1   = f1->$vmsvar(0)$(:,{latS:latN},:)
      tmp1_c2   = f1->$vmsvar(1)$(:,{latS:latN},:)
 
-     if (compare.ne."Model_vs_OBS") then
-       tmp2_c1   = f2->$vmsvar(0)$(:,{latS:latN},:)
-       tmp2_c2   = f2->$vmsvar(1)$(:,{latS:latN},:)
+     if (isfilevar(f2, vosvar(0)).and.isfilevar(f2, vosvar(1))) then
+       tmp2_c1   = f2->$vosvar(0)$(:,{latS:latN},:)
+       tmp2_c2   = f2->$vosvar(1)$(:,{latS:latN},:)
+     else
+       print(vosvar(0)+" and " + vosvar(1)+" are not found, using missing values")
+       tmp2_c1   = tmp1_c1
+       tmp2_c2   = tmp1_c2
+       tmp2_c1   = -9999.
+       tmp2_c2   = -9999.
      end if 
-
-     if (compare.eq."Model_vs_OBS") then
-       if (isfilevar(f2, vosvar(0)).and.isfilevar(f2, vosvar(1))) then
-         tmp2_c1   = f2->$vosvar(0)$(:,{latS:latN},:)
-         tmp2_c2   = f2->$vosvar(1)$(:,{latS:latN},:)
-       else
-         print(vosvar(0)+" and " + vosvar(1)+" are not found, using missing values")
-         tmp2_c1   = tmp1_c1
-         tmp2_c2   = tmp1_c2
-         tmp2_c1   = -9999.
-         tmp2_c2   = -9999.
-       end if 
-     end if
 
   else
 
@@ -132,8 +129,8 @@
 
   var2_1   = tmp2_c1
   var2_2   = tmp2_c2
-  var2_1   = vmsign(0)* var2_1 * factor
-  var2_2   = vmsign(1)* var2_2 * factor
+  var2_1   = vosign(0)* var2_1 * factor
+  var2_2   = vosign(1)* var2_2 * factor
   var2_m   = var2_1
   var2_m   = sqrt(var2_1^2+var2_2^2)
 

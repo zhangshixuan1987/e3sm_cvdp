@@ -11,47 +11,50 @@
 begin
 
   compare                                    = getenv("COMPARE")
-  tpath                                      = getenv("TPATH")
-  cpath                                      = getenv("CPATH")
-  case1name                                  = getenv("TEST_NAME")
-  case2name                                  = getenv("CTRL_NAME")
-  casedir                                    = getenv("CASEDIR")
+  outdir                                     = getenv("CASEDIR")
   opath                                      = getenv("DIAG_DATA_ROOT")
   wgtfile                                    = getenv("JET_RGDWGT_FILE")
-  obstimtag                                  = getenv("OBS_TIME_TAG")
+
+  tpath                                      = getenv("TPATH")
+  cpath                                      = getenv("CPATH")
+
+  tcase                                      = getenv("TEST")
+  ccase                                      = getenv("CTRL")
+
+  tname                                      = getenv("TNAME")
+  cname                                      = getenv("CNAME")
+
+  tttag                                      = getenv("TTTAG")
+  cttag                                      = getenv("CTTAG")
+
+  statistical_test                           = getenv("REGRESSION_TEST")
+  statistical_siglev                         = 0.05
 
 ;define regions for jet position analysi
   latS                                       = -70.  ;negative for southern hemisphere
   latN                                       = -20.  ;negative for southern hemisphere
-
-;define maximum and minimum range for plot
-  maxlev = 11
-  minval = -20
-  maxval =  20
 
 ;define constants for unit conversion
   pi                                         = 3.14159265
   rearth                                     = 6.37122e6
   grav                                       = 9.80665
 
- print(case1name + " " +case2name)
+ print(cname + " " +tname)
 ;variable name in the climo file
   modvars                                    = (/"U"/)
   facmod                                     = (/1.0/)
   varunt                                     = (/"m s~S~-1~N~"/)
-  panelstr1                                  = case1name
-  panelstr2                                  = case2name
+  panelstr1                                  = tname + " ("+tttag+")"
+  panelstr2                                  = cname + " ("+cttag+")"
 
   if(compare.eq."Model_vs_OBS")then
 
-   if((case2name.eq."ERA5").or.(case2name.eq."ERA20C")) then
+   if((cname.eq."ERA5").or.(cname.eq."ERA20C")) then
      obsvars                                 = (/"u"/)
      facobs                                  = (/1.0/)
-     panelstr2                               = case2name + " ("+obstimtag+")"
-   else if (case2name.eq."NOAA20C") then
+   else if (cname.eq."NOAA20C") then
      obsvars                                 = (/"uwnd"/)
      facobs                                  = (/1.0/)
-     panelstr2                               = case2name + " ("+obstimtag+")"
    else
      print("The observational source are not available; only allow ERA5, ERA20C or NOAA20C")
      exit
@@ -62,89 +65,77 @@ begin
 
 ;declear the season or annual mean data to be used;;;;;
   seasons                                      = (/"ANN","DJF","JJA"/)
-  preslev                                      = (/850/)
+  pout                                         = (/850/)
   intyp                                        = 2
 
 ;read in two files
 
-  do ll = 0,dimsizes(preslev) - 1
+  do ll = 0,dimsizes(pout) - 1
 
-        f                                      = systemfunc("ls "+tpath+"/*_monthly_means.nc")
-        f1                                     = addfile(f,"r")
-                               
-        if(compare.eq."Model_vs_OBS") then
-          f                                    = systemfunc("ls "+cpath+"/*_prelev_analysis_*monthly*.nc")
-          f2                                   = addfile(f,"r")
-        else
-          f                                    = systemfunc("ls "+cpath+"/*_monthly_means.nc")
-          f2                                   = addfile(f,"r")
+
+      f                                       = systemfunc("ls "+tpath+"/"+tcase+"*"+tttag+".nc")
+      f1                                      = addfile(f,"r")
+      gw1                                     = f1->gw
+
+      f                                       = systemfunc("ls "+cpath+"/"+ccase+"*"+cttag+".nc")
+      f2                                      = addfile(f,"r")
+      gw2                                     = f2->gw
+
+
+     do jj = 0, dimsizes(modvars)-1
+
+        mvarnam                             = modvars(jj)
+        var1                                = f1->$mvarnam$
+        tmp1                                = vinth2p(var1,f1->hyam,f1->hybm,pout(ll),f1->PS,intyp,f1->P0/100.0,1,False)
+        vp1                                 = tmp1(:,0,:,:)
+        delete([/tmp1/])
+
+        if(compare.ne."Model_vs_OBS") then
+          var2                              = f2->$mvarnam$
+          tmp2                              = vinth2p(var2,f2->hyam,f2->hybm,pout(ll),f2->PS,intyp,f2->P0/100.0,1,False)
+          vp2                               = tmp2(:,0,:,:)
+          delete([/tmp2/])
         end if
 
-
-        do jj = 0, dimsizes(modvars)-1
-
-           mvarnam                             = modvars(jj)
-           var1                                = f1->$mvarnam$
-           tmp1                                = vinth2p(var1,f1->hyam,f1->hybm,preslev(ll),f1->PS,intyp,f1->P0/100.0,1,False)
-           vp1                                 = tmp1(:,0,:,:)
-           delete([/tmp1/])
-
-           if(compare.ne."Model_vs_OBS") then
-             var2                              = f2->$mvarnam$
-             tmp2                              = vinth2p(var2,f2->hyam,f2->hybm,preslev(ll),f2->PS,intyp,f2->P0/100.0,1,False)
-             vp2                               = tmp2(:,0,:,:)
-             delete([/tmp2/])
-           end if
-
-           if(compare.eq."Model_vs_OBS") then
-              ovarnam                          = obsvars(jj)
-              var2                             = f2->$ovarnam$
-              vp2                              = var2(:,{preslev(ll)},:,:)
-           end if
-
-           if(compare.eq."Model_vs_OBS") then
-              ovarnam                          = obsvars(jj)
-              var2                             = f2->$ovarnam$
-              lev                              = f2->lev
-              indl                             = ind(lev.eq.preslev(ll))
-              if(.not.ismissing(indl)) then
-                vp2                            = var2(:,indl,:,:)
-              else
-                tmp                            = int2p_n_Wrap(lev, var2, preslev(ll), 2, 1)
-                vp2                            = tmp(:,0,:,:)
-                delete([/tmp/])
-              end if
-              delete([/lev,indl/])
-           end if
-
-           delete([/var1,var2/])
-
-           vp1@_FillValue                      = -9999.
-           vp2@_FillValue                      = -9999.
-
-           if(compare.eq."Model_vs_OBS") then
-             vp1                               = vp1*facmod(jj)
-             vp2                               = vp2*facobs(jj)
+        if(compare.eq."Model_vs_OBS") then
+           ovarnam                          = obsvars(jj)
+           var2                             = f2->$ovarnam$
+           lev                              = f2->lev
+           indl                             = ind(lev.eq.pout(ll))
+           if(.not.ismissing(indl)) then
+             vp2                            = var2(:,indl,:,:)
            else
-             vp1                               = vp1*facmod(jj)
-             vp2                               = vp2*facmod(jj)
+             tmp                            = int2p_n_Wrap(lev, var2, pout(ll), 2, 1)
+             vp2                            = tmp(:,0,:,:)
+             delete([/tmp/])
            end if
+           delete([/lev,indl/])
+        end if
 
-           vp1@units                           = varunt(jj)
-           vp2@units                           = varunt(jj)
+        delete([/var1,var2/])
 
-           ddd1                                = dimsizes(vp1)
-           ddd2                                = dimsizes(vp2)
+        vp1@_FillValue                      = -9999.
+        vp2@_FillValue                      = -9999.
 
-           ;printVarSummary(vp1)
-           ;printVarSummary(vp2)
+        if(compare.eq."Model_vs_OBS") then
+          vp1                               = vp1*facmod(jj)
+          vp2                               = vp2*facobs(jj)
+        else
+          vp1                               = vp1*facmod(jj)
+          vp2                               = vp2*facmod(jj)
+        end if
 
-           ;;check the two comparing files and see if they are in the same grid, otherwise, 
-           ;;return the error message;;;;
-           if ((ddd1(1).ne.ddd2(1)).or.(ddd1(2).ne.ddd2(2)))then
-            print("Error: this scripts requires the two files must in the same grid to run!!!")
-            return
-           end if
+        vp1@units                           = varunt(jj)
+        vp2@units                           = varunt(jj)
+
+        ;;check the two comparing files and see if they are in the same grid,
+        ddd1                                  = dimsizes(vp1)
+        ddd2                                  = dimsizes(vp2)
+        ;;otherwise, return the error message;;;;
+        if ((ddd1(1).ne.ddd2(1)).or.(ddd1(2).ne.ddd2(2)))then
+          print("Error: this scripts requires the two files must in the same grid to run!!!")
+          return
+        end if
 
        ; ==============================================================
        ; User defined parameters that specify region of globe
@@ -163,12 +154,6 @@ begin
 
          xClm   = dim_avg_n_Wrap(xClm1,0)
          yClm   = dim_avg_n_Wrap(yClm1,0)
-
-         ;printVarSummary(xAnom1)
-         ;printMinMax(xAnom1, True)
-
-         ;printVarSummary(xAnom1)
-         ;printMinMax(xAnom1, True)
 
          delete([/x1,y1/])
 
@@ -191,7 +176,6 @@ begin
        ; First step: regrid the data to 0.1x0.1 within 70S and 20S region
        ;=====================================================================
         weightfile = systemfunc("ls "+wgtfile)
-       ;print(weightfile)
         exists = isfilepresent(weightfile)
 
        if(.not.exists) then
@@ -282,17 +266,21 @@ begin
 
          end do           
  
-       ;;;;loop the season and do the plot;;;;
- 
-       do kk = 0,dimsizes(seasons) - 1
-
-       ; =================================================================
-       ; Select different season for the analysis
-       ; =================================================================
-         utc_date1 = cd_calendar(x1_ins&time,0)
+        ; =================================================================
+        ; Select different season for the eof
+        ; =================================================================
+        ;shift the model time to be consistent with the observations;;;
+         x1_ins&time = x1_ins&time - 1.0
+         if(compare.ne."Model_vs_OBS")then
+           y1_ins&time = y1_ins&time - 1.0
+         end if
+         utc_date1 = cd_calendar(x1_ins&time(:),0)
          utc_date2 = cd_calendar(y1_ins&time,0)
          monthx1   = tointeger(utc_date1(:,1))
          monthx2   = tointeger(utc_date2(:,1))
+         delete([/utc_date1,utc_date2/])
+
+       do kk = 0,dimsizes(seasons) - 1
 
          if(seasons(kk).eq."ANN")then
 
@@ -331,19 +319,15 @@ begin
       
          xAnom = xAnom1(indx1,:,:)
          yAnom = yAnom1(indx2,:,:)
-         delete([/indx1,indx2,utc_date1,utc_date2,monthx1,monthx2/])
 
-         ;print(min(x_ins)+ " " +max(x_ins)+" "+ avg(x_ins))
-         ;print(min(y_ins)+ " " +max(y_ins)+" "+ avg(y_ins))
-         ;print(min(x_pos)+ " " +max(x_pos)+" "+ avg(x_pos))
-         ;print(min(y_pos)+ " " +max(y_pos)+" "+ avg(y_pos))
+         delete([/indx1,indx2/])
 
         ;======================================================================
         ;Save the data for the regression analysis
         ;==================================================================
          setfileoption("nc", "Format",  "NetCDF4")
-         out_file1  = opath +"/"+"Jet_index_"+case1name+"_monthly_mean_"+mvarnam+"_at_"+toint(preslev(ll))+"hPa_"+seasons(kk)+".nc"
-         out_file2  = opath +"/"+"Jet_index_"+case2name+"_monthly_mean_"+mvarnam+"_at_"+toint(preslev(ll))+"hPa_"+seasons(kk)+".nc"
+         out_file1  = opath +"/"+"Jet_index_"+cname+"_monthly_mean_"+mvarnam+"_at_"+toint(pout(ll))+"hPa_"+seasons(kk)+".nc"
+         out_file2  = opath +"/"+"Jet_index_"+tname+"_monthly_mean_"+mvarnam+"_at_"+toint(pout(ll))+"hPa_"+seasons(kk)+".nc"
 
          system("rm " + out_file1)
          system("rm " + out_file2)
@@ -413,11 +397,9 @@ begin
          delete([/utc_date1,utc_date2/])
 
          wtype                        = "eps"
-        ;wtype@wkWidth                = 2500
-        ;wtype@wkHeight               = 2500
-         figdir                       = casedir+"/Jet_Index_Analysis/"
-         fe                        = "Jet_index_with_monthly_mean_"+modvars(jj)+"_"+seasons(kk)+"_"+preslev(ll) 
-         wks                                 = gsn_open_wks(wtype, figdir + fe)
+         figdir                       = outdir+"/Jet_Index_Analysis/"
+         fe                           = "Jet_index_with_monthly_mean_"+modvars(jj)+"_"+seasons(kk)+"_"+pout(ll) 
+         wks                          = gsn_open_wks(wtype, figdir + fe)
 
          plot      = new((/6/),graphic)
          tsmapx    = new((/6/),graphic)
@@ -473,14 +455,18 @@ begin
         ;symMinMaxPlt(tmpdat, 16, False, res)      ; contributed.ncl
         ;delete(tmpdat)
 
-        res@cnLevelSelectionMode = "ManualLevels"  
-        ; manually set the contour levels with the following 3 resources
-        mnmxint = nice_mnmxintvl( minval, maxval, maxlev, False)
-        res@cnMinLevelValF           = mnmxint(0) ; set the minimum contour level
-        res@cnMaxLevelValF           = mnmxint(1) ; set the maximum contour level     
-        res@cnLevelSpacingF          = mnmxint(2) ; *special* match CPC
+        ;define maximum and minimum range for plot
+         maxlev = 11
+         minval = -20
+         maxval =  20
+         res@cnLevelSelectionMode = "ManualLevels"  
+         ; manually set the contour levels with the following 3 resources
+         mnmxint = nice_mnmxintvl( minval, maxval, maxlev, False)
+         res@cnMinLevelValF           = mnmxint(0) ; set the minimum contour level
+         res@cnMaxLevelValF           = mnmxint(1) ; set the maximum contour level     
+         res@cnLevelSpacingF          = mnmxint(2) ; *special* match CPC
 
-        delete([/mnmxint/])
+         delete([/mnmxint/])
 
        ;*******************************************
        ; first plot
@@ -501,10 +487,13 @@ begin
           res@gsnCenterString   = "" ;panelstr2
           res@tiMainString      = "Case: "+panelstr2
           plot(1) = gsn_csm_contour_map_polar(wks,yClm,res)
-      
+       
        ;*******************************************
        ; second plot: Jet Strength
        ;*******************************************
+          xstring  = "Time (year)"
+          ystring  = "m s~S~-1~N~"
+
           rts           = True
           rts@gsnDraw   = False       ; don't draw yet
           rts@gsnFrame  = False       ; don't advance frame yet
@@ -536,8 +525,8 @@ begin
 
           rts@trYMinF                      =  5.0
           rts@trYMaxF                      = 20.0
-          rts@tiXAxisString                = "Time (year)"          
-          rts@tiYAxisString                = "m s~S~-1~N~"
+          rts@tiXAxisString                = xstring
+          rts@tiYAxisString                = ystring
 
          ;create individual plots
          ;---Draw third plot in lower left corner
@@ -589,13 +578,14 @@ begin
        ;*******************************************
        ; second plot: Jet Position
        ;*******************************************
-          rts1 = rts
+          ystring = "Degree"
+          xstring = "Time (year)"
 
+          rts1 = rts
           rts1@trYMinF                      = -60.0
           rts1@trYMaxF                      = -35.0
-          rts1@tiXAxisString                = "Time"
-          rts1@tiYAxisString                = "Degree"
-
+          rts1@tiXAxisString                = xstring
+          rts1@tiYAxisString                = ystring
           rts1@gsnXYBarChart                = False
           rts1@xyLineThicknesses            = 3.0
           rts1@xyLineColors                 = "Black"
@@ -658,30 +648,26 @@ begin
           pres2@gsnFrame                  = False               ; save panel until both ready
           pres2@gsnPanelTop               = 0.58                 ; draw from center to right edge
           pres2@gsnPanelBottom            = 0.33                ; draw from center to right edge
+          pres2@gsnPanelXF               = (/0.08,0.57/)
           gsn_panel(wks,plot(2:3),(/1,2/),pres2)       ; create first panel
 
           pres3                           = True       ; mods desired
           pres3@gsnFrame                  = False      ; save panel until both ready
           pres3@gsnPanelTop               = 0.30       ; draw from center to right edge
           pres3@gsnPanelBottom            = 0.05       ; draw from center to right edge
+          pres3@gsnPanelXF               = (/0.08,0.57/)
           gsn_panel(wks,plot(4:5),(/1,2/),pres3)       ; create first panel
        
           frame(wks)                                   ; draw both on same page
-
-          ;if (wtype .eq. "png") then
-          ;   tmpa = systemfunc("convert "+fe+".png -trim del.png")
-          ;   tmpb = systemfunc("mv del.png "+fe+".png")
-          ;end if
-
-          ;delete([/xyarr1,xyarr2,tsmap1,tsmap2/])
           delete([/xa_ins,ya_ins,xa_pos,ya_pos/])
           delete([/x_ins,y_ins,x_pos,y_pos,jet_ins1,jet_ins2,jet_pos1,jet_pos2,yyyy1,yyyy2/])
           delete([/jet_ins1_regres,jet_ins2_regres,jet_pos1_regres,jet_pos2_regres/])
           delete([/xAnom,yAnom/])
 
-       end do 
+        end do 
 
          delete([/xAnom1,yAnom1,xClm1,yClm1,xClm,yClm,x1,y1,x1_ins,y1_ins,x1_pos,y1_pos/])
+         delete([/monthx1,monthx2/])
 
      end do                                              ; end of looping over variables
      

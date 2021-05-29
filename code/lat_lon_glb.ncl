@@ -14,12 +14,20 @@
 begin
 
   compare                                    = getenv("COMPARE")
+  outdir                                     = getenv("CASEDIR")
+
   tpath                                      = getenv("TPATH")
   cpath                                      = getenv("CPATH")
-  case1name                                  = getenv("TEST_NAME")
-  case2name                                  = getenv("CTRL_NAME")
-  casedir                                    = getenv("CASEDIR")
-  obstimtag                                  = getenv("OBS_TIME_TAG")
+
+  tcase                                      = getenv("TEST") 
+  ccase                                      = getenv("CTRL")
+
+  tname                                      = getenv("TNAME")
+  cname                                      = getenv("CNAME")
+
+  tttag                                      = getenv("TTTAG")
+  cttag                                      = getenv("CTTAG")
+
   statistical_test                           = getenv("DIFFERENCE_TEST")
   statistical_siglev                         = 0.05
 
@@ -35,28 +43,20 @@ begin
 ;declear the season or annual mean data to be used;;;;;
   seasons                                       = (/"ANN","DJF","JJA"/)
 
-;read in two files
-;start to do the plot;
+  ;read in two files
+  ;start to do the plot;
   print ("Start to plot global map distribution for selected variables ")
   load "./share_info_for_latlon_map.ncl"
 
   do ll = 0, dimsizes(pout)-1
 
-     do kk = 0, dimsizes(seasons)-1
-
-        f 			   		= systemfunc("ls $TPATH/*"+seasons(kk)+"_means.nc")
+        f 			   		= systemfunc("ls "+tpath+"/"+tcase+"*"+tttag+".nc")
         f1			   		= addfile(f,"r")
         gw1                                     = f1->gw 
 
-        if(compare.eq."Model_vs_OBS") then
-          f                                     = systemfunc("ls $CPATH/*_siglev_analysis_*_"+seasons(kk)+".nc")
-          f2                                    = addfile(f,"r")
-          gw2                                   = f2->gw 
-        else
-          f                                     = systemfunc("ls $CPATH/*"+seasons(kk)+"_means.nc")
-          f2                                    = addfile(f,"r")
-          gw2                                   = f2->gw 
-        end if 
+        f                                       = systemfunc("ls "+cpath+"/"+ccase+"*"+cttag+".nc")
+        f2                                      = addfile(f,"r")
+        gw2                                     = f2->gw
 
         do jj = 0, dimsizes(modvars)-1
 
@@ -83,32 +83,40 @@ begin
           var1@units                           = varunt(jj)
           var2@units                           = varunt(jj)
 
-          ;;;;;;select the data for plots;;;;;;;;;;;;;;;;;;;;;;;;;;;
-          vp1                                 = var1(:,{latS:latN},:)
-          vp2                                 = var2(:,{latS:latN},:)
-          gw                                  = gw1({latS:latN})
-          ddd1                                = dimsizes(vp1)
-          ddd2                                = dimsizes(vp2)
-          delete([/var1,var2/])
-
-          ;;check the two comparing files and see if they are in the same grid, otherwise, return the error message;;;;
+          ;;check the two comparing files and see if they are in the same grid, 
+          ddd1                                  = dimsizes(var1)
+          ddd2                                  = dimsizes(var2)
+          ;;otherwise, return the error message;;;;
           if ((ddd1(1).ne.ddd2(1)).or.(ddd1(2).ne.ddd2(2)))then
             print("Error: this scripts requires the two files must in the same grid to run!!!")
             return
           end if
 
-          ;;generate the weighting metrics 
-          mcor                          = new((/ddd1(1),ddd1(2)/),float)
-          mcor@_FillValue               = vp1@_FillValue
-          do i = 0, ddd2(1)-1
-             mcor(i,:)                  = tofloat(gw(i))*(2.*pi/ddd1(2))*rearth^2.
+          ;;generate the weighting metrics
+          mcorx                         = var1(0,:,:)
+          mcorx@_FillValue              = var1@_FillValue
+          do i = 0, ddd1(1)-1
+             mcorx(i,:)                 = tofloat(gw1(i))*(2.*pi/ddd1(2))*rearth^2.
           end do
 
+         do kk = 0, dimsizes(seasons)-1
+
+          ;;;;;;select the data for plots;;;;;;;;;;;;;;;;;;;;;;;;;;;
+          if(seasons(kk).eq."ANN")then
+            vp1                          = month_to_annual(var1(:,{latS:latN},:),1)
+            vp2                          = month_to_annual(var2(:,{latS:latN},:),1)
+          else
+            vp1                          = month_to_season(var1(:,{latS:latN},:),seasons(kk))
+            vp2                          = month_to_season(var2(:,{latS:latN},:),seasons(kk))
+          end if 
+          vp1!0                          = "time"
+          vp2!0                          = "time"
+          mcor                          = mcorx({latS:latN},:)
+ 
           if(str_lower(statistical_test).eq."true")then 
             l_plot_ttest = True 
             xtmp = vp1(lat|:,lon|:,time|:)       ; reorder but do it only once [temporary]
             ytmp = vp2(lat|:,lon|:,time|:)
-           ;printVarSummary(xtmp) 
             xAve = dim_avg (xtmp)              ; calculate means at each grid point
             yAve = dim_avg (ytmp)
             xVar = dim_variance (xtmp)         ; calculate variances
@@ -117,17 +125,13 @@ begin
             yEqv = equiv_sample_size (ytmp, statistical_siglev,0)
             xN   = wgt_areaave2 (xEqv, mcor, 0)    ; wgty could be gaussian weights
             yN   = wgt_areaave2 (yEqv, mcor, 0)
-           ;print(xN+  " "+yN)          
             iflag = True                       ; population variance similar
             prob  = ttest(xAve,xVar,xN, yAve,yVar,yN, iflag, False)
-           ;print(min(prob)+ " " +max(prob))
-           ;printVarSummary(prob)
             delete([/xtmp,ytmp,xAve,yAve,xVar,yVar,xEqv,yEqv,xN,yN/])
  	  end if 
 
 	   vp1x				    = dim_avg_n_Wrap(vp1,0)
 	   vp2x				    = dim_avg_n_Wrap(vp2,0)
-	  ;print(vp1x@_FillValue)
 
            vp1a				    = vp1x
            vp2a				    = vp2x
@@ -168,7 +172,7 @@ begin
            wtype                        = "eps"
           ;wtype@wkWidth                = 2500
           ;wtype@wkHeight               = 2500
-           figdir                       = casedir+"/Latitude-Longitude_Contour_Maps_"+pout(ll)+"/"
+           figdir                       = outdir+"/Latitude-Longitude_Contour_Maps_"+pout(ll)+"/"
            fe                           = mvarnam+"_"+seasons(kk)+"_latlon_"+pout(ll) 
            wks                          = gsn_open_wks(wtype,figdir+ fe)
 
@@ -243,6 +247,7 @@ begin
               res1@cnLevels                    := sprintf("%7.2f",s1)
               res1@cnFillColors                 = (/3,4,5,6,7,8,9,10,11,12,13,29,30,15,16,17/)
               res1@gsnLeftString                = str_upper(mvarnam)+ " ("+varunt(jj)+")"
+              res1@gsnCenterString              = seasons(kk)
               res1@tiMainString                 = panelstr1
               if(max(abs(s1)).ge.100.0)then
                 res1@gsnRightString             = "mean: "+sprintf("%5.1f",vp1m)
@@ -269,7 +274,7 @@ begin
 	      res2@cnLevels      		= sprintf("%7.2f",s2)
 	      res2@cnFillColors  		= (/18,20,22,23,24,25,26,27,28,30,31,33/)
 	      res2@gsnLeftString 		= str_upper(mvarnam)+ " ("+varunt(jj)+")"
-              res2@tiMainString                 = panelstr1 + " - " + panelstr2 ; "absolute difference"
+              res2@tiMainString                 = "Difference (Test - Reference)" ;panelstr1 + " - " + panelstr2 ;
               res2@gsnCenterString              = seasons(kk)
               if(max(abs(s2)).ge.100.0)then
                 res2@gsnRightString             = "mean: "+sprintf("%5.1f",vp1m - vp2m)
@@ -305,21 +310,16 @@ begin
                                                   ;str_upper(mvarnam)+ " ("+seasons(kk)+"; unit: "+unit+")"
               gsn_panel(wks,plot(:),(/2,2/),pres)
 
-              ;convert the figure 
-              ;if (wtype .eq. "png") then
-              ;  tmpa = systemfunc("convert "+figdir+fe+".png -trim del.png")
-              ;  tmpb = systemfunc("mv del.png "+fe+".png")
-              ;end if
-
               delete([/vp1a,vp2a,adiff,rdiff,vp1b,vp2b/])
 
-           delete([/plot,res,pres,wks,ddd1,ddd2,s1,s2,s3/])
+           delete([/plot,res,pres,wks,s1,s2,s3/])
 
         end do       ; end of looping over variables
 
-        delete([/f1,gw1/])
-        delete([/f2,gw2/])
-
      end do          ; end of looping over seasons
+
+     delete([/f1,gw1,var1,ddd1/])
+     delete([/f2,gw2,var2,ddd2/])
+
   end do
 end

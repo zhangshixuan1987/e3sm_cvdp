@@ -12,13 +12,20 @@
 begin
 
   compare                                    = getenv("COMPARE")
+  outdir                                     = getenv("CASEDIR")
+  opath                                      = getenv("DIAG_DATA_ROOT")
+
   tpath                                      = getenv("TPATH")
   cpath                                      = getenv("CPATH")
-  case1name                                  = getenv("TEST_NAME")
-  case2name                                  = getenv("CTRL_NAME")
-  casedir                                    = getenv("CASEDIR")
-  opath                                      = getenv("DIAG_DATA_ROOT")
-  obstimtag                                  = getenv("OBS_TIME_TAG")
+
+  tcase                                      = getenv("TEST")
+  ccase                                      = getenv("CTRL")
+
+  tname                                      = getenv("TNAME")
+  cname                                      = getenv("CNAME")
+
+  tttag                                      = getenv("TTTAG")
+  cttag                                      = getenv("CTTAG")
 
 ;define regions for eof analysis
   latS                                       = -90.  ;negative for southern hemisphere
@@ -32,22 +39,22 @@ begin
   rearth                                     = 6.37122e6
   grav                                       = 9.80665
 
- print(case1name + " " +case2name)
+ print(cname + " " +tname)
 ;variable name in the climo file
   modvars                                    = (/"Z3"/)
   facmod                                     = (/1.0/)
   varunt                                     = (/"m"/)
-  panelstr1                                  = case1name
-  panelstr2                                  = case2name
+  panelstr1                                  = cname
+  panelstr2                                  = tname
 
-  if((case2name.eq."ERA5").or.(case2name.eq."ERA20C")) then
+  if((cname.eq."ERA5").or.(cname.eq."ERA20C")) then
      obsvars                                 = (/"z"/)
      facobs                                  = (/1.0/grav/)
-     panelstr2                               = case2name + " ("+obstimtag+")"
-  else if (case2name.eq."NOAA20C") then
+     panelstr2                               = tname + " ("+cttag+")"
+  else if (cname.eq."NOAA20C") then
      obsvars                                 = (/"hgt"/)
      facobs                                  = (/1.0/)
-     panelstr2                               = case2name + " ("+obstimtag+")"
+     panelstr2                               = tname + " ("+cttag+")"
   else
     print("The observational source are not available; only allow ERA5, ERA20C or NOAA20C")
     exit
@@ -56,99 +63,87 @@ begin
 
 ;declear the season or annual mean data to be used;;;;;
   seasons                                    = (/"ANN","DJF","JJA"/)
-  preslev                                    = (/300,50/)
+  pout                                    = (/300,50/)
   intyp                                      = 2
 
 ;read in two files
 
-  do ll = 0,dimsizes(preslev) - 1
+  do ll = 0,dimsizes(pout) - 1
 
-        f                                      = systemfunc("ls "+tpath+"/*_monthly_means.nc")
-        f1                                     = addfile(f,"r")
+      f                                       = systemfunc("ls "+tpath+"/"+tcase+"*"+tttag+".nc")
+      f1                                      = addfile(f,"r")
+      gw1                                     = f1->gw
 
-        if(compare.eq."Model_vs_OBS") then
-          f                                    = systemfunc("ls "+cpath+"/*_prelev_analysis_*monthly*.nc")
-          f2                                   = addfile(f,"r")
-        else
-          f                                    = systemfunc("ls "+cpath+"/*_monthly_means.nc")
-          f2                                   = addfile(f,"r")
-        end if
+      f                                       = systemfunc("ls "+cpath+"/"+ccase+"*"+cttag+".nc")
+      f2                                      = addfile(f,"r")
+      gw2                                     = f2->gw
 
-        do jj = 0, dimsizes(modvars)-1
+    do jj = 0, dimsizes(modvars)-1
 
-           mvarnam                             = modvars(jj)
-           var1                                = f1->$mvarnam$
-           tmp1                                = vinth2p(var1,f1->hyam,f1->hybm,preslev(ll),f1->PS,intyp,f1->P0/100.0,1,False)
-           vp1                                 = tmp1(:,0,:,:)
-           delete([/tmp1/])
+       mvarnam                             = modvars(jj)
+       var1                                = f1->$mvarnam$
+       tmp1                                = vinth2p(var1,f1->hyam,f1->hybm,pout(ll),f1->PS,intyp,f1->P0/100.0,1,False)
+       vp1                                 = tmp1(:,0,:,:)
+       delete([/tmp1/])
 
-           if(compare.ne."Model_vs_OBS") then
-             var2                              = f2->$mvarnam$
-             tmp2                              = vinth2p(var2,f2->hyam,f2->hybm,preslev(ll),f2->PS,intyp,f2->P0/100.0,1,False)
-             vp2                               = tmp2(:,0,:,:)
-             delete([/tmp2/])
-           end if
+       if(compare.ne."Model_vs_OBS") then
+         var2                              = f2->$mvarnam$
+         tmp2                              = vinth2p(var2,f2->hyam,f2->hybm,pout(ll),f2->PS,intyp,f2->P0/100.0,1,False)
+         vp2                               = tmp2(:,0,:,:)
+         delete([/tmp2/])
+       end if
 
-           if(compare.eq."Model_vs_OBS") then
-              ovarnam                          = obsvars(jj)
-              var2                             = f2->$ovarnam$
-              lev                              = f2->lev
-              indl                             = ind(lev.eq.preslev(ll))
-              if(.not.ismissing(indl)) then
-                vp2                            = var2(:,indl,:,:)
-              else
-                tmp                            = int2p_n_Wrap(lev, var2, preslev(ll), 2, 1)
-                vp2                            = tmp(:,0,:,:)
-                delete([/tmp/])
-              end if
-              delete([/lev,indl/])
-           end if
-           delete([/var1,var2/])
+       if(compare.eq."Model_vs_OBS") then
+          ovarnam                          = obsvars(jj)
+          var2                             = f2->$ovarnam$
+          lev                              = f2->lev
+          indl                             = ind(lev.eq.pout(ll))
+          if(.not.ismissing(indl)) then
+            vp2                            = var2(:,indl,:,:)
+          else
+            tmp                            = int2p_n_Wrap(lev, var2, pout(ll), 2, 1)
+            vp2                            = tmp(:,0,:,:)
+            delete([/tmp/])
+          end if
+          delete([/lev,indl/])
+       end if
+       delete([/var1,var2/])
 
-           if(compare.eq."Model_vs_OBS") then
-             vp1                               = vp1*facmod(jj)
-             vp2                               = vp2*facobs(jj)
-           else
-             vp1                               = vp1*facmod(jj)
-             vp2                               = vp2*facmod(jj)
-           end if
+       if(compare.eq."Model_vs_OBS") then
+         vp1                               = vp1*facmod(jj)
+         vp2                               = vp2*facobs(jj)
+       else
+         vp1                               = vp1*facmod(jj)
+         vp2                               = vp2*facmod(jj)
+       end if
 
-           vp1@units                           = varunt(jj)
-           vp2@units                           = varunt(jj)
+       vp1@units                           = varunt(jj)
+       vp2@units                           = varunt(jj)
 
-           ddd1                                = dimsizes(vp1)
-           ddd2                                = dimsizes(vp2)
+       ;;check the two comparing files and see if they are in the same grid, otherwise, return the error message;;;;
+       ddd1                                = dimsizes(vp1)
+       ddd2                                = dimsizes(vp2)
 
-           ;printVarSummary(vp1)
-           ;printVarSummary(vp2)
-         
-           ;;check the two comparing files and see if they are in the same grid, otherwise, return the error message;;;;
-           if ((ddd1(1).ne.ddd2(1)).or.(ddd1(2).ne.ddd2(2)))then
-            print("Error: this scripts requires the two files must in the same grid to run!!!")
-            return
-           end if
+       if ((ddd1(1).ne.ddd2(1)).or.(ddd1(2).ne.ddd2(2)))then
+         print("Error: this scripts requires the two files must in the same grid to run!!!")
+         return
+       end if
 
-       ; ==============================================================
-       ; User defined parameters that specify region of globe
-       ; ==============================================================
+      ; ==============================================================
+      ; User defined parameters that specify region of globe
+      ; ==============================================================
          x1     = vp1(:,{latS:latN},:)
          y1     = vp2(:,{latS:latN},:)
          delete([/vp1,vp2/])
 
-       ; ==============================================================
-       ; compute climatology and Anomalies
-       ; ==============================================================
+      ; ==============================================================
+      ; compute climatology and Anomalies
+      ; ==============================================================
          xClm1  = clmMonTLL(x1)                      ; (12,lat,lon)
          yClm1  = clmMonTLL(y1)
 
          xAnom1 = calcMonAnomTLL(x1, xClm1)
          yAnom1 = calcMonAnomTLL(y1, yClm1)
-
-         ;printVarSummary(xAnom1)
-         ;printMinMax(xAnom1, True)
-
-         ;printVarSummary(xAnom1)         
-         ;printMinMax(xAnom1, True)
 
        ; =================================================================
        ; create weights:  sqrt(cos(lat))   [or sqrt(gw) ]
@@ -167,15 +162,21 @@ begin
          copy_VarMeta(x1, xw1)
          copy_VarMeta(y1, yw1) 
 
-     do kk = 0,dimsizes(seasons) - 1
-
        ; =================================================================
        ; Select different season for the eof
        ; =================================================================
-         utc_date1 = cd_calendar(xw1&time,0)
+         ;shift the model time to be consistent with the observations;;;
+         xw1&time = xw1&time - 1.0
+         if(compare.ne."Model_vs_OBS")then
+           yw1&time = yw1&time - 1.0
+         end if
+         utc_date1 = cd_calendar(xw1&time(:),0)
          utc_date2 = cd_calendar(yw1&time,0)
          monthx1   = tointeger(utc_date1(:,1))
          monthx2   = tointeger(utc_date2(:,1))
+         delete([/utc_date1,utc_date2/])
+
+       do kk = 0,dimsizes(seasons) - 1
 
          if(seasons(kk).eq."ANN")then
 
@@ -210,7 +211,7 @@ begin
          xClm  = dim_avg_n_Wrap(x1(indx1,:,:),0) 
          yClm  = dim_avg_n_Wrap(y1(indx2,:,:),0)
 
-         delete([/indx1,indx2,utc_date1,utc_date2,monthx1,monthx2/])
+         delete([/indx1,indx2/])
 
        ; =================================================================
        ; Compute EOFs & Standardize time series
@@ -244,8 +245,8 @@ begin
         ;Save the data for the regression analysis
         ;======================================================================
          setfileoption("nc", "Format",  "NetCDF4")
-         out_file1  = opath +"/"+"Polar_vortex_PCS_"+case1name+"_monthly_mean_"+mvarnam+"_at_"+toint(preslev(ll))+"hPa_"+seasons(kk)+".nc"
-         out_file2  = opath +"/"+"Polar_vortex_PCS_"+case2name+"_monthly_mean_"+mvarnam+"_at_"+toint(preslev(ll))+"hPa_"+seasons(kk)+".nc"
+         out_file1  = opath +"/"+"Polar_vortex_PCS_"+cname+"_monthly_mean_"+mvarnam+"_at_"+toint(pout(ll))+"hPa_"+seasons(kk)+".nc"
+         out_file2  = opath +"/"+"Polar_vortex_PCS_"+tname+"_monthly_mean_"+mvarnam+"_at_"+toint(pout(ll))+"hPa_"+seasons(kk)+".nc"
 
          system("rm " + out_file1)
          system("rm " + out_file2)
@@ -304,8 +305,8 @@ begin
          wtype                        = "eps"
         ;wtype@wkWidth                = 2500
         ;wtype@wkHeight               = 2500
-         fe                        = modvars(jj)+"_"+seasons(kk)+"_monthly_mean_" + preslev(ll)+"hPa"
-         wks                          = gsn_open_wks(wtype,casedir+"/Polar_Votex/"   + fe)
+         fe                        = modvars(jj)+"_"+seasons(kk)+"_monthly_mean_" + pout(ll)+"hPa"
+         wks                          = gsn_open_wks(wtype,outdir+"/Polar_Votex/"   + fe)
 
          plot      = new((/6/),graphic)
          tsmap1    = new((/6/),graphic)
@@ -336,7 +337,7 @@ begin
 
          res@lbLabelBarOn             = True
          res@lbOrientation            = "Vertical"
-         res@lbTitleString            = "Z"+preslev(ll)+" (gpm)" ;Geopential height (gpm)";
+         res@lbTitleString            = "Z"+pout(ll)+" (gpm)" ;Geopential height (gpm)";
          res@lbTitlePosition          = "Right"                           ; title location
          res@lbTitleDirection         = "Across"                          ; letter angle
          res@lbTitleAngleF            = 90.                               ; title angle
@@ -372,7 +373,7 @@ begin
         res@cnLevelSpacingF      = mnmxint(2)
         res@lbLabelStride        = 2
         
-        ;if(preslev(ll).eq.300)then
+        ;if(pout(ll).eq.300)then
         ;  res@lbLabelStride            = 10
         ;  res@cnMinLevelValF           = 8000.                ; set the minimum contour level
         ;  res@cnMaxLevelValF           = 9680.             ; set the maximum contour level
@@ -387,14 +388,14 @@ begin
 
         ;---Draw first plot in upper left corner
         res@gsnLeftString     = "Geopotential height"
-        res@gsnRightString    = toint(preslev(ll))+ " hPa"
+        res@gsnRightString    = toint(pout(ll))+ " hPa"
         res@gsnCenterString   = "" ;panelstr1
         res@tiMainString      = "Case: "+panelstr1
         plot(0)   = gsn_csm_contour_map_polar(wks,xClm,res)
 
         ;---Draw second plot in upper right corner
         res@gsnLeftString     = "Geopotential height"
-        res@gsnRightString    = toint(preslev(ll))+ " hPa"
+        res@gsnRightString    = toint(pout(ll))+ " hPa"
         res@gsnCenterString   = "" ;panelstr2
         res@tiMainString      = "Case: "+panelstr2
         plot(1) = gsn_csm_contour_map_polar(wks,yClm,res)
@@ -411,7 +412,7 @@ begin
         ;symMinMaxPlt(tmpdat, 16, False, res)           ; contributed.ncl
         res@cnLevelSelectionMode     = "ManualLevels"   ; manually set the contour levels with the following 3 resources
 
-        if(preslev(ll).eq.300)then
+        if(pout(ll).eq.300)then
 
          res@cnMinLevelValF           = -25.             ; set the minimum contour level
          res@cnMaxLevelValF           =  25.             ; set the maximum contour level
@@ -556,6 +557,7 @@ begin
 
         delete([/xAnom1,yAnom1,xClm1,yClm1,xw1,yw1,x1,y1,xclat,yclat/])
         delete([/f1,f2/])
+        delete([/monthx1,monthx2/])
 
        end do ; end of looping over variables 
 

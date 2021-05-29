@@ -7,7 +7,7 @@
 
     if (isfilevar(f2, "ie")) then
       var2                          = f2->ie
-      var2                          = var2 * 2.5e6 
+      var2                          = -var2 * 2.5e6 
     else
       print(ovarnam + " does not exist, using missing values" )
       var2                          = var1
@@ -18,6 +18,7 @@
 
     if (isfilevar(f2, "ishf")) then
       var2                          = f2->ishf
+      var2                          = var2*-1.0
     else
       print(ovarnam + " does not exist, using missing values" )
       var2                          = var1
@@ -101,7 +102,7 @@
     ;;  - str (Surface net thermal radiation)
     ;; rlds = strd (Surface thermal radiation downwards)
     if (isfilevar(f2, "str") ) then
-      var2                          = f2->str
+      var2                          = - f2->str
     else if (isfilevar(f2, "rlus").and.isfilevar(f2, "rlds"))then
       var2                          = f2->rlus
       var2                          = f2->rlus - f2->rlds
@@ -116,7 +117,7 @@
    ;; rlusc (Clear-sky Surface Downwelling Longwave Radiation)
    ;; rldsc (Clear-sky )
     if (isfilevar(f2, "strc") ) then
-      var2                          = f2->strc
+      var2                          = -f2->strc
     else if (isfilevar(f2, "rlusc").and.isfilevar(f2, "rldsc"))then
       var2                          = f2->rlusc
       var2                          = f2->rlusc - f2->rldsc
@@ -358,7 +359,7 @@
     ;LWCF: (rlut - rldt) - (rlutc - rldtc)
     if (isfilevar(f2, "ttr").and.isfilevar(f2, "ttrc")) then
       var2                          = f2->ttrc
-      var2                          = (-f2->ttr) - (-f2->ttrc)
+      var2                          = f2->ttr - f2->ttrc
     else if (isfilevar(f2, "rlut").and.isfilevar(f2, "rlutc")) then
       var2                          = f2->rlut 
       var2                          = -f2->rlut  +  f2->rlutc
@@ -411,7 +412,7 @@
     ; LWCF_SRF: (rlusc - rldsc) - (rlus - rlds)
     if (isfilevar(f2, "str").and.isfilevar(f2, "strc")) then
       var2                          = f2->str
-      var2                          = -f2->str + f2->strc
+      var2                          = f2->str - f2->strc
     else if (isfilevar(f2, "rlds").and.isfilevar(f2, "rlus").and.\
              isfilevar(f2, "rldsc").and.isfilevar(f2, "rlusc")) then
       var2                          = f2->rlds
@@ -430,7 +431,7 @@
     if (isfilevar(f2, "ssr").and.isfilevar(f2, "ssrc").and.\
         isfilevar(f2, "str").and.isfilevar(f2, "strc")) then
       var2                          =  f2->ssr
-      var2                          = (f2->ssr - f2->ssrc)+(f2->strc - f2->str)
+      var2                          = (f2->ssr - f2->ssrc)+(-f2->str + f2->strc)
     else if (isfilevar(f2, "rsds").and.isfilevar(f2, "rsus").and. \
              isfilevar(f2, "rsusc").and.isfilevar(f2, "rsdsc").and. \
              isfilevar(f2, "rlus").and.isfilevar(f2,  "rlds").and. \

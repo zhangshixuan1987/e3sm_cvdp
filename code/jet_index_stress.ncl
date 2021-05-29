@@ -13,51 +13,50 @@
 begin
 
   compare                                    = getenv("COMPARE")
-  tpath                                      = getenv("TPATH")
-  cpath                                      = getenv("CPATH")
-  case1name                                  = getenv("TEST_NAME")
-  case2name                                  = getenv("CTRL_NAME")
-  casedir                                    = getenv("CASEDIR")
+  outdir                                     = getenv("CASEDIR")
   opath                                      = getenv("DIAG_DATA_ROOT")
   wgtfile                                    = getenv("JET_RGDWGT_FILE")
-  obstimtag                                  = getenv("OBS_TIME_TAG")
+
+  tpath                                      = getenv("TPATH")
+  cpath                                      = getenv("CPATH")
+
+  tcase                                      = getenv("TEST")
+  ccase                                      = getenv("CTRL")
+
+  tname                                      = getenv("TNAME")
+  cname                                      = getenv("CNAME")
+
+  tttag                                      = getenv("TTTAG")
+  cttag                                      = getenv("CTTAG")
 
 ;define regions for eof analysis
   latS                                         = -70.  ;negative for southern hemisphere
   latN                                         = -20.  ;negative for southern hemisphere
-
-;define maximum and minimum range for plot
-  maxlev = 11
-  minval = -0.2
-  maxval =  0.2
 
 ;define constants for unit conversion
   pi                                           = 3.14159265
   rearth                                       = 6.37122e6
   grav                                         = 9.80665
 
- print(case1name + " " +case2name)
+ print(cname + " " +tname)
 ;variable name in the climo file
   modvars                                    = (/"TAUX"/)
   facmod                                     = (/-1.0/)
   varunt                                     = (/"m~S~2~N~ s~S~-2~N~"/)
-  panelstr1                                  = case1name
-  panelstr2                                  = case2name
+  panelstr1                                  = tname + " ("+tttag+")"
+  panelstr2                                  = cname + " ("+cttag+")"
 
   if(compare.eq."Model_vs_OBS")then
 
-   if (case2name.eq."ERA5") then
+   if (cname.eq."ERA5") then
      obsvars                                 = (/"metss"/)
      facobs                                  = (/1.0/)
-     panelstr2                               = case2name + " ("+obstimtag+")"
-   else if (case2name.eq."ERA20C") then
+   else if (cname.eq."ERA20C") then
      obsvars                                 = (/"iews"/)
      facobs                                  = (/1.0/)
-     panelstr2                               = case2name + " ("+obstimtag+")"
-   else if (case2name.eq."NOAA20C") then 
+   else if (cname.eq."NOAA20C") then 
      obsvars                                 = (/"metss"/)
      facobs                                  = (/1.0/)
-     panelstr2                               = case2name + " ("+obstimtag+")"
    else
      print("The observational source are not available; only allow ERA5, ERA20C or NOAA20C")
      exit
@@ -69,59 +68,54 @@ begin
 
 ;declear the season or annual mean data to be used;;;;;
   seasons                                      = (/"ANN","DJF","JJA"/)
-  preslev                                      = (/"Surface"/)
+  pout                                         = (/"Surface"/)
 
 ;read in two files
 
-  do ll = 0,dimsizes(preslev) - 1
+  do ll = 0,dimsizes(pout) - 1
 
-        f                                      = systemfunc("ls $TPATH/*_monthly_means.nc")
-        f1                                     = addfile(f,"r")
-                               
-        if(compare.eq."Model_vs_OBS") then
-          f                                    = systemfunc("ls $CPATH/*_siglev_analysis*monthly*.nc")
-          f2                                   = addfile(f,"r")
-        else
-          f                                    = systemfunc("ls $CPATH/*_monthly_means.nc")
-          f2                                   = addfile(f,"r")
+      f                                       = systemfunc("ls "+tpath+"/"+tcase+"*"+tttag+".nc")
+      f1                                      = addfile(f,"r")
+      gw1                                     = f1->gw
+
+      f                                       = systemfunc("ls "+cpath+"/"+ccase+"*"+cttag+".nc")
+      f2                                      = addfile(f,"r")
+      gw2                                     = f2->gw
+
+      do jj = 0, dimsizes(modvars)-1
+
+        mvarnam  = modvars(jj)
+        print("working on variable "+ mvarnam)
+        load "./function_read_model_var.ncl"
+
+        if (compare.eq."Model_vs_OBS") then
+          ovarnam  = obsvars(jj)
+          load "./function_read_obs_var.ncl"
         end if
 
-        do jj = 0, dimsizes(modvars)-1
+        var1@_FillValue                      = -9999.
+        var2@_FillValue                      = -9999.
 
-           mvarnam  = modvars(jj)
-           print("working on variable "+ mvarnam)
-           load "./function_read_model_var.ncl"
+        if(compare.eq."Model_vs_OBS") then
+          var1                               = var1*facmod(jj)
+          var2                               = var2*facobs(jj)
+        else
+          var1                               = var1*facmod(jj)
+          var2                               = var2*facmod(jj)
+        end if
 
-           if (compare.eq."Model_vs_OBS") then
-             ovarnam  = obsvars(jj)
-             load "./function_read_obs_var.ncl"
-           end if
+        var1@units                           = varunt(jj)
+        var2@units                           = varunt(jj)
 
-           var1@_FillValue                      = -9999.
-           var2@_FillValue                      = -9999.
+        ;;check the two comparing files and see if they are in the same grid,
+        ddd1                                  = dimsizes(var1)
+        ddd2                                  = dimsizes(var2)
+        ;;otherwise, return the error message;;;;
+        if ((ddd1(1).ne.ddd2(1)).or.(ddd1(2).ne.ddd2(2)))then
+          print("Error: this scripts requires the two files must in the same grid to run!!!")
+          return
+        end if
 
-           if(compare.eq."Model_vs_OBS") then
-             var1                               = var1*facmod(jj)
-             var2                               = var2*facobs(jj)
-           else
-             var1                               = var1*facmod(jj)
-             var2                               = var2*facmod(jj)
-           end if
-
-           var1@units                           = varunt(jj)
-           var2@units                           = varunt(jj)
-
-           ddd1                                = dimsizes(var1)
-           ddd2                                = dimsizes(var2)
-
-           ;printVarSummary(var1)
-           ;printVarSummary(var2)
-
-           ;;check the two comparing files and see if they are in the same grid, otherwise, return the error message;;;;
-           if ((ddd1(1).ne.ddd2(1)).or.(ddd1(2).ne.ddd2(2)))then
-            print("Error: this scripts requires the two files must in the same grid to run!!!")
-            return
-           end if
        ; ==============================================================
        ; User defined parameters that specify region of globe
        ; ==============================================================
@@ -139,12 +133,6 @@ begin
 
          xClm   = dim_avg_n_Wrap(xClm1,0)
          yClm   = dim_avg_n_Wrap(yClm1,0)
-
-         ;printVarSummary(xAnom1)
-         ;printMinMax(xAnom1, True)
-
-         ;printVarSummary(xAnom1)
-         ;printMinMax(xAnom1, True)
 
          delete([/x1,y1/])
 
@@ -242,11 +230,6 @@ begin
          xa1_pos = x1_pos
          ya1_pos = y1_pos
      
-         print(min(x1_ins)+ " " +max(x1_ins))
-         print(min(y1_ins)+ " " +max(y1_ins))
-         print(min(x1_pos)+" " +max(x1_pos))
-         print(min(y1_pos)+" " +max(y1_pos))
-
          do i = 0,11
 
            xsub = x1_ins(i::12)
@@ -266,17 +249,22 @@ begin
            delete([/xsub/])
 
          end do
-       ;;;;loop the season and do the plot;;;;
-
-       do kk = 0,dimsizes(seasons) - 1
 
        ; =================================================================
-       ; Select different season for the analysis
+       ; Select different season for the eof
        ; =================================================================
-         utc_date1 = cd_calendar(x1_ins&time,0)
+        ;shift the model time to be consistent with the observations;;;
+         x1_ins&time = x1_ins&time - 1.0
+         if(compare.ne."Model_vs_OBS")then
+           y1_ins&time = y1_ins&time - 1.0
+         end if
+         utc_date1 = cd_calendar(x1_ins&time(:),0)
          utc_date2 = cd_calendar(y1_ins&time,0)
          monthx1   = tointeger(utc_date1(:,1))
          monthx2   = tointeger(utc_date2(:,1))
+         delete([/utc_date1,utc_date2/])
+
+       do kk = 0,dimsizes(seasons) - 1
 
          if(seasons(kk).eq."ANN")then
 
@@ -315,19 +303,15 @@ begin
 
          xAnom = xAnom1(indx1,:,:)
          yAnom = yAnom1(indx2,:,:)
-         delete([/indx1,indx2,utc_date1,utc_date2,monthx1,monthx2/])
 
-         ;print(min(x_ins)+ " " +max(x_ins)+" "+ avg(x_ins))
-         ;print(min(y_ins)+ " " +max(y_ins)+" "+ avg(y_ins))
-         ;print(min(x_pos)+ " " +max(x_pos)+" "+ avg(x_pos))
-         ;print(min(y_pos)+ " " +max(y_pos)+" "+ avg(y_pos))
+         delete([/indx1,indx2/])
 
         ;======================================================================
         ;Save the data for the regression analysis
         ;==================================================================
          setfileoption("nc", "Format",  "NetCDF4")
-         out_file1  = opath +"/"+"Jet_index_"+case1name+"_monthly_mean_"+mvarnam+"_at_"+preslev(ll)+"_"+seasons(kk)+".nc"
-         out_file2  = opath +"/"+"Jet_index_"+case2name+"_monthly_mean_"+mvarnam+"_at_"+preslev(ll)+"_"+seasons(kk)+".nc"
+         out_file1  = opath +"/"+"Jet_index_"+cname+"_monthly_mean_"+mvarnam+"_at_"+pout(ll)+"_"+seasons(kk)+".nc"
+         out_file2  = opath +"/"+"Jet_index_"+tname+"_monthly_mean_"+mvarnam+"_at_"+pout(ll)+"_"+seasons(kk)+".nc"
 
          system("rm " + out_file1)
          system("rm " + out_file2)
@@ -362,8 +346,8 @@ begin
          fout2->jetd_ins   = ya_ins
          fout1->jetd_pos   = xa_pos
          fout2->jetd_pos   = ya_pos
-         fout1->U850       = xClm
-         fout2->U850       = yClm
+         fout1->$mvarnam$  = xClm
+         fout2->$mvarnam$  = yClm
 
          delete([/time1,time2,fout1,fout2,out_file1,out_file2/])
 
@@ -382,8 +366,8 @@ begin
          wtype                        = "eps"
         ;wtype@wkWidth                = 2500
         ;wtype@wkHeight               = 2500
-         figdir                       = casedir+"/Jet_Index_Analysis/"
-         fe                           = "Jet_index_with_monthly_mean_"+modvars(jj)+"_"+seasons(kk)+"_"+preslev(ll)
+         figdir                       = outdir+"/Jet_Index_Analysis/"
+         fe                           = "Jet_index_with_monthly_mean_"+modvars(jj)+"_"+seasons(kk)+"_"+pout(ll)
          wks                          = gsn_open_wks(wtype, figdir + fe)
 
          plot      = new((/6/),graphic)
@@ -441,12 +425,16 @@ begin
         ;symMinMaxPlt(tmpdat, 16, False, res)      ; contributed.ncl
         ;delete(tmpdat)
 
-        res@cnLevelSelectionMode = "ManualLevels"
+        ;define maximum and minimum range for plot
+         maxlev = 11
+         minval = -0.2
+         maxval =  0.2
+         res@cnLevelSelectionMode = "ManualLevels"
         ; manually set the contour levels with the following 3 resources
-        mnmxint = nice_mnmxintvl( minval, maxval, maxlev, False)
-        res@cnMinLevelValF           = mnmxint(0) ; set the minimum contour level
-        res@cnMaxLevelValF           = mnmxint(1) ; set the maximum contour level
-        res@cnLevelSpacingF          = mnmxint(2) ; *special* match CPC
+         mnmxint = nice_mnmxintvl( minval, maxval, maxlev, False)
+         res@cnMinLevelValF           = mnmxint(0) ; set the minimum contour level
+         res@cnMaxLevelValF           = mnmxint(1) ; set the maximum contour level
+         res@cnLevelSpacingF          = mnmxint(2) ; *special* match CPC
 
         delete([/mnmxint/])
 
@@ -473,6 +461,9 @@ begin
        ;*******************************************
        ; second plot: Jet Strength
        ;*******************************************
+          xstring  = "Time (year)"
+          ystring  = varunt(jj)
+
           rts           = True
           rts@gsnDraw   = False       ; don't draw yet
           rts@gsnFrame  = False       ; don't advance frame yet
@@ -505,8 +496,8 @@ begin
 
           rts@trYMinF                      =  0.0
           rts@trYMaxF                      =  0.4
-          rts@tiXAxisString                = "Time (year)"
-          rts@tiYAxisString                = varunt(jj)
+          rts@tiXAxisString                = xstring 
+          rts@tiYAxisString                = ystring 
 
          ;create individual plots
          ;---Draw third plot in lower left corner
@@ -558,13 +549,14 @@ begin
        ;*******************************************
        ; second plot: Jet Position
        ;*******************************************
-          rts1 = rts
+          xstring  = "Time (year)"
+          ystring  = "Degree"
 
+          rts1 = rts
           rts1@trYMinF              = -60.0
           rts1@trYMaxF              = -35.0
-          rts1@tiXAxisString        = "Time"
-          rts1@tiYAxisString        = "Degree"
-
+          rts1@tiXAxisString        = xstring 
+          rts1@tiYAxisString        = ystring 
           rts1@gsnXYBarChart        = False
           rts1@xyLineThicknesses    = 3.0
           rts1@xyLineColors         = "Black"
@@ -572,7 +564,7 @@ begin
          ;create individual plots
          ;---Draw fifth plot in lower left corner
           rts1@gsnLeftString        = "Jet position"
-          rts1@gsnRightString       = case1name
+          rts1@gsnRightString       = panelstr1
           if(.not.all(ismissing(x_pos)))then
             rts1@gsnYRefLine        = avg(x_pos)   ; reference line
           else
@@ -595,7 +587,7 @@ begin
 
          ;---Draw sixth plot in lower right corner
           rts1@gsnLeftString        = "Jet position"
-          rts1@gsnRightString       = case2name
+          rts1@gsnRightString       = panelstr2
           if(.not.all(ismissing(y_ins)))then
             rts1@gsnYRefLine        = avg(y_pos)   ; reference line
           else
@@ -626,22 +618,18 @@ begin
           pres2@gsnFrame                  = False               ; save panel until both ready
           pres2@gsnPanelTop               = 0.58                 ; draw from center to right edge
           pres2@gsnPanelBottom            = 0.33                ; draw from center to right edge
+          pres2@gsnPanelXF               = (/0.08,0.57/)
           gsn_panel(wks,plot(2:3),(/1,2/),pres2)       ; create first panel
 
           pres3                           = True       ; mods desired
           pres3@gsnFrame                  = False      ; save panel until both ready
           pres3@gsnPanelTop               = 0.30       ; draw from center to right edge
           pres3@gsnPanelBottom            = 0.05       ; draw from center to right edge
+          pres3@gsnPanelXF               = (/0.08,0.57/)
           gsn_panel(wks,plot(4:5),(/1,2/),pres3)       ; create first panel
 
           frame(wks)                                   ; draw both on same page
 
-          ;if (wtype .eq. "png") then
-          ;   tmpa = systemfunc("convert "+fe+".png -trim del.png")
-          ;   tmpb = systemfunc("mv del.png "+fe+".png")
-          ;end if
-
-          ;delete([/xyarr1,xyarr2,tsmap1,tsmap2/])
           delete([/xa_ins,ya_ins,xa_pos,ya_pos/])
           delete([/x_ins,y_ins,x_pos,y_pos,yyyy1,yyyy2/])
           delete([/xAnom,yAnom/])
@@ -649,6 +637,7 @@ begin
        end do
 
          delete([/xAnom1,yAnom1,xClm1,yClm1,xClm,yClm,x1,y1,x1_ins,y1_ins,x1_pos,y1_pos/])
+         delete([/monthx1,monthx2/])
 
      end do                                              ; end of looping over variables
 
