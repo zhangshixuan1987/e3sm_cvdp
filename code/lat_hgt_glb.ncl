@@ -269,22 +269,29 @@ begin
            res@gsnRightString               = "mean: "+sprintf("%5.2f",avg(rdiff(:,:)))
            plot(3)              = gsn_csm_contour(wks,rdiff(:,:),res)
 
-           rescn2 = res
-           rescn2@lbLabelBarOn    = False 
+           rescn2 = True
+           rescn2@lbLabelBarOn    = False
+           rescn2@gsnTickMarksOn  = False     ; no tickmarks
+           rescn2@gsnDraw         = False     ; don't draw
+           rescn2@gsnFrame        = False     ; don't advance frame
            rescn2@tiMainString    = ""
            rescn2@gsnLeftString   = ""
            rescn2@gsnRightString  = ""
            rescn2@cnMinLevelValF  = (1.0 - statistical_siglev)*100.0
            rescn2@cnMaxLevelValF  = 100.0
-           rescn2@cnLevelSpacingF = 10.
-           rescn2@cnMonoFillPattern = True  
-           rescn2@cnMonoFillColor = True 
+          ;rescn2@cnLevelSpacingF = 1.
+           rescn2@cnMonoFillPattern = True
+           rescn2@cnMonoFillColor = True
+           rescn2@cnFillOn        = True      ; color fill
+           rescn2@cnLinesOn       = False
+           rescn2@cnLineLabelsOn  = False        ; True is default
+           rescn2@cnInfoLabelOn   = False                ; turn off info label
            rescn2@cnFillMode      = "AreaFill" ; raster fill significance patterns
            rescn2@cnFillPattern   = 17
            rescn2@cnFillDotSizeF  = 0.002
-           rescn2@cnFillColors    = "black"
            rescn2@cnFillColor     = "black"
-           rescn2@cnFillOpacityF  = 0.5 
+           rescn2@cnFillOpacityF  = 0.5
+
            plotA = gsn_csm_contour(wks,prob0,rescn2) ; contours are at 95,100
            plotB = gsn_csm_contour(wks,prob0,rescn2) ; contours are at 95,100
 

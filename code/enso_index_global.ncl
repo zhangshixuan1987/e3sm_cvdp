@@ -205,8 +205,8 @@ begin
     eof1 = enso_ind1(:,indx1)
     eof2 = enso_ind2(:,indx2)
     setfileoption("nc", "Format",  "NetCDF4")
-    out_file1  = opath +"/"+"ENSO_index_"+cname+"_monthly_mean_"+seasons(kk)+".nc"
-    out_file2  = opath +"/"+"ENSO_index_"+tname+"_monthly_mean_"+seasons(kk)+".nc"
+    out_file1  = opath +"/"+"ENSO_index_"+tname+"_monthly_mean_"+seasons(kk)+".nc"
+    out_file2  = opath +"/"+"ENSO_index_"+cname+"_monthly_mean_"+seasons(kk)+".nc"
 
     system("rm " + out_file1)
     system("rm " + out_file2)

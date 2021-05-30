@@ -101,7 +101,7 @@ begin
       wmi@units  = varunt(2)
 
       system("rm " + out_file1)
-      fout1 = addfile(out_file1,"c")
+      fout1 = addfile(out_file1,"cw")
 
       fout1->U     = umi
       fout1->V     = vmi
@@ -148,7 +148,7 @@ begin
         wmi@units  = varunt(2)
 
         system("rm " + out_file2)
-        fout2 = addfile(out_file2,"c")
+        fout2 = addfile(out_file2,"cw")
 
         fout2->U     = umi
         fout2->V     = vmi
@@ -196,7 +196,7 @@ begin
         wmi@units  = varunt(2)
 
         system("rm " + out_file2)
-        fout2 = addfile(out_file2,"c")
+        fout2 = addfile(out_file2,"cw")
 
         fout2->U     = umi
         fout2->V     = vmi

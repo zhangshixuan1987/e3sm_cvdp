@@ -162,8 +162,8 @@ begin
  ; Regress
  ; =================================================================
  ; read PC time series for regression
-   eof_file1  = opath +"/"+"EOF_PCS_"+cname+"_monthly_mean_"+eofmodvar+"_at_"+eofplev+"hPa_"+seasons(kk)+".nc"
-   eof_file2  = opath +"/"+"EOF_PCS_"+tname+"_monthly_mean_"+eofmodvar+"_at_"+eofplev+"hPa_"+seasons(kk)+".nc"
+   eof_file1  = opath +"/"+"EOF_PCS_"+tname+"_monthly_mean_"+eofmodvar+"_at_"+eofplev+"hPa_"+seasons(kk)+".nc"
+   eof_file2  = opath +"/"+"EOF_PCS_"+cname+"_monthly_mean_"+eofmodvar+"_at_"+eofplev+"hPa_"+seasons(kk)+".nc"
    feof1      = addfile(eof_file1,"r")
    feof2      = addfile(eof_file2,"r")
    eof1_ts    = feof1->eof_ts
@@ -344,15 +344,20 @@ begin
 
   delete([/mnmxint/])
 
+  res@mpLabelFontHeightF           = FontHeightF*2.0
+  res@gsnPolarLabelFontHeightF     = FontHeightF
+
+  left_string   = "Regress on ~C~"+ str_upper(mvarnam)+ " ("+varunt(jj)+")"
+  right_string  = eof(n)
+  center_string = ""
+
   ;*******************************************
   ; first plot
   ;*******************************************
-     res@mpLabelFontHeightF           = FontHeightF*2.0
-     res@gsnPolarLabelFontHeightF     = FontHeightF
-    ;---Draw first plot in upper left corner
-     res@gsnLeftString     = "Regress on "+ str_upper(mvarnam)+ " ("+varunt(jj)+")"
-     res@gsnRightString    = eof(n)+"("+eofmodvar+","+sprintf("%5.1f", eof1@pcvar(n)) +"%)"
-     res@gsnCenterString   = "" ;panelstr1
+  ;---Draw first plot in upper left corner
+     res@gsnLeftString     = left_string
+     res@gsnRightString    = right_string
+     res@gsnCenterString   = center_string
      if(n.eq.0)then
        res@tiMainString    = "" + panelstr1
      else
@@ -361,9 +366,9 @@ begin
      plot(n*3)   = gsn_csm_contour_map_polar(wks,eof1_regres(n,:,:),res)
 
     ;---Draw second plot in upper right corner
-     res@gsnLeftString     = "Regress on "+ str_upper(mvarnam)+ " ("+varunt(jj)+")"
-     res@gsnRightString    = eof(n)+"("+eofmodvar+","+sprintf("%5.1f", eof1@pcvar(n)) +"%)"
-     res@gsnCenterString   = "" ;panelstr2
+     res@gsnLeftString     = left_string
+     res@gsnRightString    = right_string
+     res@gsnCenterString   = center_string
      if(n.eq.0)then
        res@tiMainString    = ""+panelstr2
      else
@@ -373,10 +378,7 @@ begin
 
     ;---Draw third plot in upper right corner
      resd = res
-      resd@cnFillPalette     = "BlueDarkOrange18"
-     ;resd@cnMinLevelValF    = res@cnMinLevelValF  / 2.0 ; set the minimum contour level
-     ;resd@cnMaxLevelValF    = res@cnMaxLevelValF  / 2.0 ; set the maximum contour level
-     ;resd@cnLevelSpacingF   = res@cnLevelSpacingF / 2.0 ; *special* match CPC
+     resd@cnFillPalette     = "BlueDarkOrange18"
      resd@gsnLeftString     = "Difference ("+eof(n)+")"
      resd@gsnRightString    = pstring
      resd@gsnCenterString   = "" ;panelstr2

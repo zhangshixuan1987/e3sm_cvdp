@@ -169,8 +169,8 @@ begin
  ; Regress
  ; =================================================================
  ; read PC time series for regression
-   jet_file1  = opath +"/"+"Jet_index_"+cname+"_monthly_mean_"+jetmodvar+"_at_"+toint(jetplev)+"hPa_"+seasons(kk)+".nc"
-   jet_file2  = opath +"/"+"Jet_index_"+tname+"_monthly_mean_"+jetmodvar+"_at_"+toint(jetplev)+"hPa_"+seasons(kk)+".nc"
+   jet_file1  = opath +"/"+"Jet_index_"+tname+"_monthly_mean_"+jetmodvar+"_at_"+toint(jetplev)+"hPa_"+seasons(kk)+".nc"
+   jet_file2  = opath +"/"+"Jet_index_"+cname+"_monthly_mean_"+jetmodvar+"_at_"+toint(jetplev)+"hPa_"+seasons(kk)+".nc"
    fjet1      = addfile(jet_file1,"r")
    fjet2      = addfile(jet_file2,"r")
 
@@ -348,16 +348,20 @@ begin
 
   delete([/mnmxint/])
 
- ;*******************************************
- ; first plot
- ;*******************************************
-    res@mpLabelFontHeightF           = FontHeightF*2.0
-    res@gsnPolarLabelFontHeightF     = FontHeightF
+  res@mpLabelFontHeightF           = FontHeightF*2.0
+  res@gsnPolarLabelFontHeightF     = FontHeightF
 
-    ;---Draw first plot in upper left corner
-     res@gsnLeftString     = "Regression on "+mvarnam +" ("+regxAnom@units+")"
-     res@gsnRightString    = jetinfo(n) 
-     res@gsnCenterString   = "" ;panelstr1
+  left_string   = "Regress on ~C~"+ str_upper(mvarnam)+ " ("+varunt(jj)+")"
+  right_string  = jetinfo(n)
+  center_string = ""
+
+  ;*******************************************
+  ; first plot
+  ;*******************************************
+  ;---Draw first plot in upper left corner
+     res@gsnLeftString     = left_string
+     res@gsnRightString    = right_string
+     res@gsnCenterString   = center_string
      if(n.eq.0)then
        res@tiMainString    = "" + panelstr1
      else
@@ -366,9 +370,9 @@ begin
      plot(n*3)   = gsn_csm_contour_map_polar(wks,jet1_regres(n,:,:),res)
 
     ;---Draw second plot in upper right corner
-     res@gsnLeftString     = "Regression on "+mvarnam +" ("+regxAnom@units+")"
-     res@gsnRightString    = jetinfo(n)
-     res@gsnCenterString   = "" ;panelstr2
+     res@gsnLeftString     = left_string
+     res@gsnRightString    = right_string
+     res@gsnCenterString   = center_string
      if(n.eq.0)then
        res@tiMainString    = ""+panelstr2
      else

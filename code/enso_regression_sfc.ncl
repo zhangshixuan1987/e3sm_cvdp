@@ -155,8 +155,8 @@ begin
  ; Regress
  ; =================================================================
  ; read PC time series for regression
-   enso_file1  = opath +"/"+"ENSO_index_"+cname+"_monthly_mean_"+seasons(kk)+".nc"
-   enso_file2  = opath +"/"+"ENSO_index_"+tname+"_monthly_mean_"+seasons(kk)+".nc"
+   enso_file1  = opath +"/"+"ENSO_index_"+tname+"_monthly_mean_"+seasons(kk)+".nc"
+   enso_file2  = opath +"/"+"ENSO_index_"+cname+"_monthly_mean_"+seasons(kk)+".nc"
    fenso1      = addfile(enso_file1,"r")
    fenso2      = addfile(enso_file2,"r")
    ensox       = fenso1->enso
@@ -334,16 +334,18 @@ begin
 
   delete([/mnmxint/])
 
- ;*******************************************
- ; first plot
- ;*******************************************
-    res@mpLabelFontHeightF           = FontHeightF*2.0
-    res@gsnPolarLabelFontHeightF     = FontHeightF
-
+  left_string   = "Regress on ~C~"+ str_upper(mvarnam)+ " ("+varunt(jj)+")"
+  right_string  = ninoreg(n)
+  center_string = ""
+  res@mpLabelFontHeightF           = FontHeightF*2.0
+  res@gsnPolarLabelFontHeightF     = FontHeightF
+  ;*******************************************
+  ; first plot
+  ;*******************************************
     ;---Draw first plot in upper left corner
-    res@gsnLeftString    = "Regress on "+ str_upper(mvarnam)+ " ("+varunt(jj)+")"
-    res@gsnRightString   = ninoreg(n)
-    res@gsnCenterString   = "" ;panelstr1 
+    res@gsnLeftString     = left_string
+    res@gsnRightString    = right_string
+    res@gsnCenterString   = center_string
     if(n.eq.0)then
       res@tiMainString    = "" + panelstr1
     else
@@ -352,9 +354,9 @@ begin
     plot(n*3)   = gsn_csm_contour_map_polar(wks,enso1_regres(n,:,:),res)
 
     ;---Draw second plot in upper right corner
-    res@gsnLeftString    = "Regress on "+ str_upper(mvarnam)+ " ("+varunt(jj)+")"
-    res@gsnRightString   = ninoreg(n)
-    res@gsnCenterString   = "" ;panelstr2
+    res@gsnLeftString     = left_string
+    res@gsnRightString    = right_string
+    res@gsnCenterString   = center_string
     if(n.eq.0)then
       res@tiMainString    = "" + panelstr2
     else
@@ -365,10 +367,7 @@ begin
 
     ;---Draw third plot in upper right corner
      resd = res
-      resd@cnFillPalette     = "BlueDarkOrange18"
-     ;resd@cnMinLevelValF    = res@cnMinLevelValF  / 2.0 ; set the minimum contour level
-     ;resd@cnMaxLevelValF    = res@cnMaxLevelValF  / 2.0 ; set the maximum contour level
-     ;resd@cnLevelSpacingF   = res@cnLevelSpacingF / 2.0 ; *special* match CPC
+      resd@cnFillPalette    = "BlueDarkOrange18"
      resd@gsnLeftString     = "Difference ("+ninoreg(n)+")"
      resd@gsnRightString    = pstring
      resd@gsnCenterString   = "" ;panelstr2

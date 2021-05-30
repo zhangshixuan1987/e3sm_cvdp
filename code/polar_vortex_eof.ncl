@@ -44,17 +44,15 @@ begin
   modvars                                    = (/"Z3"/)
   facmod                                     = (/1.0/)
   varunt                                     = (/"m"/)
-  panelstr1                                  = cname
-  panelstr2                                  = tname
+  panelstr1                                  = tname + " ("+tttag+")"
+  panelstr2                                  = cname + " ("+cttag+")"
 
   if((cname.eq."ERA5").or.(cname.eq."ERA20C")) then
      obsvars                                 = (/"z"/)
      facobs                                  = (/1.0/grav/)
-     panelstr2                               = tname + " ("+cttag+")"
   else if (cname.eq."NOAA20C") then
      obsvars                                 = (/"hgt"/)
      facobs                                  = (/1.0/)
-     panelstr2                               = tname + " ("+cttag+")"
   else
     print("The observational source are not available; only allow ERA5, ERA20C or NOAA20C")
     exit
@@ -63,7 +61,7 @@ begin
 
 ;declear the season or annual mean data to be used;;;;;
   seasons                                    = (/"ANN","DJF","JJA"/)
-  pout                                    = (/300,50/)
+  pout                                       = (/300,50/)
   intyp                                      = 2
 
 ;read in two files
@@ -245,8 +243,8 @@ begin
         ;Save the data for the regression analysis
         ;======================================================================
          setfileoption("nc", "Format",  "NetCDF4")
-         out_file1  = opath +"/"+"Polar_vortex_PCS_"+cname+"_monthly_mean_"+mvarnam+"_at_"+toint(pout(ll))+"hPa_"+seasons(kk)+".nc"
-         out_file2  = opath +"/"+"Polar_vortex_PCS_"+tname+"_monthly_mean_"+mvarnam+"_at_"+toint(pout(ll))+"hPa_"+seasons(kk)+".nc"
+         out_file1  = opath +"/"+"Polar_vortex_PCS_"+tname+"_monthly_mean_"+mvarnam+"_at_"+toint(pout(ll))+"hPa_"+seasons(kk)+".nc"
+         out_file2  = opath +"/"+"Polar_vortex_PCS_"+cname+"_monthly_mean_"+mvarnam+"_at_"+toint(pout(ll))+"hPa_"+seasons(kk)+".nc"
 
          system("rm " + out_file1)
          system("rm " + out_file2)
