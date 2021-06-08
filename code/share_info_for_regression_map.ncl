@@ -102,10 +102,10 @@
   else if (l_regress .eq. "l_regress_jet") then
 
     maxlev         = 11
-    lev_jet        = (/ 200.,  0.5,   0.5,   0.5,  \
-                        0.5,   0.04,  0.04,  0.04, \
-                        8.,    4.,    4.,    8.,   \
-                        4.,    4.                    /)
+    lev_jet        = (/ 100.,  0.3,   0.3,   0.3,  \
+                        0.3,   0.02,  0.02,  0.02, \
+                        4.,    2.,    2.,    4.,   \
+                        2.,    2.                    /)
   else
 
    print("The source for regression plot is not clear, quit")

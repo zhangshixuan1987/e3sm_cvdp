@@ -15,6 +15,7 @@ begin
 
   compare                                    = getenv("COMPARE")
   outdir                                     = getenv("CASEDIR")
+  opath                                      = getenv("DIAG_DATA_ROOT")
 
   tpath                                      = getenv("TPATH")
   cpath                                      = getenv("CPATH")
@@ -31,6 +32,9 @@ begin
   refplev_file                               = getenv("REF_PRE_LEV")
   statistical_test                           = getenv("DIFFERENCE_TEST")
   statistical_siglev                         = 0.05
+
+  panelstr1                                  = tname + " ("+tttag+")"
+  panelstr2                                  = cname + " ("+cttag+")"
 
 ;define regions for plot
   latS                                       = -90.  ;negative for southern hemisphere
@@ -55,148 +59,111 @@ begin
   rearth                                    = 6.37122e6
   grav                                      = 9.806
 
-;read in two files
-
   do ll = 0, dimsizes(pout)-1
+
+  ;read in two files
+   file1  = opath +"/"+"HC_analysis_"+tname+"_monthly_mean.nc"
+   file2  = opath +"/"+"HC_analysis_"+cname+"_monthly_mean.nc"
+   exists = isfilepresent(file1).and.isfilepresent(file2)
+
+   if(.not.exists) then
+     f                                       = systemfunc("ls "+tpath+"/"+tcase+"*"+tttag+".nc")
+     f1                                      = addfile(f,"r")
+     gw1                                     = f1->gw
+     f                                       = systemfunc("ls "+cpath+"/"+ccase+"*"+cttag+".nc")
+     f2                                      = addfile(f,"r")
+     gw2                                     = f2->gw
+     load "./function_hadley_cell_analysis.ncl"
+     fin1 = addfile(file1,"r")
+     fin2 = addfile(file2,"r")
+   else
+     fin1 = addfile(file1,"r")
+     fin2 = addfile(file2,"r")
+   end if
+
+    um    = fin1->U
+    vm    = fin1->V
+    wm    = fin1->W
+    sfm   = fin1->SF
+
+    uo    = fin2->U
+    vo    = fin2->V                               
+    wo    = fin2->W
+    sfo   = fin2->SF
  
-      f                                       = systemfunc("ls "+tpath+"/"+tcase+"*"+tttag+".nc")
-      f1                                      = addfile(f,"r")
-      gw1                                     = f1->gw
+    sfm!0="time"
+    sfm!1="lev"
+    sfm!2="lat"
+    sfm&lat = fin1->lat
 
-      f                                       = systemfunc("ls "+cpath+"/"+ccase+"*"+cttag+".nc")
-      f2                                      = addfile(f,"r")
-      gw2                                     = f2->gw
 
-     ; =================================================================
-     print ("Start to process the cross-section of  selected variables ")
-     load "./share_info_for_hadley_cell_var.ncl"
+    sfo!0="time"
+    sfo!1="lev"
+    sfo!2="lat"
+    sfo&lat = fin2->lat
 
-        um                                  = vinth2p(f1->$modvars(0)$,f1->hyam,f1->hybm,pinterp,f1->PS,intyp,f1->P0/100.0,1,False)
-        vm                                  = vinth2p(f1->$modvars(1)$,f1->hyam,f1->hybm,pinterp,f1->PS,intyp,f1->P0/100.0,1,False)
-        wm                                  = vinth2p(f1->$modvars(2)$,f1->hyam,f1->hybm,pinterp,f1->PS,intyp,f1->P0/100.0,1,False)
-        
-        if(compare.ne."Model_vs_OBS") then
-          uo                                = vinth2p(f2->$modvars(0)$,f2->hyam,f2->hybm,pinterp,f2->PS,intyp,f2->P0/100.0,1,False)
-          vo                                = vinth2p(f2->$modvars(1)$,f2->hyam,f2->hybm,pinterp,f2->PS,intyp,f2->P0/100.0,1,False)
-          wo                                = vinth2p(f2->$modvars(2)$,f2->hyam,f2->hybm,pinterp,f2->PS,intyp,f2->P0/100.0,1,False)
-        end if
+    copy_VarCoords(sfm,wm)
+    copy_VarCoords(sfm,vm)
+    copy_VarCoords(sfm,um)
+    copy_VarCoords(sfo,wo)
+    copy_VarCoords(sfo,vo)
+    copy_VarCoords(sfo,uo)   
 
-        if(compare.eq."Model_vs_OBS") then
-           uo                               = int2p_n_Wrap(f2->lev,f2->$obsvars(0)$,pinterp, intyp, 1) 
-           vo                               = int2p_n_Wrap(f2->lev,f2->$obsvars(1)$,pinterp, intyp, 1)
-           wo                               = int2p_n_Wrap(f2->lev,f2->$obsvars(2)$,pinterp, intyp, 1)
-        end if
+    ;printMinMax(sfm,False)
+    ;printMinMax(sfo,False)       
+    ;printMinMax(wm,False)
+    ;printMinMax(wo,False)
 
-        um@_FillValue                       = -9999.
-        vm@_FillValue                       = -9999.
-        wm@_FillValue                       = -9999.
-        vo@_FillValue                       = -9999.
-        uo@_FillValue                       = -9999.
-        vo@_FillValue                       = -9999.
-
-        if(compare.eq."Model_vs_OBS") then
-          um                                = um*facmod(0)
-          uo                                = uo*facobs(0)
-          vm                                = vm*facmod(1)
-          vo                                = vo*facobs(1)
-          wm                                = wm*facmod(2)
-          wo                                = wo*facobs(2)
-        else
-          um                                = um*facmod(0)
-          uo                                = uo*facmod(0)
-          vm                                = vm*facmod(1)
-          vo                                = vo*facmod(1)
-          wm                                = wm*facmod(2)
-          wo                                = wo*facmod(2)
-        end if
-
-        um@units                            = varunt(0)
-        uo@units                            = varunt(0)
-        vm@units                            = varunt(1)
-        vo@units                            = varunt(1)
-        wm@units                            = varunt(2)
-        wo@units                            = varunt(2)
-
-        ;;check the two comparing files and see if they are in the same grid,
-        ddd1                                  = dimsizes(um)
-        ddd2                                  = dimsizes(uo)
-        ;;otherwise, return the error message;;;;
-        if ((ddd1(2).ne.ddd2(2)).or.(ddd1(3).ne.ddd2(3)))then
-          print("Error: this scripts requires the two files must in the same grid to run!!!")
-          return
-        end if
-
-        printVarSummary(wm)
-      ;derive the stream function and velocity potential 
-        sfvpm  = uv2sfvpF (um,vm) 
-        sfvpo  = uv2sfvpF (uo,vo) 
-        sfm    = sfvpm(0,:,:,:,:)
-        sfo    = sfvpo(0,:,:,:,:)
-
-        ;======================================================================
-        ;Save the derived data for the future use 
-        ;======================================================================
-         setfileoption("nc", "Format",  "NetCDF4")
-         out_file1  = opath +"/"+"EOF_PCS_"+cname+"_monthly_mean_"+mvarnam+"_at_"+toint(pout(ll))+"hPa_"+seasons(kk)+".nc"
-         out_file2  = opath +"/"+"EOF_PCS_"+tname+"_monthly_mean_"+mvarnam+"_at_"+toint(pout(ll))+"hPa_"+seasons(kk)+".nc"
-
-         system("rm " + out_file1)
-         system("rm " + out_file2)
-
-         fout1 = addfile(out_file1,"c")
-         fout2 = addfile(out_file2,"c")
-
-         time1 = eof1_ts&time
-         time2 = eof2_ts&time
-         time1!0 = "time"
-         time2!0 = "time"
-         time1&time = time1
-         time2&time = time2
-
-         fout1->time         = time1
-         fout2->time         = time2
-         eof1@description    = "EOF pattern"
-         eof2@description    = "EOF pattern"
-         eof1_ts@description = "EOF PCs (standardized)"
-         eof2_ts@description = "EOF PCs (standardized)"
-
-         fout1->eof      = eof1
-         fout2->eof      = eof2
-         fout1->eof_ts   = eof1_ts
-         fout2->eof_ts   = eof2_ts
-
-         delete([/time1,time2,fout1,fout2,out_file1,out_file2/])
-
-        printMinMax(sfm,False)
-        printMinMax(sfo,False)       
-        exit
- 
-
-        do kk = 0, dimsizes(seasons)-1
+    do kk = 0, dimsizes(seasons)-1
 
         ;;;;;;select the data for plots;;;;;;;;;;;;;;;;;;;;;;;;;;;
         if(seasons(kk).eq."ANN")then
-          vp1                          = month_to_annual(var1(:,:,{latS:latN},:),1)
-          vp2                          = month_to_annual(var2(:,:,{latS:latN},:),1)
+          u1                          = month_to_annual(um(:,:,{latS:latN}),1)
+          v1                          = month_to_annual(vm(:,:,{latS:latN}),1)
+          w1                          = month_to_annual(wm(:,:,{latS:latN}),1)
+          sf1                         = month_to_annual(sfm(:,:,{latS:latN}),1)
+          u2                          = month_to_annual(uo(:,:,{latS:latN}),1)
+          v2                          = month_to_annual(vo(:,:,{latS:latN}),1)
+          w2                          = month_to_annual(wo(:,:,{latS:latN}),1)
+          sf2                         = month_to_annual(sfo(:,:,{latS:latN}),1)
         else
-          vp1                          = month_to_season(var1(:,:,{latS:latN},:),seasons(kk))
-          vp2                          = month_to_season(var2(:,:,{latS:latN},:),seasons(kk))
+          u1                          = month_to_season(um(:,:,{latS:latN}),seasons(kk))
+          v1                          = month_to_season(vm(:,:,{latS:latN}),seasons(kk))
+          w1                          = month_to_season(wm(:,:,{latS:latN}),seasons(kk))
+          sf1                         = month_to_season(sfm(:,:,{latS:latN}),seasons(kk))
+          u2                          = month_to_season(uo(:,:,{latS:latN}),seasons(kk))
+          v2                          = month_to_season(vo(:,:,{latS:latN}),seasons(kk))
+          w2                          = month_to_season(wo(:,:,{latS:latN}),seasons(kk))
+          sf2                         = month_to_season(sfo(:,:,{latS:latN}),seasons(kk))
         end if
-        vp1!0="time"
-        vp1!1="lev"
-        vp1!2="lat"
-        vp1!3="lon"
 
-        vp2!0="time"
-        vp2!1="lev"
-        vp2!2="lat"
-        vp2!3="lon"
+       sf1!0="time"
+       sf1!1="lev"
+       sf1!2="lat"
+       sf1&lat = fin1->lat
+
+       sf2!0="time"
+       sf2!1="lev"
+       sf2!2="lat"
+       sf2&lat = fin2->lat
+
+
+       copy_VarCoords(sf1,u1)
+       copy_VarCoords(sf1,v1)
+       copy_VarCoords(sf1,w1)
+
+       copy_VarCoords(sf2,u2)
+       copy_VarCoords(sf2,v2)
+       copy_VarCoords(sf2,w2)
 
        if(str_lower(statistical_test).eq."true")then
 
+         rad   = 4.0*atan(1.0)/180.0
+         gw1   = cos(fin1->lat*rad)
+         gw2   = cos(fin2->lat*rad)
          l_plot_ttest = True
-         vpt1 = dim_avg_n_Wrap(vp1,3)
-         vpt2 = dim_avg_n_Wrap(vp2,3) 
+         vpt1 = sf1
+         vpt2 = sf2
          xtmp = vpt1(lev|:,lat|:,time|:)       ; reorder but do it only once [temporary]
          ytmp = vpt2(lev|:,lat|:,time|:)
          xAve = dim_avg (xtmp)              ; calculate means at each grid point
@@ -209,55 +176,88 @@ begin
          yN   = dim_avg_n(dim_avg_wgt_n(yEqv, gw2, 0, 1),0)
          iflag = True                       ; population variance similar
          prob  = ttest(xAve,xVar,xN, yAve,yVar,yN, iflag, False)
-         delete([/vpt1,vpt2,xtmp,ytmp,xAve,yAve,xVar,yVar,xEqv,yEqv,xN,yN/])
+         delete([/vpt1,vpt2,xtmp,ytmp,xAve,yAve,xVar,yVar,xEqv,yEqv,xN,yN,gw1,gw2/])
 
        end if
 
-       vp1a                                = dim_avg_n_Wrap(dim_avg_n_Wrap(vp1,3),0)
-       vp2a                                = dim_avg_n_Wrap(dim_avg_n_Wrap(vp2,3),0)
+       u1a                                = dim_avg_n_Wrap(u1,0)
+       v1a                                = dim_avg_n_Wrap(v1,0)
+       w1a                                = dim_avg_n_Wrap(w1,0)
+       sf1a                               = dim_avg_n_Wrap(sf1,0)
 
-       vp1a@_FillValue                     = -9999.
-       vp2a@_FillValue                     = -9999.
+       u2a                                = dim_avg_n_Wrap(u2,0)
+       v2a                                = dim_avg_n_Wrap(v2,0)
+       w2a                                = dim_avg_n_Wrap(w2,0)
+       sf2a                               = dim_avg_n_Wrap(sf2,0)
 
-       vp1b                                = where(abs(vp1a) .lt. 1.e-1, vp1a@_FillValue, vp1a)
-       vp2b                                = where(abs(vp2a) .lt. 1.e-1, vp2a@_FillValue, vp2a)
-       vp1b                                = where(ismissing(vp2b), vp1a@_FillValue, vp1b)
-       vp2b                                = where(ismissing(vp1b), vp2a@_FillValue, vp2b)
+       u1a@_FillValue                     = -9999.
+       v1a@_FillValue                     = -9999.
+       w1a@_FillValue                     = -9999.
+       sf1a@_FillValue                    = -9999.
 
-       adiff                               = vp1a
-       adiff                               = vp1a-vp2a
+       u2a@_FillValue                     = -9999.
+       v2a@_FillValue                     = -9999.
+       w2a@_FillValue                     = -9999.
+       sf2a@_FillValue                    = -9999.
 
-       rdiff                               = vp1a
-       rdiff                               = (vp1b-vp2b)/abs(vp2b)*100.
+       uadiff                             = u2a
+       uadiff                             = u1a-u2a
 
-       prob0                               = adiff
-       prob0                               = (1.0 - prob)*100.0
-       prob0                               = where(prob.le.statistical_siglev,prob0,prob0@_FillValue)
+       vadiff                             = v2a
+       vadiff                             = v1a-v2a
 
+       wadiff                             = w2a
+       wadiff                             = w1a-w2a
+
+       sfadiff                            = sf2a
+       sfadiff                            = sf1a-sf2a
+
+       prob0                              = sfadiff
+       prob0                              = (1.0 - prob)*100.0
+       prob0                              = where(prob.le.statistical_siglev,prob0,prob0@_FillValue)
 
        ;;;;;;;;;;start to process the figure ;;;;;;;
-        plot                                = new((/4/),graphic)
-        wtype                               = "eps"
-        figdir                              = outdir+"/Pressure-Latitude_Zonal_Mean_Contour/"
-        fe                                  = modvars(jj)+"_"+seasons(kk)+"_lathgt"+"_"+pout(ll)
-        wks                                 = gsn_open_wks(wtype, figdir + fe)
+       plot                                = new((/3/),graphic)
+       wtype                               = "eps"
+       figdir                              = outdir+"/Hadley_Cell_Analysis/"
+       fe                                  = "Hadelay_circulation_"+seasons(kk)+"_lathgt"+"_"+pout(ll)
+       wks                                 = gsn_open_wks(wtype, figdir + fe)
 
-        gsn_merge_colormaps(wks,"amwg","amwg_blueyellowred")             ; merge two color maps
+       gsn_merge_colormaps(wks,"amwg","amwg_blueyellowred")             ; merge two color maps
 
-        load "./share_color_bar_for_cross_section.ncl"
-
+       load "./share_color_bar_for_hadley_analysis.ncl"
+       sf1a    = sf1a*facsfm
+       sf2a    = sf2a*facsfm
+       sfadiff = sfadiff*facsfm
+       w1a     = w1a*100.0
+       w2a     = w2a*100.0
+       wadiff  = wadiff*100.0
     ;;;;;;;;;;;;;;;;;;;;;;;;;
     ;
     ;    Make the Plot
     ;
     ;;;;;;;;;;;;;;;;;;;;;;;;;
            res                              = True                  ; plot mods desired
-           res@vpWidthF                     = 0.6
-           res@vpHeightF                    = 0.6
+           res@vpWidthF                     = 1.0
+           res@vpHeightF                    = 0.5
            res@gsnFrame                     = False                 ; Do not draw plot
            res@gsnDraw                      = False                 ; Do not advance frame
           ;res@gsnMajorLatSpacing           =  10             ;-- change major lat tickmark spacing
           ;res@gsnMinorLatSpacing           =  2.5            ;-- change major lat tickmark spacing
+
+           FontHeightF = 0.028
+           res@tiMainFontThicknessF          = 3.0
+           res@tiMainFontHeightF             = FontHeightF*1.2
+           res@tmYLLabelFontHeightF          = FontHeightF
+           res@tmXBLabelFontHeightF          = FontHeightF
+           res@tiXAxisFontHeightF            = FontHeightF
+           res@tiYAxisFontHeightF            = FontHeightF
+           res@gsnStringFontHeightF          = FontHeightF
+           res@cnLineLabelFontHeightF        = FontHeightF
+           res@lbLabelFontHeightF            = FontHeightF*0.8
+           res@lbTitleFontHeightF            = FontHeightF*0.8
+           res@lbLabelFontHeightF            = FontHeightF*0.8
+           res@lbTitleFontHeightF            = FontHeightF*0.8
 
            res@cnFillOn                     = True                  ; turn on color fill
            res@cnLinesOn                    = False                 ; no contour lines
@@ -265,7 +265,6 @@ begin
            res@cnMissingValFillColor        = "White" ;"gray76"               ; black = 1
 
            res@tmXTOn                       = False
-           res@tmYLLabelFontHeightF         = 0.025
            res@tmBorderThicknessF           = 1.0
            res@tmXBMajorThicknessF          = 1.0
            res@tmXBMinorThicknessF          = 1.0
@@ -276,51 +275,104 @@ begin
            res@tmYRMode                     = "Automatic"          ; turn off special labels on right axis
 
            res@tmXBMode                     = "Explicit"	
-           res@tmXBValues                   = ispan(toint(latS),toint(latN),30)
-           res@tmXBLabels                   = (/"90S","60S","30S","0", \
-                                                "30N","60N","90N"/)
-           res@tmXBMinorValues              = ispan(toint(latS),toint(latN),15)
-
+           res@tmXBValues                   = XBValues
+           res@tmXBLabels                   = XBLabels
+           res@tmXBMinorValues              = XBMinorValues
            res@tmYLMode                     = "Explicit"                ; explicit labels
-           res@tmYLValues                   = (/ 1000, 850, 700, 500, 300, 200, 100, 10, 1/)
+           res@tmYLValues                   = YLValues 
            res@tmYLLabels                   = ""+res@tmYLValues         ; make strings
 
-           res@lbLabelBarOn                 = True
-           res@lbOrientation                = "Vertical"
            res@cnInfoLabelOn                = False
-           res@cnLevelSelectionMode         = "ExplicitLevels"       ; manual levels
-           res@cnLevels                     = sprintf("%5.2f",s1)
-           res@cnFillColors                 = (/3,4,5,6,7,8,9,10,11,12,13,14,15/)
-           res@gsnRightStringFontHeightF    = 0.025
            res@gsnRightStringOrthogonalPosF = 0.02
            res@trYReverse                   = True
            res@tiYAxisString                = "Pressure (hPa)"
-           res@gsnLeftStringFontHeightF     = 0.025
            res@gsnLeftStringOrthogonalPosF  = 0.015
-
            res@tiMainString                 = panelstr1
-           res@gsnLeftString                = str_upper(modvars(jj))+" (unit: "+ vp1a@units+")" ;"relative diff. (%)"
-           res@gsnRightString               = "mean: "+sprintf("%5.2f",avg(vp1a(:,:)))
-           plot(0)              = gsn_csm_contour(wks,vp1a(:,:),res)
+           res@gsnLeftString                = leftstring
+           res@gsnRightString               = "Global mean: "+sprintf("%5.2f",avg(sf1a(:,:)))
 
-           res@tiMainString                 = panelstr2
-           res@gsnLeftString                = str_upper(modvars(jj))+" (unit: "+ vp1a@units+")" ;"relative diff. (%)"
-           res@gsnRightString               = "mean: "+sprintf("%5.2f",avg(vp2a(:,:)))
-           plot(1)              = gsn_csm_contour(wks,vp2a(:,:),res)
+           res0 = res
+           res0@cnFillOn                     = False                  ; turn on color fill
+           res0@cnLinesOn                    = True                 ; no contour lines
+           res0@cnLineLabelsOn               = True
+           res0@cnMissingValFillColor        = "White" ;"gray76"               ; black = 1
+           res0@cnLineColor                  = "Blue3"
+           res0@cnInfoLabelOn                = False
+           res0@cnLevelSelectionMode         = "ExplicitLevels"       ; manual levels
+           res0@cnLevels                    := s3
+           res0@cnLineLabelInterval          = 1             ; default = 2
+           res0@cnLineLabelFontColor         = res0@cnLineColor
+           res0@cnLineLabelPlacementMode     = "constant"    ; choose constant label method
+           res0@tiMainString                 = ""
+           res0@gsnLeftString                = ""
+           res0@gsnRightString               = ""
+           plotC   = gsn_csm_contour(wks,u1a,res0)
+           plotD   = gsn_csm_contour(wks,u2a,res0)
 
-           res@cnLevels                     = sprintf("%7.2e",s2)
-           res@cnFillColors                 = (/18,20,21,22,23,24,0,27,28,29,30,31,33/)              ; contour interval
+           vecres                           = True            ; vector only resources
+           vecres@gsnDraw                   = False           ; don't draw
+           vecres@gsnFrame                  = False           ; don't advance frame
+           vecres@vcGlyphStyle              = "LineArrow";"CurlyVector"   ; curly vectors
+           vecres@vcRefLengthF              = 0.04            ; define length of vec ref
+           vecres@vcMinDistanceF            = 0.015 
+           vecres@gsnRightString            = " "             ; turn off right string
+           vecres@gsnLeftString             = " "             ; turn off left string
+           vecres@tiXAxisString             = " "             ; turn off axis label 
+           vecres@vcMapDirection            = False
+           vecres@vcRefAnnoOrthogonalPosF   = -0.12    ; move ref vector into plot
+           vecres@vcRefAnnoPerimOn          = False
+           vecres@vcRefAnnoParallelPosF     = 1.2    ; move ref vector into plot
+           vecres@vcRefAnnoFontHeightF      = FontHeightF*0.5
+           vecres@vcRefMagnitudeF           = 1.0               ; define vector ref mag
+           vecres@vcRefAnnoString1          = vecres@vcRefMagnitudeF+ " (v,w*100)" ;" m s~S~-1~N~"
+           vecres@vcRefAnnoString2          = ""; "(v,w*100)"
+    
+           res1 = res
+           res1@lbLabelBarOn                 = True
+           res1@lbOrientation                = "Vertical"
+           res1@cnInfoLabelOn                = False
+           res1@cnLevelSelectionMode         = "ExplicitLevels"       ; manual levels
+           res1@cnFillPalette                = Contour_color_bar
+           res1@cnLevels                     = sprintf("%5.2f",s1)
+          ;res1@cnFillColors                 = (/3,4,5,6,7,8,9,10,11,12,13,14,15/)
+           res1@tiMainString                 = panelstr1
+           res1@gsnLeftString                = leftstring
+           res1@gsnRightString               = "Global mean: "+sprintf("%5.2f",avg(sf1a(:,:)))
 
-           res@tiMainString                 = panelstr1 + " - " + panelstr2 ; "absolute difference"
-           res@gsnLeftString                = str_upper(modvars(jj))+" (unit: "+ vp1a@units+")" ;"relative diff. (%)"
-           res@gsnRightString               = "mean: "+sprintf("%5.2f",avg(adiff(:,:)))
-           plot(2)              = gsn_csm_contour(wks,adiff(:,:),res)
+           plotA   = gsn_csm_contour(wks,sf1a,res1)
+           plotB   = gsn_csm_vector(wks,v1a,w1a,vecres)
+           overlay(plotA,plotB)                      ; result will be plotA
+           overlay(plotA,plotC)                      ; result will be plotA
+           plot(0) = plotA                           ; now assign plotA to array
 
-           res@cnLevels                     = sprintf("%7.2f",s3)
-           res@tiMainString                 = "relative diff. (%)"
-           res@gsnLeftString                = str_upper(modvars(jj))+" (unit: "+ vp1a@units+")" ;"relative diff. (%)"
-           res@gsnRightString               = "mean: "+sprintf("%5.2f",avg(rdiff(:,:)))
-           plot(3)              = gsn_csm_contour(wks,rdiff(:,:),res)
+           res1@tiMainString                 = panelstr2
+           res1@gsnLeftString                = leftstring
+           res1@gsnRightString               = "Global mean: "+sprintf("%5.2f",avg(sf2a(:,:)))
+           plotA   = gsn_csm_contour(wks,sf2a,res1)
+           plotB   = gsn_csm_vector(wks,v2a,w2a,vecres)
+           overlay(plotA,plotB)                      ; result will be plotA
+           overlay(plotA,plotD)                      ; result will be plotA
+           plot(1) = plotA                           ; now assign plotA to array
+
+           res2 = res
+           res2@lbLabelBarOn                 = True
+           res2@lbOrientation                = "Vertical"
+           res2@cnInfoLabelOn                = False
+           res2@cnLevelSelectionMode         = "ExplicitLevels"       ; manual levels
+           res2@cnFillPalette                = Diff_corlor_bar
+           res2@cnLevels                     = sprintf("%7.2e",s2)
+           res2@cnFillColors                 = (/3,4,5,6,7,8,9,10,11,12,13,14,15/)
+           res2@tiMainString                 = panelstr1 + " - " + panelstr2 ; "absolute difference"
+           res2@gsnLeftString                = leftstring
+           res2@gsnRightString               = "Global mean: "+sprintf("%5.2f",avg(sfadiff(:,:)))
+           plotA   = gsn_csm_contour(wks,sfadiff,res2)
+
+           vecres@vcRefMagnitudeF           = 0.5               ; define vector ref mag
+           vecres@vcRefAnnoString1          = vecres@vcRefMagnitudeF +" (~F33~D~N~~F~v,~F33~D~N~~F~w*100)" ;+ " m s~S~-1~N~"
+           vecres@vcRefAnnoString2          = "" ;"(~F33~D~N~~F~v,~F33~D~N~~F~w*100)"
+           plotB   = gsn_csm_vector(wks,vadiff,wadiff,vecres)
+           overlay(plotA,plotB)                      ; result will be plotA
+           plot(2) = plotA                           ; now assign plotA to array
 
            rescn2 = res
            rescn2@lbLabelBarOn    = False 
@@ -329,20 +381,17 @@ begin
            rescn2@gsnRightString  = ""
            rescn2@cnMinLevelValF  = (1.0 - statistical_siglev)*100.0
            rescn2@cnMaxLevelValF  = 100.0
-           rescn2@cnLevelSpacingF = 10.
+           rescn2@cnLevelSpacingF = 1.
            rescn2@cnMonoFillPattern = True  
            rescn2@cnMonoFillColor = True 
            rescn2@cnFillMode      = "AreaFill" ; raster fill significance patterns
            rescn2@cnFillPattern   = 17
            rescn2@cnFillDotSizeF  = 0.002
-           rescn2@cnFillColors    = "black"
            rescn2@cnFillColor     = "black"
            rescn2@cnFillOpacityF  = 0.5 
-           plotA = gsn_csm_contour(wks,prob0,rescn2) ; contours are at 95,100
-           plotB = gsn_csm_contour(wks,prob0,rescn2) ; contours are at 95,100
-
-           overlay(plot(2),plotA)
-           overlay(plot(3),plotB)
+           ;plotA = gsn_csm_contour(wks,prob0,rescn2) ; contours are at 95,100
+           ;plotB = gsn_csm_contour(wks,prob0,rescn2) ; contours are at 95,100
+           ;overlay(plot(2),plotA)
 
            pres                             = True        ; panel plot mods desired
            pres@gsnMaximize                 = False       ; fill the page
@@ -351,18 +400,16 @@ begin
            pres@gsnPanelXWhiteSpacePercent  = 3.
            pres@gsnPanelYWhiteSpacePercent  = 5.
            pres@txString                    = str_upper(compare)+" ("+seasons(kk)+")"
-           gsn_panel(wks,(/plot(:)/),(/2,2/),pres)
+           gsn_panel(wks,(/plot(:)/),(/3,1/),pres)
 
            delete([/plotA,plotB/])
 
-           delete([/vp1a,vp2a,adiff,rdiff,vp1,vp2,vp1b,vp2b,wks/])
+           delete([/u1a,v1a,w1a,sf1a,u2a,v2a,w2a,sf2a/])
+           delete([/uadiff,wadiff,sfadiff,wks/])
 
-        delete([/plot,res,pres,s1,s2,s3/])
+        delete([/plot,res,pres,s1,s2/])
 
      end do          ; end of looping over seasonsons
-
-     delete([/f1,gw1,var1,ddd1/])
-     delete([/f2,gw2,var2,ddd2/])
 
  end do
  

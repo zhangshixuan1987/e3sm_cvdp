@@ -354,6 +354,15 @@ begin
          xa_pos@description = "jet position (anomaly value)"
          ya_pos@description = "jet position (anomaly value)"
 
+         x_ins@units        = varunt(jj)
+         y_ins@units        = varunt(jj)
+         xa_ins@units       = varunt(jj)
+         ya_ins@units       = varunt(jj)
+         x_pos@units        = "1 Degree"
+         y_pos@units        = "1 Degree"
+         xa_pos@units       = "1 Degree"
+         ya_pos@units       = "1 Degree"
+
          fout1->jeto_ins   = x_ins
          fout2->jeto_ins   = y_ins
          fout1->jeto_pos   = x_pos

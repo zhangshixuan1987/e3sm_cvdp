@@ -105,11 +105,6 @@ begin
    regy1  = var2(:,{latS:latN},:)
    delete([/var1,var2/])
 
-   latx1  = regx1&lat
-   lonx1  = regx1&lon
-   latx2  = regy1&lat
-   lonx2  = regy1&lon
-
  ; ==============================================================
  ; compute climatology and Anomalies
  ; ==============================================================
@@ -179,10 +174,15 @@ begin
 
    jet1       = new((/njetind,ddjet1(0)/),typeof(regxAnom))
    jet2       = new((/njetind,ddjet2(0)/),typeof(regyAnom))
+   junit      = new(njetind,string)
+
    jet1(0,:)  = fjet1->jetd_ins
    jet1(1,:)  = fjet1->jetd_pos
    jet2(0,:)  = fjet2->jetd_ins
    jet2(1,:)  = fjet2->jetd_pos
+
+   junit(0)   = fjet1->jetd_ins@units
+   junit(1)   = fjet1->jetd_pos@units
 
    jet1_regres = new((/njetind,ddjet1(1),ddjet1(2)/),typeof(regxAnom))     ; create an array w meta data
    jet2_regres = new((/njetind,ddjet2(1),ddjet2(2)/),typeof(regyAnom))     ; create an array w meta data
@@ -291,6 +291,8 @@ begin
 
    pstring   = smbias + "~C~" + smrmsd + "~C~" + smcorr
 
+   lbtitle   = mvarnam +" ("+regxAnom@units+") / unit change ("+junit(n)+")"
+
  ;============================================================
  ; PLOTS
  ;============================================================
@@ -317,7 +319,7 @@ begin
 
    res@lbLabelBarOn             = True
    res@lbOrientation            = "Vertical"
-   res@lbTitleString            = mvarnam +" ("+regxAnom@units+")" ;Geopential height (gpm)";
+   res@lbTitleString            = lbtitle
    res@lbTitlePosition          = "Right"                           ; title location
    res@lbTitleDirection         = "Across"                          ; letter angle
    res@lbTitleAngleF            = 90.                               ; title angle

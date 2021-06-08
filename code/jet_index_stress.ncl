@@ -41,8 +41,8 @@ begin
  print(cname + " " +tname)
 ;variable name in the climo file
   modvars                                    = (/"TAUX"/)
-  facmod                                     = (/-1.0/)
-  varunt                                     = (/"m~S~2~N~ s~S~-2~N~"/)
+  facmod                                     = (/-100.0/)
+  varunt                                     = (/"10~S~-2~N~ m~S~2~N~ s~S~-2~N~"/)
   panelstr1                                  = tname + " ("+tttag+")"
   panelstr2                                  = cname + " ("+cttag+")"
 
@@ -50,13 +50,13 @@ begin
 
    if (cname.eq."ERA5") then
      obsvars                                 = (/"metss"/)
-     facobs                                  = (/1.0/)
+     facobs                                  = (/100.0/)
    else if (cname.eq."ERA20C") then
      obsvars                                 = (/"iews"/)
-     facobs                                  = (/1.0/)
+     facobs                                  = (/100.0/)
    else if (cname.eq."NOAA20C") then 
      obsvars                                 = (/"metss"/)
-     facobs                                  = (/1.0/)
+     facobs                                  = (/100.0/)
    else
      print("The observational source are not available; only allow ERA5, ERA20C or NOAA20C")
      exit
@@ -328,7 +328,6 @@ begin
 
          fout1->time         = time1
          fout2->time         = time2
-
          x_ins@description = "jet strength (original value)"
          y_ins@description = "jet strength (original value)"
          x_pos@description = "jet position (original value)"
@@ -337,6 +336,14 @@ begin
          ya_ins@description = "jet strength (anomaly value)"
          xa_pos@description = "jet position (anomaly value)"
          ya_pos@description = "jet position (anomaly value)"
+         x_ins@units        = varunt(jj)
+         y_ins@units        = varunt(jj)
+         xa_ins@units       = varunt(jj)
+         ya_ins@units       = varunt(jj)
+         x_pos@units        = "1 Degree"
+         y_pos@units        = "1 Degree"
+         xa_pos@units       = "1 Degree"
+         ya_pos@units       = "1 Degree"
 
          fout1->jeto_ins   = x_ins
          fout2->jeto_ins   = y_ins
@@ -427,8 +434,8 @@ begin
 
         ;define maximum and minimum range for plot
          maxlev = 11
-         minval = -0.2
-         maxval =  0.2
+         minval = -20
+         maxval =  20
          res@cnLevelSelectionMode = "ManualLevels"
         ; manually set the contour levels with the following 3 resources
          mnmxint = nice_mnmxintvl( minval, maxval, maxlev, False)
@@ -495,7 +502,7 @@ begin
 
 
           rts@trYMinF                      =  0.0
-          rts@trYMaxF                      =  0.4
+          rts@trYMaxF                      =  40.0
           rts@tiXAxisString                = xstring 
           rts@tiYAxisString                = ystring 
 
