@@ -10,10 +10,12 @@
 
   if(compare.eq."Model_vs_OBS") then
 
-   if((cname.ne."ERA5").and.(cname.ne."ERA20C")) then
+   if((cname.ne."ERA5").and.(cname.ne."ERA20C").and.(cname.ne."ERA_20C")) then
+
      print("The observational source are not available; only allow ERA5, ERA20C or NOAA20C")
-     print("Error occurs at share_info_for_latlon_map.ncl")
+     print("Error occurs at share_info_for_vector_map.ncl")
      exit
+
    end if
 
   end if 

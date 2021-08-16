@@ -38,7 +38,7 @@
 
   if(compare.eq."Model_vs_OBS") then
 
-   if((cname.eq."ERA5").or.(cname.eq."ERA20C")) then
+   if((cname.eq."ERA5").or.(cname.eq."ERA20C").or.(cname.eq."ERA_20C")) then
 
      obsvars = (/  "tcc",     "lcc",      "hcc",        "tclw",         "tciw",      \
                    "mcpr",    "mlspr",    "mtpr",       "msr",                       \
@@ -62,7 +62,7 @@
                    1,              1,             1e-2,         1,            1,        \
                    1e2,            1e2,          1,            1,            1         /)
 
-   else if (cname.eq."NOAA20C") then
+   else if ((cname.eq."NOAA20C").or.(cname.eq."NOAA_20C")) then
 
       obsvars = (/ "tcc",     "lcc",      "hcc",        "tclw",          "tciw",      \
                    "pcpr",    "plspr",    "prate",      "PRECST",                     \

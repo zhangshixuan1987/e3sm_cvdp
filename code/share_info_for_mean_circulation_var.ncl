@@ -8,12 +8,12 @@
 
   if(compare.eq."Model_vs_OBS")then 
 
-   if((cname.eq."ERA5").or.(cname.eq."ERA20C")) then
+   if((cname.eq."ERA5").or.(cname.eq."ERA20C").or.(cname.eq."ERA_20C")) then
 
      obsvars                                 = (/"u", "v", "w","t","sp","ttr"/)
      facobs                                  = (/  1,  1,  100, 1, 1, -1/86400.0/)
 
-   else if (cname.eq."NOAA20C") then
+   else if ((cname.eq."NOAA20C").or.(cname.eq."NOAA_20C")) then
 
      obsvars                                 = (/"uwnd","vwnd","omega","air","psfc","rlut"/)
      facobs                                  = (/  1,      1,   100,     1,   1, 1/)

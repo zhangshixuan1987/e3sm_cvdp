@@ -51,10 +51,10 @@ begin
 
   if(compare.eq."Model_vs_OBS")then
 
-   if((cname.eq."ERA5").or.(cname.eq."ERA20C")) then
+   if((cname.eq."ERA5").or.(cname.eq."ERA20C").or.(cname.eq."ERA_20C")) then
      obsvars                                 = (/"msl","skt","t2m","si10"/)
      facobs                                  = (/1.0,1.0,1.0,1.0/)
-   else if (cname.eq."NOAA20C") then
+   else if ((cname.eq."NOAA20C").or.(cname.eq."NOAA_20C")) then
      obsvars                                 = (/"prmsl","skt","t2m","si10"/)
      facobs                                  = (/1.0,1.0,1.0,1.0/)
    else

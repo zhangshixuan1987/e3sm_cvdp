@@ -48,10 +48,10 @@ begin
   panelstr1                                  = tname + " ("+tttag+")"
   panelstr2                                  = cname + " ("+cttag+")"
 
-  if((cname.eq."ERA5").or.(cname.eq."ERA20C"))
+  if((cname.eq."ERA5").or.(cname.eq."ERA20C").or.(cname.eq."ERA_20C"))
      obsvars                                 = (/"msl"/)
      facobs                                  = (/1.0/100.0/)
-  else if (cname.eq."NOAA20C")
+  else if ((cname.eq."NOAA20C").or.(cname.eq."NOAA_20C")) then
      obsvars                                 = (/"prmsl"/)
      facobs                                  = (/1.0/100.0/)
   else

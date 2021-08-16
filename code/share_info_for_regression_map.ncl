@@ -16,7 +16,7 @@
 
   if(compare.eq."Model_vs_OBS") then
 
-   if((cname.eq."ERA5").or.(cname.eq."ERA20C")) then
+   if((cname.eq."ERA5").or.(cname.eq."ERA20C").or.(cname.eq."ERA_20C")) then
 
      obsregvars  = (/  "msl",            "skt",          "t2m",         "si10",      \
                        "mtpr",           "lcc",          "hcc",         "tcc",       \
@@ -27,7 +27,7 @@
                        1.0/86400.0,      1.0/86400.0,    1.0/86400.0,   1.0/86400.0, \
                        1.0/86400.0,      1.0/86400.0                                 /)
 
-   else if (cname.eq."NOAA20C")
+   else if ((cname.eq."NOAA20C").or.(cname.eq."NOAA_20C")) then
 
      obsregvars  = (/  "prmsl",          "skt",          "t2m",         "si10",      \
                        "prate",          "lcc",          "hcc",         "tcc",       \

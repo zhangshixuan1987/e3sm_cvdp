@@ -53,10 +53,10 @@ begin
 
   if(compare.eq."Model_vs_OBS")then
 
-   if((cname.eq."ERA5").or.(cname.eq."ERA20C")) then
+   if((cname.eq."ERA5").or.(cname.eq."ERA20C").or.(cname.eq."ERA_20C")) then
      obsvars                                 = (/"z"/)
      facobs                                  = (/1.0/grav/)
-   else if (cname.eq."NOAA20C") then
+   else if ((cname.eq."NOAA20C").or.(cname.eq."NOAA_20C")) then
      obsvars                                 = (/"hgt"/)
      facobs                                  = (/1.0/)
    else

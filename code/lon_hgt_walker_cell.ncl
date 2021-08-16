@@ -37,8 +37,8 @@ begin
   panelstr2                                  = cname + " ("+cttag+")"
 
 ;define regions for plot
-  latS                                       = -90.  ;negative for southern hemisphere
-  latN                                       =  90.  ;negative for southern hemisphere
+  lonW                                       =   0.  ;negative for southern hemisphere
+  lonE                                       = 360.  ;negative for southern hemisphere
   pout                                       = "Global"
 
   pi                                         = 3.14159265
@@ -62,8 +62,8 @@ begin
   do ll = 0, dimsizes(pout)-1
 
   ;read in two files
-   file1  = opath +"/"+"HC_analysis_"+tname+"_monthly_mean.nc"
-   file2  = opath +"/"+"HC_analysis_"+cname+"_monthly_mean.nc"
+   file1  = opath +"/"+"WC_analysis_"+tname+"_monthly_mean.nc"
+   file2  = opath +"/"+"WC_analysis_"+cname+"_monthly_mean.nc"
    exists = isfilepresent(file1).and.isfilepresent(file2)
 
    if(.not.exists) then
@@ -73,7 +73,7 @@ begin
      f                                       = systemfunc("ls "+cpath+"/"+ccase+"*"+cttag+".nc")
      f2                                      = addfile(f,"r")
      gw2                                     = f2->gw
-     load "./function_hadley_cell_analysis.ncl"
+     load "./function_walker_cell_analysis.ncl"
      fin1 = addfile(file1,"r")
      fin2 = addfile(file2,"r")
    else
@@ -93,14 +93,14 @@ begin
  
     sfm!0="time"
     sfm!1="lev"
-    sfm!2="lat"
-    sfm&lat = fin1->lat
+    sfm!2="lon"
+    sfm&lon = fin1->lon
 
 
     sfo!0="time"
     sfo!1="lev"
-    sfo!2="lat"
-    sfo&lat = fin2->lat
+    sfo!2="lon"
+    sfo&lon = fin2->lon
 
     copy_VarCoords(sfm,wm)
     copy_VarCoords(sfm,vm)
@@ -118,34 +118,34 @@ begin
 
         ;;;;;;select the data for plots;;;;;;;;;;;;;;;;;;;;;;;;;;;
         if(seasons(kk).eq."ANN")then
-          u1                          = month_to_annual(um(:,:,{latS:latN}),1)
-          v1                          = month_to_annual(vm(:,:,{latS:latN}),1)
-          w1                          = month_to_annual(wm(:,:,{latS:latN}),1)
-          sf1                         = month_to_annual(sfm(:,:,{latS:latN}),1)
-          u2                          = month_to_annual(uo(:,:,{latS:latN}),1)
-          v2                          = month_to_annual(vo(:,:,{latS:latN}),1)
-          w2                          = month_to_annual(wo(:,:,{latS:latN}),1)
-          sf2                         = month_to_annual(sfo(:,:,{latS:latN}),1)
+          u1                          = month_to_annual(um(:,:,{lonW:lonE}),1)
+          v1                          = month_to_annual(vm(:,:,{lonW:lonE}),1)
+          w1                          = month_to_annual(wm(:,:,{lonW:lonE}),1)
+          sf1                         = month_to_annual(sfm(:,:,{lonW:lonE}),1)
+          u2                          = month_to_annual(uo(:,:,{lonW:lonE}),1)
+          v2                          = month_to_annual(vo(:,:,{lonW:lonE}),1)
+          w2                          = month_to_annual(wo(:,:,{lonW:lonE}),1)
+          sf2                         = month_to_annual(sfo(:,:,{lonW:lonE}),1)
         else
-          u1                          = month_to_season(um(:,:,{latS:latN}),seasons(kk))
-          v1                          = month_to_season(vm(:,:,{latS:latN}),seasons(kk))
-          w1                          = month_to_season(wm(:,:,{latS:latN}),seasons(kk))
-          sf1                         = month_to_season(sfm(:,:,{latS:latN}),seasons(kk))
-          u2                          = month_to_season(uo(:,:,{latS:latN}),seasons(kk))
-          v2                          = month_to_season(vo(:,:,{latS:latN}),seasons(kk))
-          w2                          = month_to_season(wo(:,:,{latS:latN}),seasons(kk))
-          sf2                         = month_to_season(sfo(:,:,{latS:latN}),seasons(kk))
+          u1                          = month_to_season(um(:,:,{lonW:lonE}),seasons(kk))
+          v1                          = month_to_season(vm(:,:,{lonW:lonE}),seasons(kk))
+          w1                          = month_to_season(wm(:,:,{lonW:lonE}),seasons(kk))
+          sf1                         = month_to_season(sfm(:,:,{lonW:lonE}),seasons(kk))
+          u2                          = month_to_season(uo(:,:,{lonW:lonE}),seasons(kk))
+          v2                          = month_to_season(vo(:,:,{lonW:lonE}),seasons(kk))
+          w2                          = month_to_season(wo(:,:,{lonW:lonE}),seasons(kk))
+          sf2                         = month_to_season(sfo(:,:,{lonW:lonE}),seasons(kk))
         end if
 
        sf1!0="time"
        sf1!1="lev"
-       sf1!2="lat"
-       sf1&lat = fin1->lat
+       sf1!2="lon"
+       sf1&lon = fin1->lon
 
        sf2!0="time"
        sf2!1="lev"
-       sf2!2="lat"
-       sf2&lat = fin2->lat
+       sf2!2="lon"
+       sf2&lon = fin2->lon
 
 
        copy_VarCoords(sf1,u1)
@@ -159,24 +159,22 @@ begin
        if(str_lower(statistical_test).eq."true")then
 
          rad   = 4.0*atan(1.0)/180.0
-         gw1   = cos(fin1->lat*rad)
-         gw2   = cos(fin2->lat*rad)
          l_plot_ttest = True
          vpt1 = sf1
          vpt2 = sf2
-         xtmp = vpt1(lev|:,lat|:,time|:)       ; reorder but do it only once [temporary]
-         ytmp = vpt2(lev|:,lat|:,time|:)
+         xtmp = vpt1(lev|:,lon|:,time|:)       ; reorder but do it only once [temporary]
+         ytmp = vpt2(lev|:,lon|:,time|:)
          xAve = dim_avg (xtmp)              ; calculate means at each grid point
          yAve = dim_avg (ytmp)
          xVar = dim_variance (xtmp)         ; calculate variances
          yVar = dim_variance (ytmp)
          xEqv = equiv_sample_size (xtmp, statistical_siglev,0)
          yEqv = equiv_sample_size (ytmp, statistical_siglev,0)
-         xN   = dim_avg_n(dim_avg_wgt_n(xEqv, gw1, 0, 1),0)
-         yN   = dim_avg_n(dim_avg_wgt_n(yEqv, gw2, 0, 1),0)
+         xN   = dim_avg_n(dim_avg_n(xEqv, 1),0)
+         yN   = dim_avg_n(dim_avg_n(yEqv, 1),0)
          iflag = True                       ; population variance similar
          prob  = ttest(xAve,xVar,xN, yAve,yVar,yN, iflag, False)
-         delete([/vpt1,vpt2,xtmp,ytmp,xAve,yAve,xVar,yVar,xEqv,yEqv,xN,yN,gw1,gw2/])
+         delete([/vpt1,vpt2,xtmp,ytmp,xAve,yAve,xVar,yVar,xEqv,yEqv,xN,yN/])
 
        end if
 
@@ -220,12 +218,12 @@ begin
        plot                                = new((/3/),graphic)
        wtype                               = "eps"
        figdir                              = outdir+"/Mean_Circulation_Analysis/"
-       fe                                  = "Hadelay_circulation_"+seasons(kk)+"_lathgt"+"_"+pout(ll)
+       fe                                  = "Walker_circulation_"+seasons(kk)+"_lathgt"+"_"+pout(ll)
        wks                                 = gsn_open_wks(wtype, figdir + fe)
 
        gsn_merge_colormaps(wks,"amwg","amwg_blueyellowred")             ; merge two color maps
 
-       load "./share_color_bar_for_hadley_analysis.ncl"
+       load "./share_color_bar_for_walker_analysis.ncl"
        sf1a    = sf1a*facsfm
        sf2a    = sf2a*facsfm
        sfadiff = sfadiff*facsfm
@@ -306,8 +304,8 @@ begin
            res0@tiMainString                 = ""
            res0@gsnLeftString                = ""
            res0@gsnRightString               = ""
-           plotC   = gsn_csm_contour(wks,u1a,res0)
-           plotD   = gsn_csm_contour(wks,u2a,res0)
+           plotC   = gsn_csm_contour(wks,v1a,res0)
+           plotD   = gsn_csm_contour(wks,v2a,res0)
 
            vecres                           = True            ; vector only resources
            vecres@gsnDraw                   = False           ; don't draw
@@ -340,7 +338,7 @@ begin
            res1@gsnRightString               = "Global mean: "+sprintf("%5.2f",avg(sf1a(:,:)))
 
            plotA   = gsn_csm_contour(wks,sf1a,res1)
-           plotB   = gsn_csm_vector(wks,v1a,w1a,vecres)
+           plotB   = gsn_csm_vector(wks,u1a,w1a,vecres)
            overlay(plotA,plotB)                      ; result will be plotA
            overlay(plotA,plotC)                      ; result will be plotA
            plot(0) = plotA                           ; now assign plotA to array
@@ -349,7 +347,7 @@ begin
            res1@gsnLeftString                = leftstring
            res1@gsnRightString               = "Global mean: "+sprintf("%5.2f",avg(sf2a(:,:)))
            plotA   = gsn_csm_contour(wks,sf2a,res1)
-           plotB   = gsn_csm_vector(wks,v2a,w2a,vecres)
+           plotB   = gsn_csm_vector(wks,u2a,w2a,vecres)
            overlay(plotA,plotB)                      ; result will be plotA
            overlay(plotA,plotD)                      ; result will be plotA
            plot(1) = plotA                           ; now assign plotA to array
@@ -370,7 +368,7 @@ begin
            vecres@vcRefMagnitudeF           = 0.5               ; define vector ref mag
            vecres@vcRefAnnoString1          = vecres@vcRefMagnitudeF +" (~F33~D~N~~F~v,~F33~D~N~~F~w*100)" ;+ " m s~S~-1~N~"
            vecres@vcRefAnnoString2          = "" ;"(~F33~D~N~~F~v,~F33~D~N~~F~w*100)"
-           plotB   = gsn_csm_vector(wks,vadiff,wadiff,vecres)
+           plotB   = gsn_csm_vector(wks,uadiff,wadiff,vecres)
            overlay(plotA,plotB)                      ; result will be plotA
            plot(2) = plotA                           ; now assign plotA to array
 
@@ -405,7 +403,7 @@ begin
            delete([/plotA,plotB/])
 
            delete([/u1a,v1a,w1a,sf1a,u2a,v2a,w2a,sf2a/])
-           delete([/uadiff,wadiff,sfadiff,wks/])
+           delete([/uadiff,vadiff,wadiff,sfadiff,wks/])
 
         delete([/plot,res,pres,s1,s2/])
 

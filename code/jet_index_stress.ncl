@@ -51,10 +51,10 @@ begin
    if (cname.eq."ERA5") then
      obsvars                                 = (/"metss"/)
      facobs                                  = (/100.0/)
-   else if (cname.eq."ERA20C") then
+   else if ((cname.eq."ERA20C").or.(cname.eq."ERA_20C")) then
      obsvars                                 = (/"iews"/)
      facobs                                  = (/100.0/)
-   else if (cname.eq."NOAA20C") then 
+   else if ((cname.eq."NOAA20C").or.(cname.eq."NOAA_20C")) then
      obsvars                                 = (/"metss"/)
      facobs                                  = (/100.0/)
    else

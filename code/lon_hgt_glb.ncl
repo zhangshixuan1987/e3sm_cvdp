@@ -138,26 +138,26 @@ begin
        if(str_lower(statistical_test).eq."true")then
 
          l_plot_ttest = True
-         vpt1 = dim_avg_n_Wrap(vp1,3)
-         vpt2 = dim_avg_n_Wrap(vp2,3) 
-         xtmp = vpt1(lev|:,lat|:,time|:)       ; reorder but do it only once [temporary]
-         ytmp = vpt2(lev|:,lat|:,time|:)
+         vpt1 = dim_avg_wgt_n_Wrap(vp1,gw1,1,2)
+         vpt2 = dim_avg_wgt_n_Wrap(vp2,gw2,1,2) 
+         xtmp = vpt1(lev|:,lon|:,time|:)       ; reorder but do it only once [temporary]
+         ytmp = vpt2(lev|:,lon|:,time|:)
          xAve = dim_avg (xtmp)              ; calculate means at each grid point
          yAve = dim_avg (ytmp)
          xVar = dim_variance (xtmp)         ; calculate variances
          yVar = dim_variance (ytmp)
          xEqv = equiv_sample_size (xtmp, statistical_siglev,0)
          yEqv = equiv_sample_size (ytmp, statistical_siglev,0)
-         xN   = dim_avg_n(dim_avg_wgt_n(xEqv, gw1, 0, 1),0)
-         yN   = dim_avg_n(dim_avg_wgt_n(yEqv, gw2, 0, 1),0)
+         xN   = dim_avg_n(dim_avg_n(xEqv, 1),0)
+         yN   = dim_avg_n(dim_avg_n(yEqv, 1),0)
          iflag = True                       ; population variance similar
          prob  = ttest(xAve,xVar,xN, yAve,yVar,yN, iflag, False)
          delete([/vpt1,vpt2,xtmp,ytmp,xAve,yAve,xVar,yVar,xEqv,yEqv,xN,yN/])
 
        end if
 
-       vp1a                                = dim_avg_n_Wrap(dim_avg_n_Wrap(vp1,3),0)
-       vp2a                                = dim_avg_n_Wrap(dim_avg_n_Wrap(vp2,3),0)
+       vp1a                                = dim_avg_n_Wrap(dim_avg_wgt_n_Wrap(vp1,gw1,1,2),0)
+       vp2a                                = dim_avg_n_Wrap(dim_avg_wgt_n_Wrap(vp2,gw2,1,2),0)
 
        vp1a@_FillValue                     = -9999.
        vp2a@_FillValue                     = -9999.
@@ -185,8 +185,8 @@ begin
        ;;;;;;;;;;start to process the figure ;;;;;;;
         plot                                = new((/4/),graphic)
         wtype                               = "eps"
-        figdir                              = outdir+"/Pressure-Latitude_Zonal_Mean_Contour/"
-        fe                                  = modvars(jj)+"_"+seasons(kk)+"_lathgt"+"_"+pout(ll)
+        figdir                              = outdir+"/Pressure-Longitude_Meridional_Mean_Contour/"
+        fe                                  = modvars(jj)+"_"+seasons(kk)+"_lonhgt"+"_"+pout(ll)
         wks                                 = gsn_open_wks(wtype, figdir + fe)
 
         gsn_merge_colormaps(wks,"amwg","amwg_blueyellowred")             ; merge two color maps
@@ -223,10 +223,10 @@ begin
            res@tmYRMode                     = "Automatic"          ; turn off special labels on right axis
 
            res@tmXBMode                     = "Explicit"	
-           res@tmXBValues                   = ispan(toint(latS),toint(latN),30)
-           res@tmXBLabels                   = (/"90S","60S","30S","0", \
-                                                "30N","60N","90N"/)
-           res@tmXBMinorValues              = ispan(toint(latS),toint(latN),15)
+           res@tmXBValues                   = ispan(0,360,60)
+           res@tmXBLabels                   = (/"0","60E","120E","180", \
+                                                "120W","60W","0"/)
+           res@tmXBMinorValues              = ispan(0,360,30)
 
            res@tmYLMode                     = "Explicit"                ; explicit labels
            res@tmYLValues                   = (/ 1000, 850, 700, 500, 300, 200, 100, 10, 1/)

@@ -58,9 +58,9 @@ begin
  ;variable name in for caclulating nino index 
   modninovar   = ("TS")
   if(compare.eq."Model_vs_OBS")then
-   if((cname.eq."ERA5").or.(cname.eq."ERA20C")) then
+   if((cname.eq."ERA5").or.(cname.eq."ERA20C").or.(cname.eq."ERA_20C")) then
      obsninovar = ("sst")
-   else if (cname.eq."NOAA20C") then
+   else if ((cname.eq."NOAA20C").or.(cname.eq."NOAA_20C")) then
      obsninovar = ("skt")
    else
      print("The observational source are not available; only allow ERA5, ERA20C or NOAA20C")
