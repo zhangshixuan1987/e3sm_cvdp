@@ -82,6 +82,10 @@ begin
        var2@units                        = tndunt(jj)
        delete([/tmp1/])
 
+       ;;mask out the missing values;;;;
+       var1 = where (ismissing(var2), var1@_FillValue, var1)
+       var2 = where (ismissing(var1), var2@_FillValue, var2)
+
        ;;;;;;select the data for plots;;;;;;;;;;;;;;;;;;;;;;;;;;;
        vpr   = cld(:,:,{latS:latN},:)
        vpr!0 = "time"

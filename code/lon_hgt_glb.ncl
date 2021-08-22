@@ -156,6 +156,11 @@ begin
 
        end if
 
+       ;;mask out the missing values;;;;
+       vp1 = where (ismissing(vp2), vp1@_FillValue, vp1)
+       vp2 = where (ismissing(vp1), vp2@_FillValue, vp2)
+
+       ;;calculate the meridional mean and do the plot 
        vp1a                                = dim_avg_n_Wrap(dim_avg_wgt_n_Wrap(vp1,gw1,1,2),0)
        vp2a                                = dim_avg_n_Wrap(dim_avg_wgt_n_Wrap(vp2,gw2,1,2),0)
 

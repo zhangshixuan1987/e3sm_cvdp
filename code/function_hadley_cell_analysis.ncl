@@ -70,6 +70,14 @@
         woi      = vinth2p(wo,f2->hyam,f2->hybm,pinterp1,f2->PS,intyp,f2->P0/100.0,1,False)
       end if 
 
+      ;;mask out the missing values;;;;
+      umi = where (ismissing(uoi), umi@_FillValue, umi)
+      uoi = where (ismissing(umi), uoi@_FillValue, uoi)
+      vmi = where (ismissing(voi), vmi@_FillValue, vmi)
+      voi = where (ismissing(vmi), voi@_FillValue, voi)
+      wmi = where (ismissing(woi), wmi@_FillValue, wmi)
+      woi = where (ismissing(wmi), woi@_FillValue, woi)
+
       umi@units  = varunt(0)
       vmi@units  = varunt(1)
       wmi@units  = "m s~S~-1~N~" ;varunt(2)

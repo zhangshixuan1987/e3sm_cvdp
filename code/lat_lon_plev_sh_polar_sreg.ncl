@@ -30,9 +30,9 @@ begin
   statistical_siglev                         = 0.05
 
  ;define regions for plot
-  latS                                       = -90.  ;negative for southern hemisphere
-  latN                                       =  90.  ;negative for southern hemisphere
-  pout                                       = "Global"
+  latS                                          = -90.  ;negative for southern hemisphere
+  latN                                          = -55.  ;negative for southern hemisphere
+  pout                                          = "55S-90S"
 
   pi                                         = 3.14159265
   rearth                                     = 6.37122e6
@@ -205,31 +205,26 @@ begin
 ;    Make the Plot
 ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;
-   res                  	        = True                  ; plot mods desired
-   res@cnFillOn         	        = True                  ; turn on color fill
-   res@cnLinesOn          	        = False                 ; no contour lines
-   res@cnLineLabelsOn     	        = False
+   res                               = True                  ; plot mods desired
+   res@cnFillOn                      = True                  ; turn on color fill
+   res@cnLinesOn                     = False                 ; no contour lines
+   res@cnLineLabelsOn                = False
    res@gsnFrame                      = False                 ; Do not draw plot
    res@gsnDraw                       = False                 ; Do not advance frame
 
-
    FontHeightF = 0.018
-   res@tiMainFontThicknessF          = 2.0
-   res@tiMainFontHeightF             = FontHeightF*1.5
+   res@tiMainFontThicknessF          = 3.0
+   res@tiMainFontHeightF             = FontHeightF*1.2
    res@tmYLLabelFontHeightF          = FontHeightF
    res@tmXBLabelFontHeightF          = FontHeightF
    res@tiXAxisFontHeightF            = FontHeightF
    res@tiYAxisFontHeightF            = FontHeightF
-   res@gsnStringFontHeightF          = FontHeightF*1.2
+   res@gsnStringFontHeightF          = FontHeightF
    res@cnLineLabelFontHeightF        = FontHeightF
-   res@lbLabelFontHeightF            = FontHeightF ;*0.8
-   res@lbTitleFontHeightF            = FontHeightF ;*0.8
+   res@lbLabelFontHeightF            = FontHeightF*0.8
+   res@lbTitleFontHeightF            = FontHeightF*0.8
 
-   res@gsnMajorLatSpacing            = 30
-   res@gsnMajorLonSpacing            = 45
-   res@gsnMinorLatSpacing            = 15
-   res@gsnMinorLonSpacing            = 15
-
+   res@tmXTOn                        = False
    res@tmBorderThicknessF            = 1.0
    res@tmXBMajorThicknessF           = 1.0
    res@tmXBMinorThicknessF           = 1.0
@@ -237,18 +232,21 @@ begin
    res@tmYLMinorThicknessF           = 1.0
    res@tmYRMajorThicknessF           = 1.0
    res@tmYRMinorThicknessF           = 1.0
-   res@mpGeophysicalLineThicknessF   = 0.5
 
-   res@tmXTOn                        = False
-  ;res@tmYRMode          	   	= "Automatic"           ; turn off special labels on right axis
+   res@gsnPolarLabelFontHeightF      = 0.02
+   res@gsnPolar                      = "SH"
+   res@mpFillOn                      = False        ; turn off map fill
+   res@mpMaxLatF                     = latN
+   res@mpGeophysicalLineThicknessF   = 2.0
 
    res@lbLabelBarOn                  = True
    res@lbOrientation                 = "Vertical"
    res@lbPerimOn                     = False             ; default has box
-   res@pmLabelBarHeightF             = 0.38
-   res@pmLabelBarWidthF              = 0.1
-   res@pmLabelBarParallelPosF        = 0.50
-   res@pmLabelBarOrthogonalPosF      = 0.05
+  ;res@pmLabelBarParallelPosF        = 0.61
+   res@pmLabelBarOrthogonalPosF      = 0.15
+   res@lbLabelFontHeightF            = 0.02               ; make labels smaller
+  ;res@pmLabelBarHeightF             = 0.38
+  ;res@pmLabelBarWidthF              = 0.1
   ;res@lbTitleString                 = ""
 
    res@cnInfoLabelOn     		= False
@@ -257,9 +255,6 @@ begin
 
    res@mpFillOn                      = False        ; turn off map fill
    res@mpGeophysicalLineThicknessF   = 2.0
-   res@mpMinLonF                     =   0
-   res@mpMaxLonF                     = 360
-   res@mpCenterLonF                  = 180     ; This is necessary to get the correct map
 
    res1 = res
    res1@cnLevels                     = sprintf("%5.2f",s1)
@@ -273,7 +268,7 @@ begin
      res1@gsnRightString               = "mean: "+sprintf("%5.2f",vp1m)
      res1@lbLabelStrings               = sprintf("%5.2f",s1)
    end if
-   plot(0)   			       = gsn_csm_contour_map_ce(wks,vp1x,res1)
+   plot(0)   			       = gsn_csm_contour_map(wks,vp1x,res1)
    res1@tiMainString                   = panelstr2
    res1@gsnLeftString                  = str_upper(varstr)+ " ("+unit+")"  
    if(max(abs(s1)).ge.10.0)then
@@ -283,7 +278,7 @@ begin
      res1@gsnRightString               = "mean: "+sprintf("%5.2f",vp2m)
      res1@lbLabelStrings               = sprintf("%5.2f",s1)
    end if
-   plot(1) 			        = gsn_csm_contour_map_ce(wks,vp2x,res1)
+   plot(1) 			        = gsn_csm_contour_map(wks,vp2x,res1)
 
    res2 = res
    res2@cnLevels      		     = sprintf("%5.2f",s2)
@@ -297,7 +292,7 @@ begin
      res2@gsnRightString             = "mean: "+sprintf("%5.2f",vdmm)
      res2@lbLabelStrings             = sprintf("%5.2f",s2)
    end if
-   plot(2) 			     = gsn_csm_contour_map_ce(wks,vdiff,res2)
+   plot(2) 			     = gsn_csm_contour_map(wks,vdiff,res2)
 
    pres                              = True        ; panel plot mods desired
    pres@gsnMaximize                  = False       ; fill the page
@@ -324,12 +319,12 @@ begin
 
  delete([/var1,var1,var2,var2, ddd1,ddd2/])
 
- end if 
+ end if
 
 end do
 
  delete([/f1,gw1,f2,gw2/])
 
-end do 
+end do
 
 end

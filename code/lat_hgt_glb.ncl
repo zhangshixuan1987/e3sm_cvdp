@@ -95,6 +95,10 @@ begin
         var1@_FillValue                       = -9999.
         var2@_FillValue                       = -9999.
 
+       ;;mask out the missing values;;;;
+       var1 = where (ismissing(var2), var1@_FillValue, var1)
+       var2 = where (ismissing(var1), var2@_FillValue, var2)
+
         if(compare.eq."Model_vs_OBS") then
           var1                                = var1*facmod(jj)
           var2                                = var2*facobs(jj)
@@ -156,6 +160,7 @@ begin
 
        end if
 
+       ;;calculate the zonal or meridional mean and do the plot 
        vp1a                                = dim_avg_n_Wrap(dim_avg_n_Wrap(vp1,3),0)
        vp2a                                = dim_avg_n_Wrap(dim_avg_n_Wrap(vp2,3),0)
 
