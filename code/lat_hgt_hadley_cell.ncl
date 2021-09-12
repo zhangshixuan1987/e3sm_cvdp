@@ -190,6 +190,16 @@ begin
        w2a                                = dim_avg_n_Wrap(w2,0)
        sf2a                               = dim_avg_n_Wrap(sf2,0)
 
+       ;;mask the missing values in two datasets;;;
+       u1a = where (ismissing(u2a), u1a@_FillValue, u1a)
+       u2a = where (ismissing(u1a), u2a@_FillValue, u2a)
+       v1a = where (ismissing(v2a), v1a@_FillValue, v1a)
+       v2a = where (ismissing(v1a), v2a@_FillValue, v2a)
+       w1a = where (ismissing(w2a), w1a@_FillValue, w1a)
+       w2a = where (ismissing(w1a), w2a@_FillValue, w2a)
+       sf1a = where (ismissing(sf2a), sf1a@_FillValue, sf1a)
+       sf2a = where (ismissing(sf1a), sf2a@_FillValue, sf2a)
+
        u1a@_FillValue                     = -9999.
        v1a@_FillValue                     = -9999.
        w1a@_FillValue                     = -9999.

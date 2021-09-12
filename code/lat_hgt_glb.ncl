@@ -95,10 +95,6 @@ begin
         var1@_FillValue                       = -9999.
         var2@_FillValue                       = -9999.
 
-       ;;mask out the missing values;;;;
-       var1 = where (ismissing(var2), var1@_FillValue, var1)
-       var2 = where (ismissing(var1), var2@_FillValue, var2)
-
         if(compare.eq."Model_vs_OBS") then
           var1                                = var1*facmod(jj)
           var2                                = var2*facobs(jj)
@@ -161,8 +157,16 @@ begin
        end if
 
        ;;calculate the zonal or meridional mean and do the plot 
-       vp1a                                = dim_avg_n_Wrap(dim_avg_n_Wrap(vp1,3),0)
-       vp2a                                = dim_avg_n_Wrap(dim_avg_n_Wrap(vp2,3),0)
+       
+       ;;temporal mean 
+       vp1x                                = dim_avg_n_Wrap(vp1,0)
+       vp2x                                = dim_avg_n_Wrap(vp2,0)
+       vp1x = where (ismissing(vp1x), vp1x@_FillValue, vp1x)
+       vp2x = where (ismissing(vp2x), vp2x@_FillValue, vp2x)
+
+       ;;;;zonal mean 
+       vp1a                                = dim_avg_n_Wrap(vp1x,2)
+       vp2a                                = dim_avg_n_Wrap(vp2x,2)
 
        vp1a@_FillValue                     = -9999.
        vp2a@_FillValue                     = -9999.
@@ -314,7 +318,7 @@ begin
 
            delete([/plotA,plotB/])
 
-           delete([/vp1a,vp2a,adiff,rdiff,vp1,vp2,vp1b,vp2b,wks/])
+           delete([/vp1x,vp2x,vp1a,vp2a,adiff,rdiff,vp1,vp2,vp1b,vp2b,wks/])
 
         delete([/plot,res,pres,s1,s2,s3/])
 

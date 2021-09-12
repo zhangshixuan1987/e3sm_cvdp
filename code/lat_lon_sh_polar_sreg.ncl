@@ -30,6 +30,7 @@ begin
 
   statistical_test                           = getenv("DIFFERENCE_TEST")
   statistical_siglev                         = 0.05
+  l_plot_ttest                               = False
 
 ;define regions for plot
   latS                                          = -90.  ;negative for southern hemisphere

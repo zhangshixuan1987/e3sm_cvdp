@@ -156,13 +156,16 @@ begin
 
        end if
 
-       ;;mask out the missing values;;;;
-       vp1 = where (ismissing(vp2), vp1@_FillValue, vp1)
-       vp2 = where (ismissing(vp1), vp2@_FillValue, vp2)
-
        ;;calculate the meridional mean and do the plot 
-       vp1a                                = dim_avg_n_Wrap(dim_avg_wgt_n_Wrap(vp1,gw1,1,2),0)
-       vp2a                                = dim_avg_n_Wrap(dim_avg_wgt_n_Wrap(vp2,gw2,1,2),0)
+       ;;temporal mean
+       vp1x                                = dim_avg_n_Wrap(vp1,0)
+       vp2x                                = dim_avg_n_Wrap(vp2,0)
+       vp1x                                = where (ismissing(vp1x), vp1x@_FillValue, vp1x)
+       vp2x                                = where (ismissing(vp2x), vp2x@_FillValue, vp2x)
+
+       ;;;;zonal mean
+       vp1a                                = dim_avg_wgt_n_Wrap(vp1,gw1,1,1)
+       vp2a                                = dim_avg_wgt_n_Wrap(vp2,gw2,1,1)
 
        vp1a@_FillValue                     = -9999.
        vp2a@_FillValue                     = -9999.
@@ -314,7 +317,7 @@ begin
 
            delete([/plotA,plotB/])
 
-           delete([/vp1a,vp2a,adiff,rdiff,vp1,vp2,vp1b,vp2b,wks/])
+           delete([/vp1x,vp2x,vp1a,vp2a,adiff,rdiff,vp1,vp2,vp1b,vp2b,wks/])
 
         delete([/plot,res,pres,s1,s2,s3/])
 
