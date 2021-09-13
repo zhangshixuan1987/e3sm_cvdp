@@ -307,7 +307,7 @@ begin
                                                   ;str_upper(mvarnam)+ " ("+seasons(kk)+"; unit: "+unit+")"
               gsn_panel(wks,plot(:),(/2,2/),pres)
 
-              delete([/vp1a,vp2a,adiff,rdiff,vp1b,vp2b/])
+              delete([/vp1a,vp2a,adiff,rdiff,rdiffm,vp1b,vp2b,vp1m,vp2m/])
 
            delete([/plot,res,pres,wks,s1,s2,s3/])
 
@@ -317,6 +317,7 @@ begin
 
      delete([/f1,gw1,var1,ddd1/])
      delete([/f2,gw2,var2,ddd2/])
+     delete(mcorx)
 
   end do
 end
