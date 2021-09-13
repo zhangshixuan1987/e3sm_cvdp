@@ -164,8 +164,8 @@ begin
        vp2x                                = where (ismissing(vp2x), vp2x@_FillValue, vp2x)
 
        ;;;;zonal mean
-       vp1a                                = dim_avg_wgt_n_Wrap(vp1,gw1,1,1)
-       vp2a                                = dim_avg_wgt_n_Wrap(vp2,gw2,1,1)
+       vp1a                                = dim_avg_wgt_n_Wrap(vp1x,gw1,1,1)
+       vp2a                                = dim_avg_wgt_n_Wrap(vp2x,gw2,1,1)
 
        vp1a@_FillValue                     = -9999.
        vp2a@_FillValue                     = -9999.
