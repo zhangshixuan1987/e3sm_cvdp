@@ -26,7 +26,7 @@
 ;; your www home 
 ;;..........................................................
 
-   cml = "https://portal.nersc.gov/cfs/e3sm/zhan391/"+mydir+"/"  
+   cml = "https://portal.nersc.gov/cfs/e3sm/zhan391/polar_diag/"+mydir+"/"  
 
 ;;..........................................................
 ;; define variable
