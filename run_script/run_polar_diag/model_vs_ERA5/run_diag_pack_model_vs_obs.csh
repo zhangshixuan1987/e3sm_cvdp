@@ -163,7 +163,7 @@ foreach f (*)
   cd $f
 
   ##remove the .png file if exist 
-  rm -f ./*.png
+  rm -f *.png
 
   set line = `ls -trl | grep .eps | wc -l`
 

@@ -131,7 +131,7 @@ echo ""
 echo ""
 end
 
-#wait 
+wait 
 
 #third sets: the regression analysis 
 #note: the data from second set are required to
@@ -149,7 +149,7 @@ $command<$f &
 echo ""
 echo ""
 end
-#wait
+wait
 
 ##convert the figures and generate the link page 
 cd $CASEDIR
