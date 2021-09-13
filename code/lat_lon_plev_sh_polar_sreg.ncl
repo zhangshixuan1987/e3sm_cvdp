@@ -48,7 +48,7 @@ begin
   plevels                                    = (/1000, 975, 850, 700, 500, 200/)
 
  ;variable name in the climo file
- load "./share_info_for_3d_var.ncl"
+ load "./share_info_for_plev_var.ncl"
 
  do ll = 0, dimsizes(pout)-1
 
