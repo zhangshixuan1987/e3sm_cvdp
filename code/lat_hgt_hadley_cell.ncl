@@ -50,9 +50,9 @@ begin
   seasons                                   = (/"ANN","DJF","JJA"/)
 
 ;define the pressure levels for cross-section plot 
-  pinterp                                      = asciiread(refplev_file,-1,"float")
-  pinterp@longname                             = "lev"
-  pinterp@units                                = "hPa"
+  pinterp                                   = asciiread(refplev_file,-1,"float")
+  pinterp@longname                          = "lev"
+  pinterp@units                             = "hPa"
   intyp                                     = 2
 
   pi                                        = 3.14159265
@@ -65,20 +65,30 @@ begin
    file1  = opath +"/"+"HC_analysis_"+tname+"_monthly_mean.nc"
    file2  = opath +"/"+"HC_analysis_"+cname+"_monthly_mean.nc"
    exists = isfilepresent(file1).and.isfilepresent(file2)
-
+    
+   if(exists) then
+     fin1 = addfile(file1,"r")
+     fin2 = addfile(file2,"r")
+     varexist = isfilevar(fin1,"SF").or.isfilevar(fin2,"SF")
+     if(.not.varexist) then
+      exists = False 
+     end if 
+   end if 
+  
    if(.not.exists) then
-     f                                       = systemfunc("ls "+tpath+"/"+tcase+"*"+tttag+".nc")
+
+     f                                       = systemfunc("ls "+tpath+"/"+tcase+"_*_"+tttag+".nc")
      f1                                      = addfile(f,"r")
      gw1                                     = f1->gw
-     f                                       = systemfunc("ls "+cpath+"/"+ccase+"*"+cttag+".nc")
+
+     f                                       = systemfunc("ls "+cpath+"/"+ccase+"_*_"+cttag+".nc")
      f2                                      = addfile(f,"r")
      gw2                                     = f2->gw
+
      load "./function_hadley_cell_analysis.ncl"
      fin1 = addfile(file1,"r")
      fin2 = addfile(file2,"r")
-   else
-     fin1 = addfile(file1,"r")
-     fin2 = addfile(file2,"r")
+
    end if
 
     um    = fin1->U

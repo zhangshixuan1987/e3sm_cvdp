@@ -49,11 +49,11 @@ begin
  do ll = 0, dimsizes(pout)-1
 
    ;read in two files
-   f                                       = systemfunc("ls "+tpath+"/"+tcase+"*"+tttag+".nc")
+   f                                       = systemfunc("ls "+tpath+"/"+tcase+"_*_"+tttag+".nc")
    f1                                      = addfile(f,"r")
    gw1                                     = f1->gw
 
-   f                                       = systemfunc("ls "+cpath+"/"+ccase+"*"+cttag+".nc")
+   f                                       = systemfunc("ls "+cpath+"/"+ccase+"_*_"+cttag+".nc")
    f2                                      = addfile(f,"r")
    gw2                                     = f2->gw
 
