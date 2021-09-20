@@ -30,7 +30,7 @@ set end_year   = 2014
 set time_tag   = `printf "%04d" $start_year`-`printf "%04d" $end_year`
 
 #location of work directory 
-set WORK_DIR      = /lcrc/group/acme/ac.szhang/acme_scratch/data/E3SM/polar_diag
+set WORK_DIR      = /lcrc/group/acme/ac.szhang/acme_scratch/data/polar_diag
 #location of model history file (run directory or model output directory)
 set RUN_FILE_DIR  = /lcrc/group/acme/ac.szhang/acme_scratch/polar_diag/my_run_script/e3sm_process/${CASE_NAME}/data
 #Mapping file
