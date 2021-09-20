@@ -12,7 +12,7 @@
 #module load netcdf/4.6.1-6z2nuae
 #module load ncl 
 set script_name = ncl
-set script_path = /soft/bebop/ncl/6.6.2/bin/
+set script_path = /soft/bebop/ncl/6.6.2/bin
 set path        = ( $script_path  $path )
 set command     = $script_path/$script_name
 
