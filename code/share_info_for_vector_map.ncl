@@ -1,7 +1,7 @@
 ;;;;;;declare the variables for vector  map;;;;;;;;;;;;
-  plotvars   = (/ "WIND_STRESS",            "WIND_1000",  "WIND_950", "WIND_850",   "WIND_700",       "WIND_500",       "WIND_200"  /)
+  plotvars   = (/ "WIND_STRESS",            "WIND_1000",  "WIND_950", "WIND_850",   "WIND_700",       "WIND_500",       "WIND_200"       /)
   prelev     = (/-9999,                     1000,            950,           850,         700,              500,              200         /)
-  facvar     = (/ 1e2,                      1,               1,              1,            1,                1,                1           /)
+  facvar     = (/ 1e2,                      1,               1,              1,            1,                1,                1         /)
   varunt     = (/"10~S~-2~N~ N m~S~-2~N~",  "m s~S~-1~N~",   "m s~S~-1~N~", "m s~S~-1~N~",  "m s~S~-1~N~",    "m s~S~-1~N~",    "m s~S~-1~N~" /)
   intyp      = 2 ;
 

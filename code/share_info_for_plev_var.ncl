@@ -1,7 +1,7 @@
 ;;;;;;declare the 3D variables;;;;;;;;;;;;
-  modvars                                    = (/"T",  "Q",  "RELHUM"/)
-  facmod                                     = (/ 1,  1e3,         1/)
-  varunt                                     = (/"K","g kg~S~-1~N~","Percent"/)
+  modvars                                    = (/"U", "V", "T",  "Q",  "RELHUM", "OMEGA"/)
+  facmod                                     = (/ 1,    1,   1,  1e3,         1, 24.0*3600.0/100.0/)
+  varunt                                     = (/"m s~S~-1~N~","m s~S~-1~N~","K","g kg~S~-1~N~","Percent","hPa day~S~-1~N~"/)
 
   panelstr1  = tname + " ("+tttag+")"
   panelstr2  = cname + " ("+cttag+")"

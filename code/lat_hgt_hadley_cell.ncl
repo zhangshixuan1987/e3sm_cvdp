@@ -69,7 +69,10 @@ begin
    if(exists) then
      fin1 = addfile(file1,"r")
      fin2 = addfile(file2,"r")
-     varexist = isfilevar(fin1,"SF").or.isfilevar(fin2,"SF")
+     varexist = isfilevar(fin1,"SF").and.isfilevar(fin2,"SF").and.\
+                isfilevar(fin1,"W").and.isfilevar(fin2,"W").and.\
+                isfilevar(fin1,"U").and.isfilevar(fin2,"U").and.\
+                isfilevar(fin1,"V").and.isfilevar(fin2,"V") 
      if(.not.varexist) then
       exists = False 
      end if 
