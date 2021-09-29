@@ -3,14 +3,6 @@
   if (isfilevar(f2, ovarnam)) then
     var2                            = f2->$ovarnam$
 
-    if (isfilevar(f2, "slhf")) then
-       var2                          = -1 * var2  
-    end if 
-
-    if (isfilevar(f2, "sshf")) then
-       var2                          = -1 * var2
-    end if
-
   else if (ovarnam.eq."slhf") then
 
     if (isfilevar(f2, "ie")) then
