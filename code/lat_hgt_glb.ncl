@@ -161,8 +161,9 @@ begin
        ;;temporal mean 
        vp1x                                = dim_avg_n_Wrap(vp1,0)
        vp2x                                = dim_avg_n_Wrap(vp2,0)
-       vp1x = where (ismissing(vp1x), vp1x@_FillValue, vp1x)
-       vp2x = where (ismissing(vp2x), vp2x@_FillValue, vp2x)
+
+       vp1x = where (ismissing(vp2x), vp1x@_FillValue, vp1x)
+       vp2x = where (ismissing(vp1x), vp2x@_FillValue, vp2x)
 
        ;;;;zonal mean 
        vp1a                                = dim_avg_n_Wrap(vp1x,2)
