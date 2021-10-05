@@ -7,7 +7,7 @@
 
     if (isfilevar(f2, "ie")) then
       var2                          = f2->ie
-      var2                          = -var2 * 2.5e6 
+      var2                          = var2 * 2.5e6 
     else
       print(ovarnam + " does not exist, using missing values" )
       var2                          = var1
@@ -18,7 +18,7 @@
 
     if (isfilevar(f2, "ishf")) then
       var2                          = f2->ishf
-      var2                          = var2*-1.0
+      var2                          = var2
     else
       print(ovarnam + " does not exist, using missing values" )
       var2                          = var1
@@ -468,6 +468,26 @@
     end if
     end if
 
+  else if (ovarnam.eq."RESSURF") then
+
+   ;;ERA5 reanalysis ignore the small downward long-wave (non-solar)
+   ;;(i.e. the dowanwelling longwave fluxes at TOP is zero), thus,
+   ;;TTR represents the negative of outgoing longwave radiation
+   ;;RESTOM = FSNT - FLNT  = TSR - (-TTR) = TSR + TTR
+   ;;       = (rsdt - rsut) - (rlut - rldt)
+    if (isfilevar(f2, "ttr") .and. isfilevar(f2, "tsr") ) then
+      var2                          = f2->ttr
+      var2                          = f2->ttr + f2->tsr
+    else if (isfilevar(f2, "rsdt") .and. isfilevar(f2, "rsut") .and. isfilevar(f2, "rlut") )
+      var2                          = f2->rsdt
+      var2                          = (f2->rsdt - f2->rsut) - f2->rlut
+    else
+      print( ovarnam + " does not exist in the file, using missing values" )
+      var2                          = var1
+      var2                          = -9999.0
+    end if
+    end if
+
   else if (ovarnam.eq."RESTOM") then
 
    ;;ERA5 reanalysis ignore the small downward long-wave (non-solar) 
@@ -646,4 +666,5 @@
   end if 
   
   end if 
-
+ 
+  end if 

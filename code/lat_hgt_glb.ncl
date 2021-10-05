@@ -46,9 +46,9 @@ begin
   seasons                                   = (/"ANN","DJF","JJA"/)
 
 ;define the pressure levels for cross-section plot 
-  pinterp                                      = asciiread(refplev_file,-1,"float")
-  pinterp@longname                             = "lev"
-  pinterp@units                                = "hPa"
+  pinterp                                   = asciiread(refplev_file,-1,"float")
+  pinterp@longname                          = "lev"
+  pinterp@units                             = "hPa"
   intyp                                     = 2
 
   pi                                        = 3.14159265

@@ -7,7 +7,7 @@
                "FLUT",     "FSUTOA",   "FSUTOAC",    "FLNT",         "FLUTC",     \
                "FSNTOA",   "FSNTOAC",  "FLNS",       "FLNSC",        "FLDS",      \
                "FLUS",     "FLDSC",    "FSNS",       "FSNSC",        "FSDS",      \
-               "FSUS",     "FSUSC",    "FSDSC",      "RESTOM",       "RESTOA",    \
+               "FSUS",     "FSUSC",    "FSDSC",      "RESTOM",       "RESTOA",     "RESSURF",\
                "TS",       "U10",      "PSL",        "TREFHT",       "TMQ",       \
                "TAUX",     "TAUY",     "ALBEDO",     "ALBEDOC",      "ALBEDO_SRF" /)
 
@@ -19,7 +19,7 @@
                 1,              1,            1,            1,            1,     \
                 1,              1,            1,            1,            1,     \
                 1,              1,            1,            1,            1,     \
-                1,              1,            1e-2,         1,            1,     \
+                1,              1,            1e-2,         1,            1,              1,\
                -1e2,         -1e2,            1,            1,            1      /)
 
   varunt   = (/"fraction",                "fraction",               "fraction",         "g kg~S~-1~N~",     "g kg~S~-1~N~",\
@@ -29,7 +29,7 @@
                "W m~S~-2~N~",             "W m~S~-2~N~",            "W m~S~-2~N~",      "W m~S~-2~N~",      "W m~S~-2~N~", \
                "W m~S~-2~N~",             "W m~S~-2~N~",            "W m~S~-2~N~",      "W m~S~-2~N~",      "W m~S~-2~N~", \
                "W m~S~-2~N~",             "W m~S~-2~N~",            "W m~S~-2~N~",      "W m~S~-2~N~",      "W m~S~-2~N~", \
-               "W m~S~-2~N~",             "W m~S~-2~N~",            "W m~S~-2~N~",      "W m~S~-2~N~",      "W m~S~-2~N~", \
+               "W m~S~-2~N~",             "W m~S~-2~N~",            "W m~S~-2~N~",      "W m~S~-2~N~",      "W m~S~-2~N~",       "W m~S~-2~N~", \
                "K",                       "m~S~-1~N~",              "hPa",              "K",                "kg m~S~-2~N~",\
                "10~S~-2~N~ N m~S~-2~N~",  "10~S~-2~N~ N m~S~-2~N~", "unitless",         "unitless",         "unitless"    /)
 
@@ -47,7 +47,7 @@
                    "FLUT",    "FSUTOA",   "FSUTOAC",    "FLNT",         "FLUTC",     \
                    "FSNTOA",  "FSNTOAC",  "FLNS",       "FLNSC",        "FLDS",      \
                    "FLUS",    "FLDSC",    "FSNS",       "FSNSC",        "FSDS",      \
-                   "FSUS",    "FSUSC",    "FSDSC",      "RESTOM",       "RESTOA",    \
+                   "FSUS",    "FSUSC",    "FSDSC",      "RESTOM",       "RESTOA",    "RESSURF", \
                    "skt",     "si10",     "msl",        "t2m",          "tcwv",      \
                    "metss",   "mntss",    "ALBEDO",     "ALBEDOC",      "ALBEDO_SRF" /)
 
@@ -58,7 +58,7 @@
                    1/86400.0,      1/86400.0,     1/86400.0,    1/86400.0,    1/86400.0,\
                    1/86400.0,      1/86400.0,     1/86400.0,    1/86400.0,    1/86400.0,\
                    1/86400.0,      1/86400.0,     1/86400.0,    1/86400.0,    1/86400.0,\
-                   1/86400.0,      1/86400.0,     1/86400.0,    1/86400.0,    1/86400.0,\
+                   1/86400.0,      1/86400.0,     1/86400.0,    1/86400.0,    1/86400.0,   1/86400.0,\
                    1,              1,             1e-2,         1,            1,        \
                    1e2,            1e2,          1,            1,            1         /)
 
@@ -71,7 +71,7 @@
                    "FLUT",    "FSUTOA",   "FSUTOAC",    "FLNT",         "FLUTC",     \
                    "FSNTOA",  "FSNTOAC",  "FLNS",       "FLNSC",        "FLDS",      \
                    "FLUS",    "FLDSC",    "FSNS",       "FSNSC",        "FSDS",      \
-                   "FSUS",    "FSUSC",    "FSDSC",      "RESTOM",       "RESTOA",    \
+                   "FSUS",    "FSUSC",    "FSDSC",      "RESTOM",       "RESTOA",    "RESSURF", \
                    "skt",     "si10",     "prmsl",      "t2m",          "pr_wtr",      \
                    "metss",   "mntss",    "ALBEDO",     "ALBEDOC",      "ALBEDO_SRF" /)
 
@@ -82,7 +82,7 @@
                   1,              1,            1,            1,            1,     \
                   1,              1,            1,            1,            1,     \
                   1,              1,            1,            1,            1,     \
-                  1,              1,            1,            1,            1,     \
+                  1,              1,            1,            1,            1,             1,\
                   1,              1,            1e-2,         1,            1,     \
                 1e2,            1e2,            1,            1,            1      /)
 
