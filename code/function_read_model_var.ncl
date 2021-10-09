@@ -35,6 +35,9 @@
   else if ( mvarnam .eq. "RESTOA") then
      vmsvar                           := (/"FSNTOA","FLUT"/)
      vmsign                           := (/1,-1/)
+  else if (mvarnam .eq. "RESSURF") then 
+      vmsvar                          := (/"FSNS","FLNS","SHFLX","QFLX","PRECC","PRECL","PRECSC","PRECSL"/)
+      vmsign                          := (/1,-1,-1,1,1,1,-1,-1/)
   else if (mvarnam .eq. "NET_FLUX_SRF") then
      vmsvar                           := (/"FSNS","FLNS","SHFLX","LHFLX"/)
      vmsign                           := (/1,-1,-1,-1/)
@@ -50,6 +53,7 @@
   else
      vmsvar                           := (/mvarnam/)
      vmsign                           := (/1/)
+  end if 
   end if
   end if
   end if
@@ -97,6 +101,34 @@
         delete([/tmp2/])
       end if
 
+    else if (mvarnam.eq."RESSURF") then 
+
+      do ivv = 1, 2
+        var1                              = var1 + f1->$vmsvar(ivv)$ * vmsign(ivv)
+        if (compare.ne."Model_vs_OBS") then
+          var2                            = var2 + f2->$vmsvar(ivv)$ * vmsign(ivv)
+        end if
+      end do
+      lvap = 2.501e6
+      lice = 3.337e5
+      lsub = lvap + lice
+      tmp1                                = lsub * f1->$vmsvar(3)$ * vmsign(3)
+      tmp2                                = lice * 1e3 * (f1->$vmsvar(4)$ * vmsign(4) + \
+                                                          f1->$vmsvar(5)$ * vmsign(5) + \
+                                                          f1->$vmsvar(6)$ * vmsign(6) + \
+                                                          f1->$vmsvar(7)$ * vmsign(7)) 
+      var1                                = var1 - (tmp1 - tmp2)
+      delete([/tmp1,tmp2/])
+
+      if (compare.ne."Model_vs_OBS") then
+         tmp1                             = lsub * f2->$vmsvar(3)$ * vmsign(3)
+         tmp2                             = lice * 1e3 * (f2->$vmsvar(4)$ * vmsign(4) + \
+                                                          f2->$vmsvar(5)$ * vmsign(5) + \
+                                                          f2->$vmsvar(6)$ * vmsign(6) + \
+                                                          f2->$vmsvar(7)$ * vmsign(7))
+         var2                             = var2 - (tmp1 - tmp2)
+       end if
+
     else
 
       do ivv = 1, dimsizes(vmsvar)-1,1
@@ -107,5 +139,6 @@
       end do
 
    end if
+   end if 
 
   end if

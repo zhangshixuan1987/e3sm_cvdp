@@ -455,6 +455,7 @@
         isfilevar(f2, "slhf").and.isfilevar(f2, "sshf")) then
       var2                          = f2->ssr
       var2                          = f2->ssr + f2->str + f2->slhf + f2->sshf
+
     else if (isfilevar(f2, "rsds").and.isfilevar(f2, "rsus").and.   \
              isfilevar(f2, "rlds").and.isfilevar(f2, "rlus").and. \
              isfilevar(f2, "lhtfl").and.isfilevar(f2, "shtfl")) then
@@ -469,18 +470,21 @@
     end if
 
   else if (ovarnam.eq."RESSURF") then
-
    ;;ERA5 reanalysis ignore the small downward long-wave (non-solar)
    ;;(i.e. the dowanwelling longwave fluxes at TOP is zero), thus,
    ;;TTR represents the negative of outgoing longwave radiation
    ;;RESTOM = FSNT - FLNT  = TSR - (-TTR) = TSR + TTR
    ;;       = (rsdt - rsut) - (rlut - rldt)
-    if (isfilevar(f2, "ttr") .and. isfilevar(f2, "tsr") ) then
-      var2                          = f2->ttr
-      var2                          = f2->ttr + f2->tsr
-    else if (isfilevar(f2, "rsdt") .and. isfilevar(f2, "rsut") .and. isfilevar(f2, "rlut") )
-      var2                          = f2->rsdt
-      var2                          = (f2->rsdt - f2->rsut) - f2->rlut
+    if (isfilevar(f2, "ssr").and.isfilevar(f2, "str").and. \
+        isfilevar(f2, "slhf").and.isfilevar(f2, "sshf")) then
+      var2                          = f2->ssr
+      var2                          = f2->ssr + f2->str + f2->slhf + f2->sshf
+    else if (isfilevar(f2, "rsds").and.isfilevar(f2, "rsus").and.   \
+             isfilevar(f2, "rlds").and.isfilevar(f2, "rlus").and. \
+             isfilevar(f2, "lhtfl").and.isfilevar(f2, "shtfl") ) then 
+      var2                          = f2->rsds
+      var2                          = (f2->rsds - f2->rsus) + (f2->rlds - f2->rlus) \
+                                    - (f2->lhtfl + f2->shtfl)
     else
       print( ovarnam + " does not exist in the file, using missing values" )
       var2                          = var1
