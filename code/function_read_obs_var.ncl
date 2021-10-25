@@ -477,8 +477,17 @@
    ;;       = (rsdt - rsut) - (rlut - rldt)
     if (isfilevar(f2, "ssr").and.isfilevar(f2, "str").and. \
         isfilevar(f2, "slhf").and.isfilevar(f2, "sshf")) then
+      lvap = 2.501e6
+      lice = 3.337e5
+      lsub = lvap + lice
+      tmp1                          = - lsub * f2->mer
+      tmp2                          = lice * 1e3 * (f2->mcpr  + \
+                                                    f2->mlspr + \
+                                                    f2->mcsr  + \
+                                                    f2->mlssr )
       var2                          = f2->ssr
-      var2                          = f2->ssr + f2->str + f2->slhf + f2->sshf
+      var2                          = f2->ssr + f2->str + f2->sshf - (tmp1 - tmp2)
+      delete([/tmp1,tmp2/])
     else if (isfilevar(f2, "rsds").and.isfilevar(f2, "rsus").and.   \
              isfilevar(f2, "rlds").and.isfilevar(f2, "rlus").and. \
              isfilevar(f2, "lhtfl").and.isfilevar(f2, "shtfl") ) then 
