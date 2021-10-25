@@ -482,8 +482,8 @@
       lsub = lvap + lice
       tmp1                          = - lsub * f2->mer
       tmp2                          = lice * (f2->mcpr  + \
-                                              f2->mlspr + \
-                                              f2->mcsr  + \
+                                              f2->mlspr - \
+                                              f2->mcsr  - \
                                               f2->mlssr )
       var2                          = f2->ssr
       var2                          = f2->ssr + f2->str + f2->sshf - (tmp1 - tmp2)
