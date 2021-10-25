@@ -481,10 +481,10 @@
       lice = 3.337e5
       lsub = lvap + lice
       tmp1                          = - lsub * f2->mer
-      tmp2                          = lice * 1e3 * (f2->mcpr  + \
-                                                    f2->mlspr + \
-                                                    f2->mcsr  + \
-                                                    f2->mlssr )
+      tmp2                          = lice * (f2->mcpr  + \
+                                              f2->mlspr + \
+                                              f2->mcsr  + \
+                                              f2->mlssr )
       var2                          = f2->ssr
       var2                          = f2->ssr + f2->str + f2->sshf - (tmp1 - tmp2)
       delete([/tmp1,tmp2/])
