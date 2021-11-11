@@ -120,7 +120,7 @@
       end if 
       delete([/po,to/])
 
-      wmi        = vinth2p(wo,f1->hyam,f1->hybm,pinterp1,f1->PS,intyp,f1->P0/100.0,1,False)
+      wmi        = vinth2p(wm,f1->hyam,f1->hybm,pinterp1,f1->PS,intyp,f1->P0/100.0,1,False)
 
       if(compare.eq."Model_vs_OBS") then
         woi      = int2p_n_Wrap(f2->lev,wo,pinterp1, intyp, 1)
