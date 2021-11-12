@@ -346,9 +346,10 @@ begin
            vecres@vcRefAnnoPerimOn          = False
            vecres@vcRefAnnoParallelPosF     = 1.2    ; move ref vector into plot
            vecres@vcRefAnnoFontHeightF      = FontHeightF*0.5
-           vecres@vcRefMagnitudeF           = 1.0               ; define vector ref mag
-           vecres@vcRefAnnoString1          = vecres@vcRefMagnitudeF+ " (v,w*100)" ;" m s~S~-1~N~"
-           vecres@vcRefAnnoString2          = ""; "(v,w*100)"
+           vecres@vcRefAnnoSide             = "Bottom"
+           vecres@vcRefMagnitudeF           = 1.0              ; define vector ref mag
+           vecres@vcRefAnnoString1          = vecres@vcRefMagnitudeF
+           vecres@vcRefAnnoString2          = "(v,wx100)"
     
            res1 = res
            res1@lbLabelBarOn                 = True
@@ -389,10 +390,10 @@ begin
            res2@gsnLeftString                = leftstring
            res2@gsnRightString               = "Global mean: "+sprintf("%5.2f",avg(sfadiff(:,:)))
            plotA   = gsn_csm_contour(wks,sfadiff,res2)
-
-           vecres@vcRefMagnitudeF           = 0.5               ; define vector ref mag
-           vecres@vcRefAnnoString1          = vecres@vcRefMagnitudeF +" (~F33~D~N~~F~v,~F33~D~N~~F~w*100)" ;+ " m s~S~-1~N~"
-           vecres@vcRefAnnoString2          = "" ;"(~F33~D~N~~F~v,~F33~D~N~~F~w*100)"
+           vecres@vcRefAnnoSide             = "Bottom"
+           vecres@vcRefMagnitudeF           = 0.5        ; define vector ref mag
+           vecres@vcRefAnnoString1          = vecres@vcRefMagnitudeF 
+           vecres@vcRefAnnoString2          = "(~F33~D~N~~F~v,~F33~D~N~~F~wx100)"
            plotB   = gsn_csm_vector(wks,vadiff,wadiff,vecres)
            overlay(plotA,plotB)                      ; result will be plotA
            plot(2) = plotA                           ; now assign plotA to array
