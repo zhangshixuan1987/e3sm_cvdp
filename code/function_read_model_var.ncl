@@ -37,7 +37,7 @@
      vmsign                           := (/1,-1/)
   else if (mvarnam .eq. "RESSURF") then 
       vmsvar                          := (/"FSNS","FLNS","SHFLX","QFLX","PRECC","PRECL","PRECSC","PRECSL"/)
-      vmsign                          := (/1,-1,-1,1,1,1,-1,-1/)
+      vmsign                          := (/1,         -1,     -1,     1,      1,      1,      -1,     -1/)
   else if (mvarnam .eq. "NET_FLUX_SRF") then
      vmsvar                           := (/"FSNS","FLNS","SHFLX","LHFLX"/)
      vmsign                           := (/1,-1,-1,-1/)
