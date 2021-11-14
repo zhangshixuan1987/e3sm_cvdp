@@ -1,8 +1,8 @@
 #!/bin/csh
 # Submit this script as : sbatch ./[script-name]
 #SBATCH  --job-name=regrid0300
-#SBATCH  --nodes=1
-#SBATCH  --time=2:00:00
+#SBATCH  --nodes=4
+#SBATCH  --time=12:00:00
 #SBATCH  --exclusive
 #SBATCH -A condo
 #SBATCH -p acme-small
@@ -24,15 +24,17 @@ set script_path = /blues/gpfs/home/software/spack-0.10.1/opt/spack/linux-centos7
 #Modify path so that ncclimo can find latest ncra and other nco utilities
 set path = ( $script_path  $path )
 
-set CASE_NAME  = v2.LR.historical_0101
-set start_year = 1985
-set end_year   = 2014
+foreach model_case (v2.LR.historical_0101 v2.LR.historical_0151 v2.LR.historical_0201 v2.LR.historical_0251 v2.LR.historical_0301)
+
+set CASE_NAME  = $model_case
+set start_year = 1981
+set end_year   = 2010
 set time_tag   = `printf "%04d" $start_year`-`printf "%04d" $end_year`
 
 #location of work directory 
 set WORK_DIR      = /lcrc/group/acme/ac.szhang/acme_scratch/data/polar_diag
 #location of model history file (run directory or model output directory)
-set RUN_FILE_DIR  = /lcrc/group/acme/ac.szhang/acme_scratch/polar_diag/my_run_script/e3sm_process/${CASE_NAME}/data
+set RUN_FILE_DIR  = /lcrc/group/e3sm/ac.forsyth2/E3SMv2/${CASE_NAME}/archive/atm/hist
 #Mapping file
 set MAP_FILE      = /lcrc/group/acme/ac.szhang/acme_scratch/data/regrid_maps/map_ne30pg2_to_cmip6_180x360_aave.20200201.nc
 
@@ -65,3 +67,6 @@ ncrcat -d time,0, -v ${var3d_list},${var2d_list} $eam_files ${SE_FILE}
 
 set CLIMO_SCRIPT = $script_path/$script_name
 $CLIMO_SCRIPT -i ${SE_FILE} -m ${MAP_FILE} -o ${FV_FILE}
+
+end 
+

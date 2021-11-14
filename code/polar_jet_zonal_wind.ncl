@@ -3,10 +3,8 @@
   load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/contributed.ncl"
   load "$NCARG_ROOT/lib/ncarg/nclscripts/esmf/ESMF_regridding.ncl"
 
-; Purpose: A tempolate to make a eof plot for AAO patterns 
+; Purpose: A tempolate to make jet position and strength plot  
 ;          Data is vertically interpolated to pressure levels
-;          1st panel: EOFs for the first three modes
-;          2nd panel: time series plot
 ; Author : Shixuan Zhang
 ; Date   : Dec 06, 2020
 
@@ -29,50 +27,51 @@ begin
   tttag                                      = getenv("TTTAG")
   cttag                                      = getenv("CTTAG")
 
-;define regions for eof analysis
-  latS                                         = -70.  ;negative for southern hemisphere
-  latN                                         = -20.  ;negative for southern hemisphere
+  statistical_test                           = getenv("REGRESSION_TEST")
+  statistical_siglev                         = 0.05
+
+;define regions for jet position analysi
+  latS                                       = -70.  ;negative for southern hemisphere
+  latN                                       = -20.  ;negative for southern hemisphere
 
 ;define constants for unit conversion
-  pi                                           = 3.14159265
-  rearth                                       = 6.37122e6
-  grav                                         = 9.80665
+  pi                                         = 3.14159265
+  rearth                                     = 6.37122e6
+  grav                                       = 9.80665
 
  print(cname + " " +tname)
 ;variable name in the climo file
-  modvars                                    = (/"TAUX"/)
-  facmod                                     = (/-100.0/)
-  varunt                                     = (/"10~S~-2~N~ m~S~2~N~ s~S~-2~N~"/)
+  modvars                                    = (/"U"/)
+  facmod                                     = (/1.0/)
+  varunt                                     = (/"m s~S~-1~N~"/)
   panelstr1                                  = tname + " ("+tttag+")"
   panelstr2                                  = cname + " ("+cttag+")"
 
   if(compare.eq."Model_vs_OBS")then
 
-   if (cname.eq."ERA5") then
-     obsvars                                 = (/"metss"/)
-     facobs                                  = (/100.0/)
-   else if ((cname.eq."ERA20C").or.(cname.eq."ERA_20C")) then
-     obsvars                                 = (/"iews"/)
-     facobs                                  = (/100.0/)
+   if((cname.eq."ERA5").or.(cname.eq."ERA20C").or.(cname.eq."ERA_20C")) then
+     obsvars                                 = (/"u"/)
+     facobs                                  = (/1.0/)
    else if ((cname.eq."NOAA20C").or.(cname.eq."NOAA_20C")) then
-     obsvars                                 = (/"metss"/)
-     facobs                                  = (/100.0/)
+     obsvars                                 = (/"uwnd"/)
+     facobs                                  = (/1.0/)
    else
      print("The observational source are not available; only allow ERA5, ERA20C or NOAA20C")
      exit
    end if
    end if
-   end if 
 
   end if 
 
 ;declear the season or annual mean data to be used;;;;;
-  seasons                                      = (/"ANN","DJF","JJA"/)
-  pout                                         = (/"Surface"/)
+  seasons                                      = (/"ANN","DJF","JJA","MAM","SON"/)
+  pout                                         = (/850/)
+  intyp                                        = 2
 
 ;read in two files
 
   do ll = 0,dimsizes(pout) - 1
+
 
       f                                       = systemfunc("ls "+tpath+"/"+tcase+"_*_"+tttag+".nc")
       f1                                      = addfile(f,"r")
@@ -82,34 +81,55 @@ begin
       f2                                      = addfile(f,"r")
       gw2                                     = f2->gw
 
-      do jj = 0, dimsizes(modvars)-1
+     do jj = 0, dimsizes(modvars)-1
 
-        mvarnam  = modvars(jj)
-        print("working on variable "+ mvarnam)
-        load "./function_read_model_var.ncl"
+        mvarnam                             = modvars(jj)
+        var1                                = f1->$mvarnam$
+        tmp1                                = vinth2p(var1,f1->hyam,f1->hybm,pout(ll),f1->PS,intyp,f1->P0/100.0,1,False)
+        vp1                                 = tmp1(:,0,:,:)
+        delete([/tmp1/])
 
-        if (compare.eq."Model_vs_OBS") then
-          ovarnam  = obsvars(jj)
-          load "./function_read_obs_var.ncl"
+        if(compare.ne."Model_vs_OBS") then
+          var2                              = f2->$mvarnam$
+          tmp2                              = vinth2p(var2,f2->hyam,f2->hybm,pout(ll),f2->PS,intyp,f2->P0/100.0,1,False)
+          vp2                               = tmp2(:,0,:,:)
+          delete([/tmp2/])
         end if
-
-        var1@_FillValue                      = -9999.
-        var2@_FillValue                      = -9999.
 
         if(compare.eq."Model_vs_OBS") then
-          var1                               = var1*facmod(jj)
-          var2                               = var2*facobs(jj)
-        else
-          var1                               = var1*facmod(jj)
-          var2                               = var2*facmod(jj)
+           ovarnam                          = obsvars(jj)
+           var2                             = f2->$ovarnam$
+           lev                              = f2->lev
+           indl                             = ind(lev.eq.pout(ll))
+           if(.not.ismissing(indl)) then
+             vp2                            = var2(:,indl,:,:)
+           else
+             tmp                            = int2p_n_Wrap(lev, var2, pout(ll), 2, 1)
+             vp2                            = tmp(:,0,:,:)
+             delete([/tmp/])
+           end if
+           delete([/lev,indl/])
         end if
 
-        var1@units                           = varunt(jj)
-        var2@units                           = varunt(jj)
+        delete([/var1,var2/])
+
+        vp1@_FillValue                      = -9999.
+        vp2@_FillValue                      = -9999.
+
+        if(compare.eq."Model_vs_OBS") then
+          vp1                               = vp1*facmod(jj)
+          vp2                               = vp2*facobs(jj)
+        else
+          vp1                               = vp1*facmod(jj)
+          vp2                               = vp2*facmod(jj)
+        end if
+
+        vp1@units                           = varunt(jj)
+        vp2@units                           = varunt(jj)
 
         ;;check the two comparing files and see if they are in the same grid,
-        ddd1                                  = dimsizes(var1)
-        ddd2                                  = dimsizes(var2)
+        ddd1                                  = dimsizes(vp1)
+        ddd2                                  = dimsizes(vp2)
         ;;otherwise, return the error message;;;;
         if ((ddd1(1).ne.ddd2(1)).or.(ddd1(2).ne.ddd2(2)))then
           print("Error: this scripts requires the two files must in the same grid to run!!!")
@@ -119,8 +139,8 @@ begin
        ; ==============================================================
        ; User defined parameters that specify region of globe
        ; ==============================================================
-         x1     = var1(:,{latS:latN},:)
-         y1     = var2(:,{latS:latN},:)
+         x1     = vp1(:,{latS:latN},:)
+         y1     = vp2(:,{latS:latN},:)
 
        ; ==============================================================
        ; compute climatology and Anomalies
@@ -141,28 +161,23 @@ begin
        ; studies (e.g. Kidston and Gerber 2010; Son et al. 2010; Swart and Fyfe 2012) 
        ; whereby, as described above, the strength and latitude of the westerly jet 
        ; are identified in zonally-averaged lower-tropospheric (or near-surface) 
-       ; time-mean westerly wind or surface wind stress. In this script, we mainly  
-       ; follow the method used by  Swart and Fyfe (2012) and  Lee et al. (2019),
-       ; and strength of the jet stream is represented by the latitudinal 
-       ; position and magnitude of the zonal wind-stress maximum. The method 
-       ; to derive the position and strength of the jet stream takes three steps 
-       ; 1. climate ate model and reanalysis wind-stress data was first interpolated 
-       ;    onto a common 0.5- by-0.5 degree horizontal grid and and to a common 
-       ;    monthly no-leap-year calendar in time
-       ; 2. calculate the the zonal-mean zonal surface wind-stress between 70S and 20S.
-       ; 3. search for the latitude of the maximum in the zonal-mean zonal surface 
-       ;    wind-stress, which is the jet position. The strength of the jet was 
-       ;    defined as the stress at this position
-       ;=====================================================================
+       ; time-mean westerly wind or surface wind stress. In this script, the specific 
+       ; approach used follows that of (Bracegirdle et al. 2018), who calculate 
+       ; jet diagnostics from latitudinally-interpolated zonal mean westerly wind 
+       ; on the 850 hPa level (U850) between the latitudes of 75°S and 10°S
+       ; The main reason for choosing 850 hPa is that it captures the lower-tropospheric 
+       ; jet whilst also avoiding uncertainties associated with reanalysis estimates of 
+       ; wind in the atmospheric boundary layer (Kent et al. 2012), therefore 
+       ; allowing for more direct model-observation comparisons. 
+       ; =====================================================================
 
-       ;====================================================================
-       ; First step: regrid the data within 70S to 20S to 0.5x0.5
+       ; ====================================================================
+       ; First step: regrid the data to 0.1x0.1 within 70S and 20S region
        ;=====================================================================
         weightfile = systemfunc("ls "+wgtfile)
-       ;print(weightfile)
         exists = isfilepresent(weightfile)
 
-        if(.not.exists) then
+       if(.not.exists) then
 
          print("OPeNDAP test unsuccessful.")
          print("Either the file doesn't exist, or NCL does")
@@ -176,26 +191,26 @@ begin
          Opt@DstGridType    = "0.1x0.1"
          Opt@DstLLCorner    = (/ latS,   0.25d/)
          Opt@DstURCorner    = (/ latN, 359.75d/)
-         var1x               = ESMF_regrid(var1,Opt)
-         var2x               = ESMF_regrid(var2,Opt)
+         vp1x               = ESMF_regrid(vp1,Opt)
+         vp2x               = ESMF_regrid(vp2,Opt)
 
-        else
+       else
+         
+         vp1x = ESMF_regrid_with_weights(vp1,weightfile,False)
+         vp2x = ESMF_regrid_with_weights(vp2,weightfile,False)
 
-         var1x = ESMF_regrid_with_weights(var1,weightfile,False)
-         var2x = ESMF_regrid_with_weights(var2,weightfile,False)
-
-        end if
-
-        ;printVarSummary(var1x)
-        ;printVarSummary(var2x)
-        ;delete([/var1,var2/])       
-
-       ; ==============================================================
-       ; Second step: calculate the zonal mean zonal surface wind-stress 
-       ; between 70S and 20S. 
-       ; ==============================================================
-         x1     = dim_avg_n_Wrap(var1x,2)
-         y1     = dim_avg_n_Wrap(var2x,2)
+       end if 
+ 
+       ;printVarSummary(vp1x)
+       ;printVarSummary(vp2x)
+       ; ======================================================================
+       ; Second step: Calculate the zonal mean zonal wind at 850hPa
+       ; between 70S and 20S, and find the lattitude of maximum zonal
+       ; mean zonal wind (which is the jet position), and its corresponding
+       ; magnitude (which is the jet strength)
+       ; ==================================================================
+         x1     = dim_avg_n_Wrap(vp1x,2)
+         y1     = dim_avg_n_Wrap(vp2x,2)
 
          x1_ins = dim_max_n_Wrap(x1,1)
          y1_ins = dim_max_n_Wrap(y1,1)
@@ -205,7 +220,7 @@ begin
 
          x1_pos   = x1_ins
          y1_pos   = y1_ins
-        
+
          if(.not.all(ismissing(xmax_ind)))then
            do ix = 0,dimsizes(x1_pos)-1
             x1_pos(ix) = tofloat(x1&lat(xmax_ind(ix)))
@@ -214,7 +229,7 @@ begin
            x1_pos = -9999.
            x1_pos@_FillValue = -9999.
          end if
- 
+
          if(.not.all(ismissing(ymax_ind)))then
            do ix = 0,dimsizes(y1_pos)-1
             y1_pos(ix) = tofloat(y1&lat(ymax_ind(ix)))
@@ -222,17 +237,17 @@ begin
          else
            y1_pos = -9999.
            y1_pos@_FillValue = -9999.
-         end if 
+         end if
 
        ;;;;calculate the anomalies;;;;
          xa1_ins = x1_ins
          ya1_ins = y1_ins
          xa1_pos = x1_pos
          ya1_pos = y1_pos
-     
-         do i = 0,11
 
-           xsub = x1_ins(i::12)
+         do i = 0,11
+           
+           xsub = x1_ins(i::12) 
            xa1_ins(i::12) = x1_ins(i::12) - avg(xsub)
            delete([/xsub/])
 
@@ -248,11 +263,11 @@ begin
            ya1_pos(i::12) = y1_pos(i::12) - avg(xsub)
            delete([/xsub/])
 
-         end do
-
-       ; =================================================================
-       ; Select different season for the eof
-       ; =================================================================
+         end do           
+ 
+        ; =================================================================
+        ; Select different season for the eof
+        ; =================================================================
         ;shift the model time to be consistent with the observations;;;
          x1_ins&time = x1_ins&time - 1.0
          if(compare.ne."Model_vs_OBS")then
@@ -281,6 +296,16 @@ begin
            indx1 = ind ((monthx1.eq.6).or.(monthx1.eq.7).or.(monthx1.eq.8))
            indx2 = ind ((monthx2.eq.6).or.(monthx2.eq.7).or.(monthx2.eq.8))
 
+         else if (seasons(kk).eq."MAM") then
+
+           indx1 = ind ((monthx1.eq.3).or.(monthx1.eq.4).or.(monthx1.eq.5))
+           indx2 = ind ((monthx2.eq.3).or.(monthx2.eq.4).or.(monthx2.eq.5))
+
+         else if (seasons(kk).eq."SON") then
+
+           indx1 = ind ((monthx1.eq.9).or.(monthx1.eq.10).or.(monthx1.eq.11))
+           indx2 = ind ((monthx2.eq.9).or.(monthx2.eq.10).or.(monthx2.eq.11))
+
          else
 
            print("User did not specify the season, use all of the monthly data")
@@ -290,17 +315,20 @@ begin
          end if
          end if
          end if
+         end if
+         end if
+
 
          x_ins = x1_ins(indx1)
          y_ins = y1_ins(indx2)
          x_pos = x1_pos(indx1)
          y_pos = y1_pos(indx2)
-
+ 
          xa_ins = xa1_ins(indx1)
          ya_ins = ya1_ins(indx2)
          xa_pos = xa1_pos(indx1)
          ya_pos = ya1_pos(indx2)
-
+      
          xAnom = xAnom1(indx1,:,:)
          yAnom = yAnom1(indx2,:,:)
 
@@ -310,8 +338,8 @@ begin
         ;Save the data for the regression analysis
         ;==================================================================
          setfileoption("nc", "Format",  "NetCDF4")
-         out_file1  = opath +"/"+"Jet_index_"+tname+"_monthly_mean_"+mvarnam+"_at_"+pout(ll)+"_"+seasons(kk)+".nc"
-         out_file2  = opath +"/"+"Jet_index_"+cname+"_monthly_mean_"+mvarnam+"_at_"+pout(ll)+"_"+seasons(kk)+".nc"
+         out_file1  = opath +"/"+"Jet_index_"+tname+"_monthly_mean_"+mvarnam+"_at_"+toint(pout(ll))+"hPa_"+seasons(kk)+".nc"
+         out_file2  = opath +"/"+"Jet_index_"+cname+"_monthly_mean_"+mvarnam+"_at_"+toint(pout(ll))+"hPa_"+seasons(kk)+".nc"
 
          system("rm " + out_file1)
          system("rm " + out_file2)
@@ -328,6 +356,7 @@ begin
 
          fout1->time         = time1
          fout2->time         = time2
+
          x_ins@description = "jet strength (original value)"
          y_ins@description = "jet strength (original value)"
          x_pos@description = "jet position (original value)"
@@ -336,6 +365,7 @@ begin
          ya_ins@description = "jet strength (anomaly value)"
          xa_pos@description = "jet position (anomaly value)"
          ya_pos@description = "jet position (anomaly value)"
+
          x_ins@units        = varunt(jj)
          y_ins@units        = varunt(jj)
          xa_ins@units       = varunt(jj)
@@ -353,13 +383,30 @@ begin
          fout2->jetd_ins   = ya_ins
          fout1->jetd_pos   = xa_pos
          fout2->jetd_pos   = ya_pos
-         fout1->$mvarnam$  = xClm
-         fout2->$mvarnam$  = yClm
+         fout1->U850       = xClm
+         fout2->U850       = yClm
 
          delete([/time1,time2,fout1,fout2,out_file1,out_file2/])
 
        ; =================================================================
-       ; Extract the YYYYMM from the time coordinate
+       ; Regress
+       ; =================================================================
+         jet_ins1        = dim_standardize_n( x_ins, 0, 0)      ; normalize
+         jet_ins2        = dim_standardize_n( y_ins, 0, 0)      ; normalize
+         jet_ins1_regres = xClm                              ; create an array w meta data
+         jet_ins2_regres = yClm                              ; create an array w meta data
+         jet_ins1_regres = (/ regCoef_n(jet_ins1, xAnom, 0, 0) /)
+         jet_ins2_regres = (/ regCoef_n(jet_ins2, yAnom, 0, 0) /)
+
+         jet_pos1        = dim_standardize_n( x_pos, 0, 0)      ; normalize
+         jet_pos2        = dim_standardize_n( y_pos, 0, 0)      ; normalize
+         jet_pos1_regres = xClm                             ; create an array w meta data
+         jet_pos2_regres = yClm                              ; create an array w meta data
+         jet_pos1_regres = (/ regCoef_n(jet_pos1, xAnom, 0, 0) /)
+         jet_pos2_regres = (/ regCoef_n(jet_pos2, yAnom, 0, 0) /)
+
+       ; =================================================================
+       ; Extract the YYYYMM from the time coordinate 
        ; =================================================================
 
          utc_date1 = cd_calendar(x_ins&time,-1)
@@ -371,26 +418,23 @@ begin
          delete([/utc_date1,utc_date2/])
 
          wtype                        = "eps"
-        ;wtype@wkWidth                = 2500
-        ;wtype@wkHeight               = 2500
-         figdir                       = outdir+"/Jet_Index_Analysis/"
-         fe                           = "Jet_index_with_monthly_mean_"+modvars(jj)+"_"+seasons(kk)+"_"+pout(ll)
+         figdir                       = outdir+"/Polar_Jet_U850/"
+         fe                           = "Jet_index_with_monthly_mean_"+modvars(jj)+"_"+seasons(kk)+"_"+pout(ll) 
          wks                          = gsn_open_wks(wtype, figdir + fe)
 
          plot      = new((/6/),graphic)
          tsmapx    = new((/6/),graphic)
          tsmap1    = new((/6/),graphic)
          tsmap2    = new((/6/),graphic)
-
-
+      
        ;============================================================
        ; PLOTS
        ;============================================================
-         res                      = True
+         res                      = True         
          res@gsnDraw              = False        ; don't draw yet
          res@gsnFrame             = False        ; don't advance frame yet
          res@gsnPolar             = "SH"
-
+ 
          res@mpFillOn             = False        ; turn off map fill
          res@mpMaxLatF            = latN
         ;res@mpCenterLonF         = 180
@@ -403,7 +447,7 @@ begin
          res@gsnStringFontHeightF     = FontHeightF*1.2
 
          res@cnFillOn                 = True         ; turn on color fill
-         res@cnFillPalette            = "BlueWhiteOrangeRed"
+         res@cnFillPalette            = "BlueWhiteOrangeRed"  
          res@cnLinesOn                = False        ; True is default
          res@cnLineLabelsOn           = False        ; True is default
 
@@ -436,14 +480,14 @@ begin
          maxlev = 11
          minval = -20
          maxval =  20
-         res@cnLevelSelectionMode = "ManualLevels"
-        ; manually set the contour levels with the following 3 resources
+         res@cnLevelSelectionMode = "ManualLevels"  
+         ; manually set the contour levels with the following 3 resources
          mnmxint = nice_mnmxintvl( minval, maxval, maxlev, False)
          res@cnMinLevelValF           = mnmxint(0) ; set the minimum contour level
-         res@cnMaxLevelValF           = mnmxint(1) ; set the maximum contour level
+         res@cnMaxLevelValF           = mnmxint(1) ; set the maximum contour level     
          res@cnLevelSpacingF          = mnmxint(2) ; *special* match CPC
 
-        delete([/mnmxint/])
+         delete([/mnmxint/])
 
        ;*******************************************
        ; first plot
@@ -452,36 +496,36 @@ begin
           res@gsnPolarLabelFontHeightF     = FontHeightF
 
           ;---Draw first plot in upper left corner
-          res@gsnLeftString     = modvars(jj)
+          res@gsnLeftString     = modvars(jj)+ " at 850hPa"
           res@gsnRightString    = varunt(jj) ;"Case: "+panelstr1
-          res@gsnCenterString   = ""
+          res@gsnCenterString   = "" 
           res@tiMainString      = "Case: "+panelstr1
           plot(0)   = gsn_csm_contour_map_polar(wks,xClm,res)
 
           ;---Draw second plot in upper right corner
-          res@gsnLeftString     = modvars(jj)
+          res@gsnLeftString     = modvars(jj)+ " at 850hPa"
           res@gsnRightString    = varunt(jj) ;"Case: "+panelstr2
           res@gsnCenterString   = "" ;panelstr2
           res@tiMainString      = "Case: "+panelstr2
           plot(1) = gsn_csm_contour_map_polar(wks,yClm,res)
-
+       
        ;*******************************************
        ; second plot: Jet Strength
        ;*******************************************
           xstring  = "Time (year)"
-          ystring  = varunt(jj)
+          ystring  = "m s~S~-1~N~"
 
           rts           = True
           rts@gsnDraw   = False       ; don't draw yet
           rts@gsnFrame  = False       ; don't advance frame yet
-          rts@gsnScale  = True        ; force text scaling
+          rts@gsnScale  = True        ; force text scaling               
 
           rts@vpHeightF = 0.40        ; Changes the aspect ratio
           rts@vpWidthF  = 0.85
           rts@vpXF      = 0.10        ; change start locations
           rts@vpYF      = 0.75        ; the plot
 
-          rts@gsnXYBarChart         = False            ; create bar chart
+          rts@gsnXYBarChart         = False            ; create bar chart 
          ;rts@gsnAboveYRefLineColor = "red"           ; above ref line fill red
          ;rts@gsnBelowYRefLineColor = "blue"          ; below ref line fill blue
           rts@xyLineThicknesses            = 3.0
@@ -500,11 +544,10 @@ begin
           rts@tmYRMajorThicknessF          = 1.0
           rts@tmYRMinorThicknessF          = 1.0
 
-
-          rts@trYMinF                      =  0.0
-          rts@trYMaxF                      =  40.0
-          rts@tiXAxisString                = xstring 
-          rts@tiYAxisString                = ystring 
+          rts@trYMinF                      =  5.0
+          rts@trYMaxF                      = 20.0
+          rts@tiXAxisString                = xstring
+          rts@tiYAxisString                = ystring
 
          ;create individual plots
          ;---Draw third plot in lower left corner
@@ -530,7 +573,7 @@ begin
           tsmapx(2)                 = gsn_csm_xy(wks,yyyy1,xyarrx1,rtsx1)
          ;overlay(plot(2),tsmapx(2))
           delete([/xyarrx1,rtsx1/])
-
+           
           ;---Draw fourth plot in lower right corner
           rts@gsnLeftString         = "Jet strength"
           rts@gsnRightString        = panelstr2
@@ -538,7 +581,7 @@ begin
             rts@gsnYRefLine         = avg(y_ins)   ; reference line
           else
             rts@gsnYRefLine         = 9999   ; reference line
-          end if 
+          end if
           plot(3) = gsn_csm_xy (wks,yyyy2,y_ins,rts)
 
           rtsx1 = rts
@@ -556,17 +599,17 @@ begin
        ;*******************************************
        ; second plot: Jet Position
        ;*******************************************
-          xstring  = "Time (year)"
-          ystring  = "Degree"
+          ystring = "Degree"
+          xstring = "Time (year)"
 
           rts1 = rts
-          rts1@trYMinF              = -60.0
-          rts1@trYMaxF              = -35.0
-          rts1@tiXAxisString        = xstring 
-          rts1@tiYAxisString        = ystring 
-          rts1@gsnXYBarChart        = False
-          rts1@xyLineThicknesses    = 3.0
-          rts1@xyLineColors         = "Black"
+          rts1@trYMinF                      = -60.0
+          rts1@trYMaxF                      = -35.0
+          rts1@tiXAxisString                = xstring
+          rts1@tiYAxisString                = ystring
+          rts1@gsnXYBarChart                = False
+          rts1@xyLineThicknesses            = 3.0
+          rts1@xyLineColors                 = "Black"
 
          ;create individual plots
          ;---Draw fifth plot in lower left corner
@@ -595,12 +638,13 @@ begin
          ;---Draw sixth plot in lower right corner
           rts1@gsnLeftString        = "Jet position"
           rts1@gsnRightString       = panelstr2
-          if(.not.all(ismissing(y_ins)))then
+          if(.not.all(ismissing(y_pos)))then
             rts1@gsnYRefLine        = avg(y_pos)   ; reference line
           else
             rts1@gsnYRefLine        = 9999   ; reference line
           end if
           plot(5) = gsn_csm_xy (wks,yyyy2,y_pos,rts1)
+
           rtsx1 = rts
           rtsx1@gsnXYBarChart       = False
           rtsx1@gsnLeftString       = ""
@@ -620,7 +664,7 @@ begin
           pres1@gsnPanelBottom           = 0.60     ; space for label bar
           pres1@gsnPanelXF               = (/0.07,0.57/)
           gsn_panel(wks,plot(0:1),(/1,2/),pres1)          ; create first panel
-
+          
           pres2                           = True                ; mods desired
           pres2@gsnFrame                  = False               ; save panel until both ready
           pres2@gsnPanelTop               = 0.58                 ; draw from center to right edge
@@ -634,23 +678,24 @@ begin
           pres3@gsnPanelBottom            = 0.05       ; draw from center to right edge
           pres3@gsnPanelXF               = (/0.08,0.57/)
           gsn_panel(wks,plot(4:5),(/1,2/),pres3)       ; create first panel
-
+       
           frame(wks)                                   ; draw both on same page
-
           delete([/xa_ins,ya_ins,xa_pos,ya_pos/])
-          delete([/x_ins,y_ins,x_pos,y_pos,yyyy1,yyyy2/])
+          delete([/x_ins,y_ins,x_pos,y_pos,jet_ins1,jet_ins2,jet_pos1,jet_pos2,yyyy1,yyyy2/])
+          delete([/jet_ins1_regres,jet_ins2_regres,jet_pos1_regres,jet_pos2_regres/])
           delete([/xAnom,yAnom/])
 
-       end do
+        end do 
 
          delete([/xAnom1,yAnom1,xClm1,yClm1,xClm,yClm,x1,y1,x1_ins,y1_ins,x1_pos,y1_pos/])
          delete([/monthx1,monthx2/])
 
      end do                                              ; end of looping over variables
-
+     
      delete([/f1,f2/])
 
   end do                                                    ; end of looping over pressure levels
+
 
 end
 

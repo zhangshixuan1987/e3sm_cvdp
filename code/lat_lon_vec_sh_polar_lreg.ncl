@@ -41,7 +41,7 @@ begin
   sigma                                      = 5.67e-8 ; Stefan-Boltzmann constant
 
  ;define time for the plot
-  seasons                                    = (/"ANN","DJF","JJA"/)
+  seasons                                       = (/"ANN","DJF","JJA","MAM","SON"/)
 
  ;variable name in the climo file
   load "./share_info_for_vector_map.ncl"

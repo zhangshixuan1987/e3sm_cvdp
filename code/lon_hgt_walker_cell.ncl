@@ -47,7 +47,7 @@ begin
   sigma                                      = 5.67e-8 ; Stefan-Boltzmann constant
 
 ;declear the season or annual mean data to be used;;;;;
-  seasons                                   = (/"ANN","DJF","JJA"/)
+  seasons                                       = (/"ANN","DJF","JJA","MAM","SON"/)
 
 ;define the pressure levels for cross-section plot 
   pinterp                                      = asciiread(refplev_file,-1,"float")

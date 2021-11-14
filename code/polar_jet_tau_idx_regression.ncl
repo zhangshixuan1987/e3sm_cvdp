@@ -36,7 +36,7 @@ begin
   latN                                       = -20.  ;negative for southern hemisphere
 
  ;declear the season or annual mean data to be used;;;;;
-  seasons                                      = (/"ANN","DJF","JJA"/)
+  seasons                                      = (/"ANN","DJF","JJA","MAM","SON"/)
 
  ;define the jet index information
   jetinfo                                    = (/"Jet intensity", "Jet position"/)
@@ -56,7 +56,7 @@ begin
 
  ; =================================================================
   ;;;;;;start to do the regression;;;;
-  print ("Start to regress enso index on selected variables ")
+  print ("Start to regress jet index on selected variables ")
   load "./share_info_for_regression_map.ncl"
 
   do jj = 0, dimsizes(modregvars)-1
@@ -131,30 +131,42 @@ begin
 
  do kk = 0,dimsizes(seasons) - 1
 
-   if(seasons(kk).eq."ANN")then
+    if(seasons(kk).eq."ANN")then
 
-     indx1 = ind ((monthx1.ge.1).and.(monthx1.le.12))
-     indx2 = ind ((monthx2.ge.1).and.(monthx2.le.12))
+      indx1 = ind ((monthx1.ge.1).and.(monthx1.le.12))
+      indx2 = ind ((monthx2.ge.1).and.(monthx2.le.12))
 
-   else if (seasons(kk).eq."DJF")then
+    else if (seasons(kk).eq."DJF")then
 
-     indx1 = ind ((monthx1.eq.12).or.(monthx1.eq.1).or.(monthx1.eq.2))
-     indx2 = ind ((monthx2.eq.12).or.(monthx2.eq.1).or.(monthx2.eq.2))
+      indx1 = ind ((monthx1.eq.12).or.(monthx1.eq.1).or.(monthx1.eq.2))
+      indx2 = ind ((monthx2.eq.12).or.(monthx2.eq.1).or.(monthx2.eq.2))
 
-   else if (seasons(kk).eq."JJA") then
+    else if (seasons(kk).eq."JJA") then
 
-     indx1 = ind ((monthx1.eq.6).or.(monthx1.eq.7).or.(monthx1.eq.8))
-     indx2 = ind ((monthx2.eq.6).or.(monthx2.eq.7).or.(monthx2.eq.8))
+      indx1 = ind ((monthx1.eq.6).or.(monthx1.eq.7).or.(monthx1.eq.8))
+      indx2 = ind ((monthx2.eq.6).or.(monthx2.eq.7).or.(monthx2.eq.8))
 
-   else
+    else if (seasons(kk).eq."MAM") then
 
-     print("User did not specify the season, use all of the monthly data")
-     indx1 = ind ((monthx1.ge.1).and.(monthx1.le.12))
-     indx2 = ind ((monthx2.ge.1).and.(monthx2.le.12))
+      indx1 = ind ((monthx1.eq.3).or.(monthx1.eq.4).or.(monthx1.eq.5))
+      indx2 = ind ((monthx2.eq.3).or.(monthx2.eq.4).or.(monthx2.eq.5))
 
-   end if
-   end if
-   end if
+    else if (seasons(kk).eq."SON") then
+
+      indx1 = ind ((monthx1.eq.9).or.(monthx1.eq.10).or.(monthx1.eq.11))
+      indx2 = ind ((monthx2.eq.9).or.(monthx2.eq.10).or.(monthx2.eq.11))
+
+    else
+
+      print("User did not specify the season, use all of the monthly data")
+      indx1 = ind ((monthx1.ge.1).and.(monthx1.le.12))
+      indx2 = ind ((monthx2.ge.1).and.(monthx2.le.12))
+
+    end if
+    end if
+    end if
+    end if
+    end if
 
    regxAnom = regxAnom1(indx1,:,:)
    regyAnom = regyAnom1(indx2,:,:)
@@ -277,7 +289,7 @@ begin
    wtype                        = "eps"
   ;wtype@wkWidth                = 2500
   ;wtype@wkHeight               = 2500
-   figdir                       = outdir+"/Jet_Index_Analysis/"
+   figdir                       = outdir+"/Polar_Jet_Wind_Stress/"
    fe                           = "Jet_"+jetmodvar+"_from_monthly_mean_regression_on_"+modregvars(jj)+"_"+seasons(kk)
    wks                          = gsn_open_wks(wtype, figdir + fe)
 

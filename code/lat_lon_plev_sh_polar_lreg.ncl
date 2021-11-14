@@ -42,7 +42,7 @@ begin
   intyp                                      = 2
 
  ;define time for the plot
-  seasons                                    = (/"ANN","DJF","JJA"/)
+  seasons                                       = (/"ANN","DJF","JJA","MAM","SON"/)
 
  ;define pressure levels for plot
   plevels                                    = (/1000, 975, 850, 700, 500, 200/)

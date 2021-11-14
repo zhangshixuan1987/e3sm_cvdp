@@ -33,17 +33,16 @@ begin
 
 ;define regions for enso analysis
   latS                                       = -90.  ;negative for southern hemisphere
-  latN                                       = -20.  ;negative for southern hemisphere
+  latN                                       =  90.  ;negative for southern hemisphere
 
 ;declear the season or annual mean data to be used;;;;;
-  seasons                                      = (/"ANN","DJF","JJA"/)
+  seasons                                      = (/"ANN","DJF","JJA","MAM","SON"/)
 
 ;declear enso region
-  nenso        = 3     ; Leading EOF only
-  ninoreg      = (/"Nino 3", "Nino 3.4", "Nino 4"/)
+  nenso        = 1     ; Leading EOF only
+  ninoreg      = (/"Nino 4"/)
 
 ;read in two files
-
    f                                       = systemfunc("ls "+tpath+"/"+tcase+"*"+tttag+".nc")
    f1                                      = addfile(f,"r")
    gw1                                     = f1->gw
@@ -123,40 +122,51 @@ begin
 
     if(seasons(kk).eq."ANN")then
 
-     indx1 = ind ((monthx1.ge.1).and.(monthx1.le.12))
-     indx2 = ind ((monthx2.ge.1).and.(monthx2.le.12))
+      indx1 = ind ((monthx1.ge.1).and.(monthx1.le.12))
+      indx2 = ind ((monthx2.ge.1).and.(monthx2.le.12))
 
     else if (seasons(kk).eq."DJF")then
 
-     indx1 = ind ((monthx1.eq.12).or.(monthx1.eq.1).or.(monthx1.eq.2))
-     indx2 = ind ((monthx2.eq.12).or.(monthx2.eq.1).or.(monthx2.eq.2))
+      indx1 = ind ((monthx1.eq.12).or.(monthx1.eq.1).or.(monthx1.eq.2))
+      indx2 = ind ((monthx2.eq.12).or.(monthx2.eq.1).or.(monthx2.eq.2))
 
     else if (seasons(kk).eq."JJA") then
 
-     indx1 = ind ((monthx1.eq.6).or.(monthx1.eq.7).or.(monthx1.eq.8))
-     indx2 = ind ((monthx2.eq.6).or.(monthx2.eq.7).or.(monthx2.eq.8))
+      indx1 = ind ((monthx1.eq.6).or.(monthx1.eq.7).or.(monthx1.eq.8))
+      indx2 = ind ((monthx2.eq.6).or.(monthx2.eq.7).or.(monthx2.eq.8))
+
+    else if (seasons(kk).eq."MAM") then
+
+      indx1 = ind ((monthx1.eq.3).or.(monthx1.eq.4).or.(monthx1.eq.5))
+      indx2 = ind ((monthx2.eq.3).or.(monthx2.eq.4).or.(monthx2.eq.5))
+
+    else if (seasons(kk).eq."SON") then
+
+      indx1 = ind ((monthx1.eq.9).or.(monthx1.eq.10).or.(monthx1.eq.11))
+      indx2 = ind ((monthx2.eq.9).or.(monthx2.eq.10).or.(monthx2.eq.11))
 
     else
 
-     print("User did not specify the season, use all of the monthly data")
-     indx1 = ind ((monthx1.ge.1).and.(monthx1.le.12))
-     indx2 = ind ((monthx2.ge.1).and.(monthx2.le.12))
+      print("User did not specify the season, use all of the monthly data")
+      indx1 = ind ((monthx1.ge.1).and.(monthx1.le.12))
+      indx2 = ind ((monthx2.ge.1).and.(monthx2.le.12))
 
+    end if
+    end if
     end if
     end if
     end if
 
     regxAnom = regxAnom1(indx1,:,:)
     regyAnom = regyAnom1(indx2,:,:)
-
     delete([/indx1,indx2/])
 
  ; =================================================================
  ; Regress
  ; =================================================================
  ; read PC time series for regression
-   enso_file1  = opath +"/"+"ENSO_index_"+tname+"_monthly_mean_"+seasons(kk)+".nc"
-   enso_file2  = opath +"/"+"ENSO_index_"+cname+"_monthly_mean_"+seasons(kk)+".nc"
+   enso_file1  = opath +"/"+"Nino4_ENSO_index_"+tname+"_monthly_mean_"+seasons(kk)+".nc"
+   enso_file2  = opath +"/"+"Nino4_ENSO_index_"+cname+"_monthly_mean_"+seasons(kk)+".nc"
    fenso1      = addfile(enso_file1,"r")
    fenso2      = addfile(enso_file2,"r")
    ensox       = fenso1->enso
@@ -165,20 +175,18 @@ begin
 
    ddenso1      = dimsizes(regxAnom)
    ddenso2      = dimsizes(regyAnom) 
-   enso1_regres = new((/nenso,ddenso1(1),ddenso1(2)/),typeof(regxAnom))     ; create an array w meta data
-   enso2_regres = new((/nenso,ddenso2(1),ddenso2(2)/),typeof(regyAnom))     ; create an array w meta data
+   enso1_regres = new((/ddenso1(1),ddenso1(2)/),typeof(regxAnom))     ; create an array w meta data
+   enso2_regres = new((/ddenso2(1),ddenso2(2)/),typeof(regyAnom))     ; create an array w meta data
    enso1_regres@_FillValue = -9999.
    enso2_regres@_FillValue = -9999.
 
-   enso1_regres!0 = "nenso"
-   enso1_regres!1 = "lat"
-   enso1_regres!2 = "lon"
+   enso1_regres!0 = "lat"
+   enso1_regres!1 = "lon"
    enso1_regres&lat = regxAnom&lat
    enso1_regres&lon = regxAnom&lon
 
-   enso2_regres!0 = "nenso"
-   enso2_regres!1 = "lat"
-   enso2_regres!2 = "lon"
+   enso2_regres!0 = "lat"
+   enso2_regres!1 = "lon"
    enso2_regres&lat = regyAnom&lat
    enso2_regres&lon = regyAnom&lon
 
@@ -187,45 +195,42 @@ begin
 
    delete([/ddenso1,ddenso2/])
 
-   do ne=0,nenso-1
+   rc1   = regCoef_n(ensox, regxAnom, 0, 0)
+   rc2   = regCoef_n(ensoy, regyAnom, 0, 0)
 
-      rc1   = regCoef_n(ensox(ne,:), regxAnom, 0, 0)
-      rc2   = regCoef_n(ensoy(ne,:), regyAnom, 0, 0)
+   rc1@_FillValue = -9999.
+   rc2@_FillValue = -9999.
 
-      rc1@_FillValue = -9999.
-      rc2@_FillValue = -9999.
+   if (str_lower(statistical_test).eq. "true")then        
+    l_plot_test = True 
 
-      if (str_lower(statistical_test).eq. "true")then        
-       l_plot_test = True 
+    drc1  = dimsizes(rc1) 
+    df1   = rc1@nptxy-2   ; degrees of freedom
+    tval1 = rc1@tval      ; t-statistic
+    xb1   = tval1
+    xb1   = 0.50
+    pb1   = betainc(df1/(df1+tval1^2),df1/2.0,xb1)
+    prob1 = reshape(pb1,(/drc1(0),drc1(1)/))
+    prob1 = where(prob1.le.statistical_siglev,rc1,rc1@_FillValue)
+    enso1_rgprob(:,:) = (/ prob1 /)
+    delete([/drc1,df1,tval1,xb1,pb1,prob1/])
 
-       drc1  = dimsizes(rc1) 
-       df1   = rc1@nptxy-2   ; degrees of freedom
-       tval1 = rc1@tval      ; t-statistic
-       xb1   = tval1
-       xb1   = 0.50
-       pb1   = betainc(df1/(df1+tval1^2),df1/2.0,xb1)
-       prob1 = reshape(pb1,(/drc1(0),drc1(1)/))
-       prob1 = where(prob1.le.statistical_siglev,rc1,rc1@_FillValue)
-       enso1_rgprob(ne,:,:) = (/ prob1 /)
-       delete([/drc1,df1,tval1,xb1,pb1,prob1/])
+    drc2  = dimsizes(rc2)
+    df2   = rc2@nptxy-2   ; degrees of freedom
+    tval2 = rc2@tval      ; t-statistic
+    xb2   = tval2
+    xb2   = 0.50
+    pb2   = betainc(df2/(df2+tval2^2),df2/2.0,xb2)
+    prob2 = reshape(pb2,(/drc2(0),drc2(1)/))
+    prob2 = where(prob2.le.statistical_siglev,rc2,rc2@_FillValue)
+    enso2_rgprob(:,:) = (/ prob2 /)
+    delete([/drc2,df2,tval2,xb2,pb2,prob2/])
+   end if 
 
-       drc2  = dimsizes(rc2)
-       df2   = rc2@nptxy-2   ; degrees of freedom
-       tval2 = rc2@tval      ; t-statistic
-       xb2   = tval2
-       xb2   = 0.50
-       pb2   = betainc(df2/(df2+tval2^2),df2/2.0,xb2)
-       prob2 = reshape(pb2,(/drc2(0),drc2(1)/))
-       prob2 = where(prob2.le.statistical_siglev,rc2,rc2@_FillValue)
-       enso2_rgprob(ne,:,:) = (/ prob2 /)
-       delete([/drc2,df2,tval2,xb2,pb2,prob2/])
-      end if 
+   enso1_regres(:,:) = (/ rc1 /)
+   enso2_regres(:,:) = (/ rc2 /)
+   delete([/rc1,rc2/])
 
-      enso1_regres(ne,:,:) = (/ rc1 /)
-      enso2_regres(ne,:,:) = (/ rc2 /)
-      delete([/rc1,rc2/])
-
-   end do
 
    enso1_rgprob = (1.0 - enso1_rgprob)*100.0
    enso2_rgprob = (1.0 - enso2_rgprob)*100.0
@@ -256,89 +261,91 @@ begin
 
  ;;;;start to plot
   wtype                        = "eps"
-  fildir    = outdir+"/Regression_Contour_Maps/"
-  filname   = "ENSO_monthly_mean_regression_on_"+modregvars(jj) +"_"+seasons(kk)
+  fildir    = outdir+"/ENSO_Index_Analysis/"
+  filname   = "Nino4_ENSO_index_monthly_mean_regression_on_"+modregvars(jj) +"_"+seasons(kk)
   wks       = gsn_open_wks("eps",fildir+filname)
-  plot      = new (nenso*3,graphic)
-  dum       = new (nenso*3,graphic)
+  plot      = new (3,graphic)
+  dum       = new (3,graphic)
 
- do n = 0, nenso-1
-
-  smbias    = "Mean diff:   " + sprintf("%5.2f", mbias(n))
-  smrmsd    = "RMS  diff:   " + sprintf("%5.2f", mrmsd(n))
-  smcorr    = "Correlation: " + sprintf("%5.2f", mcorr(n))
+  smbias    = "Mean diff:   " + sprintf("%5.2f", mbias)
+  smrmsd    = "RMS  diff:   " + sprintf("%5.2f", mrmsd)
+  smcorr    = "Correlation: " + sprintf("%5.2f", mcorr)
   pstring   = smbias + "~C~" + smrmsd + "~C~" + smcorr
 
  ;============================================================
  ; PLOTS
  ;============================================================
-   res                      = True         
-   res@gsnDraw              = False        ; don't draw yet
-   res@gsnFrame             = False        ; don't advance frame yet
-   res@gsnPolar             = "SH"
-
-   res@mpFillOn             = False        ; turn off map fill
-   res@mpMaxLatF            = latN
-  ;res@mpCenterLonF         = 180
+   res                               = True                  ; plot mods desired
+   res@cnFillOn                      = True                  ; turn on color fill
+   res@cnLinesOn                     = False                 ; no contour lines
+   res@cnLineLabelsOn                = False
+   res@gsnFrame                      = False                 ; Do not draw plot
+   res@gsnDraw                       = False                 ; Do not advance frame
 
    FontHeightF = 0.018
-   res@tiMainFontHeightF        = FontHeightF*1.5
-   res@tmYLLabelFontHeightF     = FontHeightF
-   res@tmXBLabelFontHeightF     = FontHeightF
-   res@lbLabelFontHeightF       = FontHeightF
-   res@gsnStringFontHeightF     = FontHeightF*1.2
+   res@tiMainFontThicknessF          = 3.0
+   res@tiMainFontHeightF             = FontHeightF*1.2
+   res@tmYLLabelFontHeightF          = FontHeightF
+   res@tmXBLabelFontHeightF          = FontHeightF
+   res@tiXAxisFontHeightF            = FontHeightF*0.95
+   res@tiYAxisFontHeightF            = FontHeightF*0.95
+   res@gsnStringFontHeightF          = FontHeightF*1.2
+   res@cnLineLabelFontHeightF        = FontHeightF
+   res@lbLabelFontHeightF            = FontHeightF*0.95
+   res@lbTitleFontHeightF            = FontHeightF
+
+   res@tmXTOn                        = False
+   res@tmYROn                        = False
+   res@tmBorderThicknessF            = 1.0
+   res@tmXBMajorThicknessF           = 1.0
+   res@tmXBMinorThicknessF           = 1.0
+   res@tmYLMajorThicknessF           = 1.0
+   res@tmYLMinorThicknessF           = 1.0
+   res@tmYRMajorThicknessF           = 1.0
+   res@tmYRMinorThicknessF           = 1.0
+
+   res@mpFillOn                      = False        ; turn off map fill
+   res@mpGeophysicalLineThicknessF   = 1.0
+   res@mpMinLonF                     =   0
+   res@mpMaxLonF                     = 360
+   res@mpCenterLonF                  = 180     ; This is necessary to get the correct map
+
+   res@gsnMajorLatSpacing            = 30
+   res@gsnMajorLonSpacing            = 45
+   res@gsnMinorLatSpacing            = 15
+   res@gsnMinorLonSpacing            = 15
 
    res@cnFillOn                 = True         ; turn on color fill
-   res@cnFillPalette            = "BlueDarkRed18"  
+   res@cnFillPalette            = "BlueDarkRed18"
    res@cnLinesOn                = False        ; True is default
    res@cnLineLabelsOn           = False        ; True is default
 
-   res@lbLabelBarOn             = True
-   res@lbOrientation            = "Vertical"
-   res@lbTitleString            = mvarnam +" ("+regxAnom@units+")" ;Geopential height (gpm)";
-   res@lbTitlePosition          = "Right"                           ; title location
-   res@lbTitleDirection         = "Across"                          ; letter angle
-   res@lbTitleAngleF            = 90.                               ; title angle
-   res@lbTitleFontHeightF       = FontHeightF                    ; font height
-  ;res@pmLabelBarParallelPosF   = 0.61
-   res@pmLabelBarOrthogonalPosF = 0.15
+   res@lbLabelBarOn                  = True
+   res@lbOrientation                 = "Vertical"
+   res@lbPerimOn                     = False             ; default has box
+   res@pmLabelBarHeightF             = 0.38
+   res@pmLabelBarWidthF              = 0.1
+   res@pmLabelBarParallelPosF        = 0.48
+   res@pmLabelBarOrthogonalPosF      = 0.02
+  ;res@lbTitleString                 = ""
 
-   res@tmXTOn                   = False
-   res@tmYLLabelFontHeightF     = 0.025
-   res@tmBorderThicknessF       = 1.0
-   res@tmXBMajorThicknessF      = 1.0
-   res@tmXBMinorThicknessF      = 1.0
-   res@tmYLMajorThicknessF      = 1.0
-   res@tmYLMinorThicknessF      = 1.0
-   res@tmYRMajorThicknessF      = 1.0
-   res@tmYRMinorThicknessF      = 1.0
+   res@cnInfoLabelOn                 = False
+   res@cnLevelSelectionMode          = "ExplicitLevels"       ; manual levels
+   res@cnMissingValFillColor         = "White" ;"gray76"               ; black = 1
 
-  ;set symmetric plot min/ma
-  ;tmpdat = (/enso1_regres,enso2_regres/)
-  ;symMinMaxPlt(tmpdat, 16, False, res)      ; contributed.ncl
-  ;delete(tmpdat)
-
-  res@cnLevelSelectionMode = "ManualLevels"  ; manually set the contour levels with the following 3 resources
-  if(n.eq.0)then
-    mnmxint = nice_mnmxintvl( -lev_enso1(jj), lev_enso1(jj), maxlev, False)
-  else if (n.eq.1)then 
-    mnmxint = nice_mnmxintvl( -lev_enso2(jj), lev_enso2(jj), maxlev, False)
-  else
-    mnmxint = nice_mnmxintvl( -lev_enso3(jj), lev_enso3(jj), maxlev, False)
-  end if 
-  end if
-
+   res@cnLevelSelectionMode = "ManualLevels"  ; manually set the contour levels with the following 3 resources
+   mnmxint = nice_mnmxintvl( -lev_enso1(jj), lev_enso1(jj), maxlev, False)
+  ;mnmxint = nice_mnmxintvl( -lev_enso2(jj), lev_enso2(jj), maxlev, False)
+  ;mnmxint = nice_mnmxintvl( -lev_enso3(jj), lev_enso3(jj), maxlev, False)
   res@cnMinLevelValF           = mnmxint(0) ; set the minimum contour level
   res@cnMaxLevelValF           = mnmxint(1) ; set the maximum contour level     
   res@cnLevelSpacingF          = mnmxint(2) ; *special* match CPC
-
   delete([/mnmxint/])
 
-  left_string   = "Regress on ~C~"+ str_upper(mvarnam)+ " ("+varunt(jj)+")"
-  right_string  = ninoreg(n)
+  left_string   = "Regress on "+ str_upper(mvarnam)+ " ("+varunt(jj)+")"
+  right_string  = ninoreg
   center_string = ""
   res@mpLabelFontHeightF           = FontHeightF*2.0
-  res@gsnPolarLabelFontHeightF     = FontHeightF
   ;*******************************************
   ; first plot
   ;*******************************************
@@ -346,37 +353,25 @@ begin
     res@gsnLeftString     = left_string
     res@gsnRightString    = right_string
     res@gsnCenterString   = center_string
-    if(n.eq.0)then
-      res@tiMainString    = "" + panelstr1
-    else
-      res@tiMainString    = ""
-    end if
-    plot(n*3)   = gsn_csm_contour_map_polar(wks,enso1_regres(n,:,:),res)
+    res@tiMainString    = "" + panelstr1
+    plot(0)   = gsn_csm_contour_map_ce(wks,enso1_regres(:,:),res)
 
     ;---Draw second plot in upper right corner
     res@gsnLeftString     = left_string
     res@gsnRightString    = right_string
     res@gsnCenterString   = center_string
-    if(n.eq.0)then
-      res@tiMainString    = "" + panelstr2
-    else
-      res@tiMainString    = ""
-    end if
-    plot(n*3+1) = gsn_csm_contour_map_polar(wks,enso2_regres(n,:,:),res)
+    res@tiMainString    = "" + panelstr2
+    plot(1) = gsn_csm_contour_map_ce(wks,enso2_regres(:,:),res)
 
 
     ;---Draw third plot in upper right corner
      resd = res
-      resd@cnFillPalette    = "BlueDarkOrange18"
-     resd@gsnLeftString     = "Difference ("+ninoreg(n)+")"
+     resd@cnFillPalette     = "CBR_coldhot" ;"GreenMagenta16" ;"BlueDarkOrange18"
+     resd@gsnLeftString     = "Difference ("+ninoreg+")"
      resd@gsnRightString    = pstring
      resd@gsnCenterString   = "" ;panelstr2
-     if(n.eq.0)then
-       resd@tiMainString    = ""
-     else
-       resd@tiMainString    = ""
-     end if
-     plot(n*3+2) = gsn_csm_contour_map_polar(wks,eofd_regres(n,:,:),resd)
+     resd@tiMainString    = ""
+     plot(2) = gsn_csm_contour_map_ce(wks,eofd_regres(:,:),resd)
 
      rescn2 = True
      rescn2@lbLabelBarOn    = False
@@ -400,20 +395,19 @@ begin
      rescn2@cnFillDotSizeF  = 0.002
      rescn2@cnFillColor     = "black"
      rescn2@cnFillOpacityF  = 0.5
-     dum(n*3)   = gsn_csm_contour(wks,enso1_rgprob(n,:,:),rescn2) ; contours are at 95,100
-     dum(n*3+1) = gsn_csm_contour(wks,enso2_rgprob(n,:,:),rescn2) ; contours are at 95,100
+     dum(0)   = gsn_csm_contour(wks,enso1_rgprob(:,:),rescn2) ; contours are at 95,100
+     dum(1) = gsn_csm_contour(wks,enso2_rgprob(:,:),rescn2) ; contours are at 95,100
 
-     overlay(plot(n*3),dum(n*3))
-     overlay(plot(n*3+1),dum(n*3+1))
-
-    end do ; end of eof mods
+     overlay(plot(0),dum(0))
+     overlay(plot(1),dum(1))
 
    ; panel plot only resources
     pres                          = True                ; mods desired
+    pres@gsnPanelYWhiteSpacePercent = 8
    ;pres@gsnPanelBottom           = 0.45    ; space for label bar
    ;pres@gsnPanelTop              = 0.85     ; only panel on lower half of page
-    pres@gsnPanelXF               = (/0.07,0.37,0.67/)
-    gsn_panel(wks,plot,(/nenso,3/),pres)          ; create first panel
+   ;pres@gsnPanelXF               = (/0.07,0.37,0.67/)
+    gsn_panel(wks,plot,(/3,1/),pres)          ; create first panel
 
     delete([/mbias,mrmsd,mcorr/])
 

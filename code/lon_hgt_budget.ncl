@@ -32,7 +32,7 @@ begin
   MinY                                       = 1.0
 
   ;declear the season or annual mean data to be used;;;;;
-  seasons                                    = (/"ANN","DJF","JJA"/)
+  seasons                                    = (/"ANN","DJF","JJA","MAM","SON"/)
 
   ;define the pressure levels for cross-section plot 
   pinterp                                    = asciiread(refplev_file,-1,"float")

@@ -29,20 +29,20 @@ begin
 
   statistical_test                           = getenv("REGRESSION_TEST")
   statistical_siglev                         = 0.05
-  l_regress                                  = "l_regress_psl"
+  l_regress                                  = "l_regress_z500"
 
 ;define regions for eof analysis
   latS                                         = -90.  ;negative for southern hemisphere
   latN                                         = -20.  ;negative for southern hemisphere
 
 ;declear the season or annual mean data to be used;;;;;
-  seasons                                      = (/"ANN","DJF","JJA"/)
+  seasons                                      = (/"ANN","DJF","JJA","MAM","SON"/)
 
 ;define # of desired EOFs
-  neof                                         = 3     ; Leading EOF only
-  eof                                          = (/"SAM", "PSA1", "PSA2"/)
-  eofmodvar                                    = ("PSL")
-  eofplev                                      = ("Surface")
+  neof                                         = 1
+  eof                                          = (/"SAM"/)
+  eofmodvar                                    = ("Z3")
+  eofplev                                      = ("500")
 
 ;read in two files
 
@@ -144,6 +144,16 @@ begin
       indx1 = ind ((monthx1.eq.6).or.(monthx1.eq.7).or.(monthx1.eq.8))
       indx2 = ind ((monthx2.eq.6).or.(monthx2.eq.7).or.(monthx2.eq.8))
 
+    else if (seasons(kk).eq."MAM") then
+
+      indx1 = ind ((monthx1.eq.ne*3).or.(monthx1.eq.4).or.(monthx1.eq.5))
+      indx2 = ind ((monthx2.eq.ne*3).or.(monthx2.eq.4).or.(monthx2.eq.5))
+
+    else if (seasons(kk).eq."SON") then
+
+      indx1 = ind ((monthx1.eq.9).or.(monthx1.eq.10).or.(monthx1.eq.11))
+      indx2 = ind ((monthx2.eq.9).or.(monthx2.eq.10).or.(monthx2.eq.11))
+
     else
 
       print("User did not specify the season, use all of the monthly data")
@@ -153,6 +163,8 @@ begin
     end if
     end if
     end if
+    end if 
+    end if 
 
     regxAnom = regxAnom1(indx1,:,:)
     regyAnom = regyAnom1(indx2,:,:)
@@ -162,96 +174,93 @@ begin
   ; =================================================================
   ; Regress
   ; =================================================================
-   
-  ; read PC time series for regression
-    eof_file1  = opath +"/"+"EOF_PCS_"+tname+"_monthly_mean_"+eofmodvar+"_at_"+eofplev+"_"+seasons(kk)+".nc"
-    eof_file2  = opath +"/"+"EOF_PCS_"+cname+"_monthly_mean_"+eofmodvar+"_at_"+eofplev+"_"+seasons(kk)+".nc"
-    feof1      = addfile(eof_file1,"r")
-    feof2      = addfile(eof_file2,"r")
-    eof1_ts    = feof1->eof_ts
-    eof2_ts    = feof2->eof_ts
-    eof1       = feof1->eof
-    eof2       = feof2->eof 
-    delete([/eof_file1,eof_file2,feof1,feof2/])
-
-    ddeof1      = dimsizes(regxAnom)
-    ddeof2      = dimsizes(regyAnom) 
-
-    eof1_regres = new((/neof,ddeof1(1),ddeof1(2)/),typeof(regxAnom))     ; create an array w meta data
-    eof2_regres = new((/neof,ddeof2(1),ddeof2(2)/),typeof(regyAnom))     ; create an array w meta data
-    eof1_regres@_FillValue = -9999.
-    eof2_regres@_FillValue = -9999.
-
-    eof1_regres!0 = "neof"
-    eof1_regres!1 = "lat"
-    eof1_regres!2 = "lon"
-    eof1_regres&lat = regxAnom&lat
-    eof1_regres&lon = regxAnom&lon
-
-    eof2_regres!0 = "neof"
-    eof2_regres!1 = "lat"
-    eof2_regres!2 = "lon"
-    eof2_regres&lat = regyAnom&lat
-    eof2_regres&lon = regyAnom&lon
-
-    eof1_rgprob = eof1_regres
-    eof2_rgprob = eof2_regres
 
     do ne=0,neof-1
+   
+     ;read PC time series for regression
+     eof_file1  = opath +"/"+eof(ne)+"_EOF_PCS_"+tname+"_monthly_mean_"+eofmodvar+"_at_"+eofplev+"hPa_"+seasons(kk)+".nc"
+     eof_file2  = opath +"/"+eof(ne)+"_EOF_PCS_"+cname+"_monthly_mean_"+eofmodvar+"_at_"+eofplev+"hPa_"+seasons(kk)+".nc"
+     feof1      = addfile(eof_file1,"r")
+     feof2      = addfile(eof_file2,"r")
+     eof1_ts    = feof1->eof_ts
+     eof2_ts    = feof2->eof_ts
+     eof1       = feof1->eof
+     eof2       = feof2->eof 
+     delete([/eof_file1,eof_file2,feof1,feof2/])
 
-       rc1   = regCoef_n(eof1_ts(ne,:), regxAnom, 0, 0)
-       rc2   = regCoef_n(eof2_ts(ne,:), regyAnom, 0, 0)
-       rc1@_FillValue = -9999.
-       rc2@_FillValue = -9999.
+     ddeof1      = dimsizes(regxAnom)
+     ddeof2      = dimsizes(regyAnom) 
 
-       if (str_lower(statistical_test).eq. "true")then        
-        l_plot_test = True 
+     eof1_regres = new((/ddeof1(1),ddeof1(2)/),typeof(regxAnom))     ; create an array w meta data
+     eof2_regres = new((/ddeof2(1),ddeof2(2)/),typeof(regyAnom))     ; create an array w meta data
+     eof1_regres@_FillValue = -9999.
+     eof2_regres@_FillValue = -9999.
 
-        drc1  = dimsizes(rc1) 
-        df1   = rc1@nptxy-2   ; degrees of freedom
-        tval1 = rc1@tval      ; t-statistic
-        xb1   = tval1
-        xb1   = 0.50
-        pb1   = betainc(df1/(df1+tval1^2),df1/2.0,xb1)
-        prob1 = reshape(pb1,(/drc1(0),drc1(1)/))
-        prob1 = where(prob1.le.statistical_siglev,rc1,rc1@_FillValue)
-        eof1_rgprob(ne,:,:) = (/ tofloat(prob1) /)
-        delete([/drc1,df1,tval1,xb1,pb1,prob1/])
+     eof1_regres!0 = "lat"
+     eof1_regres!1 = "lon"
+     eof1_regres&lat = regxAnom&lat
+     eof1_regres&lon = regxAnom&lon
 
-        drc2  = dimsizes(rc2)
-        df2   = rc2@nptxy-2   ; degrees of freedom
-        tval2 = rc2@tval      ; t-statistic
-        xb2   = tval2
-        xb2   = 0.50
-        pb2   = betainc(df2/(df2+tval2^2),df2/2.0,xb2)
-        prob2 = reshape(pb2,(/drc2(0),drc2(1)/))
-        prob2 = where(prob2.le.statistical_siglev,rc2,rc2@_FillValue)
-        eof2_rgprob(ne,:,:) = (/ tofloat(prob2) /)
-        delete([/drc2,df2,tval2,xb2,pb2,prob2/])
-       end if 
+     eof2_regres!0 = "lat"
+     eof2_regres!1 = "lon"
+     eof2_regres&lat = regyAnom&lat
+     eof2_regres&lon = regyAnom&lon
 
-       eof1_regres(ne,:,:) = (/ doubletofloat(rc1) /)
-       eof2_regres(ne,:,:) = (/ doubletofloat(rc2) /)
+     eof1_rgprob = eof1_regres
+     eof2_rgprob = eof2_regres
 
-       delete([/rc1,rc2/])
+     rc1   = regCoef_n(eof1_ts, regxAnom, 0, 0)
+     rc2   = regCoef_n(eof2_ts, regyAnom, 0, 0)
+     rc1@_FillValue = -9999.
+     rc2@_FillValue = -9999.
 
-    end do
+     if (str_lower(statistical_test).eq. "true")then        
 
-    eof1_rgprob = (1.0 - eof1_rgprob)*100.0
-    eof2_rgprob = (1.0 - eof2_rgprob)*100.0
+      l_plot_test = True 
 
-   ;;;calculate the error metrix 
-   rad     = 4.*atan(1.)/180.    ;
-   cost    = tofloat(cos(eof1_regres&lat*rad))       ; cosine weights
-   mean1   = wgt_areaave (eof1_regres,cost,1.0,0)
-   mean2   = wgt_areaave (eof2_regres,cost,1.0,0)
-   mbias   = wgt_areaave (eof1_regres-eof2_regres,cost,1.0,0)
-   mrmsd   = wgt_arearmse(eof1_regres-conform(eof1_regres,mean1,0),eof2_regres-conform(eof2_regres,mean2,0),cost,1.0,0)
-   mcorr   = pattern_cor(eof1_regres,eof2_regres,cost, 1) 
+      drc1  = dimsizes(rc1) 
+      df1   = rc1@nptxy-2   ; degrees of freedom
+      tval1 = rc1@tval      ; t-statistic
+      xb1   = tval1
+      xb1   = 0.50
+      pb1   = betainc(df1/(df1+tval1^2),df1/2.0,xb1)
+      prob1 = reshape(pb1,(/drc1(0),drc1(1)/))
+      prob1 = where(prob1.le.statistical_siglev,rc1,rc1@_FillValue)
+      eof1_rgprob = (/ tofloat(prob1) /)
+      delete([/drc1,df1,tval1,xb1,pb1,prob1/])
+
+      drc2  = dimsizes(rc2)
+      df2   = rc2@nptxy-2   ; degrees of freedom
+      tval2 = rc2@tval      ; t-statistic
+      xb2   = tval2
+      xb2   = 0.50
+      pb2   = betainc(df2/(df2+tval2^2),df2/2.0,xb2)
+      prob2 = reshape(pb2,(/drc2(0),drc2(1)/))
+      prob2 = where(prob2.le.statistical_siglev,rc2,rc2@_FillValue)
+      eof2_rgprob = (/ tofloat(prob2) /)
+      delete([/drc2,df2,tval2,xb2,pb2,prob2/])
+     end if 
+
+     eof1_regres = (/ doubletofloat(rc1) /)
+     eof2_regres = (/ doubletofloat(rc2) /)
+
+     delete([/rc1,rc2/])
+
+     eof1_rgprob = (1.0 - eof1_rgprob)*100.0
+     eof2_rgprob = (1.0 - eof2_rgprob)*100.0
+
+     ;;;calculate the error metrix 
+     rad     = 4.*atan(1.)/180.    ;
+     cost    = tofloat(cos(eof1_regres&lat*rad))       ; cosine weights
+     mean1   = wgt_areaave (eof1_regres,cost,1.0,0)
+     mean2   = wgt_areaave (eof2_regres,cost,1.0,0)
+     mbias   = wgt_areaave (eof1_regres-eof2_regres,cost,1.0,0)
+     mrmsd   = wgt_arearmse(eof1_regres-conform(eof1_regres,mean1,0),eof2_regres-conform(eof2_regres,mean2,0),cost,1.0,0)
+     mcorr   = pattern_cor(eof1_regres,eof2_regres,cost, 1) 
   
-   eofd_regres = eof1_regres 
-   eofd_regres = eof1_regres - eof2_regres
-   delete([/rad,cost,mean1,mean2/])
+     eofd_regres = eof1_regres 
+     eofd_regres = eof1_regres - eof2_regres
+     delete([/rad,cost,mean1,mean2/])
 
   ; =================================================================
   ; Extract the YYYYMM from the time coordinate 
@@ -267,20 +276,18 @@ begin
 
  ;;;;start to plot
   wtype                        = "eps"
-  figdir                       = outdir+"/Regression_Contour_Maps/"
-  fe                           = "EOF_monthly_mean_"+eofmodvar+"_regression_on_"+modregvars(jj)+"_"+seasons(kk)
+  figdir                       = outdir+"/Polar_SAM_Analysis/"
+  fe                           = "SAM_EOF_Z500_regression_on_"+modregvars(jj)+"_"+seasons(kk)
   wks                          = gsn_open_wks(wtype, figdir + fe)
 
   plot = new (neof*3,graphic)
   dum  = new (neof*3,graphic)
 
-  do n = 0, neof-1
+  smbias    = "Mean diff:   " + sprintf("%5.2f", mbias)
+  smrmsd    = "RMS  diff:   " + sprintf("%5.2f", mrmsd)
+  smcorr    = "Correlation: " + sprintf("%5.2f", mcorr)
 
-    smbias    = "Mean diff:   " + sprintf("%5.2f", mbias(n))
-    smrmsd    = "RMS  diff:   " + sprintf("%5.2f", mrmsd(n))
-    smcorr    = "Correlation: " + sprintf("%5.2f", mcorr(n))
-
-    pstring   = smbias + "~C~" + smrmsd + "~C~" + smcorr
+  pstring   = smbias + "~C~" + smrmsd + "~C~" + smcorr
 
   ;============================================================
   ; PLOTS
@@ -331,16 +338,8 @@ begin
    ;symMinMaxPlt(tmpdat, 16, False, res)      ; contributed.ncl
    ;delete(tmpdat)
 
-   res@cnLevelSelectionMode = "ManualLevels"  ; manually set the contour levels with the following 3 resources
-   if(n.eq.0)then
-     mnmxint = nice_mnmxintvl( -lev_eof1(jj), lev_eof1(jj), maxlev, False)
-   else if (n.eq.1)then 
-     mnmxint = nice_mnmxintvl( -lev_eof2(jj), lev_eof2(jj), maxlev, False)
-   else
-     mnmxint = nice_mnmxintvl( -lev_eof3(jj), lev_eof3(jj), maxlev, False)
-   end if 
-   end if
-
+   res@cnLevelSelectionMode = "ManualLevels"  ; manually set the contour levels with the following ne*3 resources
+   mnmxint = nice_mnmxintvl( -lev_eof1(jj), lev_eof1(jj), maxlev, False)
    res@cnMinLevelValF           = mnmxint(0) ; set the minimum contour level
    res@cnMaxLevelValF           = mnmxint(1) ; set the maximum contour level     
    res@cnLevelSpacingF          = mnmxint(2) ; *special* match CPC
@@ -351,7 +350,7 @@ begin
    res@gsnPolarLabelFontHeightF     = FontHeightF
 
    left_string   = "Regress on ~C~"+ str_upper(mvarnam)+ " ("+varunt(jj)+")"
-   right_string  = eof(n)
+   right_string  = eof(ne)
    center_string = ""
 
    ;*******************************************
@@ -361,36 +360,24 @@ begin
      res@gsnLeftString     = left_string
      res@gsnRightString    = right_string
      res@gsnCenterString   = center_string
-     if(n.eq.0)then 
-       res@tiMainString    = "" + panelstr1
-     else
-       res@tiMainString    = ""
-     end if 
-     plot(n*3)   = gsn_csm_contour_map_polar(wks,eof1_regres(n,:,:),res)
+     res@tiMainString      = "" + panelstr1
+     plot(ne*3)   = gsn_csm_contour_map_polar(wks,eof1_regres(:,:),res)
 
     ;---Draw second plot in upper right corner
      res@gsnLeftString     = left_string
      res@gsnRightString    = right_string
      res@gsnCenterString   = center_string
-     if(n.eq.0)then
-       res@tiMainString    = ""+panelstr2
-     else
-       res@tiMainString    = ""
-     end if
-     plot(n*3+1) = gsn_csm_contour_map_polar(wks,eof2_regres(n,:,:),res)
+     res@tiMainString    = ""+panelstr2
+     plot(ne*3+1) = gsn_csm_contour_map_polar(wks,eof2_regres(:,:),res)
 
     ;---Draw third plot in upper right corner
      resd = res
      resd@cnFillPalette     = "BlueDarkOrange18"
-     resd@gsnLeftString     = "Difference ("+eof(n)+")" 
+     resd@gsnLeftString     = "Difference ("+eof(ne)+")" 
      resd@gsnRightString    = pstring
      resd@gsnCenterString   = "" ;panelstr2
-     if(n.eq.0)then
-       resd@tiMainString    = ""
-     else
-       resd@tiMainString    = ""
-     end if
-     plot(n*3+2) = gsn_csm_contour_map_polar(wks,eofd_regres(n,:,:),resd)
+     resd@tiMainString      = ""
+     plot(ne*3+2)           = gsn_csm_contour_map_polar(wks,eofd_regres(:,:),resd)
 
      rescn2 = True
      rescn2@lbLabelBarOn    = False
@@ -414,11 +401,11 @@ begin
      rescn2@cnFillDotSizeF  = 0.002
      rescn2@cnFillColor     = "black"
      rescn2@cnFillOpacityF  = 0.5
-     dum(n*3)   = gsn_csm_contour(wks,eof1_rgprob(n,:,:),rescn2) ; contours are at 95,100
-     dum(n*3+1) = gsn_csm_contour(wks,eof2_rgprob(n,:,:),rescn2) ; contours are at 95,100
+     dum(ne*3)   = gsn_csm_contour(wks,eof1_rgprob(:,:),rescn2) ; contours are at 95,100
+     dum(ne*3+1) = gsn_csm_contour(wks,eof2_rgprob(:,:),rescn2) ; contours are at 95,100
 
-     overlay(plot(n*3),dum(n*3))
-     overlay(plot(n*3+1),dum(n*3+1))
+     overlay(plot(ne*3),dum(ne*3))
+     overlay(plot(ne*3+1),dum(ne*3+1))
 
     end do ; end of eof mods
 
