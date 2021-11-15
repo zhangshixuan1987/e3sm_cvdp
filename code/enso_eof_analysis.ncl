@@ -38,7 +38,7 @@ begin
   lonE                                       = 300.0
 
 ;define # of desired EOFs
-  neof                                       = 2     ; Leading EOF only
+  neof                                       = 3     ; Leading EOF only
 
 ;define constants for unit conversion
   pi                                         = 3.14159265

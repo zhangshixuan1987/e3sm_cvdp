@@ -643,21 +643,25 @@ begin
 
    rts@trYMinF               = -4.0
    rts@trYMaxF               =  4.0
+   rts@xyLineThicknesses     = 0.1
+   rts@xyLineColors          = "Black"
 
   ;create individual plots
   ;---Draw third plot in lower left corner
    rts@gsnLeftString        = ninoreg+" index"
    rts@gsnRightString       = "Standardized index" 
    rts@tiMainString         = "" ;""+panelstr2
-   plot(3) = gsn_csm_xy (wks,yyyy1,idensox(:),rts)
-    
+   xyarr1                   = idensox(:)
+   plot(3) = gsn_csm_xy (wks,yyyy1,xyarr1,rts)
+   delete([/xyarr1/])
+ 
    rts1 = rts
    rts1@gsnXYBarChart       = False
    rts1@gsnLeftString       = ""
    rts1@gsnRightString      = ""
    rts1@gsnCenterString     = ""
-   rts1@xyLineThicknesses   = 3            
-   rts1@xyLineColors        = "Black"
+   rts1@xyLineThicknesses   = 2            
+   rts1@xyLineColors        = "Red"
    xyarr1                   = wgt_runave_Wrap(idensox(:),(/1.,3,5,6,5,3,1/), 0)   
    dum(3)                   = gsn_csm_xy(wks,yyyy1,xyarr1,rts1) 
    overlay(plot(3),dum(3))
@@ -668,15 +672,17 @@ begin
    rts@gsnLeftString        = ninoreg+" index"
    rts@gsnRightString       = "Standardized index" 
    rts@tiMainString         = "" ;""+panelstr2
-   plot(4) = gsn_csm_xy (wks,yyyy2,idensoy(:),rts)
+   xyarr2                   = idensoy(:)
+   plot(4) = gsn_csm_xy (wks,yyyy2,xyarr2,rts)
+   delete([/xyarr2/])
 
    rts2 = rts
    rts2@gsnXYBarChart       = False
    rts2@gsnLeftString       = ""
    rts2@gsnRightString      = ""
    rts2@gsnCenterString     = ""
-   rts2@xyLineThicknesses   = 3 
-   rts2@xyLineColors        = "Black"
+   rts2@xyLineThicknesses   = 2 
+   rts2@xyLineColors        = "Red"
    xyarr2                   = wgt_runave_Wrap(idensoy(:),(/1.,3,5,6,5,3,1/), 0) 
    dum(4)               = gsn_csm_xy(wks,yyyy2,xyarr2,rts2)
    overlay(plot(4),dum(4))
@@ -686,15 +692,17 @@ begin
    rts@gsnLeftString        = ninoreg+" index"
    rts@gsnRightString       = "Standardized index" 
    rts@tiMainString         = "" 
-   plot(5) = gsn_csm_xy (wks,yyyy3,idensoz(:),rts)
+   xyarr3                   = idensoz(:)
+   plot(5) = gsn_csm_xy (wks,yyyy3,xyarr3,rts)
+   delete([/xyarr3/])
 
    rts2 = rts
    rts2@gsnXYBarChart       = False
    rts2@gsnLeftString       = ""
    rts2@gsnRightString      = ""
    rts2@gsnCenterString     = ""
-   rts2@xyLineThicknesses   = 3
-   rts2@xyLineColors        = "Black"
+   rts2@xyLineThicknesses   = 2
+   rts2@xyLineColors        = "Red"
    xyarr3                   = wgt_runave_Wrap(idensoz(:),(/1.,3,5,6,5,3,1/), 0)
    dum(5)               = gsn_csm_xy(wks,yyyy3,xyarr3,rts2)
    overlay(plot(5),dum(5))

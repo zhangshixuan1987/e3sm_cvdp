@@ -598,7 +598,7 @@ begin
 
           pres2                           = True                ; mods desired
           pres2@gsnFrame                  = False               ; save panel until both ready
-          pres2@gsnPanelYWhiteSpacePercent = 8
+          pres2@gsnPanelYWhiteSpacePercent = 4
          ;pres2@gsnPanelBottom            = 0.10                ; draw from center to right edge
          ;pres2@gsnPanelTop               = 0.5                ; draw from center to right edge
           pres2@gsnPanelMainString        = "Left: monthly mean;  Right: 3-month running average"
