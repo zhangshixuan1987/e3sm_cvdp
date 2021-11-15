@@ -185,6 +185,7 @@ begin
              res0@gsnLeftString             = str_upper(modvars(jj))+" (unit: "+ vp1a@units+")" ;"relative diff. (%)"
              res0@gsnRightString            = "mean: "+sprintf("%5.2f",avg(vp1a(:,:)))
              plot(0)                        = gsn_csm_contour(wks,vp1a(:,:),res0)
+             delete(res0)
            end if 
 
            res1 = res 
@@ -221,7 +222,7 @@ begin
             ;overlay(plot(0),plotA)
             ;overlay(plot(ii),plotB)
             ;delete([/plotA/])
-
+             delete(rescn2)
            end if 
 
            delete([/vpra,vp1a,vp2a,vp1,vp2,vpr/])
@@ -237,7 +238,7 @@ begin
            pres@txString                    = panelstr1+" ("+seasons(kk)+")"
            gsn_panel(wks,(/plot(:)/),(/2,3/),pres)
 
-        delete([/plot,res,pres,s1,s2,s3,wks/])
+        delete([/plot,res,res1,pres,s1,s2,s3,wks/])
 
      end do       ; end of looping over variables
 

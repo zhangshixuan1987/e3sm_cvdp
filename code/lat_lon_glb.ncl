@@ -313,7 +313,7 @@ begin
 
               delete([/vp1a,vp2a,adiff,rdiff,rdiffm,vp1b,vp2b,vp1m,vp2m/])
 
-           delete([/plot,res,pres,wks,s1,s2,s3/])
+           delete([/plot,res,res1,res2,res3,pres,wks,s1,s2,s3/])
 
         end do       ; end of looping over variables
 

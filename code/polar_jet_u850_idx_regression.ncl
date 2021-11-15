@@ -445,6 +445,7 @@ begin
    gsn_panel(wks,plot,(/njetind,3/),pres)          ; create first panel
 
    delete([/regxAnom,regyAnom,jet1_regres,jet2_regres,jet1,jet2/])
+   delete([/jet1_prob,jet2_prob/])
    delete([/yyyy1,yyyy2,mbias,mrmsd,mcorr/])
 
   end do

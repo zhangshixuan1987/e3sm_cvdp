@@ -431,7 +431,7 @@ begin
            delete([/u1a,v1a,w1a,sf1a,u2a,v2a,w2a,sf2a/])
            delete([/uadiff,wadiff,sfadiff,wks/])
 
-        delete([/plot,res,pres,s1,s2/])
+        delete([/plot,res,res0,res1,res2,vecres,rescn2,pres,s1,s2,s3/])
 
      end do          ; end of looping over seasonsons
 

@@ -621,6 +621,10 @@ begin
           simple_legend_ndc(wks2, genres, lineres, textres)
           frame(wks2)
 
+          delete([/sam1_regres,sam2_regres,sam3_regres,sam4_regres/])
+          delete([/sam1_rgprob,sam2_rgprob,sam3_rgprob,sam4_rgprob/])
+          delete([/pltdat1,pltdat2,pltdat3,pltdat3/])
+
         end do                                      ; end of looping over seasons
 
         end do                                      ; end of looping over variables

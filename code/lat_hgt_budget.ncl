@@ -237,7 +237,7 @@ begin
            pres@txString                    = panelstr1+" ("+seasons(kk)+")"
            gsn_panel(wks,(/plot(:)/),(/2,3/),pres)
 
-        delete([/plot,res,pres,s1,s2,s3,wks/])
+        delete([/plot,res,rescn2,pres,s1,s2,s3/])
 
      end do       ; end of looping over variables
 

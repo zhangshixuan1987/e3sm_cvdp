@@ -258,40 +258,40 @@ begin
    res@mpGeophysicalLineThicknessF   = 2.0
 
    res1 = res
-   res1@cnLevels                     = sprintf("%5.2f",s1)
-   res1@cnFillColors                 = (/3,4,5,6,7,8,9,10,11,12,13,29,30,15,16,17/)
-   res1@tiMainString                   = panelstr1
-   res1@gsnLeftString                  = str_upper(varstr)+ " ("+unit+")"
+   res1@cnLevels                      := sprintf("%5.2f",s1)
+   res1@cnFillColors                  := (/3,4,5,6,7,8,9,10,11,12,13,29,30,15,16,17/)
+   res1@tiMainString                  := panelstr1
+   res1@gsnLeftString                 := str_upper(varstr)+ " ("+unit+")"
    if(max(abs(s1)).ge.10.0)then
-     res1@gsnRightString               = "mean: "+sprintf("%5.1f",vp1m)
-     res1@lbLabelStrings               = sprintf("%5.1f",s1)
+     res1@gsnRightString              := "mean: "+sprintf("%5.1f",vp1m)
+     res1@lbLabelStrings              := sprintf("%5.1f",s1)
    else
-     res1@gsnRightString               = "mean: "+sprintf("%5.2f",vp1m)
-     res1@lbLabelStrings               = sprintf("%5.2f",s1)
+     res1@gsnRightString              := "mean: "+sprintf("%5.2f",vp1m)
+     res1@lbLabelStrings              := sprintf("%5.2f",s1)
    end if
-   plot(0)   			       = gsn_csm_contour_map(wks,vp1x,res1)
-   res1@tiMainString                   = panelstr2
-   res1@gsnLeftString                  = str_upper(varstr)+ " ("+unit+")"  
+   plot(0)   			      := gsn_csm_contour_map(wks,vp1x,res1)
+   res1@tiMainString                  := panelstr2
+   res1@gsnLeftString                 := str_upper(varstr)+ " ("+unit+")"  
    if(max(abs(s1)).ge.10.0)then
-     res1@gsnRightString               = "mean: "+sprintf("%5.1f",vp2m)
-     res1@lbLabelStrings               = sprintf("%5.1f",s1)
+     res1@gsnRightString              := "mean: "+sprintf("%5.1f",vp2m)
+     res1@lbLabelStrings              := sprintf("%5.1f",s1)
    else
-     res1@gsnRightString               = "mean: "+sprintf("%5.2f",vp2m)
-     res1@lbLabelStrings               = sprintf("%5.2f",s1)
+     res1@gsnRightString              := "mean: "+sprintf("%5.2f",vp2m)
+     res1@lbLabelStrings              := sprintf("%5.2f",s1)
    end if
    plot(1) 			        = gsn_csm_contour_map(wks,vp2x,res1)
 
    res2 = res
-   res2@cnLevels      		     = sprintf("%5.2f",s2)
-   res2@cnFillColors  		     = (/18,20,22,23,24,25,26,27,28,30,31,33/)
-   res2@tiMainString                 = "Difference (Test - Reference)" ;panelstr1 + " - " + panelstr2 ;
-   res2@gsnLeftString 		     = str_upper(varstr)+ " ("+unit+")"  
+   res2@cnLevels      		     := sprintf("%5.2f",s2)
+   res2@cnFillColors  		     := (/18,20,22,23,24,25,26,27,28,30,31,33/)
+   res2@tiMainString                 := "Difference (Test - Reference)" ;panelstr1 + " - " + panelstr2 ;
+   res2@gsnLeftString 		     := str_upper(varstr)+ " ("+unit+")"  
    if(max(abs(s2)).ge.10.0)then
-     res2@gsnRightString             = "mean: "+sprintf("%5.1f",vdmm)
-     res2@lbLabelStrings             = sprintf("%5.1f",s2)
+     res2@gsnRightString             := "mean: "+sprintf("%5.1f",vdmm)
+     res2@lbLabelStrings             := sprintf("%5.1f",s2)
    else
-     res2@gsnRightString             = "mean: "+sprintf("%5.2f",vdmm)
-     res2@lbLabelStrings             = sprintf("%5.2f",s2)
+     res2@gsnRightString             := "mean: "+sprintf("%5.2f",vdmm)
+     res2@lbLabelStrings             := sprintf("%5.2f",s2)
    end if
    plot(2) 			     = gsn_csm_contour_map(wks,vdiff,res2)
 
@@ -312,7 +312,7 @@ begin
 
       delete([/vp1,vp2,vp1x,vp2x,vdiff/])
 
-   delete([/plot,res,pres,wks,s1,s2/])
+   delete([/plot,res,res1,res2,pres,wks,s1,s2/])
 
   end do       ; end of looping over variables
 
