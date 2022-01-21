@@ -245,6 +245,14 @@ begin
          eof1_ts = dim_standardize_n( eof1_ts, 0, 1)      ; normalize
          eof2_ts = dim_standardize_n( eof2_ts, 0, 1)      ; normalize
 
+       ; =================================================================
+       ; Regress
+       ; =================================================================
+         eof1_regres = eof1(indx,:,:)                               ; create an array w meta data
+         eof2_regres = eof2(indx,:,:)                               ; create an array w meta data
+         eof1_regres = (/ regCoef_n(eof1_ts(indx,:), xAnom, 0, 0) /)
+         eof2_regres = (/ regCoef_n(eof2_ts(indx,:), yAnom, 0, 0) /)
+
         ;======================================================================
         ;Save the data for the regression analysis
         ;==================================================================
@@ -272,20 +280,12 @@ begin
          eof1_ts@description = "EOF PCs (standardized)"
          eof2_ts@description = "EOF PCs (standardized)"
 
-         fout1->eof      = eof1
-         fout2->eof      = eof2
+         fout1->eof      = eof1_regres
+         fout2->eof      = eof2_regres
          fout1->eof_ts   = eof1_ts
          fout2->eof_ts   = eof2_ts
 
          delete([/time1,time2,fout1,fout2,out_file1,out_file2/])
-
-       ; =================================================================
-       ; Regress
-       ; =================================================================
-         eof1_regres = eof1(indx,:,:)                               ; create an array w meta data
-         eof2_regres = eof2(indx,:,:)                               ; create an array w meta data
-         eof1_regres = (/ regCoef_n(eof1_ts(indx,:), xAnom, 0, 0) /)
-         eof2_regres = (/ regCoef_n(eof2_ts(indx,:), yAnom, 0, 0) /)
 
          ;;;calculate the rmsd and correlation;;
          rad    = 4.0*atan(1.0)/180.0

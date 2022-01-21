@@ -312,6 +312,18 @@ begin
          eof2_ts = dim_standardize_n( eof2_ts, 0, 1)      ; normalize
          eof3_ts = dim_standardize_n( eof3_ts, 0, 1)      ; normalize
 
+       ; =================================================================
+       ; Regress
+       ; =================================================================
+         eof1_regres = eof1                               ; create an array w meta data
+         eof2_regres = eof2                               ; create an array w meta data
+         eof3_regres = eof3                               ; create an array w meta data
+         do ne=0,neof-1
+            eof1_regres(ne,:,:) = (/ regCoef_n(eof1_ts(ne,:), xAnom, 0, 0) /)
+            eof2_regres(ne,:,:) = (/ regCoef_n(eof2_ts(ne,:), yAnom, 0, 0) /)
+            eof3_regres(ne,:,:) = (/ regCoef_n(eof3_ts(ne,:), zAnom, 0, 0) /)
+         end do
+
         ;======================================================================
         ;Save the data for the regression analysis
         ;==================================================================
@@ -352,31 +364,15 @@ begin
          eof2_ts@description = "EOF PCs (standardized)"
          eof3_ts@description = "EOF PCs (standardized)"
 
-         fout1->eof      = eof1
-         fout2->eof      = eof2
-         fout3->eof      = eof3
+         fout1->eof      = eof1_regres
+         fout2->eof      = eof2_regres
+         fout3->eof      = eof3_regres
 
          fout1->eof_ts   = eof1_ts
          fout2->eof_ts   = eof2_ts
          fout3->eof_ts   = eof3_ts
 
          delete([/time1,time2,time3,fout1,fout2,fout3,out_file1,out_file2,out_file3/])
-
-       ; =================================================================
-       ; Regress
-       ; =================================================================
-
-         eof1_regres = eof1                               ; create an array w meta data
-         eof2_regres = eof2                               ; create an array w meta data
-         eof3_regres = eof3                               ; create an array w meta data
-
-         do ne=0,neof-1
-
-            eof1_regres(ne,:,:) = (/ regCoef_n(eof1_ts(ne,:), xAnom, 0, 0) /)
-            eof2_regres(ne,:,:) = (/ regCoef_n(eof2_ts(ne,:), yAnom, 0, 0) /)
-            eof3_regres(ne,:,:) = (/ regCoef_n(eof3_ts(ne,:), zAnom, 0, 0) /)
-
-         end do
 
        ; =================================================================
        ; Extract the YYYYMM from the time coordinate 
