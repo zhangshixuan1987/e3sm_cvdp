@@ -32,6 +32,9 @@ begin
   statistical_siglev                         = 0.05
   l_regress                                  = "l_regress_enso"
 
+  l_use_yyyyref                              = getenv("L_USE_YYYYREF")
+  yyyyref                                    = toint(getenv("YYYYREF"))
+
 ;define regions for enso analysis
   latS                                       = -20.  ;negative for southern hemisphere
   latN                                       =  20.  ;negative for southern hemisphere
@@ -101,17 +104,29 @@ begin
   end if
   utc_date1 = cd_calendar(ensovar1&time,0)
   utc_date2 = cd_calendar(ensovar2&time,0)
+
+  if(str_lower(l_use_yyyyref).eq. "true") then
+     utc_date1(:,0) = utc_date1(:,0) + yyyyref
+     utc_date2(:,0) = utc_date2(:,0) + yyyyref
+  end if
+
   miny = min((/min(utc_date1(:,0)),min(utc_date2(:,0))/))
   maxy = max((/max(utc_date1(:,0)),max(utc_date2(:,0))/))
-  utc_date3 = cd_calendar(f3->time,0)
-  indtim    = ind(utc_date3(:,0).ge.miny.and.utc_date3(:,0).le.maxy)
-  ensovar3  = f3->sst(indtim,:,:)
-  ensovar3@_FillValue                      = -9999.
-  delete([/utc_date1,utc_date2,utc_date3,indtim/])
-
+  if(compare.eq."Model_vs_OBS")then
+    utc_date3 = cd_calendar(f3->time,0)
+    print(miny + " " +maxy)
+    indtim    = ind(utc_date3(:,0).ge.miny.and.utc_date3(:,0).le.maxy)
+    ensovar3  = f3->sst(indtim,:,:)
+    ensovar3@_FillValue                      = -9999.
+    delete([/utc_date1,utc_date2,utc_date3,indtim/])
+  else
+    nx        = min((/dimsizes(utc_date1(:,0)),dimsizes(utc_date2(:,0))/))
+    ensovar3  = f3->sst(0:nx-1,:,:)
+    ensovar3@_FillValue                      = -9999.
+    delete([/utc_date1,utc_date2,nx/])
+  end if
   ;printVarSummary(ensovar1)
   ;printVarSummary(ensovar2)
- 
 
   ensovar1@_FillValue                  = -9999.
   ensovar2@_FillValue                  = -9999.
@@ -452,15 +467,19 @@ begin
    utc_date1 = cd_calendar(regxAnom&time,1)  
    utc_date2 = cd_calendar(regyAnom&time,1)
    utc_date3 = cd_calendar(regzAnom&time,1)
-   
+
+   if(str_lower(l_use_yyyyref).eq. "true") then
+     utc_date1 = utc_date1 - yyyyref*100        
+     utc_date2 = utc_date2 - yyyyref*100
+   end if
+
    yyyy1     = yyyymm_to_yyyyfrac(utc_date1, 0.0) ;utc_date1(:,0)
    yyyy2     = yyyymm_to_yyyyfrac(utc_date2, 0.0) ;utc_date2(:,0)
    yyyy3     = yyyymm_to_yyyyfrac(utc_date3, 0.0) ;utc_date2(:,0)
-   delete([/utc_date1,utc_date2,utc_date3/]) 
 
+   delete([/utc_date1,utc_date2,utc_date3/]) 
    delete([/rc1,rc2,rc3,regxAnom,regyAnom,regzAnom/])
    
-
   ;;;;start to plot;;;;;;;;;;;;;;
   wtype     = "eps"
   fildir    = outdir+"/ENSO_Index_Analysis/"
@@ -556,7 +575,11 @@ begin
    plot(0)   = gsn_csm_contour_map(wks,enso1_regres(:,:),res)
 
   ;---Draw second plot in upper right corner
-   res@gsnLeftString     = "Regress on SST (~S~o~N~C)"
+   if(compare.eq."Model_vs_OBS")then
+     res@gsnLeftString   = "Regress on SST (~S~o~N~C)"
+   else
+     res@gsnLeftString   = "Regress on TS (~S~o~N~C)"
+   end if
    res@gsnRightString    = ninoreg 
    res@gsnCenterString   = "";
    res@tiMainString      = "" + panelstr2
@@ -661,7 +684,6 @@ begin
    rts1@gsnRightString      = ""
    rts1@gsnCenterString     = ""
    rts1@xyLineThicknesses   = 2            
-   rts1@xyLineColors        = "Red"
    xyarr1                   = wgt_runave_Wrap(idensox(:),(/1.,3,5,6,5,3,1/), 0)   
    dum(3)                   = gsn_csm_xy(wks,yyyy1,xyarr1,rts1) 
    overlay(plot(3),dum(3))
@@ -682,7 +704,6 @@ begin
    rts2@gsnRightString      = ""
    rts2@gsnCenterString     = ""
    rts2@xyLineThicknesses   = 2 
-   rts2@xyLineColors        = "Red"
    xyarr2                   = wgt_runave_Wrap(idensoy(:),(/1.,3,5,6,5,3,1/), 0) 
    dum(4)               = gsn_csm_xy(wks,yyyy2,xyarr2,rts2)
    overlay(plot(4),dum(4))
@@ -702,7 +723,6 @@ begin
    rts2@gsnRightString      = ""
    rts2@gsnCenterString     = ""
    rts2@xyLineThicknesses   = 2
-   rts2@xyLineColors        = "Red"
    xyarr3                   = wgt_runave_Wrap(idensoz(:),(/1.,3,5,6,5,3,1/), 0)
    dum(5)               = gsn_csm_xy(wks,yyyy3,xyarr3,rts2)
    overlay(plot(5),dum(5))
@@ -711,7 +731,11 @@ begin
  ; panel plot only resources
    pres1                          = True                ; mods desired
    pres1@gsnFrame                 = True               ; save panel until both ready
-   gsn_panel(wks,plot,(/2,3/),pres1)          ; create first panel
+   if(compare.eq."Model_vs_OBS")then
+     gsn_panel(wks,plot(:),(/2,3/),pres1)          ; create first panel
+   else
+     gsn_panel(wks,(/plot(0),plot(1),plot(3),plot(4)/),(/2,2/),pres1)          ; create first panel
+   end if
      
   ;pres2                           = True          ; mods desired
   ;pres2@gsnFrame                  = False          ; save panel until both ready

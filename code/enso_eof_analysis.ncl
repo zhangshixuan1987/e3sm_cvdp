@@ -31,6 +31,9 @@ begin
   statistical_test                           = getenv("DIFFERENCE_TEST")
   statistical_siglev                         = 0.05
 
+  l_use_yyyyref                              = getenv("L_USE_YYYYREF")
+  yyyyref                                    = toint(getenv("YYYYREF"))
+
 ;define regions for eof analysis
   latS                                       = -20.  ;negative for southern hemisphere
   latN                                       =  20.  ;negative for southern hemisphere
@@ -119,13 +122,29 @@ begin
          end if
         utc_date1 = cd_calendar(var1&time,0)
         utc_date2 = cd_calendar(var2&time,0)
+
+        if(str_lower(l_use_yyyyref).eq. "true") then
+           utc_date1(:,0) = utc_date1(:,0) + yyyyref
+           utc_date2(:,0) = utc_date2(:,0) + yyyyref
+        end if
+
         miny = min((/min(utc_date1(:,0)),min(utc_date2(:,0))/))
         maxy = max((/max(utc_date1(:,0)),max(utc_date2(:,0))/))
-        utc_date3 = cd_calendar(f3->time,0)
-        indtim = ind(utc_date3(:,0).ge.miny.and.utc_date3(:,0).le.maxy)  
-        var3 = f3->sst(indtim,:,:)
-        var3@_FillValue                      = -9999.
-        delete([/utc_date1,utc_date2,utc_date3,indtim/])
+        if(compare.eq."Model_vs_OBS")then
+          utc_date3 = cd_calendar(f3->time,0)
+          print(miny + " " +maxy)
+          indtim    = ind(utc_date3(:,0).ge.miny.and.utc_date3(:,0).le.maxy)
+          var3  = f3->sst(indtim,:,:)
+          var3@_FillValue                      = -9999.
+          delete([/utc_date1,utc_date2,utc_date3,indtim/])
+        else
+          nx    = min((/dimsizes(utc_date1(:,0)),dimsizes(utc_date2(:,0))/))
+          var3  = f3->sst(0:nx-1,:,:)
+          var3@_FillValue                      = -9999.
+          delete([/utc_date1,utc_date2,nx/])
+        end if
+        ;printVarSummary(ensovar1)
+        ;printVarSummary(ensovar2)
 
         ;;;mask out all values over land
         tmp1 = conform(var1,lndmsk,(/1,2/))
@@ -383,6 +402,11 @@ begin
          utc_date2 = cd_calendar(eof2_ts&time,-1)
          utc_date3 = cd_calendar(eof3_ts&time,-1)
         
+         if(str_lower(l_use_yyyyref).eq. "true") then
+           utc_date1 = utc_date1 - yyyyref*100        
+           utc_date2 = utc_date2 - yyyyref*100
+         end if
+
          yyyy1     = yyyymm_to_yyyyfrac(utc_date1, 0.0) ;utc_date1(:,0)
          yyyy2     = yyyymm_to_yyyyfrac(utc_date2, 0.0) ;utc_date2(:,0)
          yyyy3     = yyyymm_to_yyyyfrac(utc_date3, 0.0) ;utc_date2(:,0)
@@ -478,14 +502,18 @@ begin
 
          ;---Draw first plot in upper left corner
          res@gsnLeftString     = "EOF "+(n+1)+ " ("+sprintf("%4.1f", eof1@pcvar(n)) +"%)"
-         res@gsnRightString    = mvarnam +" ("+xAnom@units+")" ;sprintf("%4.1f", eof1@pcvar(n)) +"%"
+         res@gsnRightString    = mvarnam + " ("+xAnom@units+")" ;sprintf("%4.1f", eof1@pcvar(n)) +"%"
          res@gsnCenterString   = "" ;panelstr1
          res@tiMainString      = panelstr1
          plot(0)   = gsn_csm_contour_map(wks,eof1_regres(n,:,:),res)
 
          ;---Draw second plot in upper right corner
          res@gsnLeftString     = "EOF "+(n+1)+ " ("+sprintf("%4.1f", eof2@pcvar(n)) +"%)"
-         res@gsnRightString    = "SST ("+xAnom@units+")" ; sprintf("%4.1f", eof2@pcvar(n)) +"%"
+         if(compare.eq."Model_vs_OBS")then
+           res@gsnRightString    = "SST ("+xAnom@units+")" ; sprintf("%4.1f", eof2@pcvar(n)) +"%"
+         else
+           res@gsnRightString    = mvarnam + " ("+xAnom@units+")" ; sprintf("%4.1f", eof2@pcvar(n)) +"%"
+         end if 
          res@gsnCenterString   = "" ;panelstr2
          res@tiMainString      = panelstr2
          plot(1) = gsn_csm_contour_map(wks,eof2_regres(n,:,:),res)
@@ -532,18 +560,16 @@ begin
           rts@tmYLMinorThicknessF          = 1.0
           rts@tmYRMajorThicknessF          = 1.0
           rts@tmYRMinorThicknessF          = 1.0
-
           rts@trYMinF                      = -4.0
           rts@trYMaxF                      =  4.0
-          rts@trXMinF                      = miny
-          rts@trXMaxF                      = maxy
 
          ;create individual plots
          ;---Draw third plot in lower left corner
           rts@gsnLeftString     = "EOF "+(n+1) + " ("+sprintf("%4.1f", eof1@pcvar(n)) +"%)"
           rts@gsnRightString    = "Standardized index" ;sprintf("%4.1f", eof1_regres@pcvar(n)) +"%"
           rts@tiMainString      = "" ;"Case: "+panelstr1
-
+          rts@trXMinF           = min(yyyy1)
+          rts@trXMaxF           = max(yyyy1)
           xyarr1                = runave_Wrap (eof1_ts(n,:),3, 0)
           plot(3) = gsn_csm_xy (wks,yyyy1,xyarr1,rts)
           rts1 = rts
@@ -560,6 +586,8 @@ begin
           rts@gsnLeftString     = "EOF "+(n+1) + " ("+sprintf("%4.1f", eof2@pcvar(n)) +"%)"
           rts@gsnRightString    = "Standardized index" 
           rts@tiMainString      = "" 
+          rts@trXMinF           = min(yyyy2)
+          rts@trXMaxF           = max(yyyy2)
           xyarr2                   = runave_Wrap(eof2_ts(n,:),3, 0)
           plot(4) = gsn_csm_xy (wks,yyyy2,xyarr2,rts)
           rts2 = rts
@@ -576,6 +604,8 @@ begin
           rts@gsnLeftString     = "EOF "+(n+1) + " ("+sprintf("%4.1f", eof3@pcvar(n)) +"%)"
           rts@gsnRightString    = "Standardized index" 
           rts@tiMainString      = "" 
+          rts@trXMinF           = min(yyyy3)
+          rts@trXMaxF           = max(yyyy3)
           xyarr3                   = runave_Wrap(eof3_ts(n,:),3, 0)
           plot(5) = gsn_csm_xy (wks,yyyy3,xyarr3,rts)
           rts3 = rts
@@ -595,8 +625,11 @@ begin
          ;pres1@gsnPanelBottom           = 0.45    ; space for label bar
          ;pres1@gsnPanelTop              = 0.85     ; only panel on lower half of page
          ;pres1@gsnPanelXF               = (/0.07,0.57/)
-          gsn_panel(wks,plot(:),(/2,3/),pres1)          ; create first panel
-          
+          if(compare.eq."Model_vs_OBS")then
+            gsn_panel(wks,plot(:),(/2,3/),pres1)          ; create first panel
+          else
+            gsn_panel(wks,(/plot(0),plot(1),plot(3),plot(4)/),(/2,2/),pres1)          ; create first panel
+          end if 
           frame(wks)                                   ; draw both on same page
 
          end do ; end of eof mods 

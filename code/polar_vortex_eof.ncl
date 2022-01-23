@@ -47,17 +47,21 @@ begin
   panelstr1                                  = tname + " ("+tttag+")"
   panelstr2                                  = cname + " ("+cttag+")"
 
-  if((cname.eq."ERA5").or.(cname.eq."ERA20C").or.(cname.eq."ERA_20C")) then
-     obsvars                                 = (/"z"/)
-     facobs                                  = (/1.0/grav/)
-   else if ((cname.eq."NOAA20C").or.(cname.eq."NOAA_20C")) then
-     obsvars                                 = (/"hgt"/)
-     facobs                                  = (/1.0/)
-  else
-    print("The observational source are not available; only allow ERA5, ERA20C or NOAA20C")
-    exit
-  end if
-  end if
+  if(compare.eq."Model_vs_OBS") then
+
+    if((cname.eq."ERA5").or.(cname.eq."ERA20C").or.(cname.eq."ERA_20C")) then
+       obsvars                                 = (/"z"/)
+       facobs                                  = (/1.0/grav/)
+     else if ((cname.eq."NOAA20C").or.(cname.eq."NOAA_20C")) then
+       obsvars                                 = (/"hgt"/)
+       facobs                                  = (/1.0/)
+    else
+      print("The observational source are not available; only allow ERA5, ERA20C or NOAA20C")
+      exit
+    end if
+    end if
+
+  end if 
 
 ;declear the season or annual mean data to be used;;;;;
   seasons                                    = (/"ANN","DJF","JJA","SON","MAM"/)
@@ -82,14 +86,8 @@ begin
        var1                                = f1->$mvarnam$
        tmp1                                = vinth2p(var1,f1->hyam,f1->hybm,pout(ll),f1->PS,intyp,f1->P0/100.0,1,False)
        vp1                                 = tmp1(:,0,:,:)
+       vp1                                 = vp1*facmod(jj)
        delete([/tmp1/])
-
-       if(compare.ne."Model_vs_OBS") then
-         var2                              = f2->$mvarnam$
-         tmp2                              = vinth2p(var2,f2->hyam,f2->hybm,pout(ll),f2->PS,intyp,f2->P0/100.0,1,False)
-         vp2                               = tmp2(:,0,:,:)
-         delete([/tmp2/])
-       end if
 
        if(compare.eq."Model_vs_OBS") then
           ovarnam                          = obsvars(jj)
@@ -103,17 +101,16 @@ begin
             vp2                            = tmp(:,0,:,:)
             delete([/tmp/])
           end if
+          vp2                              = vp2*facobs(jj)
           delete([/lev,indl/])
+       else
+         var2                              = f2->$mvarnam$
+         tmp2                              = vinth2p(var2,f2->hyam,f2->hybm,pout(ll),f2->PS,intyp,f2->P0/100.0,1,False)
+         vp2                               = tmp2(:,0,:,:)
+         vp2                               = vp2*facmod(jj)
+         delete([/tmp2/])
        end if
        delete([/var1,var2/])
-
-       if(compare.eq."Model_vs_OBS") then
-         vp1                               = vp1*facmod(jj)
-         vp2                               = vp2*facobs(jj)
-       else
-         vp1                               = vp1*facmod(jj)
-         vp2                               = vp2*facmod(jj)
-       end if
 
        vp1@units                           = varunt(jj)
        vp2@units                           = varunt(jj)
@@ -121,7 +118,6 @@ begin
        ;;check the two comparing files and see if they are in the same grid, otherwise, return the error message;;;;
        ddd1                                = dimsizes(vp1)
        ddd2                                = dimsizes(vp2)
-
        if ((ddd1(1).ne.ddd2(1)).or.(ddd1(2).ne.ddd2(2)))then
          print("Error: this scripts requires the two files must in the same grid to run!!!")
          return
