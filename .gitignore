@@ -1,3 +1,6 @@
 /data/*
 /run_script/*
 /work/*
+/cvdp_polar/*.nc
+/cvdp_polar/*.csh
+/cvdp_polar/*.log
