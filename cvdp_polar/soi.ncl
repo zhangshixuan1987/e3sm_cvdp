@@ -15,14 +15,14 @@ begin
   PNG_SCALE_SUMMARY = tofloat(getenv("PNG_SCALE_SUMMARY"))
 
   if (POLAR.eq."SH") then
-    llatn = -20.0
-    llats = -90.0
+    rlatn = -20.0
+    rlats = -90.0
   else if (POLAR.eq."NH") then
-    llatn =  90.0
-    llats =  20.0
+    rlatn =  90.0
+    rlats =  20.0
   else
-    llatn =   90.0
-    llats =  -90.0
+    rlatn =   90.0
+    rlats =  -90.0
   end if
   end if
   

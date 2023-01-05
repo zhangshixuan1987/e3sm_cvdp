@@ -10,7 +10,6 @@ begin
   CLIMO_SYEAR = getenv("CLIMO_SYEAR")
   CLIMO_EYEAR = getenv("CLIMO_EYEAR")
   OBS         = getenv("OBS")
- ;webtitle    = getenv("webpage_title")
 
   quote = str_get_dq()
 ;----------------------------------------------------------------------------

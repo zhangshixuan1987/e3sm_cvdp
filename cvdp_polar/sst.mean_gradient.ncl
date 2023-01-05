@@ -78,13 +78,6 @@ begin
      delete([/lsm,basemap/])
      delete(d) 
  
-    ;gradLatLon  = grad_latlon_cfd (arr, arr&lat, arr&lon, True, False) 
-    ;grad_lat    = gradLatLon[0]    ; for clarity; explicitly extract variables from returned 'list'
-    ;grad_lon    = gradLatLon[1]
-    ;grad_lon@long_name = "longitudinal gradient (derivative)"
-    ;grad_lat@long_name = "latitudinal gradient (derivative)"
-    ;printMinMax(grad_lat,False)
-
      finarr = calculate_hor_gradients (arr)   
 
      if(isfilepresent(fnt)) then
@@ -115,7 +108,7 @@ begin
   end do
 
   if (CREATE_GRAPHICS.eq."False") then
-     print("Finished: sst.mean_gradient_polar.ncl")
+     print("Finished: sst.mean_gradient.ncl")
      exit
   end if
 ;==========================================================================================
@@ -194,26 +187,24 @@ begin
   copy_VarAtts(retrieve_summary_res(),tres)
 
   if (COLORMAP.eq.0) then
-     res@cnLevels = fspan(.1,0.8,8)
-     res2@cnLevels = fspan(-0.5,0.5,11)
-     sres@cnLevels = ispan(0,36,2)
-     sres2@cnLevels = fspan(-5,5,21)
-     cmap = read_colormap_file("precip3_16lev")
-     res@cnFillPalette = cmap((/0,2,4,6,8,10,12,14,16/),:) 
-     delete(cmap)
+     res@cnLevels = fspan(-1.0,1.0,11)  
+     res2@cnLevels = fspan(-0.5,0.5,11)  
+     sres@cnLevels = fspan(-1.0,1.0,11)  
+     sres2@cnLevels = fspan(-0.5,0.5,11)  
+     res@cnFillPalette = "ncl_default" 
      res2@cnFillPalette = "ncl_default"
      sres@cnFillPalette = "ncl_default"
      sres2@cnFillPalette = "ncl_default"
   end if
   if (COLORMAP.eq.1) then
-     res@cnLevels = fspan(.1,0.8,8)
-     res2@cnLevels = fspan(-0.5,0.5,11)
-     sres@cnLevels = ispan(4,32,2)
-     sres2@cnLevels = fspan(-5,5,11)
+     res@cnLevels = fspan(-1.0,1.0,11) 
+     res2@cnLevels = fspan(-0.5,0.5,11) 
+     sres@cnLevels = fspan(-1.0,1.0,11) 
+     sres2@cnLevels = fspan(-0.5,0.5,11) 
      cmap = read_colormap_file("cb_rainbow")
-     res@cnFillPalette = cmap((/33,45,61,77,93,109,122,153,173/),:) 
-     res2@cnFillPalette = "BlueDarkRed18"
-     sres@cnFillPalette = "BlueDarkRed18"
+     res@cnFillPalette   = "BlueDarkRed18" 
+     res2@cnFillPalette  = "BlueDarkRed18"
+     sres@cnFillPalette  = "BlueDarkRed18"
      sres2@cnFillPalette = "BlueDarkRed18"
   end if 
 
@@ -460,6 +451,6 @@ begin
         system("rm "+OUTDIR+"sst.mean_gradient.ps")
      end if
   end do
-  print("Finished: sst.mean_gradient_polar.ncl")
+  print("Finished: sst.mean_gradient.ncl")
 end
 

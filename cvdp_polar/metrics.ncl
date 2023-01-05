@@ -122,15 +122,15 @@ begin
 ;---------------------------------------------------------------------------------------------------------
   cr = "~C~"
   varlist = (/"nino34_spacomp_tas_djf1","nino34_spacomp_psl_djf1","nino34_hov_elnino","nino34_hov_lanina",\
-               "sam_pattern_ndjfma","sam_pattern_mjjaso","psa1_pattern_ndjfma","psa1_pattern_mjjaso",\
-               "psa2_pattern_ndjfma","psa2_pattern_mjjaso","tpdv_pattern_mon","so_pattern_ndjfma",\
-               "so_pattern_mjjaso","sst_spatialstddev_ann","pr_spatialstddev_ann"/)
+               "sam_pattern_djf","sam_pattern_jja","psa1_pattern_djf","psa1_pattern_jja",\
+               "psa2_pattern_djf","psa2_pattern_jja","tpdv_pattern_mon","so_pattern_djf",\
+               "so_pattern_jja","sst_spatialstddev_ann","pr_spatialstddev_ann"/)
   varlist_obs = varlist
   ncol_labels = (/"ENSO TAS (DJF~S~+1~N~)","ENSO PSL (DJF~S~+1~N~)", \
                   "El Nin~H-13V2F35~D~FV-2H3F21~o Hovmo~H-14V2F35~H~FV-2H3~ller",\
                   "La Nin~H-13V2F35~D~FV-2H3F21~a Hovmo~H-14V2F35~H~FV-2H3~ller", \
-                  "SAM (NDJFMA)","SAM (MJJASO)","PSA1 (NDJFMA)","PSA1 (MJJASO)", \
-                  "PSA2 (NDJFMA)","PSA2 (MJJASO)", "TPDV (Monthly)", "SO (NDJFMA)", "SO (MJJASO)", \ 
+                  "SAM (DJF)","SAM (JJA)","PSA1 (DJF)","PSA1 (JJA)", \
+                  "PSA2 (DJF)","PSA2 (JJA)", "TPDV (Monthly)", "SO (DJF)", "SO (JJA)", \ 
                   "SST std dev (Ann)","PR std dev (Ann)","Mean Score"/) 
   ncol_rms_units = (/"~S~o~N~C","hPa","~S~o~N~C","~S~o~N~C", \
                      "hPa","hPa","hPa","hPa","hPa","hPa",\
@@ -279,7 +279,7 @@ begin
               obs0_rg := arr
               obs0_rg  = obs0_rg@_FillValue 
               do hh = 0,dimsizes(arr&time_mon1)-1
-                 obs0_rg(hh,:) = (/ linint1(obs0&longitude,obs0(hh,:),False,arr&longitude,0) /)
+                 obs0_rg(hh,:) = (/ linint1(obs0&lon0,obs0(hh,:),False,arr&lon0,0) /)
               end do
            else
               clat := cos(0.01745329*arr&lat)
@@ -342,7 +342,7 @@ begin
               obs0_rg := arr
               obs0_rg  = obs0_rg@_FillValue 
               do ii = 0,dimsizes(arr&time_mon1)-1
-                 obs0_rg(ii,:) = (/ linint1(obs0&longitude,obs0(ii,:),False,arr&longitude,0) /)
+                 obs0_rg(ii,:) = (/ linint1(obs0&lon0,obs0(ii,:),False,arr&lon0,0) /)
               end do
            else
               clat := cos(0.01745329*arr&lat)
@@ -676,7 +676,7 @@ begin
   header = (/"","Pattern Correlations/RMS Differences   Observations vs. Ensemble Means",""/)
   write_table(OUTDIR+"metrics_EM.txt","w",[/header/],"%s")
   column_header1 = spacer+"   ENSO TAS   ENSO PSL   El Nino    La Nina      SAM        SAM       PSA1       PSA1       PSA2        PSA2       TPDV        SO         SO     SST sigma   PR sigma    Mean  "
-  column_header2 = spacer+"    (DJF+1)    (DJF+1)     Hov        Hov      (NDJFMA)   (MJJASO)   (NDJFMA)   (MJJASO)   (NDJFMA)   (MJJASO)   (Monthly)   (NDJFMA)   (MJJASO)   (Ann)       (Ann)     Score  "
+  column_header2 = spacer+"    (DJF+1)    (DJF+1)     Hov        Hov      (DJF)   (JJA)   (DJF)   (JJA)   (DJF)   (JJA)   (Monthly)   (DJF)   (JJA)   (Ann)       (Ann)     Score  "
   column_header3 = spacer+"  ---------  ---------  ---------  ---------  ---------  ---------  ---------  ---------  ---------  ---------  ---------  ---------  ---------  ---------  ---------  ---------"
   write_table(OUTDIR+"metrics_EM.txt","a",[/column_header1/],"%s")
   write_table(OUTDIR+"metrics_EM.txt","a",[/column_header2/],"%s")
@@ -1032,7 +1032,7 @@ begin
   header = (/"","Pattern Correlations/RMS Differences   Observations vs. Model(s)",""/)
   write_table(OUTDIR+"metrics.txt","w",[/header/],"%s")
   column_header1 = spacer+"   ENSO TAS   ENSO PSL   El Nino    La Nina      SAM        SAM       PSA1       PSA1       PSA2        PSA2       TPDV        SO         SO     SST sigma   PR sigma    Mean  "
-  column_header2 = spacer+"    (DJF+1)    (DJF+1)     Hov        Hov      (NDJFMA)   (MJJASO)   (NDJFMA)   (MJJASO)   (NDJFMA)   (MJJASO)   (Monthly)   (NDJFMA)   (MJJASO)   (Ann)       (Ann)     Score  "
+  column_header2 = spacer+"    (DJF+1)    (DJF+1)     Hov        Hov      (DJF)   (JJA)   (DJF)   (JJA)   (DJF)   (JJA)   (Monthly)   (DJF)   (JJA)   (Ann)       (Ann)     Score  "
   column_header3 = spacer+"  ---------  ---------  ---------  ---------  ---------  ---------  ---------  ---------  ---------  ---------  ---------  ---------  ---------  ---------  ---------  ---------"
   write_table(OUTDIR+"metrics.txt","a",[/column_header1/],"%s")
   write_table(OUTDIR+"metrics.txt","a",[/column_header2/],"%s")

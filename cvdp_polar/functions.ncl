@@ -43,11 +43,344 @@ begin
      blankarr&lat@units = "degrees_north"
      blankarr&lon@units = "degrees_east"
   end if
+  if (opttype.eq."time_lev_lat_lon") then
+     blankarr = new((/dimsizes(time),41,90,180/),"float",1.e20)
+     blankarr!0 = "time"    ; time coordinate variable assigned below
+     blankarr&time = time
+     blankarr!1 = "lev"
+     blankarr&lev =fspan(0,5000,41)
+     blankarr!2 = "lat"
+     blankarr&lat = fspan(-89,89,90)
+     blankarr!3 = "lon"
+     blankarr&lon = fspan(0,358,180)
+     blankarr&lat@units = "degrees_north"
+     blankarr&lon@units = "degrees_east"
+     blankarr&lev@units = "m"
+     blankarr&lev@positive = "down"
+  end if
   blankarr@units = ""
   blankarr@is_all_missing = True
   return(blankarr)
   delete([/yS,yE,mS,mE,opttype,blankarr,timeT,time/])
 end
+
+;===================================================================================================
+; read in output data from selected files
+undef("diagnostic_read_in")
+function diagnostic_read_in(vnm:string)
+; path for file(s), variable name, start year, and end year are read in.
+local nsim, na, names, paths, syear, eyear, names_EM, EM_num, delim, modname, fouarr 
+begin
+ nsim  = numAsciiRow("namelist_byvar/namelist_"+vnm)
+ na    = asciiread("namelist_byvar/namelist_"+vnm,(/nsim/),"string")
+ names = new(nsim,"string")
+ paths = new(nsim,"string")
+ syear = new(nsim,"integer",-999)
+ eyear = new(nsim,"integer",-999)
+ names_EM = new(nsim,"string")
+ EM_num = new(nsim,"integer",-999)
+ delim = "|"
+
+ do ee = 0,nsim-1
+    names(ee) = str_strip(str_get_field(na(ee),1,delim))
+    paths(ee) = str_strip(str_get_field(na(ee),2,delim))
+    syear(ee) = stringtointeger(str_strip(str_get_field(na(ee),3,delim)))
+    eyear(ee) = stringtointeger(str_strip(str_get_field(na(ee),4,delim)))
+    temp      = str_split(str_strip(str_get_field(na(ee),5,delim)),"-")
+    EM_num(ee)    = toint(temp(0))
+    names_EM(ee)  = str_join(temp(1:),"-")
+   delete(temp)
+ end do
+ modname = str_sub_str(names," ","_")
+ bc = (/"/","'","(",")"/)
+ do ff = 0,dimsizes(modname)-1
+   do ee = 0,dimsizes(bc)-1
+      modname(ff) = str_sub_str(modname(ff),bc(ee),"_")
+   end do
+ end do
+
+ fouarr = new((/7,dimsizes(modname)/),string) 
+ fouarr(0,:) = modname
+ fouarr(1,:) = tostring(syear)
+ fouarr(2,:) = tostring(eyear)
+ fouarr(3,:) = EM_num 
+ fouarr(4,:) = names 
+ fouarr(5,:) = names_EM 
+ fouarr(6,:) = paths 
+ delete([/nsim,na,names,paths,syear,eyear,names_EM,EM_num,delim,modname,bc/])
+
+ return(fouarr)
+
+end 
+;===================================================================================================
+; read in atmospheric/land data(4D) from selected files
+; assign time coordinate variables, check for issues with the array, assign _FillValue (if needed)
+; assign dimension names (for ease-of-use), check and modify units
+;
+undef("data_monthly_clim_read_in")
+function data_monthly_clim_read_in(zpath:string,vn:string,yearS:integer,yearE:integer)
+; path for file(s), variable name, start year, and end year are read in.
+local zpath,vn,cpath0,ta,tfiles,c,arr,farr,yearS,yearE,mocheck,fils_precc,fils_precl,opt
+begin
+  if (vn.eq."T") then
+     vname = (/"T","t","ta","TA"/)
+  end if
+  if (vn.eq."Q") then
+     vname = (/"Q","q","HUS","hus"/)
+  end if
+  if (vn.eq."U") then
+     vname = (/"U","u","ua","UA"/)
+  end if
+  if (vn.eq."V") then
+     vname = (/"V","v","va","VA"/)
+  end if
+  if (vn.eq."RH") then
+     vname = (/"RH","rh","RELHUM"/)
+  end if
+  if (vn.eq."T") then
+     vname = (/"T","t","ta","TA"/)
+  end if
+  if (ismissing(zpath) ) then
+;     print("File missing, creating blank array of data. View "+vn+" namelist for details.")
+     arr = create_empty_array(yearS,yearE,1,12,"time_lat_lon")
+     sydata = yearS     ; assign these variables based on yearS/yearE provided in namelist. Doesn't matter
+     eydata = yearE     ; as data array is totally missing..
+     smdata = 1
+     emdata = 12
+  else
+     cpath0 = stringtochar(zpath)
+     ta = stringtochar("*")
+     if (any(cpath0.eq.ta(0)).or.any(cpath0.eq.tochar("{"))) then   ; check for "*" and "{" denoting multiple files
+        tfiles = systemfunc("ls "+zpath+" 2> /dev/null")   ; /dev/null suppresses all standard error output
+        c = addfiles(tfiles,"r")
+        do ii=0,dimsizes(vname)-1
+           if (isfilevar(c[0],vname(ii))) then
+              arr = c[:]->$vname(ii)$
+              break
+           end if
+        end do
+        nfil = dimsizes(tfiles)
+        cpathS = stringtochar(tfiles(0))      
+        cpathE = stringtochar(tfiles(nfil-1)) 
+        ncharS = dimsizes(cpathS)
+        ncharE = dimsizes(cpathE)
+        if (.not.isvar("sydata")) then
+           sydata = stringtointeger(charactertostring(cpathS(ncharS-17:ncharS-14)))
+           smdata = stringtointeger(charactertostring(cpathS(ncharS-13:ncharS-12)))
+           eydata = stringtointeger(charactertostring(cpathE(ncharE-10:ncharE-7)))
+           emdata = stringtointeger(charactertostring(cpathE(ncharE-6:ncharE-5)))
+        end if
+        delete([/cpathS,cpathE,ncharS,ncharE,nfil/])
+     else
+        c = addfile(zpath,"r")
+        do i=0,dimsizes(vname)-1
+           if (isfilevar(c,vname(i))) then
+              arr = c->$vname(i)$
+              break
+           end if
+        end do
+        cpath = stringtochar(zpath)
+        nchar = dimsizes(cpath)
+        sydata = stringtointeger(charactertostring(cpath(nchar-17:nchar-14)))
+        smdata = stringtointeger(charactertostring(cpath(nchar-13:nchar-12)))
+        eydata = stringtointeger(charactertostring(cpath(nchar-10:nchar-7)))
+        emdata = stringtointeger(charactertostring(cpath(nchar-6:nchar-5)))
+        delete([/cpath,nchar/])
+     end if
+     delete([/ta,cpath0/])
+  end if
+
+  if (isvar("arr").eq.False) then
+     print("Variable ("+vn+") not found. Examine input file "+zpath+". Creating empty array and continuing")
+     arr = create_empty_array(yearS,yearE,1,12,"time_lat_lon")
+  end if
+
+  if (isshort(arr)) then
+     arrT = short2flt(arr)
+     delete(arr)
+     arr = arrT
+     delete(arrT)
+  end if
+
+  if (.not.isatt(arr,"_FillValue")) then     ; assign _FillValue if one is not present
+     if (isatt(arr,"missing_value")) then
+        arr@_FillValue = arr@missing_value
+     else
+        arr@_FillValue = default_fillvalue(typeof(arr))
+     end if
+  end if
+
+  dimz = dimsizes(arr)
+  if (any(dimz.eq.1)) then
+     arrT = rm_single_dims(arr)
+     delete(arr)
+     arr = arrT
+     delete(arrT)
+  end if
+
+  if (dimsizes(dimz).le.3) then
+     print("Possible curvilinear (or unstructured) grid detected. The CVDP cannot analyze non-ocean component curvilinear data. Please regrid to a rectilinear grid for inclusion in CVDP comparisons.")
+     print("Input file: "+zpath)
+     print("Setting array to all missing")
+     delete(arr)
+     arr = create_empty_array(yearS,yearE,smdata,emdata,"time_lev_lat_lon")
+     sydata = yearS     ; assign these variables based on yearS/yearE provided in namelist. Doesn't matter
+     eydata = yearE     ; as data array is totally missing..
+     smdata = 1
+     emdata = 12
+  end if
+  delete(dimz)
+
+  arr!0 = "time"
+  arr!1 = "lev"
+  arr!2 = "lat"
+  arr!3 = "lon"
+
+  if (any(abs(arr).ge.1.e20)) then   ; check for inf values or values way out of range, reset to _FillValue.
+     print("Values greater than 1.e20 or less than -1.e20 detected in "+zpath+", resetting to _FillValue")
+     arr = where(abs(arr).ge.1.e20,arr@_FillValue,arr)
+  end if
+
+  if (yearS.lt.sydata.or.yearE.gt.eydata) then
+     print("Requested "+yearS+"-"+yearE+" time span is outside the input file "+zpath+" time span of "+sydata+"-"+eydata+"")
+     print("Setting array to all missing")
+     delete(arr)
+     arr = create_empty_array(yearS,yearE,smdata,emdata,"time_lev_lat_lon")
+     sydata = yearS     ; assign these variables based on yearS/yearE provided in namelist. Doesn't matter
+     eydata = yearE     ; as data array is totally missing..
+     smdata = 1
+     emdata = 12
+  else
+     time = ispan(smdata,emdata,1)
+     if (iscoord(arr,"time")) then
+        delete(arr&time)
+     end if
+     dimz = dimsizes(arr)
+     if (dimz(0).eq.dimsizes(time)) then
+        arr&time = time
+     else
+        print("Possible mismatch detected between time specified in file name and file variables, setting array to missing")
+        print("File = "+zpath)
+        print("Read from file name: "+min(time)+"-"+max(time))
+        delete(arr)
+        arr = create_empty_array(yearS,yearE,smdata,emdata,"time_lev_lat_lon")
+        sydata = yearS     ; assign these variables based on yearS/yearE provided in namelist. Doesn't matter
+        eydata = yearE     ; as data array is totally missing..
+        smdata = 1
+        emdata = 12
+     end if
+     delete(dimz)
+     delete([/time/])
+  end if
+  delete([/sydata,smdata,eydata,emdata/])
+
+  if (arr&lat(0).ge.0) then
+     farr = arr({1:12},::-1,:,:)   ; flip the latitudes
+  else
+     farr = arr({1:12},:,:,:)
+  end if
+  delete(arr)
+
+  ;;make pressure coordinate consistent
+  lev  = farr&lev
+  if(lev(0).ge.1000) then
+    farr = farr(:,::-1,:,:)
+    farr&lev = farr&lev(::-1)
+  end if
+
+  if (max(lev).gt.10000) then
+    lev = lev / 100.0
+    lev@units = "hPa"
+    farr&lev  = lev
+  end if
+  delete(lev)
+
+  mocheck = (/1-min(farr&time),12- max(farr&time)/)
+  if (any(mocheck.ne.0)) then    ; previously: if (mod(dimsizes(farr&time),12).ne.0) then
+     if (mocheck(0).ne.0) then
+        print("First requested month is incomplete")
+     end if
+     if (mocheck(1).ne.0) then
+        print("Last requested month is incomplete")
+     end if
+     print("Request data for file "+zpath+" is possibly not monthly climatology, printing out time and creating blank array")
+     print("Time requested: "+yearS+"-"+yearE)
+     print(farr&time)
+     delete(farr)
+     farr = create_empty_array(yearS,yearE,1,12,"time_lev_lat_lon")
+  end if
+  delete(mocheck)
+
+  if (farr&lon(0).lt.0) then
+     farr = lonFlip(farr)     ; lon flip
+  end if
+  if (min(farr&lon).lt.0.or.max(farr&lon).gt.360) then
+     print(farr&lon)
+     print("Fatal: Longitudes in "+zpath+" not in expected 0-360E range, creating blank array")
+     delete(farr)
+     farr = create_empty_array(yearS,yearE,1,12,"time_lev_lat_lon")
+  end if
+
+  if (vn.eq."T") then      ; units check
+     if (farr@units.eq."K".or.farr@units.eq."Kelvin".or.farr@units.eq."deg_k".or.farr@units.eq."deg_K") then
+        farr = where(farr.lt.180,farr@_FillValue,farr)
+        farr@units = "K"
+     end if
+     if (farr@units.eq."degrees_C".or.farr@units.eq."degrees C".or.farr@units.eq."degree_C".or.farr@units.eq."degree C") then
+        farr = farr + 273.15
+        farr@units = "K"
+     end if
+  end if
+
+  if (vn.eq."U") then
+     if (farr@units.eq."m/s") then
+        farr@units = "m~S~-1~N~"
+     end if
+  end if
+
+  if (vn.eq."V") then
+     if (farr@units.eq."m/s") then
+        farr@units = "m~S~-1~N~"
+     end if
+  end if
+
+  if (vn.eq."Q") then
+     if (farr@units.eq."kg/kg") then
+        farr = farr * 1000.0
+        farr@units = "g kg~S~-1~N~"
+     end if
+  end if
+
+  if (vn.eq."RH") then
+     if (max(farr).le.1) then
+       farr = farr*100.0 
+       farr@units = "%"
+     end if 
+     if (farr@units.eq."percent") then
+        farr@units = "%"
+     end if
+  end if
+
+  date = farr&time         ; switch time to be CF-conforming
+  delete(farr&time)
+  yyyy = date/100
+  mm = date-(yyyy*100)
+  days = (days_in_month(yyyy,mm))/2
+  hms  = days
+  hms = 0   ; hours, minutes, seconds all the same (=0)
+  opt = 0
+  opt@return_type = "float"
+  time = cd_inv_calendar(yyyy,mm,days,hms,hms,hms,"months since "+min(yyyy)+"-01-15 00:00:00",opt)
+  time@long_name = "Time"
+  time@standard_name = "time"
+  time@actual_range = (/min(time),max(time)/)
+  time!0 = "time"
+  time&time = time
+  farr&time = time
+  delete([/time,yyyy,mm,days,hms,date/])
+  return(farr)
+end 
+
 ;===================================================================================================
 ; read in atmospheric/land data from selected files
 ; assign time coordinate variables, check for issues with the array, assign _FillValue (if needed)
@@ -76,6 +409,114 @@ begin
   end if
   if (vn.eq."PRECT") then
      vname = (/"PRECC","PRECL","PRECT","pr","PPT","ppt","p","P","precip","PRECIP","tp","prcp","prate"/)
+  end if
+  if (vn.eq."PRECST") then
+     vname = (/"PRECST","prs","precst"/)
+  end if
+  if (vn.eq."CLDTOT") then
+     vname = (/"CLDTOT","cldtot"/)
+  end if
+  if (vn.eq."Qn") then
+     vname = (/"Qn_SRF","Qn","qn_srf","qn"/)
+  end if
+  if (vn.eq."HFLX") then
+     vname = (/"QnTur_SRF","HFLX","qntur_srf","hflx"/)
+  end if
+  if (vn.eq."QnRad") then
+     vname = (/"QnRad_SRF","qnrad_srf"/)
+  end if
+  if (vn.eq."FLNS") then
+     vname = (/"FLNS","flns"/)
+  end if
+  if (vn.eq."FLNSC") then
+     vname = (/"FLNSC","flnsc"/)
+  end if
+  if (vn.eq."FLDS") then
+     vname = (/"FLDS","flds"/)
+  end if
+  if (vn.eq."FLDSC") then
+     vname = (/"FLDSC","fldsc"/)
+  end if
+  if (vn.eq."FSNS") then
+     vname = (/"FSNS","fsns"/)
+  end if
+  if (vn.eq."FSNSC") then
+     vname = (/"FSNSC","fsnsc"/)
+  end if
+  if (vn.eq."SH") then
+     vname = (/"SHFLX","shflx"/)
+  end if
+  if (vn.eq."LH") then
+     vname = (/"LHFLX","lhflx"/)
+  end if
+  if (vn.eq."SWCRE") then
+     vname = (/"swcre","SWCRE","SWCF","swcf"/)
+  end if
+  if (vn.eq."LWCRE") then
+     vname = (/"lwcre","LWCRE","LWCF","lwcf"/)
+  end if
+  if (vn.eq."LWP") then
+     vname = (/"TGCLDLWP","tgcldlwp"/)
+  end if
+  if (vn.eq."IWP") then
+     vname = (/"TGCLDIWP","tgcldiwp"/)
+  end if
+  if (vn.eq."SF470") then
+     vname = (/"SF470","sf470"/)
+  end if
+  if (vn.eq."SF920") then
+     vname = (/"SF920","sf920"/)
+  end if
+  if (vn.eq."VP470") then
+     vname = (/"VP470","vp470"/)
+  end if
+  if (vn.eq."VP920") then
+     vname = (/"VP920","vp920"/)
+  end if
+  if (vn.eq."ETH") then
+     vname = (/"ETH12","ETH","eth12","eth"/)
+  end if
+  if (vn.eq."ETH1") then
+     vname = (/"ETH1","eth1"/)
+  end if
+  if (vn.eq."ETH2") then
+     vname = (/"ETH2","eth2"/)
+  end if
+  if (vn.eq."Z500") then
+     vname = (/"Z500","z500"/)
+  end if
+  if (vn.eq."U850") then
+     vname = (/"U850","u850"/)
+  end if
+  if (vn.eq."V850") then
+     vname = (/"V850","v850"/)
+  end if
+  if (vn.eq."U200") then
+     vname = (/"U200","u200"/)
+  end if
+  if (vn.eq."V200") then
+     vname = (/"V200","v200"/)
+  end if
+  if (vn.eq."T850") then
+     vname = (/"T850","t850"/)
+  end if
+  if (vn.eq."TAUX") then
+     vname = (/"TAUX","taux","TAUU","tauu"/)
+  end if
+  if (vn.eq."TAUY") then
+     vname = (/"TAUY","tauy","TAUV","tauv"/)
+  end if
+  if (vn.eq."U10") then
+     vname = (/"U10","u10"/)
+  end if
+  if (vn.eq."V10") then
+     vname = (/"V10","v10"/)
+  end if
+  if (vn.eq."S10") then
+     vname = (/"S10","s10"/)
+  end if
+  if (vn.eq."TH850") then
+     vname = (/"TH850","th850","T850","t850"/)
   end if
 
   if (ismissing(zpath) ) then
@@ -125,13 +566,28 @@ begin
            end if
            delete(b)
         else
-           c = addfiles(tfiles,"r")
-           do ii=0,dimsizes(vname)-1
-              if (isfilevar(c[0],vname(ii))) then
-                 arr = c[:]->$vname(ii)$
-                 break
+           if (isfilevar(b,"PRECC").or.isfilevar(b,"PRECL")) then  ; PRECC/PRECL section
+              fils_precc = str_match(tfiles,"PRECC")
+              fils_precl = str_match(tfiles,"PRECL")
+              if (any(ismissing(fils_precc)).or.any(ismissing(fils_precl))) then
+                 print("Fatal: Need both PRECC and PRECL file(s), creating blank array")
+                 print(fils_precc)
+                 print(fils_precl)
+                 arr = create_empty_array(yearS,yearE,1,12,"time_lat_lon")
+                 sydata = yearS     ; assign these variables based on yearS/yearE provided in namelist. Doesn't matter
+                 eydata = yearE     ; as data array is totally missing..
+                 smdata = 1
+                 emdata = 12
+                 print(sydata+" "+eydata)
+              else
+                 c = addfiles(fils_precc,"r")
+                 arr = c[:]->PRECC
+                 c2  = addfiles(fils_precl,"r")
+                 arr = (/ arr+c2[:]->PRECL  /)
+                 arr@long_name = "Large-scale (stable) + convective precipitation rate (liq + ice)"
+                 delete(c2)
               end if
-           end do
+           end if 
         end if     
         nfil = dimsizes(tfiles)
         cpathS = stringtochar(tfiles(0))      ; this section will work for PRECC/PRECL, as it will read the first
@@ -146,13 +602,28 @@ begin
         end if
         delete([/cpathS,cpathE,ncharS,ncharE,nfil/])
      else
-        c = addfile(zpath,"r")
-        do i=0,dimsizes(vname)-1
-           if (isfilevar(c,vname(i))) then
-              arr = c->$vname(i)$
-              break
-           end if
-        end do
+        if (vn.eq."TH850") then
+          c = addfile(zpath,"r")
+          if (isfilevar(c,"TH850")) then  ;
+            arr = c->TH850
+          end if
+          if (isfilevar(c,"T850")) then
+            temp = c->T850
+            p = temp 
+            p = 85000.0
+            p@units = "Pa"
+            arr = pot_temp(p, temp, -1, False)
+            delete([/p,temp/])
+          end if
+        else
+          c = addfile(zpath,"r")
+          do i=0,dimsizes(vname)-1
+             if (isfilevar(c,vname(i))) then
+                arr = c->$vname(i)$
+                break
+             end if
+          end do
+        end if
         cpath = stringtochar(zpath)     
         nchar = dimsizes(cpath)
         sydata = stringtointeger(charactertostring(cpath(nchar-17:nchar-14)))
@@ -291,6 +762,14 @@ begin
         farr@units = "C"
      end if
   end if
+
+  if (vn.eq."TH850") then
+     if (farr@units.eq."degrees_C".or.farr@units.eq."degrees C".or.farr@units.eq."degree_C".or.farr@units.eq."degree C") then
+        farr = farr + 273.15 
+        farr@units = "K"
+     end if
+  end if
+
   if (vn.eq."PSL") then
      if (farr@units.eq."Pa".or.farr@units.eq."Pascals".or.farr@units.eq."Pascal") then
         farr = farr/100.
@@ -1259,6 +1738,88 @@ begin
 
   return(lbid)   ; Return it so we can maximize later if desired.
 end
+
+;=================================================================================================
+; This function is used to calculate the jet indices broadly follows previous
+; studies (e.g. Kidston and Gerber 2010; Son et al. 2010; Swart and Fyfe 2012)
+; whereby, as described above, the strength and latitude of the westerly jet
+; are identified in zonally-averaged lower-tropospheric (or near-surface)
+; time-mean westerly wind or surface wind stress. In this script, the specific
+; approach used follows that of (Bracegirdle et al. 2018), who calculate
+; jet diagnostics from latitudinally-interpolated zonal mean westerly wind
+; on the 850 hPa level (U850) between the latitudes of 75°S and 10°S
+; The main reason for choosing 850 hPa is that it captures the lower-tropospheric
+; jet whilst also avoiding uncertainties associated with reanalysis estimates of
+; wind in the atmospheric boundary layer (Kent et al. 2012), therefore
+; allowing for more direct model-observation comparisons.
+;
+undef("calculate_polar_jet")
+function calculate_polar_jet(karr:numeric,minlat[1]:numeric,maxlat[1]:numeric,minlon[1]:numeric,maxlon[1]:numeric) 
+local karr,kan,minlat,maxlat,minlon,maxlon,krgd,kzon,Opt,m,pcts_s,gg,nmax_ind,wgtfile,dimz,attstring
+begin
+
+  dimz        = dimsizes(karr)
+  finjet      = new((/4,dimz(0)/),typeof(karr),1.e20)
+  finjet!0    = "nid"
+  finjet&nid  = ispan(1,4,1)
+  finjet!1    = "time"
+  finjet&time = karr&time 
+
+  kan     = karr(:,{minlat:maxlat},{minlon:maxlon})
+
+ ; ====================================================================
+ ; First step: regrid the data to 0.1x0.1 within 70S and 20S region
+ ;=====================================================================
+  wgtfile = "wgt_regrid_to_0.1deg.nc"
+  system("rm -rvf src_SCRIP.nc  dst_SCRIP.nc *.Log "+ wgtfile)
+
+  Opt                = True
+  Opt@SrcFileName    = "src_SCRIP.nc"
+  Opt@DstFileName    = "dst_SCRIP.nc"
+  Opt@WgtFileName    = "1deg_to_0.1deg.nc"
+  Opt@ForceOverwrite = True
+  Opt@DstGridType    = "0.1x0.1"
+  Opt@DstLLCorner    = (/ minlat,   0.25d/)
+  Opt@DstURCorner    = (/ maxlat, 359.75d/)
+  krgd               = ESMF_regrid(kan,Opt)
+  delete(Opt)
+  system("rm -rvf src_SCRIP.nc  dst_SCRIP.nc *.Log "+ wgtfile)
+
+  m    = addfile("$NCARG_ROOT/lib/ncarg/data/cdf/landsea.nc","r")   ; mask out land (this is redundant for data that is already masked)
+  krgd = mask(krgd,conform(krgd,landsea_mask(m->LSMASK,krgd&lat,krgd&lon),(/1,2/)).ge.1,False)
+  delete(m)
+
+ ; ======================================================================
+ ; Second step: Calculate the zonal mean zonal wind at 850hPa
+ ; between 70S and 20S, and find the lattitude of maximum zonal
+ ; mean zonal wind (which is the jet position), and its corresponding
+ ; magnitude (which is the jet strength)
+ ; ==================================================================
+  kzon = dim_avg_n_Wrap(krgd,2)
+
+  finjet(0,:) = dim_max_n(kzon,1)
+  nmax_ind    = dim_maxind(kzon(lat|:,time|:), 0)
+  if(.not.all(ismissing(nmax_ind)))then
+    do gg = 0,dimsizes(finjet(0,:))-1
+      finjet(1,gg) = tofloat(kzon&lat(nmax_ind(gg)))
+    end do 
+  end if 
+ ;calculate standardized index 
+ finjet(2,:) = dim_standardize(finjet(0,:),0)
+ finjet(3,:) = dim_standardize(finjet(1,:),0)
+ 
+ do gg = 0,3 
+  pcts_s    = avg(finjet(gg,:))+ "," +stddev(finjet(gg,:))
+  attstring = "mean"+(gg)+"_std"+(gg)
+  finjet@$attstring$ = pcts_s 
+ end do 
+
+ delete([/kan,krgd,kzon,nmax_ind,pcts_s,attstring/])
+
+ return(finjet)
+
+end
+
 ;=================================================================================================
 ; This function sets colors to use in the subtitles that denote that they are part of the
 ; same ensemble.
@@ -1380,11 +1941,11 @@ begin
   grad_lat      = grad_lat * dydlat                     ;dG/dy
   grad_lon      = grad_lon * conform(grad_lon,dxdlon,1) ;dG/dx
   if (isatt(kan,"units")) then
-    grad_lat@units     = kan@units+" degree~S~-1~N~"
-    grad_lon@units     = kan@units+" degree~S~-1~N~"
+    grad_lat@units = kan@units+" degree~S~-1~N~"
+    grad_lon@units = kan@units+" degree~S~-1~N~"
   else
-    grad_lat@units     = "C degree~S~-1~N~"
-    grad_lon@units     = "C degree~S~-1~N~"
+    grad_lat@units = "C degree~S~-1~N~"
+    grad_lon@units = "C degree~S~-1~N~"
   end if
 
   fin_kan = kan(:17,:,:)
@@ -1433,6 +1994,36 @@ begin
   delete([/rad,re,rr,dxdlon,dydlat,gradLatLon,grad_lat,grad_lon/])
   return(fin_kan)
 end
+;=================================================================================================
+; Compute annual, 6-month and seasonal means 
+;
+undef("calculate_clim_zonal_means")
+function calculate_clim_zonal_means(kan:numeric)
+local kan,fin_kan,arrT,arr_seas,arr_6mos,arr_ann,dimz
+begin
+  dimz = dimsizes(kan)
+  fin_kan = kan(:8,:,:,0)
+  fin_kan = fin_kan@_FillValue
+  arrT = kan
+
+  arr_seas = runave_n_Wrap(arrT,3,-1,0)
+  arr_6mos = runave_n_Wrap(arrT,6,-1,0)
+  arr_ann  = runave_n_Wrap(arrT,12,-1,0)
+
+  fin_kan(0,:,:) = (/ dim_avg_n(dim_avg_n(arr_seas(0::12,:,:,:),0),2) /)
+  fin_kan(1,:,:) = (/ dim_avg_n(dim_avg_n(arr_seas(1::12,:,:,:),0),2) /)
+  fin_kan(2,:,:) = (/ dim_avg_n(dim_avg_n(arr_seas(3::12,:,:,:),0),2) /)
+  fin_kan(3,:,:) = (/ dim_avg_n(dim_avg_n(arr_seas(6::12,:,:,:),0),2) /)
+  fin_kan(4,:,:) = (/ dim_avg_n(dim_avg_n(arr_seas(7::12,:,:,:),0),2) /)
+  fin_kan(5,:,:) = (/ dim_avg_n(dim_avg_n(arr_seas(9::12,:,:,:),0),2) /)
+  fin_kan(6,:,:) = (/ dim_avg_n(dim_avg_n(arr_6mos(0::12,:,:,:),0),2) /)
+  fin_kan(7,:,:) = (/ dim_avg_n(dim_avg_n(arr_6mos(6::12,:,:,:),0),2) /)
+  fin_kan(8,:,:) = (/ dim_avg_n(dim_avg_n(arr_ann(5::12,:,:,:),0),2)  /)
+  delete([/arr_seas,arr_6mos,arr_ann,arrT/])
+
+  return(fin_kan)
+end
+
 ;=================================================================================================
 ; Compute annual, 6-month and seasonal means and standard deviations 
 ;
@@ -1760,6 +2351,72 @@ begin
   end do
   return(fineof)
 end
+
+;=================================================================================================
+; Compute monthly EOFS (for atmospheric modes)
+;
+undef("calculate_eofs_monthly")
+function calculate_eofs_monthly(karr:numeric,minlat[1]:numeric,maxlat[1]:numeric,minlon[1]:numeric,maxlon[1]:numeric,numeof:integer)
+local karr,fineof,dimz,tmsk,nyr,indxx,minlat,maxlat,minlon,maxlon,numeof,attstring,evecv,pcts,pcts_s,tarr,signif,signif_str
+begin
+  dimz = dimsizes(karr)
+  fineof = new((/numeof,3,dimz(1),dimz(2)/),typeof(karr))
+  fineof!0 = "neof"
+  fineof&neof = ispan(1,numeof,1)
+  fineof!1 = "seas"
+  fineof&seas = ispan(0,2,1)
+  fineof!2 = "lat"
+  fineof&lat = karr&lat
+  fineof!3 = "lon"
+  fineof&lon = karr&lon
+  copy_VarAtts(karr,fineof)
+
+  if (minlon.lt.0.or.maxlon.lt.0) then
+     if (min(karr&lon).ge.0) then
+        print("Warning! Input array longitudes span "+min(karr&lon)+"-"+max(karr&lon)+". Longitudes specified for EOF ("+minlon+"/"+maxlon+") are out of range.")
+        print("Exiting from calculate_eofs function.")
+        exit
+     end if
+  end if
+
+  nyr    = dimsizes(karr&time)/12
+  tmsk   = karr&time
+  tmsk   = 0.0
+  do iyy = 0,nyr-1
+    tmsk((iyy*12):((iyy+1)*12-1)) = ispan(1,12,1)
+  end do 
+  do aa = 0,2
+     if(aa.eq.0) then
+       indxx = ind(tmsk.gt.0)
+     else if(aa.eq.1) then
+       indxx = ind(tmsk.lt.5.or.tmsk.gt.10)
+     else 
+       indxx = ind(tmsk.ge.5.and.tmsk.le.10)
+     end if
+     end if 
+     tarr    = karr(indxx,:,:) 
+     tarr_CW = SqrtCosWeight(tarr)
+     evecv   = eofunc_n(tarr_CW(:,{minlat:maxlat},{minlon:maxlon}),numeof,75,0)
+     pcts    = eofunc_ts_n(tarr_CW(:,{minlat:maxlat},{minlon:maxlon}),evecv,False,0)
+     fineof@$(/"pcvar_mons"+(aa+1)/)$ = str_join(tostring(evecv@pcvar),",")
+     if (numeof.ge.2) then
+        signif := eofunc_north2(evecv@pcvar,dimsizes(indxx),False)   ; dimz(0) based on monthly data, but tarr = seasonal array
+        signif_str := new(numeof,string)
+        signif_str = where(signif.eq.True,"True","False")
+        fineof@$(/"pcvar_signif_mons"+(aa+1)/)$ = str_join(signif_str,",")
+     end if
+     do bb = 0,numeof-1
+        pcts_m = dim_standardize(pcts(bb,:),0)
+        fineof(bb,aa,:,:) = (/ regCoef_n(pcts_m,tarr,0,0) /)
+        attstring = "pc"+(bb+1)+"_mons"+(aa+1)
+        fineof@$attstring$ = pcts_m
+     end do
+     delete([/tarr,pcts_m,tarr_CW,evecv,pcts,indxx/])
+  end do
+  delete([/nyr,tmsk/])
+  return(fineof)
+end
+
 ;;================================================================================================================
 undef("add_labelbar_mt")
 procedure add_labelbar_mt(wks,plot,colors,labels)

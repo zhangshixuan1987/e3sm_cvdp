@@ -1,21 +1,50 @@
-; Calculates seasonal/annual TAS bias EOF1/2/3 indices, regression pattern
+; Calculates seasonal/annual southern hemisphere sst eofs, regression pattern
 ;
-; Variables used: tas
+; Variables used: sfcvar  
 ;
 load "$CVDP_SCRIPTS/functions.ncl"
 
 begin
-  print("Starting: tbs_eof.ncl")
-  CREATE_GRAPHICS  = getenv("CREATE_GRAPHICS")  
-  PNG_SCALE        = tofloat(getenv("PNG_SCALE"))
-  OUTPUT_TYPE      = getenv("OUTPUT_TYPE") 
-  COLORMAP         = getenv("COLORMAP")
-  OUTDIR           = getenv("OUTDIR") 
-  PNG_SCALE_SUMMARY = tofloat(getenv("PNG_SCALE_SUMMARY"))
-  
-  nsim = numAsciiRow("namelist_byvar/namelist_tas")
+ print("Starting: polar.sfcvar_eof.ncl")
+ CREATE_GRAPHICS  = getenv("CREATE_GRAPHICS")  
+ PNG_SCALE        = tofloat(getenv("PNG_SCALE"))
+ OUTPUT_TYPE      = getenv("OUTPUT_TYPE") 
+ COLORMAP         = getenv("COLORMAP")
+ OUTDIR           = getenv("OUTDIR") 
+ POLAR            = getenv("POLAR")
+ PNG_SCALE_SUMMARY = tofloat(getenv("PNG_SCALE_SUMMARY"))
 
-  na = asciiread("namelist_byvar/namelist_tas",(/nsim/),"string")
+ if (POLAR.eq."SH") then
+   rlatn = -20.0
+   rlats = -90.0
+ else if (POLAR.eq."NH") then
+   rlatn =  90.0
+   rlats =  20.0
+ else
+   rlatn =   90.0
+   rlats =  -90.0
+ end if
+ end if
+ neof    = 4 ; number of eof 
+ sfcvars = (/"psl","sst","trefht","prect","precst","u10","v10","taux","tauy","eth","hflx", \
+            "qnet","swcre","fldsc","cldtot","u850","v850","th850","z500","u200","v200"/)
+ nsvars  = dimsizes(sfcvars)
+ sfcfacs = new((/neof,nsvars/),float)
+
+ do ss = 0, nsvars-1,1
+
+  vnm   = sfcvars(ss)
+  if(vnm.eq."sst") then 
+    nsim = numAsciiRow("namelist_byvar/namelist_ts")
+    na   = asciiread("namelist_byvar/namelist_ts",(/nsim/),"string")
+  else if(vnm.eq."qnet") then
+    nsim = numAsciiRow("namelist_byvar/namelist_qn")
+    na   = asciiread("namelist_byvar/namelist_qn",(/nsim/),"string")
+  else 
+    nsim = numAsciiRow("namelist_byvar/namelist_"+vnm)
+    na   = asciiread("namelist_byvar/namelist_"+vnm,(/nsim/),"string")
+  end if 
+  end if 
   names = new(nsim,"string")
   paths = new(nsim,"string")
   syear = new(nsim,"integer",-999)
@@ -43,52 +72,123 @@ begin
   end do
   nyr = eyear-syear+1
   nyr_max = max(nyr)
-  
+ 
+  mons = (/"MONA","MONC","MONW"/) 
   seas = (/"DJF","JFM","MAM","JJA","JAS","SON","NDJFMA","MJJASO","ANN"/)
 
-  do ee = 0,nsim-1    
-     fnt = getenv("OUTDIR")+modname(ee)+".cvdp_data.tbs_eof."+syear(ee)+"-"+eyear(ee)+".nc"
+  d = addfile("$NCARG_ROOT/lib/ncarg/data/cdf/landsea.nc","r")   ; mask out land (this is redundant for data that is already masked)
+
+  do ee = 0,nsim-1
+    
+     fnt = getenv("OUTDIR")+modname(ee)+".cvdp_data.polar."+vnm+"_eof."+syear(ee)+"-"+eyear(ee)+".nc"
      fnt2 = getenv("OUTDIR")+modname(ee)+".cvdp_data."+syear(ee)+"-"+eyear(ee)+".nc"
-     f_test := read_cvdp_le_data(fnt,fnt2,"psa1_pattern_ann")
+     f_test := read_cvdp_le_data(fnt,fnt2,vnm+"eof2_pattern_ann")
      if (.not.isatt(f_test,"is_all_missing")) then
         continue
      end if
-     arr = data_read_in(paths(ee),"PSL",syear(ee),eyear(ee))    ; read in data, orient lats/lons correctly, set time coordinate variable up
+
+    ;read in data, orient lats/lons correctly, set time coordinate variable up
+     if(vnm.eq."sst") then
+       vnmi = "TS"
+     else if(vnm.eq."qnet") then
+       vnmi = "Qn"
+     else
+       vnmi = str_upper(vnm) 
+     end if
+     end if
+     arr = data_read_in(paths(ee),vnmi,syear(ee),eyear(ee)) 
+
+    ;mask out land (this is redundant for data that is already masked)
+    ;d = addfile("$NCARG_ROOT/lib/ncarg/data/cdf/landsea.nc","r")   
+    ;basemap = d->LSMASK
+    ;lsm = landsea_mask(basemap,arr&lat,arr&lon)
+    ;arr = mask(arr,conform(arr,lsm,(/1,2/)).ge.1,False)
+    ;delete([/lsm,basemap/])
+    ;delete(d)
+
      if (isatt(arr,"is_all_missing")) then
         delete(arr)
         continue
      end if 
+
      arr = rmMonAnnCycTLL(arr) 
 
-     fineof := calculate_eofs(arr,-90.,-20,0,360,4)   
+     ;;;EOF of monthly data;;;;;;
+     fineof0   := calculate_eofs_monthly(arr,rlats,rlatn,0,360,neof)
+     pcts0     := new((/3,9,dimsizes(arr&time)/),typeof(arr))
+     pcts0!2    = "time"
+     pcts0&time = arr&time 
+     pcts0&time@units = arr&time@units
+     pcts0&time@long_name = "time"
+     pcts0&time@standard_name = "time"
+     pcts0&time@calendar = "standard"
 
-     pcts := new((/3,9,dimsizes(arr&time)/12/),typeof(arr))
-     pcts!2 = "TIME"
+     ;;;EOF of seasonal mean;;;;; 
+     fineof   := calculate_eofs(arr,rlats,rlatn,0,360,neof)   
+     pcts     := new((/3,9,dimsizes(arr&time)/12/),typeof(arr))
+     pcts!2    = "TIME"
      pcts&TIME = ispan(syear(ee),eyear(ee),1)
      pcts&TIME@units = "YYYY"
      pcts&TIME@long_name = "time"
      pcts&TIME@standard_name = "time"
      pcts&TIME@calendar = "standard"
+
      latcheck = (/-85.,-62.,-60./)  ; make signs consistent if possible
      loncheck = (/  5., 210,280./)
-     climmodes = (/"sam","psa1","psa2"/)
+     climmodes = vnm+ (/"eof1","eof2","eof3"/)
      
      if(isfilepresent(fnt)) then
        system("/bin/rm " + fnt)
      end if
      z = addfile(fnt,"c")
      set_global_ncfile_attributes(z,names(ee),syear(ee),eyear(ee),getenv("VERSION"))
+
      do ff = 0,2
+        do gg = 0,2
+           if(gg.eq.0) then 
+             pcts0(ff,gg,:) = (/ fineof0@$(/"pc1_mons"+(gg+1)/)$ /)
+           else
+             pcts0(ff,gg,:(dimsizes(arr&time)/2-1)) = (/ fineof0@$(/"pc1_mons"+(gg+1)/)$ /)
+           end if 
+           if (.not.ismissing(fineof0(ff,gg,{latcheck(ff)},{loncheck(ff)}))) then    ; attempt to make all plots have the eof1e sign
+              if (fineof0(ff,gg,{latcheck(ff)},{loncheck(ff)}).ge.0) then
+                 fineof0(ff,gg,:,:) = fineof0(ff,gg,:,:)*-1.
+                 pcts0(ff,gg,:) = pcts0(ff,gg,:)*-1
+              end if
+           end if  
+           z->$(/climmodes(ff)+"_timeseries_"+changeCaseChar(mons(gg))/)$ \
+             = set_varAtts(pcts0(ff,gg,:),climmodes(ff)+" normalized principal component timeseries ("+mons(gg)+")","1","")
+
+           pattern := fineof0(ff,gg,:,:)
+           pcvar := str_split(fineof0@$(/"pcvar_mons"+(gg+1)/)$,",")
+           pattern@pcvar = sprintf("%4.1f", tofloat(pcvar(ff)))+"%"
+           if (isatt(fineof0,"pcvar_signif_mons"+(gg+1))) then
+              signif := str_split(fineof0@$(/"pcvar_signif_mons"+(gg+1)/)$,",")
+              if (signif(ff).eq.True) then
+                 pattern@pcvar = pattern@pcvar+"*"
+              end if
+           end if
+           pattern2 := (/ pattern /)
+           copy_VarCoords(pattern,pattern2)
+           pattern2@units = pattern@units
+           pattern2@pcvar = pattern@pcvar
+
+           z->$(/climmodes(ff)+"_pattern_"+changeCaseChar(mons(gg))/)$ \
+             = set_varAtts(pattern2,climmodes(ff)+" spatial pattern ("+mons(gg)+")","","")
+           delete([/pattern,pattern2/])
+        end do 
+
         do gg = 0,8
            pcts(ff,gg,:) = (/ fineof@$(/"pc1_seas"+(gg+1)/)$ /)
-           if (.not.ismissing(fineof(ff,gg,{latcheck(ff)},{loncheck(ff)}))) then    ; attempt to make all plots have the same sign
+           if (.not.ismissing(fineof(ff,gg,{latcheck(ff)},{loncheck(ff)}))) then    ; attempt to make all plots have the eof1e sign
               if (fineof(ff,gg,{latcheck(ff)},{loncheck(ff)}).ge.0) then
                  fineof(ff,gg,:,:) = fineof(ff,gg,:,:)*-1.
                  pcts(ff,gg,:) = pcts(ff,gg,:)*-1
               end if
            end if
 
-           z->$(/climmodes(ff)+"_timeseries_"+changeCaseChar(seas(gg))/)$ = set_varAtts(pcts(ff,gg,:),climmodes(ff)+" normalized principal component timeseries ("+seas(gg)+")","1","")
+           z->$(/climmodes(ff)+"_timeseries_"+changeCaseChar(seas(gg))/)$ \
+             = set_varAtts(pcts(ff,gg,:),climmodes(ff)+" normalized principal component timeseries ("+seas(gg)+")","1","")
  
            pattern := fineof(ff,gg,:,:)
            pcvar := str_split(fineof@$(/"pcvar_seas"+(gg+1)/)$,",")
@@ -104,17 +204,83 @@ begin
            pattern2@units = pattern@units
            pattern2@pcvar = pattern@pcvar
 
-           z->$(/climmodes(ff)+"_pattern_"+changeCaseChar(seas(gg))/)$     = set_varAtts(pattern2,climmodes(ff)+" spatial pattern ("+seas(gg)+")","","")
+           z->$(/climmodes(ff)+"_pattern_"+changeCaseChar(seas(gg))/)$ \
+             = set_varAtts(pattern2,climmodes(ff)+" spatial pattern ("+seas(gg)+")","","")
            delete([/pattern,pattern2/])
         end do
+        x1d = ndtooned(abs(fineof(ff,:,{rlats:rlatn},:)))
+        xm  = dim_median(x1d)
+        if(xm.gt.1) then 
+          sfcfacs(ff,ss) = xm 
+        else if (xm.gt.0.1) then 
+          sfcfacs(ff,ss) = 1.0  
+        else if (xm.gt.0.01) then
+          sfcfacs(ff,ss) = 0.1 
+        else if (xm.gt.0.001) then
+          sfcfacs(ff,ss) = 0.01
+        end if 
+        end if 
+        end if 
+        end if 
+        delete([/xm,x1d/])
      end do     
-     delete([/fnt,fnt2,fineof,z,arr,fineof,pcts/])
+     delete([/fnt,fnt2,fineof,z,arr,pcts,fineof0,pcts0/])
   end do
 
-  if (CREATE_GRAPHICS.eq."False") then
-     print("Finished: tbs_eof.ncl")
-     exit
-  end if 
+  delete([/modname,nyr,nsim,na,names,paths,syear,eyear,names_EM,EM_num,delim/])
+
+ end do ; end of var loop
+
+ if (CREATE_GRAPHICS.eq."False") then
+    print("Finished: polar.sfcvar_eof.ncl")
+    exit
+ end if 
+
+ do ss = 0, nsvars-1,1
+
+  vnm   = sfcvars(ss)
+  if(sfcvars(ss).eq."sst") then
+    nsim = numAsciiRow("namelist_byvar/namelist_ts")
+    na   = asciiread("namelist_byvar/namelist_ts",(/nsim/),"string")
+  else if(sfcvars(ss).eq."qnet") then
+    nsim = numAsciiRow("namelist_byvar/namelist_qn")
+    na   = asciiread("namelist_byvar/namelist_qn",(/nsim/),"string")
+  else
+    nsim = numAsciiRow("namelist_byvar/namelist_"+vnm)
+    na   = asciiread("namelist_byvar/namelist_"+vnm,(/nsim/),"string")
+  end if
+  end if
+  names = new(nsim,"string")
+  paths = new(nsim,"string")
+  syear = new(nsim,"integer",-999)
+  eyear = new(nsim,"integer",-999)
+  names_EM = new(nsim,"string")
+  EM_num = new(nsim,"integer",-999)
+  delim = "|"
+
+  do ee = 0,nsim-1
+     names(ee) = str_strip(str_get_field(na(ee),1,delim))
+     paths(ee) = str_strip(str_get_field(na(ee),2,delim))
+     syear(ee) = stringtointeger(str_strip(str_get_field(na(ee),3,delim)))
+     eyear(ee) = stringtointeger(str_strip(str_get_field(na(ee),4,delim)))
+     temp      = str_split(str_strip(str_get_field(na(ee),5,delim)),"-")
+     EM_num(ee)    = toint(temp(0))
+     names_EM(ee)  = str_join(temp(1:),"-")
+     delete(temp)
+  end do
+  modname = str_sub_str(names," ","_")
+  bc = (/"/","'","(",")"/)
+  do ff = 0,dimsizes(modname)-1
+     do ee = 0,dimsizes(bc)-1
+        modname(ff) = str_sub_str(modname(ff),bc(ee),"_")
+     end do
+  end do
+  nyr = eyear-syear+1
+  nyr_max = max(nyr)
+
+  mons = (/"MONA","MONC","MONW"/)
+  seas = (/"DJF","JFM","MAM","JJA","JAS","SON","NDJFMA","MJJASO","ANN"/)
+
 ;========================================================================
   wks_type = OUTPUT_TYPE
   if (wks_type.eq."png") then
@@ -123,14 +289,32 @@ begin
   end if
 
   res = True      ; spatial plot resource list
-  res@mpGeophysicalLineColor = "gray42"
-  res@mpPerimOn    = True
-  res@mpFillOn = False
-  res@gsnPolar = "SH"
-  res@mpMaxLatF = -20.
-  res@mpOutlineOn = True 
-  res@mpCenterLonF = 0. 
-  res@mpGridAndLimbOn = False
+  if (abs(rlats).lt.90.0.or.abs(rlatn).lt.90.0) then
+    res@mpGeophysicalLineColor = "gray42"
+    res@mpPerimOn    = True
+    res@mpFillOn = False
+    if(POLAR.eq."SH")
+      res@gsnPolar = "SH"
+      res@mpMaxLatF = -20.
+    else
+      res@gsnPolar = "NH"
+      res@mpMaxLatF =  20.
+    end if
+    res@mpOutlineOn = True
+    res@mpCenterLonF = 0.
+    res@mpGridAndLimbOn = False
+  else
+    res@mpProjection = "WinkelTripel"
+    res@mpGeophysicalLineColor = "gray42"
+    res@mpPerimOn    = False
+    res@mpGridLatSpacingF =  90         ; change latitude  line spacing
+    res@mpGridLonSpacingF = 180.        ; change longitude line spacing
+    res@mpGridLineColor   = "transparent"  ; trick ncl into drawing perimeter
+    res@mpGridAndLimbOn   = True        ; turn on lat/lon lines
+    res@mpFillOn = False
+    res@mpCenterLonF = 210.
+    res@mpOutlineOn = True
+  end if
   if (wks_type.eq."png") then
      res@mpGeophysicalLineThicknessF = 2.  
   else
@@ -171,8 +355,10 @@ begin
   tres = res    ; p-value plot resource list
   copy_VarAtts(retrieve_summary_res(),tres)
 
- ;res@cnLevels = fspan(-5,5,11)
- ;res2@cnLevels = fspan(-5,5,11)
+  res@cnLevels = fspan(-1,1,11)
+  res2@cnLevels = fspan(-1,1,11)
+ ;res@cnLevels  := (/-0.8,-0.6,-0.4,-0.2,-0.1,0,0.1,0.2,0.4,0.6,0.8/)
+ ;res2@cnLevels := (/-0.8,-0.6,-0.4,-0.2,-0.1,0,0.1,0.2,0.4,0.6,0.8/)
   if (COLORMAP.eq.0) then
      res@cnFillPalette = "ncl_default"
      res2@cnFillPalette = "ncl_default"
@@ -215,47 +401,69 @@ begin
   panres2@pmLabelBarHeightF = 0.05
   panres2@pmLabelBarWidthF = 0.3
 
-  variname = (/"sam_pattern_djf","sam_pattern_jfm","sam_pattern_mam","sam_pattern_jja","sam_pattern_jas","sam_pattern_son","sam_pattern_ndjfma","sam_pattern_mjjaso","sam_pattern_ann",\
-               "psa1_pattern_djf","psa1_pattern_jfm","psa1_pattern_mam","psa1_pattern_jja","psa1_pattern_jas","psa1_pattern_son","psa1_pattern_ndjfma","psa1_pattern_mjjaso","psa1_pattern_ann",\
-               "psa2_pattern_djf","psa2_pattern_jfm","psa2_pattern_mam","psa2_pattern_jja","psa2_pattern_jas","psa2_pattern_son","psa2_pattern_ndjfma","psa2_pattern_mjjaso","psa2_pattern_ann"/)
+  variname = (/"eof1_pattern_mona","eof1_pattern_monc","eof1_pattern_monw","eof1_pattern_djf",\
+               "eof1_pattern_jfm","eof1_pattern_mam","eof1_pattern_jja","eof1_pattern_jas",\
+               "eof1_pattern_son","eof1_pattern_ndjfma","eof1_pattern_mjjaso","eof1_pattern_ann",\
+               "eof2_pattern_mona","eof2_pattern_monc","eof2_pattern_monw","eof2_pattern_djf",\
+               "eof2_pattern_jfm","eof2_pattern_mam","eof2_pattern_jja","eof2_pattern_jas",\
+               "eof2_pattern_son","eof2_pattern_ndjfma","eof2_pattern_mjjaso","eof2_pattern_ann",\
+               "eof3_pattern_mona","eof3_pattern_monc","eof3_pattern_monw","eof3_pattern_djf",\
+               "eof3_pattern_jfm","eof3_pattern_mam","eof3_pattern_jja","eof3_pattern_jas",\
+               "eof3_pattern_son","eof3_pattern_ndjfma","eof3_pattern_mjjaso","eof3_pattern_ann"/)
+  variname = vnm + variname
   variname_title = variname
   variname_title_seas = variname
   do gg = 0,dimsizes(variname)-1
      txttt = str_split(variname(gg),"_")
      variname_title(gg) = changeCaseChar(txttt(0))+" Pattern"
      variname_title_seas(gg) = changeCaseChar(txttt(2))
+     if(txttt(2).eq."mona") then 
+       variname_title_seas(gg) = "Monthly"
+     end if 
+     if(txttt(2).eq."monc") then
+       variname_title_seas(gg) = "Cold Months"
+     end if
+     if(txttt(2).eq."monw") then
+       variname_title_seas(gg) = "Warm Months"
+     end if
   end do 
 
   csubtitle_color = set_subtitle_colors(max(EM_num))
   nEM = max(EM_num)
   do dd = 0,dimsizes(variname)-1
-     wks = gsn_open_wks(wks_type,getenv("OUTDIR")+"sam")
+     wks = gsn_open_wks(wks_type,getenv("OUTDIR")+vnm+"eof")
      plot_indmem      = new(nsim,"graphic")
      plot_indmem_diff = new(nsim,"graphic")
      plot_summary     = new((nEM*4),"graphic")
      plot_summary_anno = new(nEM*4,"graphic")
      xy_anno = new(nEM*4,"graphic")
 
-     if(isStrSubset(variname(dd),"sam")) then 
-       res@cnLevels = fspan(-4,4,11)
-       res2@cnLevels = fspan(-4,4,11)
-     else
-       res@cnLevels = fspan(-2,2,11)
-       res2@cnLevels = fspan(-2,2,11)
-     end if 
-
      numobs = num(EM_num.eq.0) 
      if (numobs.eq.0) then  ; if observations were not specified, set dummy file names, resulting in empty obs0 array
-        fnt = getenv("OUTDIR")+"obs.cvdp_data.tbs_eof."+syear(0)+"-"+eyear(0)+".nc"
+        fnt = getenv("OUTDIR")+"obs.cvdp_data.polar."+vnm+"_eof."+syear(0)+"-"+eyear(0)+".nc"
         fnt2 = getenv("OUTDIR")+"obs.cvdp_data."+syear(0)+"-"+eyear(0)+".nc"
         cntr = 0
      else
-        fnt = getenv("OUTDIR")+modname(0)+".cvdp_data.tbs_eof."+syear(0)+"-"+eyear(0)+".nc"
+        fnt = getenv("OUTDIR")+modname(0)+".cvdp_data.polar."+vnm+"_eof."+syear(0)+"-"+eyear(0)+".nc"
         fnt2 = getenv("OUTDIR")+modname(0)+".cvdp_data."+syear(0)+"-"+eyear(0)+".nc"
         cntr = 1
      end if
+
      obs0 := read_cvdp_le_data(fnt,fnt2,variname(dd))
 
+
+     if (isStrSubset(variname(dd),"eof1"))then 
+       res@cnLevels = res@cnLevels * sfcfacs(0,ss)
+       res2@cnLevels = res2@cnLevels * sfcfacs(0,ss)
+     end if 
+     if (isStrSubset(variname(dd),"eof2"))then
+       res@cnLevels = res@cnLevels * sfcfacs(1,ss)
+       res2@cnLevels = res2@cnLevels * sfcfacs(1,ss)
+     end if
+     if (isStrSubset(variname(dd),"eof3"))then
+       res@cnLevels = res@cnLevels * sfcfacs(2,ss)
+       res2@cnLevels = res2@cnLevels * sfcfacs(2,ss)
+     end if
      res@gsnCenterStringFontColor = "black"
      res2@gsnCenterStringFontColor = "black"
      res@lbLabelBarOn = False
@@ -268,7 +476,7 @@ begin
      cntr_EM = 0
      if (numobs.ge.2) then     ; plot obs #2-
         do ff = 1,numobs-1
-           fnt = getenv("OUTDIR")+modname(cntr)+".cvdp_data.tbs_eof."+syear(cntr)+"-"+eyear(cntr)+".nc"
+           fnt = getenv("OUTDIR")+modname(cntr)+".cvdp_data.polar."+vnm+"_eof."+syear(cntr)+"-"+eyear(cntr)+".nc"
            fnt2 = getenv("OUTDIR")+modname(cntr)+".cvdp_data."+syear(cntr)+"-"+eyear(cntr)+".nc"
            arr := read_cvdp_le_data(fnt,fnt2,variname(dd))
            if (isatt(arr,"is_all_missing")) then 
@@ -303,7 +511,7 @@ begin
            names_mod = names(cntr_ens(hh))
            names_EM_mod = names_EM(cntr_ens(hh))
 
-           fnt = getenv("OUTDIR")+modname_mod+".cvdp_data.tbs_eof."+syear_mod+"-"+eyear_mod+".nc"
+           fnt = getenv("OUTDIR")+modname_mod+".cvdp_data.polar."+vnm+"_eof."+syear_mod+"-"+eyear_mod+".nc"
            fnt2 = getenv("OUTDIR")+modname_mod+".cvdp_data."+syear_mod+"-"+eyear_mod+".nc"
            arr := read_cvdp_le_data(fnt,fnt2,variname(dd))
            if (isatt(arr,"is_all_missing")) then 
@@ -386,7 +594,10 @@ begin
         delete([/syear_em0,eyear_em0,showyr/])
 
         stats := boxplot_stat(arr_store_pcvar)
-        res@gsnRightString = decimalPlaces(stats(0),0,True)+"/"+decimalPlaces(avg(arr_store_pcvar),0,True)+"/"+decimalPlaces(stats(4),0,True)+"%~C~       r="+pattern_correlation(arr_EM({:-20},:),obs0_rg({:-20},:))
+        res@gsnRightString = decimalPlaces(stats(0),0,True)+"/"\
+                            + decimalPlaces(avg(arr_store_pcvar),0,True)+"/"\
+                            + decimalPlaces(stats(4),0,True)+"%~C~       r=" \
+                            + pattern_correlation(arr_EM({:-20},:),obs0_rg({:-20},:))
         res@gsnCenterString = names_EM_mod +" ("+arr_store@nens+" Members)"                   
         plot_summary(cntr_EM) = gsn_csm_contour_map(wks,arr_EM,res)
         ares@gsLineColor = res@gsnCenterStringFontColor
@@ -406,7 +617,8 @@ begin
         p_val = calculate_pval(obs0_rg,arr_store)
         tres@gsnRightString = calculate_area_in_range(p_val({:-20},:),10,90)+"%"
         plot_summary(cntr_EM+3) = gsn_csm_contour_map(wks,p_val,tres)
-        fno = getenv("OUTDIR")+str_sub_str(names_EM_mod," ","_")+"_EM.cvdp_data.tbs_eof."+syear_mod+"-"+eyear_mod+".nc"
+
+        fno = getenv("OUTDIR")+str_sub_str(names_EM_mod," ","_")+"_EM.cvdp_data.polar."+vnm+"_eof."+syear_mod+"-"+eyear_mod+".nc"
         if (isfilepresent2(fno)) then
            z = addfile(fno,"w")
         else
@@ -430,18 +642,18 @@ begin
      delete(wks)
 
      if (wks_type.eq."png") then
-        system("mv "+OUTDIR+"sam.000001.png "+OUTDIR+variname(dd)+".indmem.png")
-        system("mv "+OUTDIR+"sam.000002.png "+OUTDIR+variname(dd)+".indmemdiff.png")
-        system("mv "+OUTDIR+"sam.000003.png "+OUTDIR+variname(dd)+".summary.png")
+        system("mv "+OUTDIR+vnm+"eof.000001.png "+OUTDIR+variname(dd)+".indmem.png")
+        system("mv "+OUTDIR+vnm+"eof.000002.png "+OUTDIR+variname(dd)+".indmemdiff.png")
+        system("mv "+OUTDIR+vnm+"eof.000003.png "+OUTDIR+variname(dd)+".summary.png")
         if (PNG_SCALE_SUMMARY.ne.100) then
            system("convert -resize "+PNG_SCALE_SUMMARY+"% "+OUTDIR+variname(dd)+".summary.png "+OUTDIR+variname(dd)+".summary.png")
         end if
      else
-        system("psplit "+OUTDIR+"sam.ps "+OUTDIR+"sam")
-        system("mv "+OUTDIR+"sam0001.ps "+OUTDIR+variname(dd)+".indmem.ps")
-        system("mv "+OUTDIR+"sam0002.ps "+OUTDIR+variname(dd)+".indmemdiff.ps")
-        system("mv "+OUTDIR+"sam0003.ps "+OUTDIR+variname(dd)+".summary.ps")
-        system("rm "+OUTDIR+"sam.ps")
+        system("psplit "+OUTDIR+vnm+"eof.ps "+OUTDIR+vnm+"eof")
+        system("mv "+OUTDIR+vnm+"eof0001.ps "+OUTDIR+variname(dd)+".indmem.ps")
+        system("mv "+OUTDIR+vnm+"eof0002.ps "+OUTDIR+variname(dd)+".indmemdiff.ps")
+        system("mv "+OUTDIR+vnm+"eof0003.ps "+OUTDIR+variname(dd)+".summary.ps")
+        system("rm "+OUTDIR+vnm+"eof.ps")
      end if
   end do
   delete([/panres,panres2/])
@@ -529,19 +741,35 @@ begin
 
   ncolE = floattointeger(sqrt(nEM+1))   ; +1 for the summary plot
   nrowE = ((nEM+1)/ncolE)+mod(nEM+1,ncolE)
-  variname := (/"sam_timeseries_djf","sam_timeseries_jfm","sam_timeseries_mam","sam_timeseries_jja","sam_timeseries_jas","sam_timeseries_son","sam_timeseries_ndjfma","sam_timeseries_mjjaso","sam_timeseries_ann",\
-                "psa1_timeseries_djf","psa1_timeseries_jfm","psa1_timeseries_mam","psa1_timeseries_jja","psa1_timeseries_jas","psa1_timeseries_son","psa1_timeseries_ndjfma","psa1_timeseries_mjjaso","psa1_timeseries_ann",\
-                "psa2_timeseries_djf","psa2_timeseries_jfm","psa2_timeseries_mam","psa2_timeseries_jja","psa2_timeseries_jas","psa2_timeseries_son","psa2_timeseries_ndjfma","psa2_timeseries_mjjaso","psa2_timeseries_ann"/)
+  variname := (/"eof1_timeseries_mona","eof1_timeseries_monc","eof1_timeseries_monw","eof1_timeseries_djf",\
+                "eof1_timeseries_jfm","eof1_timeseries_mam","eof1_timeseries_jja","eof1_timeseries_jas",\
+                "eof1_timeseries_son","eof1_timeseries_ndjfma","eof1_timeseries_mjjaso","eof1_timeseries_ann",\
+                "eof2_timeseries_mona","eof2_timeseries_monc","eof2_timeseries_monw","eof2_timeseries_djf",\
+                "eof2_timeseries_jfm","eof2_timeseries_mam","eof2_timeseries_jja","eof2_timeseries_jas",\
+                "eof2_timeseries_son","eof2_timeseries_ndjfma","eof2_timeseries_mjjaso","eof2_timeseries_ann",\
+                "eof3_timeseries_mona","eof3_timeseries_monc","eof3_timeseries_monw","eof3_timeseries_djf",\
+                "eof3_timeseries_jfm","eof3_timeseries_mam","eof3_timeseries_jja","eof3_timeseries_jas",\
+                "eof3_timeseries_son","eof3_timeseries_ndjfma","eof3_timeseries_mjjaso","eof3_timeseries_ann"/)
+  variname = vnm + variname 
   variname_title := variname
   variname_title_seas := variname
   do gg = 0,dimsizes(variname)-1
      txttt = str_split(variname(gg),"_")
      variname_title(gg) = changeCaseChar(txttt(0))+" Timeseries"
      variname_title_seas(gg) = changeCaseChar(txttt(2))
+     if(txttt(2).eq."mona") then
+       variname_title_seas(gg) = "Monthly"
+     end if
+     if(txttt(2).eq."monc") then
+       variname_title_seas(gg) = "Cold Months"
+     end if
+     if(txttt(2).eq."monw") then
+       variname_title_seas(gg) = "Warm Months"
+     end if
   end do 
 
   do dd = 0,dimsizes(variname)-1
-     wks = gsn_open_wks(wks_type,getenv("OUTDIR")+"tbs_eof.timeseries")
+     wks = gsn_open_wks(wks_type,getenv("OUTDIR")+vnm+"eof.timeseries")
      plot_indmem      := new(nsim,"graphic")   ; for individual obs/models
      plot_obs_overlay := new(nsim,"graphic")   ; for obs overlaid onto individual models
      plot_summary     := new(nEM,"graphic")    ; for ensemble plots  to show the 2 std dev range
@@ -558,24 +786,33 @@ begin
 
      numobs = num(EM_num.eq.0) 
      if (numobs.eq.0) then
-        fnt = getenv("OUTDIR")+"obs.cvdp_data.tbs_eof."+syear(0)+"-"+eyear(0)+".nc"
+        fnt = getenv("OUTDIR")+"obs.cvdp_data.polar."+vnm+"_eof."+syear(0)+"-"+eyear(0)+".nc"
         fnt2 = getenv("OUTDIR")+"obs.cvdp_data."+syear(0)+"-"+eyear(0)+".nc"
         cntr = 0
      else
-        fnt = getenv("OUTDIR")+modname(0)+".cvdp_data.tbs_eof."+syear(0)+"-"+eyear(0)+".nc"
+        fnt = getenv("OUTDIR")+modname(0)+".cvdp_data.polar."+vnm+"_eof."+syear(0)+"-"+eyear(0)+".nc"
         fnt2 = getenv("OUTDIR")+modname(0)+".cvdp_data."+syear(0)+"-"+eyear(0)+".nc"
         cntr = 1
      end if
      obs0 := read_cvdp_le_data(fnt,fnt2,variname(dd))
      obs0!0 = "time"
-     if (isatt(obs0,"is_all_missing")) then 
-        obs0New = new(eyear(0)-syear(0)+1,float)
-        copy_VarAtts(obs0,obs0New)
-        obs0 := obs0New
-        obs0!0 = "time"
-        obs0&time = ispan(syear(0),eyear(0),1)
-        delete(obs0New)
-     end if
+     TTIME = yyyymm_time(syear(0), eyear(0), "integer")
+     if (isStrSubset(variname(dd),"mona")) then
+       yyyyFrac = yyyymm_to_yyyyfrac(TTIME, 0.0)
+     else if (isStrSubset(variname(dd),"monc").or.isStrSubset(variname(dd),"monw")) then
+       yyyyFrac = yyyymm_to_yyyyfrac(TTIME(::2), 0.0) 
+     else 
+       yyyyFrac = ispan(syear(0),eyear(0),1)
+     end if 
+     end if 
+     delete(TTIME)
+    
+     if (isatt(obs0,"is_all_missing")) then
+       obs0   := yyyyFrac 
+       obs0!0  = "time"
+       obs0&time = yyyyFrac 
+     end if 
+
      xyres@gsnLeftStringFontColor = "black"
      xyres2@gsnLeftStringFontColor = "black"
      if (isatt(xyres,"trYMinF")) then
@@ -593,13 +830,13 @@ begin
         obs_val := decimalPlaces(tttt@slope*dimsizes(obs0&time),2,True) +" "+nyr(0)+"yr~S~-1~N~" ;+obs0@units+" "+nyr(0)+"yr~S~-1~N~"
      end if
      xyres@gsnRightString = obs_val
-     plot_indmem(0) = gsn_csm_xy(wks,ispan(syear(0),eyear(0),1),obs0,xyres)
+     plot_indmem(0) = gsn_csm_xy(wks,yyyyFrac,obs0,xyres)
      xyres2A@gsnLeftString = "Ensemble Mean Summary"
-     plot_obs := gsn_csm_xy(wks,ispan(syear(0),eyear(0),1),obs0,xyres2A)
+     plot_obs := gsn_csm_xy(wks,yyyyFrac,obs0,xyres2A)
      cntr_EM = 0
      if (numobs.ge.2) then     ; plot obs #2-
         do ff = 1,numobs-1
-           fnt = getenv("OUTDIR")+modname(cntr)+".cvdp_data.tbs_eof."+syear(cntr)+"-"+eyear(cntr)+".nc"
+           fnt = getenv("OUTDIR")+modname(cntr)+".cvdp_data.polar."+vnm+"_eof."+syear(cntr)+"-"+eyear(cntr)+".nc"
            fnt2 = getenv("OUTDIR")+modname(cntr)+".cvdp_data."+syear(cntr)+"-"+eyear(cntr)+".nc"
            arr := read_cvdp_le_data(fnt,fnt2,variname(dd))
            arr!0 = "time"
@@ -614,8 +851,8 @@ begin
            tttt := dtrend_msg(ispan(0,dimsizes(arr&time)-1,1),arr,False,True)   
            xyres@gsnLeftString = names(cntr)
            xyres@gsnRightString = decimalPlaces(tttt@slope*dimsizes(arr&time),2,True)+" "+nyr(cntr)+"yr~S~-1~N~"
-           plot_indmem(cntr) = gsn_csm_xy(wks,ispan(syear(cntr),eyear(cntr),1),arr,xyres)
-           plot_obs_overlay(cntr) = gsn_csm_xy(wks,ispan(syear(0),eyear(0),1),obs0,xyres2)
+           plot_indmem(cntr) = gsn_csm_xy(wks,yyyyFrac,arr,xyres)
+           plot_obs_overlay(cntr) = gsn_csm_xy(wks,yyyyFrac,obs0,xyres2)
            overlay(plot_indmem(cntr),plot_obs_overlay(cntr))
            delete([/arr,tttt/])
            cntr = cntr+1
@@ -632,7 +869,7 @@ begin
            names_mod = names(cntr_ens(hh))
            names_EM_mod = names_EM(cntr_ens(hh))
 
-           fnt = getenv("OUTDIR")+modname_mod+".cvdp_data.tbs_eof."+syear_mod+"-"+eyear_mod+".nc"
+           fnt = getenv("OUTDIR")+modname_mod+".cvdp_data.polar."+vnm+"_eof."+syear_mod+"-"+eyear_mod+".nc"
            fnt2 = getenv("OUTDIR")+modname_mod+".cvdp_data."+syear_mod+"-"+eyear_mod+".nc"
            arr := read_cvdp_le_data(fnt,fnt2,variname(dd))
            arr!0 = "time"
@@ -668,8 +905,8 @@ begin
            tttt := dtrend_msg(ispan(0,dimsizes(arr&time)-1,1),arr,False,True)   
            xyres@gsnLeftString = names_mod
            xyres@gsnRightString = decimalPlaces(tttt@slope*dimsizes(arr&time),2,True)+" "+nyr(cntr)+"yr~S~-1~N~"
-           plot_indmem(cntr) = gsn_csm_xy(wks,ispan(syear_mod,eyear_mod,1),arr,xyres)
-           plot_obs_overlay(cntr) = gsn_csm_xy(wks,ispan(syear(0),eyear(0),1),obs0,xyres2)
+           plot_indmem(cntr) = gsn_csm_xy(wks,yyyyFrac,arr,xyres)
+           plot_obs_overlay(cntr) = gsn_csm_xy(wks,yyyyFrac,obs0,xyres2)
            overlay(plot_indmem(cntr),plot_obs_overlay(cntr))
            delete([/arr,tttt/])
            cntr = cntr+1
@@ -715,16 +952,16 @@ begin
         ss_slope@_FillValue = arr_store@_FillValue
         stats := boxplot_stat(ss_slope)
         xyres3_sum@gsnRightString = decimalPlaces(stats(0)*dimsizes(arr_EM),2,True)+"/"+decimalPlaces(tttt@slope*dimsizes(arr_EM),2,True)+"/"+decimalPlaces(stats(4)*dimsizes(arr_EM),2,True)+" "+(max(arr_EM&time)-min(arr_EM&time)+1)+"yr~S~-1~N~"
-        plot_summary(cntr_EM) = gsn_csm_xy(wks,ispan(min(arr_EM&time),max(arr_EM&time),1),arr_range2,xyres3_sum)
-        plot_summary1(cntr_EM) = gsn_csm_xy(wks,ispan(min(arr_EM&time),max(arr_EM&time),1),arr_range1,xyres3b_sum)
-        plot_summary2(cntr_EM) = gsn_csm_xy(wks,ispan(min(arr_EM&time),max(arr_EM&time),1),arr_EM,xyres_sum)
-        plot_summary_obs_overlay(cntr_EM) = gsn_csm_xy(wks,ispan(syear(0),eyear(0),1),obs0,xyres2_sum)
-        plot_sum(cntr_EM) = gsn_csm_xy(wks,ispan(min(arr_EM&time),max(arr_EM&time),1),arr_EM,xyres_sumA)
+        plot_summary(cntr_EM) = gsn_csm_xy(wks,ispan(toint(min(arr_EM&time)),toint(max(arr_EM&time)),1),arr_range2,xyres3_sum)
+        plot_summary1(cntr_EM) = gsn_csm_xy(wks,ispan(toint(min(arr_EM&time)),toint(max(arr_EM&time)),1),arr_range1,xyres3b_sum)
+        plot_summary2(cntr_EM) = gsn_csm_xy(wks,ispan(toint(min(arr_EM&time)),toint(max(arr_EM&time)),1),arr_EM,xyres_sum)
+        plot_summary_obs_overlay(cntr_EM) = gsn_csm_xy(wks,yyyyFrac,obs0,xyres2_sum)
+        plot_sum(cntr_EM) = gsn_csm_xy(wks,ispan(toint(min(arr_EM&time)),toint(max(arr_EM&time)),1),arr_EM,xyres_sumA)
         overlay(plot_summary(cntr_EM),plot_summary1(cntr_EM))
         overlay(plot_summary(cntr_EM),plot_summary_obs_overlay(cntr_EM))
         overlay(plot_summary(cntr_EM),plot_summary2(cntr_EM))
 
-        fout = getenv("OUTDIR")+str_sub_str(names_EM_mod," ","_")+"_EM.cvdp_data.tbs_eof."+syear_mod+"-"+eyear_mod+".nc"
+        fout = getenv("OUTDIR")+str_sub_str(names_EM_mod," ","_")+"_EM.cvdp_data.polar."+vnm+"_eof."+syear_mod+"-"+eyear_mod+".nc"
         if (isfilepresent2(fout)) then
            z = addfile(fout,"w")
         else
@@ -773,21 +1010,28 @@ begin
      end if
      frame(wks)
      delete(wks)
+     delete(yyyyFrac)
 
      if (wks_type.eq."png") then
-        system("mv "+OUTDIR+"tbs_eof.timeseries.000001.png "+OUTDIR+variname(dd)+".indmem.png")
-        system("mv "+OUTDIR+"tbs_eof.timeseries.000002.png "+OUTDIR+variname(dd)+".summary.png")
+        system("mv "+OUTDIR+vnm+"eof.timeseries.000001.png "+OUTDIR+variname(dd)+".indmem.png")
+        system("mv "+OUTDIR+vnm+"eof.timeseries.000002.png "+OUTDIR+variname(dd)+".summary.png")
         if (PNG_SCALE_SUMMARY.ne.100) then
            system("convert -resize "+PNG_SCALE_SUMMARY+"% "+OUTDIR+variname(dd)+".summary.png "+OUTDIR+variname(dd)+".summary.png")
         end if
      else
-        system("psplit "+OUTDIR+"tbs_eof.timeseries.ps "+OUTDIR+"tbs_eof.timeseries")
-        system("mv "+OUTDIR+"tbs_eof.timeseries0001.ps "+OUTDIR+variname(dd)+".indmem.ps")
-        system("mv "+OUTDIR+"tbs_eof.timeseries0002.ps "+OUTDIR+variname(dd)+".summary.ps")
-        system("rm "+OUTDIR+"tbs_eof.timeseries.ps")
+        system("psplit "+OUTDIR+vnm+"eof.timeseries.ps "+OUTDIR+vnm+"eof.timeseries")
+        system("mv "+OUTDIR+vnm+"eof.timeseries0001.ps "+OUTDIR+variname(dd)+".indmem.ps")
+        system("mv "+OUTDIR+vnm+"eof.timeseries0002.ps "+OUTDIR+variname(dd)+".summary.ps")
+        system("rm "+OUTDIR+vnm+"eof.timeseries.ps")
      end if
   end do
-  print("Finished: tbs_eof.ncl")
+
+  delete([/modname,nyr,nsim,na,names,paths,syear,eyear,names_EM,EM_num,delim/])
+
+ end do ; end of var loop
+
+ print("Finished: polar.sfcvar_eof.ncl")
+
 end
 
 

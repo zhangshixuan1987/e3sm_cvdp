@@ -1,34 +1,271 @@
-; Calculates seasonal/annual southern hemisphere tas eofs, regression pattern
+; Calculates seasonal/annual southern hemisphere sst regrs, regression pattern
 ;
-; Variables used: ts
+; Variables used: samsfcvar  
 ;
 load "$CVDP_SCRIPTS/functions.ncl"
 
 begin
-  print("Starting: polar.taserr_eof.ncl")
-  CREATE_GRAPHICS  = getenv("CREATE_GRAPHICS")  
-  PNG_SCALE        = tofloat(getenv("PNG_SCALE"))
-  OUTPUT_TYPE      = getenv("OUTPUT_TYPE") 
-  COLORMAP         = getenv("COLORMAP")
-  OUTDIR           = getenv("OUTDIR") 
-  POLAR            = getenv("POLAR")
-  PNG_SCALE_SUMMARY = tofloat(getenv("PNG_SCALE_SUMMARY"))
+ print("Starting: sam_psa.sfcvar_regr.ncl")
+ CREATE_GRAPHICS  = getenv("CREATE_GRAPHICS")  
+ PNG_SCALE        = tofloat(getenv("PNG_SCALE"))
+ OUTPUT_TYPE      = getenv("OUTPUT_TYPE") 
+ COLORMAP         = getenv("COLORMAP")
+ OUTDIR           = getenv("OUTDIR") 
+ POLAR            = getenv("POLAR")
+ PNG_SCALE_SUMMARY = tofloat(getenv("PNG_SCALE_SUMMARY"))
 
-  if (POLAR.eq."SH") then
-    rlatn = -20.0
-    rlats = -90.0
-  else if (POLAR.eq."NH") then
-    rlatn =  90.0
-    rlats =  20.0
+ ;;region for regression analysis
+ rlatn = -20.0
+ rlats = -90.0
+ rlonw =   0.0
+ rlone = 360.0
+
+ nsim_psl  = numAsciiRow("namelist_byvar/namelist_psl")
+ na_psl    = asciiread("namelist_byvar/namelist_psl",(/nsim_psl/),"string")
+ names_psl = new(nsim_psl,"string")
+ paths_psl = new(nsim_psl,"string")
+ syear_psl = new(nsim_psl,"integer",-999)
+ eyear_psl = new(nsim_psl,"integer",-999)
+ delim     = "|"
+
+ do ee = 0,nsim_psl-1
+    names_psl(ee) = str_strip(str_get_field(na_psl(ee),1,delim))
+    paths_psl(ee) = str_strip(str_get_field(na_psl(ee),2,delim))
+    syear_psl(ee) = stringtointeger(str_strip(str_get_field(na_psl(ee),3,delim)))
+    eyear_psl(ee) = stringtointeger(str_strip(str_get_field(na_psl(ee),4,delim)))
+ end do
+ modname_psl = str_sub_str(names_psl," ","_")
+ bc = (/"/","'","(",")"/)
+ do ff = 0,dimsizes(modname_psl)-1
+    do ee = 0,dimsizes(bc)-1
+       modname_psl(ff) = str_sub_str(modname_psl(ff),bc(ee),"_")
+    end do
+ end do
+ nyr_psl = eyear_psl-syear_psl+1
+
+ samsfcvars = (/"psl","sst","trefht","prect","precst","u10","v10","taux","tauy","eth","hflx", \
+            "qnet","swcre","fldsc","cldtot","u850","v850","th850","z500","u200","v200"/)
+ nsvars  = dimsizes(samsfcvars)
+
+ do ss = 0, nsvars-1,1
+
+  vnm   = samsfcvars(ss)
+  if(vnm.eq."sst") then 
+    nsim = numAsciiRow("namelist_byvar/namelist_ts")
+    na   = asciiread("namelist_byvar/namelist_ts",(/nsim/),"string")
+  else if(vnm.eq."qnet") then
+    nsim = numAsciiRow("namelist_byvar/namelist_qn")
+    na   = asciiread("namelist_byvar/namelist_qn",(/nsim/),"string")
+  else 
+    nsim = numAsciiRow("namelist_byvar/namelist_"+vnm)
+    na   = asciiread("namelist_byvar/namelist_"+vnm,(/nsim/),"string")
+  end if 
+  end if 
+  names = new(nsim,"string")
+  paths = new(nsim,"string")
+  syear = new(nsim,"integer",-999)
+  eyear = new(nsim,"integer",-999)
+  names_EM = new(nsim,"string")
+  EM_num = new(nsim,"integer",-999)
+
+  do ee = 0,nsim-1
+     names(ee) = str_strip(str_get_field(na(ee),1,delim))
+     paths(ee) = str_strip(str_get_field(na(ee),2,delim))
+     syear(ee) = stringtointeger(str_strip(str_get_field(na(ee),3,delim)))
+     eyear(ee) = stringtointeger(str_strip(str_get_field(na(ee),4,delim)))
+     temp      = str_split(str_strip(str_get_field(na(ee),5,delim)),"-")
+     EM_num(ee)    = toint(temp(0))
+     names_EM(ee)  = str_join(temp(1:),"-")
+     delete(temp)
+  end do
+  modname = str_sub_str(names," ","_")
+  bc = (/"/","'","(",")"/)
+  do ff = 0,dimsizes(modname)-1
+     do ee = 0,dimsizes(bc)-1
+        modname(ff) = str_sub_str(modname(ff),bc(ee),"_")
+     end do
+  end do
+  nyr = eyear-syear+1
+  nyr_max = max(nyr)
+ 
+  seas = (/"DJF","JFM","MAM","JJA","JAS","SON","NDJFMA","MJJASO","ANN"/)
+  si   = (/ 1,1,3,6,7, 9,10, 5, 1 /)
+  se   = (/ 2,3,5,8,9,11, 5,10,12 /)
+
+  d = addfile("$NCARG_ROOT/lib/ncarg/data/cdf/landsea.nc","r")   ; mask out land (this is redundant for data that is already masked)
+
+  do ee = 0,nsim-1
+    
+     fnt = getenv("OUTDIR")+modname(ee)+".cvdp_data.sam_psa_regr."+syear(ee)+"-"+eyear(ee)+".nc"
+     fnt2 = getenv("OUTDIR")+modname(ee)+".cvdp_data."+syear(ee)+"-"+eyear(ee)+".nc"
+     f_test := read_cvdp_le_data(fnt,fnt2,vnm+"regr2_pattern_ann")
+     if (.not.isatt(f_test,"is_all_missing")) then
+        continue
+     end if
+
+    ;read in data, orient lats/lons correctly, set time coordinate variable up
+     if(vnm.eq."sst") then
+       vnmi = "TS"
+     else if(vnm.eq."qnet") then
+       vnmi = "Qn"
+     else
+       vnmi = str_upper(vnm) 
+     end if
+     end if
+
+
+    ;print(paths(ee))
+    ;print(paths_psl(ee))
+     arr_indv = data_read_in(paths_psl(ee),"PSL",syear(ee),eyear(ee))
+     arr_rgrv = data_read_in(paths(ee),vnmi,syear(ee),eyear(ee)) 
+
+     if (isatt(arr_rgrv,"is_all_missing")) then
+        delete([/arr_rgrv,arr_indv/])
+        continue
+     end if 
+
+     arr_indv = rmMonAnnCycTLL(arr_indv)
+     arr_rgrv = rmMonAnnCycTLL(arr_rgrv)
+
+     if (isfilepresent2(fnt)) then
+        z = addfile(fnt,"w")
+     else
+        z = addfile(fnt,"c")
+        set_global_ncfile_attributes(z,names(ee),syear(ee),eyear(ee),getenv("VERSION"))
+     end if
+
+     nyyyy  = dimsizes(arr_indv&time)/12
+     tmsk   = arr_indv&time
+     do iyy = 0,nyyyy-1
+       tmsk((iyy*12):((iyy+1)*12-1)) = ispan(1,12,1)
+     end do
+
+     do gg = 0,8 
+
+       if(gg.eq.0) then
+         indxx = ind((tmsk.ge.si(gg).and.tmsk.le.se(gg)).or.tmsk.eq.12)
+       else if(gg.eq.6) then
+         indxx = ind(tmsk.lt.5.or.tmsk.gt.10)
+       else
+         indxx = ind(tmsk.ge.si(gg).and.tmsk.le.se(gg))
+       end if
+       end if
+
+       rarr    = arr_rgrv(indxx,{rlats:rlatn},{rlonw:rlone})
+       tarr    = arr_indv(indxx,{rlats:rlatn},{rlonw:rlone})
+       tarr_CW = SqrtCosWeight(tarr)
+       tevecv  = eofunc_n(tarr_CW,4,75,0)
+       tpcts   = eofunc_ts_n(tarr_CW,tevecv,False,0)
+       
+       latcheck = (/-85.,-62.,-60./)  ; make signs consistent if possible
+       loncheck = (/  5., 210,280./)
+       climmodes = vnm+ (/"sam","psa1","psa2"/)
+       do ff = 0,2
+          pcts   = dim_standardize(tpcts(ff,:),0)
+          rc     = regCoef_n(pcts, rarr, 0, 0) ; rc(nlat,mlon)
+          tval   = onedtond(rc@tval , dimsizes(rc))
+          df     = onedtond(rc@nptxy, dimsizes(rc)) - 2
+          b      = tval    ; b must be same size as tval (and df)
+          b      = 0.5
+
+          foeof      = (/rc/)
+          foeof!0    = "lat0"
+          foeof!1    = "lon0"
+          foeof&lat0 = tarr&lat
+          foeof&lon0 = tarr&lon
+
+          foprb      = foeof
+          foprb      = betainc(df/(df+tval^2),df/2.0,b)       ; prob(nlat,nlon)
+
+          fpval      = foeof
+          fpval      = (/escorc_n(pcts, rarr, 0, 0)/)
+          fpval      = fpval*fpval * 100.0  ;variance explained
+
+          fieof = (/ regCoef_n(pcts,tarr,0,0) /)
+          fieof!0   = "lat"
+          fieof&lat = tarr&lat
+          fieof!1   = "lon"
+          fieof&lon = tarr&lon
+          fieof@$(/"pcvar_seas"+(gg+1)/)$ = str_join(tostring(tevecv@pcvar),",")
+          pcvar := str_split(fieof@$(/"pcvar_seas"+(gg+1)/)$,",")
+          ; attempt to make all plots have the same sign
+          if (.not.ismissing(fieof({latcheck(ff)},{loncheck(ff)}))) then    
+            if (fieof({latcheck(ff)},{loncheck(ff)}).ge.0) then
+               fieof(:,:) = fieof(:,:)*-1.
+               foeof(:,:) = foeof(:,:)*-1.
+               pcts(:)    = pcts(:)*-1
+            end if
+          end if
+
+          if(gg.le.5) then
+            pcts!0      = "tim3mo"
+            pcts&tim3mo = arr_rgrv&time(indxx)
+            pcts&tim3mo@units = arr_rgrv&time@units
+            pcts&tim3mo@long_name = "time"
+            pcts&tim3mo@standard_name = "time"
+            pcts&tim3mo@calendar = "standard"
+          else if(gg.le.7) then
+            pcts!0      = "tim6mo"
+            pcts&tim6mo = arr_rgrv&time(indxx)
+            pcts&tim6mo@units = arr_rgrv&time@units
+            pcts&tim6mo@long_name = "time"
+            pcts&tim6mo@standard_name = "time"
+            pcts&tim6mo@calendar = "standard"
+          else
+            pcts!0    = "time"
+            pcts&time = arr_rgrv&time
+            pcts&time@units = arr_rgrv&time@units
+            pcts&time@long_name = "time"
+            pcts&time@standard_name = "time"
+            pcts&time@calendar = "standard"
+          end if
+          end if
+
+          z->$(/climmodes(ff)+"_timeseries_"+changeCaseChar(seas(gg))/)$ \
+            = set_varAtts(pcts(:),climmodes(ff)+" normalized principal component timeseries ("+seas(gg)+")","1","")
+ 
+          foeof@units = rarr@units 
+          foeof@pcvar = sprintf("%4.1f", tofloat(pcvar(ff)))+"%"
+
+          z->$(/climmodes(ff)+"_pattern_"+changeCaseChar(seas(gg))/)$ \
+            = set_varAtts(foeof,climmodes(ff)+" spatial pattern ("+seas(gg)+")","","")
+          
+          z->$(/climmodes(ff)+"_prob_"+changeCaseChar(seas(gg))/)$ \
+            = set_varAtts(foprb,climmodes(ff)+" regression probability ("+seas(gg)+")","","")
+ 
+          z->$(/climmodes(ff)+"_pval_"+changeCaseChar(seas(gg))/)$ \
+            = set_varAtts(fpval,climmodes(ff)+" regression probability ("+seas(gg)+")","","")
+
+          delete([/rc,pcts,tval,df,b,fieof,fpval,foeof,foprb/])
+       end do
+       delete([/rarr,tarr,tarr_CW,indxx,tevecv,tpcts/])
+     end do     
+     delete([/fnt,fnt2,z,arr_indv,arr_rgrv,tmsk/])
+  end do
+
+  delete([/modname,nyr,nsim,na,names,paths,syear,eyear,names_EM,EM_num/])
+
+ end do ; end of var loop
+
+ if (CREATE_GRAPHICS.eq."False") then
+    print("Finished: sam_psa.sfcvar_regr.ncl")
+    exit
+ end if 
+
+ do ss = 0, nsvars-1,1
+
+  vnm   = samsfcvars(ss)
+  if(samsfcvars(ss).eq."sst") then
+    nsim = numAsciiRow("namelist_byvar/namelist_ts")
+    na   = asciiread("namelist_byvar/namelist_ts",(/nsim/),"string")
+  else if(samsfcvars(ss).eq."qnet") then
+    nsim = numAsciiRow("namelist_byvar/namelist_qn")
+    na   = asciiread("namelist_byvar/namelist_qn",(/nsim/),"string")
   else
-    rlatn =   90.0
-    rlats =  -90.0
+    nsim = numAsciiRow("namelist_byvar/namelist_"+vnm)
+    na   = asciiread("namelist_byvar/namelist_"+vnm,(/nsim/),"string")
   end if
   end if
-  
-  nsim = numAsciiRow("namelist_byvar/namelist_trefht")
-
-  na = asciiread("namelist_byvar/namelist_trefht",(/nsim/),"string")
   names = new(nsim,"string")
   paths = new(nsim,"string")
   syear = new(nsim,"integer",-999)
@@ -56,136 +293,9 @@ begin
   end do
   nyr = eyear-syear+1
   nyr_max = max(nyr)
- 
-  ;;read and calculate the ensemble mean obs;;
-  d = addfile("$NCARG_ROOT/lib/ncarg/data/cdf/landsea.nc","r")   ; mask out land (this is redundant for data that is already masked)
-  nens      = num(EM_num.eq.0)
-  cntr_ens := ind(EM_num.eq.0)   ; cntr_ens are the indices where each ensemble member of an ensemble reside
-  if (nens.eq.0) then
-     print("no observations show up, should not to run this script....")
-     print("Finished: terr.indices.ncl")
-     exit
-  else
-    do hh = 0,nens-1    ;
-      modname_mod = modname(cntr_ens(hh))
-      syear_mod = syear(cntr_ens(hh))
-      eyear_mod = eyear(cntr_ens(hh))
-      names_mod = names(cntr_ens(hh))
-      names_EM_mod = names_EM(cntr_ens(hh))
-      paths_mod = paths(cntr_ens(hh))
-      data_flag = False
 
-      fnt = getenv("OUTDIR")+modname_mod+".cvdp_data.polar.taserr_eof."+syear_mod+"-"+eyear_mod+".nc"
-      fnt2 = getenv("OUTDIR")+modname_mod+".cvdp_data."+syear_mod+"-"+eyear_mod+".nc"
-      f_test := read_cvdp_le_data(fnt,fnt2,"tas_obsem_mon")
-      if (.not.isatt(f_test,"is_all_missing")) then
-         data_flag = True    ; data is present, but need raw data to compute EM
-      else
-         data_flag = False
-      end if
-      arr = data_read_in(paths_mod,"TREFHT",syear_mod,eyear_mod)    ; read in data, orient lats/lons correctly, set time coordinate variable up
-      if (isatt(arr,"is_all_missing")) then
-         delete(arr)
-         continue
-      end if
-
-      arr = rmMonAnnCycTLL(arr)
-
-      if (.not.isvar("obs_EM")) then    ; create an array to house all members, to be used to calculate EM
-         obs_EM = arr
-         obs_EM = 0.
-         cntr_EM = 0
-      end if
-      obs_EM = (/ obs_EM+arr /)
-      cntr_EM = cntr_EM+1
-
-      if (data_flag) then
-         delete(arr)
-         continue    ; data added to EM, have already computed PDV, so continue to next loop iteration
-      end if
-
-    end do
-    if (isvar("obs_EM")) then
-       obs_EM = (/ obs_EM/cntr_EM /)
-    end if
-  end if
- 
   seas = (/"DJF","JFM","MAM","JJA","JAS","SON","NDJFMA","MJJASO","ANN"/)
 
-  do ee = 0,nsim-1    
-     fnt = getenv("OUTDIR")+modname(ee)+".cvdp_data.polar.taserr_eof."+syear(ee)+"-"+eyear(ee)+".nc"
-     fnt2 = getenv("OUTDIR")+modname(ee)+".cvdp_data."+syear(ee)+"-"+eyear(ee)+".nc"
-     f_test := read_cvdp_le_data(fnt,fnt2,"taserreof2_pattern_ann")
-     if (.not.isatt(f_test,"is_all_missing")) then
-        continue
-     end if
-     arr = data_read_in(paths(ee),"TREFHT",syear(ee),eyear(ee))    ; read in data, orient lats/lons correctly, set time coordinate variable up
-     if (isatt(arr,"is_all_missing")) then
-        delete(arr)
-        continue
-     end if 
-
-     arr = rmMonAnnCycTLL(arr)
-
-    ;model biases with respect to observations   
-     arr = arr - obs_EM 
-     
-     fineof := calculate_eofs(arr,rlats,rlatn,0,360,4)   
-
-     pcts := new((/3,9,dimsizes(arr&time)/12/),typeof(arr))
-     pcts!2 = "TIME"
-     pcts&TIME = ispan(syear(ee),eyear(ee),1)
-     pcts&TIME@units = "YYYY"
-     pcts&TIME@long_name = "time"
-     pcts&TIME@standard_name = "time"
-     pcts&TIME@calendar = "standard"
-
-    ;latcheck = (/-85.,-62.,-60./)  ; make signs consistent if possible
-    ;loncheck = (/  5., 210,280./)
-     climmodes = (/"taserreof1","taserreof2","taserreof3"/)
-     
-     if(isfilepresent(fnt)) then
-       system("/bin/rm " + fnt)
-     end if
-     z = addfile(fnt,"c")
-     set_global_ncfile_attributes(z,names(ee),syear(ee),eyear(ee),getenv("VERSION"))
-     do ff = 0,2
-        do gg = 0,8
-           pcts(ff,gg,:) = (/ fineof@$(/"pc1_seas"+(gg+1)/)$ /)
-           ;if (.not.ismissing(fineof(ff,gg,{latcheck(ff)},{loncheck(ff)}))) then    ; attempt to make all plots have the taserreof1e sign
-           ;   if (fineof(ff,gg,{latcheck(ff)},{loncheck(ff)}).ge.0) then
-           ;      fineof(ff,gg,:,:) = fineof(ff,gg,:,:)*-1.
-           ;      pcts(ff,gg,:) = pcts(ff,gg,:)*-1
-           ;   end if
-           ;end if
-
-           z->$(/climmodes(ff)+"_timeseries_"+changeCaseChar(seas(gg))/)$ = set_varAtts(pcts(ff,gg,:),climmodes(ff)+" normalized principal component timeseries ("+seas(gg)+")","1","")
- 
-           pattern := fineof(ff,gg,:,:)
-           pcvar := str_split(fineof@$(/"pcvar_seas"+(gg+1)/)$,",")
-           pattern@pcvar = sprintf("%4.1f", tofloat(pcvar(ff)))+"%"
-           if (isatt(fineof,"pcvar_signif_seas"+(gg+1))) then
-              signif := str_split(fineof@$(/"pcvar_signif_seas"+(gg+1)/)$,",")
-              if (signif(ff).eq.True) then
-                 pattern@pcvar = pattern@pcvar+"*"
-              end if
-           end if
-           pattern2 := (/ pattern /)
-           copy_VarCoords(pattern,pattern2)
-           pattern2@units = pattern@units
-           pattern2@pcvar = pattern@pcvar
-
-           z->$(/climmodes(ff)+"_pattern_"+changeCaseChar(seas(gg))/)$     = set_varAtts(pattern2,climmodes(ff)+" spatial pattern ("+seas(gg)+")","","")
-           delete([/pattern,pattern2/])
-        end do
-     end do     
-     delete([/fnt,fnt2,fineof,z,arr,fineof,pcts/])
-  end do
-
-  if (CREATE_GRAPHICS.eq."False") then
-     print("Finished: polar.taserr_eof.ncl")
-     exit
-  end if 
 ;========================================================================
   wks_type = OUTPUT_TYPE
   if (wks_type.eq."png") then
@@ -260,8 +370,10 @@ begin
   tres = res    ; p-value plot resource list
   copy_VarAtts(retrieve_summary_res(),tres)
 
-  res@cnLevels = (/-0.8,-0.6,-0.4,-0.1,0,0.1,0.2,0.4,0.6,0.8/)*2.0
-  res2@cnLevels = (/-0.8,-0.6,-0.4,-0.1,0,0.1,0.2,0.4,0.6,0.8/)*2.0 
+  res@cnLevels = fspan(-1,1,11)
+  res2@cnLevels = fspan(-1,1,11)
+ ;res@cnLevels  := (/-0.8,-0.6,-0.4,-0.2,-0.1,0,0.1,0.2,0.4,0.6,0.8/)
+ ;res2@cnLevels := (/-0.8,-0.6,-0.4,-0.2,-0.1,0,0.1,0.2,0.4,0.6,0.8/)
   if (COLORMAP.eq.0) then
      res@cnFillPalette = "ncl_default"
      res2@cnFillPalette = "ncl_default"
@@ -304,21 +416,37 @@ begin
   panres2@pmLabelBarHeightF = 0.05
   panres2@pmLabelBarWidthF = 0.3
 
-  variname = (/"taserreof1_pattern_djf","taserreof1_pattern_jfm","taserreof1_pattern_mam","taserreof1_pattern_jja","taserreof1_pattern_jas","taserreof1_pattern_son","taserreof1_pattern_ndjfma","taserreof1_pattern_mjjaso","taserreof1_pattern_ann",\
-               "taserreof2_pattern_djf","taserreof2_pattern_jfm","taserreof2_pattern_mam","taserreof2_pattern_jja","taserreof2_pattern_jas","taserreof2_pattern_son","taserreof2_pattern_ndjfma","taserreof2_pattern_mjjaso","taserreof2_pattern_ann",\
-               "taserreof3_pattern_djf","taserreof3_pattern_jfm","taserreof3_pattern_mam","taserreof3_pattern_jja","taserreof3_pattern_jas","taserreof3_pattern_son","taserreof3_pattern_ndjfma","taserreof3_pattern_mjjaso","taserreof3_pattern_ann"/)
+  variname = (/"regr1_pattern_mona","regr1_pattern_monc","regr1_pattern_monw","regr1_pattern_djf",\
+               "regr1_pattern_jfm","regr1_pattern_mam","regr1_pattern_jja","regr1_pattern_jas",\
+               "regr1_pattern_son","regr1_pattern_ndjfma","regr1_pattern_mjjaso","regr1_pattern_ann",\
+               "regr2_pattern_mona","regr2_pattern_monc","regr2_pattern_monw","regr2_pattern_djf",\
+               "regr2_pattern_jfm","regr2_pattern_mam","regr2_pattern_jja","regr2_pattern_jas",\
+               "regr2_pattern_son","regr2_pattern_ndjfma","regr2_pattern_mjjaso","regr2_pattern_ann",\
+               "regr3_pattern_mona","regr3_pattern_monc","regr3_pattern_monw","regr3_pattern_djf",\
+               "regr3_pattern_jfm","regr3_pattern_mam","regr3_pattern_jja","regr3_pattern_jas",\
+               "regr3_pattern_son","regr3_pattern_ndjfma","regr3_pattern_mjjaso","regr3_pattern_ann"/)
+  variname = vnm + variname
   variname_title = variname
   variname_title_seas = variname
   do gg = 0,dimsizes(variname)-1
      txttt = str_split(variname(gg),"_")
      variname_title(gg) = changeCaseChar(txttt(0))+" Pattern"
      variname_title_seas(gg) = changeCaseChar(txttt(2))
+     if(txttt(2).eq."mona") then 
+       variname_title_seas(gg) = "Monthly"
+     end if 
+     if(txttt(2).eq."monc") then
+       variname_title_seas(gg) = "Cold Months"
+     end if
+     if(txttt(2).eq."monw") then
+       variname_title_seas(gg) = "Warm Months"
+     end if
   end do 
 
   csubtitle_color = set_subtitle_colors(max(EM_num))
   nEM = max(EM_num)
   do dd = 0,dimsizes(variname)-1
-     wks = gsn_open_wks(wks_type,getenv("OUTDIR")+"taserreof")
+     wks = gsn_open_wks(wks_type,getenv("OUTDIR")+vnm+"regr")
      plot_indmem      = new(nsim,"graphic")
      plot_indmem_diff = new(nsim,"graphic")
      plot_summary     = new((nEM*4),"graphic")
@@ -327,16 +455,35 @@ begin
 
      numobs = num(EM_num.eq.0) 
      if (numobs.eq.0) then  ; if observations were not specified, set dummy file names, resulting in empty obs0 array
-        fnt = getenv("OUTDIR")+"obs.cvdp_data.polar.taserr_eof."+syear(0)+"-"+eyear(0)+".nc"
+        fnt = getenv("OUTDIR")+"obs.cvdp_data.sam_psa_regr."+syear(0)+"-"+eyear(0)+".nc"
         fnt2 = getenv("OUTDIR")+"obs.cvdp_data."+syear(0)+"-"+eyear(0)+".nc"
         cntr = 0
      else
-        fnt = getenv("OUTDIR")+modname(0)+".cvdp_data.polar.taserr_eof."+syear(0)+"-"+eyear(0)+".nc"
+        fnt = getenv("OUTDIR")+modname(0)+".cvdp_data.sam_psa_regr."+syear(0)+"-"+eyear(0)+".nc"
         fnt2 = getenv("OUTDIR")+modname(0)+".cvdp_data."+syear(0)+"-"+eyear(0)+".nc"
         cntr = 1
      end if
+
      obs0 := read_cvdp_le_data(fnt,fnt2,variname(dd))
 
+     x1d = ndtooned(abs(obs0({rlats:rlatn},:)))
+     xm  = dim_median(x1d)
+     if(xm.gt.1) then
+       sfcfacs= xm
+     else if (xm.gt.0.1) then
+       sfcfacs = 1.0
+     else if (xm.gt.0.01) then
+       sfcfacs = 0.1
+     else if (xm.gt.0.001) then
+       sfcfacs = 0.01
+     end if
+     end if
+     end if
+     end if
+     delete([/xm,x1d/])
+
+     res@cnLevels = res@cnLevels * sfcfacs
+     res2@cnLevels = res2@cnLevels * sfcfacs
      res@gsnCenterStringFontColor = "black"
      res2@gsnCenterStringFontColor = "black"
      res@lbLabelBarOn = False
@@ -349,7 +496,7 @@ begin
      cntr_EM = 0
      if (numobs.ge.2) then     ; plot obs #2-
         do ff = 1,numobs-1
-           fnt = getenv("OUTDIR")+modname(cntr)+".cvdp_data.polar.taserr_eof."+syear(cntr)+"-"+eyear(cntr)+".nc"
+           fnt = getenv("OUTDIR")+modname(cntr)+".cvdp_data.sam_psa_regr."+syear(cntr)+"-"+eyear(cntr)+".nc"
            fnt2 = getenv("OUTDIR")+modname(cntr)+".cvdp_data."+syear(cntr)+"-"+eyear(cntr)+".nc"
            arr := read_cvdp_le_data(fnt,fnt2,variname(dd))
            if (isatt(arr,"is_all_missing")) then 
@@ -384,7 +531,7 @@ begin
            names_mod = names(cntr_ens(hh))
            names_EM_mod = names_EM(cntr_ens(hh))
 
-           fnt = getenv("OUTDIR")+modname_mod+".cvdp_data.polar.taserr_eof."+syear_mod+"-"+eyear_mod+".nc"
+           fnt = getenv("OUTDIR")+modname_mod+".cvdp_data.sam_psa_regr."+syear_mod+"-"+eyear_mod+".nc"
            fnt2 = getenv("OUTDIR")+modname_mod+".cvdp_data."+syear_mod+"-"+eyear_mod+".nc"
            arr := read_cvdp_le_data(fnt,fnt2,variname(dd))
            if (isatt(arr,"is_all_missing")) then 
@@ -392,7 +539,7 @@ begin
               continue
            end if
            if (.not.isvar("arr_store")) then  ; create an array to house all members, to be used to calculate EM
-              arr_store = new((/nens,dimsizes(arr&lat),dimsizes(arr&lon)/),typeof(arr))
+              arr_store = new((/nens,dimsizes(arr&lat),dimsizes(arr&lon)/),typregr(arr))
               arr_store!0 = "ensmem"
               arr_store!1 = "lat"
               arr_store&lat = arr&lat
@@ -467,7 +614,10 @@ begin
         delete([/syear_em0,eyear_em0,showyr/])
 
         stats := boxplot_stat(arr_store_pcvar)
-        res@gsnRightString = decimalPlaces(stats(0),0,True)+"/"+decimalPlaces(avg(arr_store_pcvar),0,True)+"/"+decimalPlaces(stats(4),0,True)+"%~C~       r="+pattern_correlation(arr_EM({:-20},:),obs0_rg({:-20},:))
+        res@gsnRightString = decimalPlaces(stats(0),0,True)+"/"\
+                            + decimalPlaces(avg(arr_store_pcvar),0,True)+"/"\
+                            + decimalPlaces(stats(4),0,True)+"%~C~       r=" \
+                            + pattern_correlation(arr_EM({:-20},:),obs0_rg({:-20},:))
         res@gsnCenterString = names_EM_mod +" ("+arr_store@nens+" Members)"                   
         plot_summary(cntr_EM) = gsn_csm_contour_map(wks,arr_EM,res)
         ares@gsLineColor = res@gsnCenterStringFontColor
@@ -487,7 +637,8 @@ begin
         p_val = calculate_pval(obs0_rg,arr_store)
         tres@gsnRightString = calculate_area_in_range(p_val({:-20},:),10,90)+"%"
         plot_summary(cntr_EM+3) = gsn_csm_contour_map(wks,p_val,tres)
-        fno = getenv("OUTDIR")+str_sub_str(names_EM_mod," ","_")+"_EM.cvdp_data.polar.taserr_eof."+syear_mod+"-"+eyear_mod+".nc"
+
+        fno = getenv("OUTDIR")+str_sub_str(names_EM_mod," ","_")+"_EM.cvdp_data.sam_psa_regr."+syear_mod+"-"+eyear_mod+".nc"
         if (isfilepresent2(fno)) then
            z = addfile(fno,"w")
         else
@@ -511,18 +662,18 @@ begin
      delete(wks)
 
      if (wks_type.eq."png") then
-        system("mv "+OUTDIR+"taserreof.000001.png "+OUTDIR+variname(dd)+".indmem.png")
-        system("mv "+OUTDIR+"taserreof.000002.png "+OUTDIR+variname(dd)+".indmemdiff.png")
-        system("mv "+OUTDIR+"taserreof.000003.png "+OUTDIR+variname(dd)+".summary.png")
+        system("mv "+OUTDIR+vnm+"regr.000001.png "+OUTDIR+variname(dd)+".indmem.png")
+        system("mv "+OUTDIR+vnm+"regr.000002.png "+OUTDIR+variname(dd)+".indmemdiff.png")
+        system("mv "+OUTDIR+vnm+"regr.000003.png "+OUTDIR+variname(dd)+".summary.png")
         if (PNG_SCALE_SUMMARY.ne.100) then
            system("convert -resize "+PNG_SCALE_SUMMARY+"% "+OUTDIR+variname(dd)+".summary.png "+OUTDIR+variname(dd)+".summary.png")
         end if
      else
-        system("psplit "+OUTDIR+"taserreof.ps "+OUTDIR+"taserreof")
-        system("mv "+OUTDIR+"taserreof0001.ps "+OUTDIR+variname(dd)+".indmem.ps")
-        system("mv "+OUTDIR+"taserreof0002.ps "+OUTDIR+variname(dd)+".indmemdiff.ps")
-        system("mv "+OUTDIR+"taserreof0003.ps "+OUTDIR+variname(dd)+".summary.ps")
-        system("rm "+OUTDIR+"taserreof.ps")
+        system("psplit "+OUTDIR+vnm+"regr.ps "+OUTDIR+vnm+"regr")
+        system("mv "+OUTDIR+vnm+"regr0001.ps "+OUTDIR+variname(dd)+".indmem.ps")
+        system("mv "+OUTDIR+vnm+"regr0002.ps "+OUTDIR+variname(dd)+".indmemdiff.ps")
+        system("mv "+OUTDIR+vnm+"regr0003.ps "+OUTDIR+variname(dd)+".summary.ps")
+        system("rm "+OUTDIR+vnm+"regr.ps")
      end if
   end do
   delete([/panres,panres2/])
@@ -610,19 +761,35 @@ begin
 
   ncolE = floattointeger(sqrt(nEM+1))   ; +1 for the summary plot
   nrowE = ((nEM+1)/ncolE)+mod(nEM+1,ncolE)
-  variname := (/"taserreof1_timeseries_djf","taserreof1_timeseries_jfm","taserreof1_timeseries_mam","taserreof1_timeseries_jja","taserreof1_timeseries_jas","taserreof1_timeseries_son","taserreof1_timeseries_ndjfma","taserreof1_timeseries_mjjaso","taserreof1_timeseries_ann",\
-                "taserreof2_timeseries_djf","taserreof2_timeseries_jfm","taserreof2_timeseries_mam","taserreof2_timeseries_jja","taserreof2_timeseries_jas","taserreof2_timeseries_son","taserreof2_timeseries_ndjfma","taserreof2_timeseries_mjjaso","taserreof2_timeseries_ann",\
-                "taserreof3_timeseries_djf","taserreof3_timeseries_jfm","taserreof3_timeseries_mam","taserreof3_timeseries_jja","taserreof3_timeseries_jas","taserreof3_timeseries_son","taserreof3_timeseries_ndjfma","taserreof3_timeseries_mjjaso","taserreof3_timeseries_ann"/)
+  variname := (/"regr1_timeseries_mona","regr1_timeseries_monc","regr1_timeseries_monw","regr1_timeseries_djf",\
+                "regr1_timeseries_jfm","regr1_timeseries_mam","regr1_timeseries_jja","regr1_timeseries_jas",\
+                "regr1_timeseries_son","regr1_timeseries_ndjfma","regr1_timeseries_mjjaso","regr1_timeseries_ann",\
+                "regr2_timeseries_mona","regr2_timeseries_monc","regr2_timeseries_monw","regr2_timeseries_djf",\
+                "regr2_timeseries_jfm","regr2_timeseries_mam","regr2_timeseries_jja","regr2_timeseries_jas",\
+                "regr2_timeseries_son","regr2_timeseries_ndjfma","regr2_timeseries_mjjaso","regr2_timeseries_ann",\
+                "regr3_timeseries_mona","regr3_timeseries_monc","regr3_timeseries_monw","regr3_timeseries_djf",\
+                "regr3_timeseries_jfm","regr3_timeseries_mam","regr3_timeseries_jja","regr3_timeseries_jas",\
+                "regr3_timeseries_son","regr3_timeseries_ndjfma","regr3_timeseries_mjjaso","regr3_timeseries_ann"/)
+  variname = vnm + variname 
   variname_title := variname
   variname_title_seas := variname
   do gg = 0,dimsizes(variname)-1
      txttt = str_split(variname(gg),"_")
      variname_title(gg) = changeCaseChar(txttt(0))+" Timeseries"
      variname_title_seas(gg) = changeCaseChar(txttt(2))
+     if(txttt(2).eq."mona") then
+       variname_title_seas(gg) = "Monthly"
+     end if
+     if(txttt(2).eq."monc") then
+       variname_title_seas(gg) = "Cold Months"
+     end if
+     if(txttt(2).eq."monw") then
+       variname_title_seas(gg) = "Warm Months"
+     end if
   end do 
 
   do dd = 0,dimsizes(variname)-1
-     wks = gsn_open_wks(wks_type,getenv("OUTDIR")+"polar.taserr_eof.timeseries")
+     wks = gsn_open_wks(wks_type,getenv("OUTDIR")+vnm+"regr.timeseries")
      plot_indmem      := new(nsim,"graphic")   ; for individual obs/models
      plot_obs_overlay := new(nsim,"graphic")   ; for obs overlaid onto individual models
      plot_summary     := new(nEM,"graphic")    ; for ensemble plots  to show the 2 std dev range
@@ -639,24 +806,33 @@ begin
 
      numobs = num(EM_num.eq.0) 
      if (numobs.eq.0) then
-        fnt = getenv("OUTDIR")+"obs.cvdp_data.polar.taserr_eof."+syear(0)+"-"+eyear(0)+".nc"
+        fnt = getenv("OUTDIR")+"obs.cvdp_data.sam_psa_regr."+syear(0)+"-"+eyear(0)+".nc"
         fnt2 = getenv("OUTDIR")+"obs.cvdp_data."+syear(0)+"-"+eyear(0)+".nc"
         cntr = 0
      else
-        fnt = getenv("OUTDIR")+modname(0)+".cvdp_data.polar.taserr_eof."+syear(0)+"-"+eyear(0)+".nc"
+        fnt = getenv("OUTDIR")+modname(0)+".cvdp_data.sam_psa_regr."+syear(0)+"-"+eyear(0)+".nc"
         fnt2 = getenv("OUTDIR")+modname(0)+".cvdp_data."+syear(0)+"-"+eyear(0)+".nc"
         cntr = 1
      end if
      obs0 := read_cvdp_le_data(fnt,fnt2,variname(dd))
      obs0!0 = "time"
-     if (isatt(obs0,"is_all_missing")) then 
-        obs0New = new(eyear(0)-syear(0)+1,float)
-        copy_VarAtts(obs0,obs0New)
-        obs0 := obs0New
-        obs0!0 = "time"
-        obs0&time = ispan(syear(0),eyear(0),1)
-        delete(obs0New)
-     end if
+     TTIME = yyyymm_time(syear(0), eyear(0), "integer")
+     if (isStrSubset(variname(dd),"mona")) then
+       yyyyFrac = yyyymm_to_yyyyfrac(TTIME, 0.0)
+     else if (isStrSubset(variname(dd),"monc").or.isStrSubset(variname(dd),"monw")) then
+       yyyyFrac = yyyymm_to_yyyyfrac(TTIME(::2), 0.0) 
+     else 
+       yyyyFrac = ispan(syear(0),eyear(0),1)
+     end if 
+     end if 
+     delete(TTIME)
+    
+     if (isatt(obs0,"is_all_missing")) then
+       obs0   := yyyyFrac 
+       obs0!0  = "time"
+       obs0&time = yyyyFrac 
+     end if 
+
      xyres@gsnLeftStringFontColor = "black"
      xyres2@gsnLeftStringFontColor = "black"
      if (isatt(xyres,"trYMinF")) then
@@ -674,13 +850,13 @@ begin
         obs_val := decimalPlaces(tttt@slope*dimsizes(obs0&time),2,True) +" "+nyr(0)+"yr~S~-1~N~" ;+obs0@units+" "+nyr(0)+"yr~S~-1~N~"
      end if
      xyres@gsnRightString = obs_val
-     plot_indmem(0) = gsn_csm_xy(wks,ispan(syear(0),eyear(0),1),obs0,xyres)
+     plot_indmem(0) = gsn_csm_xy(wks,yyyyFrac,obs0,xyres)
      xyres2A@gsnLeftString = "Ensemble Mean Summary"
-     plot_obs := gsn_csm_xy(wks,ispan(syear(0),eyear(0),1),obs0,xyres2A)
+     plot_obs := gsn_csm_xy(wks,yyyyFrac,obs0,xyres2A)
      cntr_EM = 0
      if (numobs.ge.2) then     ; plot obs #2-
         do ff = 1,numobs-1
-           fnt = getenv("OUTDIR")+modname(cntr)+".cvdp_data.polar.taserr_eof."+syear(cntr)+"-"+eyear(cntr)+".nc"
+           fnt = getenv("OUTDIR")+modname(cntr)+".cvdp_data.sam_psa_regr."+syear(cntr)+"-"+eyear(cntr)+".nc"
            fnt2 = getenv("OUTDIR")+modname(cntr)+".cvdp_data."+syear(cntr)+"-"+eyear(cntr)+".nc"
            arr := read_cvdp_le_data(fnt,fnt2,variname(dd))
            arr!0 = "time"
@@ -695,8 +871,8 @@ begin
            tttt := dtrend_msg(ispan(0,dimsizes(arr&time)-1,1),arr,False,True)   
            xyres@gsnLeftString = names(cntr)
            xyres@gsnRightString = decimalPlaces(tttt@slope*dimsizes(arr&time),2,True)+" "+nyr(cntr)+"yr~S~-1~N~"
-           plot_indmem(cntr) = gsn_csm_xy(wks,ispan(syear(cntr),eyear(cntr),1),arr,xyres)
-           plot_obs_overlay(cntr) = gsn_csm_xy(wks,ispan(syear(0),eyear(0),1),obs0,xyres2)
+           plot_indmem(cntr) = gsn_csm_xy(wks,yyyyFrac,arr,xyres)
+           plot_obs_overlay(cntr) = gsn_csm_xy(wks,yyyyFrac,obs0,xyres2)
            overlay(plot_indmem(cntr),plot_obs_overlay(cntr))
            delete([/arr,tttt/])
            cntr = cntr+1
@@ -713,7 +889,7 @@ begin
            names_mod = names(cntr_ens(hh))
            names_EM_mod = names_EM(cntr_ens(hh))
 
-           fnt = getenv("OUTDIR")+modname_mod+".cvdp_data.polar.taserr_eof."+syear_mod+"-"+eyear_mod+".nc"
+           fnt = getenv("OUTDIR")+modname_mod+".cvdp_data.sam_psa_regr."+syear_mod+"-"+eyear_mod+".nc"
            fnt2 = getenv("OUTDIR")+modname_mod+".cvdp_data."+syear_mod+"-"+eyear_mod+".nc"
            arr := read_cvdp_le_data(fnt,fnt2,variname(dd))
            arr!0 = "time"
@@ -722,7 +898,7 @@ begin
               continue
            end if
            if (.not.isvar("arr_store")) then  ; create an array to house all members, to be used to calculate EM
-              arr_store := new((/nens,dimsizes(arr&time)/),typeof(arr))
+              arr_store := new((/nens,dimsizes(arr&time)/),typregr(arr))
               arr_store!0 = "ensmem"
               arr_store!1 = "time"
               arr_store&time = arr&time
@@ -749,8 +925,8 @@ begin
            tttt := dtrend_msg(ispan(0,dimsizes(arr&time)-1,1),arr,False,True)   
            xyres@gsnLeftString = names_mod
            xyres@gsnRightString = decimalPlaces(tttt@slope*dimsizes(arr&time),2,True)+" "+nyr(cntr)+"yr~S~-1~N~"
-           plot_indmem(cntr) = gsn_csm_xy(wks,ispan(syear_mod,eyear_mod,1),arr,xyres)
-           plot_obs_overlay(cntr) = gsn_csm_xy(wks,ispan(syear(0),eyear(0),1),obs0,xyres2)
+           plot_indmem(cntr) = gsn_csm_xy(wks,yyyyFrac,arr,xyres)
+           plot_obs_overlay(cntr) = gsn_csm_xy(wks,yyyyFrac,obs0,xyres2)
            overlay(plot_indmem(cntr),plot_obs_overlay(cntr))
            delete([/arr,tttt/])
            cntr = cntr+1
@@ -796,16 +972,16 @@ begin
         ss_slope@_FillValue = arr_store@_FillValue
         stats := boxplot_stat(ss_slope)
         xyres3_sum@gsnRightString = decimalPlaces(stats(0)*dimsizes(arr_EM),2,True)+"/"+decimalPlaces(tttt@slope*dimsizes(arr_EM),2,True)+"/"+decimalPlaces(stats(4)*dimsizes(arr_EM),2,True)+" "+(max(arr_EM&time)-min(arr_EM&time)+1)+"yr~S~-1~N~"
-        plot_summary(cntr_EM) = gsn_csm_xy(wks,ispan(min(arr_EM&time),max(arr_EM&time),1),arr_range2,xyres3_sum)
-        plot_summary1(cntr_EM) = gsn_csm_xy(wks,ispan(min(arr_EM&time),max(arr_EM&time),1),arr_range1,xyres3b_sum)
-        plot_summary2(cntr_EM) = gsn_csm_xy(wks,ispan(min(arr_EM&time),max(arr_EM&time),1),arr_EM,xyres_sum)
-        plot_summary_obs_overlay(cntr_EM) = gsn_csm_xy(wks,ispan(syear(0),eyear(0),1),obs0,xyres2_sum)
-        plot_sum(cntr_EM) = gsn_csm_xy(wks,ispan(min(arr_EM&time),max(arr_EM&time),1),arr_EM,xyres_sumA)
+        plot_summary(cntr_EM) = gsn_csm_xy(wks,ispan(toint(min(arr_EM&time)),toint(max(arr_EM&time)),1),arr_range2,xyres3_sum)
+        plot_summary1(cntr_EM) = gsn_csm_xy(wks,ispan(toint(min(arr_EM&time)),toint(max(arr_EM&time)),1),arr_range1,xyres3b_sum)
+        plot_summary2(cntr_EM) = gsn_csm_xy(wks,ispan(toint(min(arr_EM&time)),toint(max(arr_EM&time)),1),arr_EM,xyres_sum)
+        plot_summary_obs_overlay(cntr_EM) = gsn_csm_xy(wks,yyyyFrac,obs0,xyres2_sum)
+        plot_sum(cntr_EM) = gsn_csm_xy(wks,ispan(toint(min(arr_EM&time)),toint(max(arr_EM&time)),1),arr_EM,xyres_sumA)
         overlay(plot_summary(cntr_EM),plot_summary1(cntr_EM))
         overlay(plot_summary(cntr_EM),plot_summary_obs_overlay(cntr_EM))
         overlay(plot_summary(cntr_EM),plot_summary2(cntr_EM))
 
-        fout = getenv("OUTDIR")+str_sub_str(names_EM_mod," ","_")+"_EM.cvdp_data.polar.taserr_eof."+syear_mod+"-"+eyear_mod+".nc"
+        fout = getenv("OUTDIR")+str_sub_str(names_EM_mod," ","_")+"_EM.cvdp_data.sam_psa_regr."+syear_mod+"-"+eyear_mod+".nc"
         if (isfilepresent2(fout)) then
            z = addfile(fout,"w")
         else
@@ -854,19 +1030,29 @@ begin
      end if
      frame(wks)
      delete(wks)
+     delete(yyyyFrac)
 
      if (wks_type.eq."png") then
-        system("mv "+OUTDIR+"polar.taserr_eof.timeseries.000001.png "+OUTDIR+variname(dd)+".indmem.png")
-        system("mv "+OUTDIR+"polar.taserr_eof.timeseries.000002.png "+OUTDIR+variname(dd)+".summary.png")
+        system("mv "+OUTDIR+vnm+"regr.timeseries.000001.png "+OUTDIR+variname(dd)+".indmem.png")
+        system("mv "+OUTDIR+vnm+"regr.timeseries.000002.png "+OUTDIR+variname(dd)+".summary.png")
         if (PNG_SCALE_SUMMARY.ne.100) then
            system("convert -resize "+PNG_SCALE_SUMMARY+"% "+OUTDIR+variname(dd)+".summary.png "+OUTDIR+variname(dd)+".summary.png")
         end if
      else
-        system("psplit "+OUTDIR+"polar.taserr_eof.timeseries.ps "+OUTDIR+"polar.taserr_eof.timeseries")
-        system("mv "+OUTDIR+"polar.taserr_eof.timeseries0001.ps "+OUTDIR+variname(dd)+".indmem.ps")
-        system("mv "+OUTDIR+"polar.taserr_eof.timeseries0002.ps "+OUTDIR+variname(dd)+".summary.ps")
-        system("rm "+OUTDIR+"polar.taserr_eof.timeseries.ps")
+        system("psplit "+OUTDIR+vnm+"regr.timeseries.ps "+OUTDIR+vnm+"regr.timeseries")
+        system("mv "+OUTDIR+vnm+"regr.timeseries0001.ps "+OUTDIR+variname(dd)+".indmem.ps")
+        system("mv "+OUTDIR+vnm+"regr.timeseries0002.ps "+OUTDIR+variname(dd)+".summary.ps")
+        system("rm "+OUTDIR+vnm+"regr.timeseries.ps")
      end if
   end do
-  print("Finished: polar.taserr_eof.ncl")
+
+  delete([/modname,nyr,nsim,na,names,paths,syear,eyear,names_EM,EM_num,delim/])
+
+ end do ; end of var loop
+
+ print("Finished: sam_psa.sfcvar_regr.ncl")
+
 end
+
+
+

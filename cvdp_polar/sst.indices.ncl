@@ -280,13 +280,26 @@ begin
      socn@units = sst@units
      socn@long_name = "Southern Ocean Index (monthly)"   
      delete(coswgt)
+
+;------------------------------------------------------------------------------------------
+;    Southern hemisphere SST leading PC 
+     sst_CW = SqrtCosWeight(sst)
+     evecv  = eofunc(sst_CW({lat|-70:-20},{lon|0:360},time|:),2,75)
+     pcts   = eofunc_ts_n(sst_CW(:,{-70:-20},{0:360}),evecv,False,0)
+     shsstpc1 = dim_standardize(pcts(0,:),0)
+     shsstpc1@comment_cvdp = "1st EOF of SST (70:20S, 0:360E)"
+     copy_VarCoords(nino34,shsstpc1)
+     shsstpc1@units = "1"
+     shsstpc1@long_name = "SH SST PC1 index (monthly)"
+     delete([/evecv,pcts,sst_CW/])
+
 ;------------------------------------------------------------------------------------------
      sst_dt = dtrend_msg_n(ispan(0,nyr(ee)*12-1,1),sst,False,False,0) ; detrend the sst array for some calculations
      copy_VarMeta(sst,sst_dt)
+     sst_CW = SqrtCosWeight(sst_dt)
+
 ;------------------------------------------------------------------------------------------
 ;  Pacific Meridional Modes
-  
-     sst_CW = SqrtCosWeight(sst_dt)
   
      evecv = eofunc(sst_CW({lat|-20:20},{lon|220:290},time|:),2,75)
      pcts  = eofunc_ts_n(sst_CW(:,{-20:20},{220:290}),evecv,False,0)
@@ -414,12 +427,12 @@ begin
         time_mon1&time_mon1 = time_mon1
         hov_hi!0 = "time_mon1"
         hov_hi&time_mon1 = time_mon1
-        longitude = finsst_hi&lon
-        longitude@standard_name = "longitude"
-        hov_hi!1 = "longitude"
-        hov_hi&longitude = longitude
+        lon0 = finsst_hi&lon
+        lon0@standard_name = "longitude"
+        hov_hi!1 = "lon0"
+        hov_hi&lon0 = lon0
         hov_hi@units = "C"
-        delete([/time_mon1,longitude/])
+        delete([/time_mon1,lon0/])
         hov_lo := (/ finsst_lo(24:52,:) /)  ; 24:52 runs from Jan+0->May+2 and matches range shown in plot
         copy_VarMeta(hov_hi,hov_lo)
     
@@ -474,9 +487,6 @@ begin
      delete([/nelnino,nlanina,nino34_3mo/])
   
 ;------------------------------------------------------------------------------------------
-     if(isfilepresent(fnt)) then
-       system("/bin/rm " + fnt)
-     end if
      z = addfile(fnt,"c")
      set_global_ncfile_attributes(z,names(ee),syear(ee),eyear(ee),getenv("VERSION"))
 
@@ -490,6 +500,7 @@ begin
      z->tropical_indian_ocean = set_varAtts(tio,"","","")
      z->indian_ocean_dipole = set_varAtts(iod,"","","")
      z->southern_ocean = set_varAtts(socn,"","","")
+     z->shsstpc1 = set_varAtts(shsstpc1,"","","") 
      z->atlantic_meridional_mode = set_varAtts(amm,"","","")
      z->atlantic_nino = set_varAtts(atl3,"","","")
      z->north_pacific_meridional_mode = set_varAtts(npmm,"","","")
@@ -506,6 +517,7 @@ begin
         delete([/hov_hi,hov_lo/])
      end if 
      delete([/nino3,nino4,nino12,amm,atl3,tsa,tna,tio,iod,socn,natl,npmm,spmm/])
+
 ;-----------------------------------------------------------------------------------------
 ;   nino3.4 running standard deviations
 ;
@@ -523,7 +535,18 @@ begin
         z->nino34_runstddev = set_varAtts(sd_run,"","","")
      end if
 ;-----------------------------------------------------------------------------------------
-;   nino3.4 spatial composites (sst, tas, psl, pr) 
+;    nino3.4 spatial composites (sst, tas, psl, pr) 
+;    nino3.4 shsstpc1 regression patterns (sst, tas, psl, pr) 
+
+     seas   = (/"ndjfma","mjjaso","monthly"/)
+     seayr  = new(dimsizes(nino34&time),integer)
+     do hh = 0,11 
+       if(hh.ge.4.and.hh.le.9) then 
+         seayr(hh::12) = 1 
+       else
+         seayr(hh::12) = 0
+       end if 
+     end do 
 
      hicntr = 0
      locntr = 0
@@ -584,7 +607,21 @@ begin
            delete(arr&time)
            arr&time = fspan(tmin*1.,(tmax*1.)+(11/12.),dimsizes(yyyymm))  ; then convert time from YYYYMM->YYYY.frac
 
-           arr = rmMonAnnCycTLL(arr) 
+           arr = rmMonAnnCycTLL(arr)
+           
+           nino34_reg_arr   = arr(0:2,:,:)
+           shsstpc1_reg_arr = arr(0:2,:,:)
+           do ss = 0,dimsizes(seas)-1
+             if (ss.le.1) then 
+               indtx = ind (seayr.eq.ss)
+             else
+               indtx = ind (seayr.gt.-1) 
+             end if 
+             nino34_reg_arr(ss,:,:)   = (/ regCoef_n(nino34(indtx),arr(indtx,:,:),0,0) /) 
+             shsstpc1_reg_arr(ss,:,:) = (/ regCoef_n(shsstpc1(indtx),arr(indtx,:,:),0,0)   /)
+             delete([/indtx/])
+           end do
+
            arr = (/ dtrend_msg_n(ispan(0,dimsizes(arr&time)-1,1),arr,False,False,0) /)
            arr = runave_n_Wrap(arr,3,0,0)
            arr(0,:,:) = (/ dim_avg_n(arr(:1,:,:),0) /)
@@ -634,11 +671,15 @@ begin
               z->nino34_lanina_spacomp_sst_son0 = set_varAtts(sc_arr_lo(9,:,:),"nino3.4 sst La Nina spatial composite (SON+0)","","")
               z->nino34_lanina_spacomp_sst_djf1 = set_varAtts(sc_arr_lo(12,:,:),"nino3.4 sst La Nina spatial composite (DJF+1)","","")
               z->nino34_lanina_spacomp_sst_mam1 = set_varAtts(sc_arr_lo(15,:,:),"nino3.4 sst La Nina spatial composite (MAM+1)","","")
+
+              z->nino34_regress_sst_ndjfma      = set_varAtts(nino34_reg_arr(0,:,:),"nino3.4 sst regression pattern (NDJFMA)","","")
+              z->nino34_regress_sst_mjjaso      = set_varAtts(nino34_reg_arr(1,:,:),"nino3.4 sst regression pattern (MJJASO)","","")
+              z->nino34_regress_sst_monthly     = set_varAtts(nino34_reg_arr(2,:,:),"nino3.4 sst regression pattern (Monthly)","","")
+              z->shsstpc1_regress_sst_ndjfma    = set_varAtts(shsstpc1_reg_arr(0,:,:),"shsstpc1 sst regression pattern (NDJFMA)","","")
+              z->shsstpc1_regress_sst_mjjaso    = set_varAtts(shsstpc1_reg_arr(1,:,:),"shsstpc1 sst regression pattern (MJJASO)","","")
+              z->shsstpc1_regress_sst_monthly   = set_varAtts(shsstpc1_reg_arr(2,:,:),"shsstpc1 sst regression pattern (Monthly)","","")
            end if
            if (hh.ge.1) then
-              if(isfilepresent(fnt)) then
-                 system("/bin/rm " + fnt)
-              end if
               z_arr = addfile(fnt,"c")
               z_arr@source = "NCAR Climate Analysis Section's Climate Variability Diagnostics Package - LE v"+getenv("VERSION")
               z_arr@Conventions = "CF-1.6"
@@ -660,6 +701,13 @@ begin
               z_arr->nino34_lanina_spacomp_tas_son0 = set_varAtts(sc_arr_lo(9,:,:),"nino3.4 tas La Nina spatial composite (SON+0)","","")
               z_arr->nino34_lanina_spacomp_tas_djf1 = set_varAtts(sc_arr_lo(12,:,:),"nino3.4 tas La Nina spatial composite (DJF+1)","","")
               z_arr->nino34_lanina_spacomp_tas_mam1 = set_varAtts(sc_arr_lo(15,:,:),"nino3.4 tas La Nina spatial composite (MAM+1)","","") 
+
+              z_arr->nino34_regress_tas_ndjfma      = set_varAtts(nino34_reg_arr(0,:,:),"nino3.4 tas regression pattern (NDJFMA)","","")
+              z_arr->nino34_regress_tas_mjjaso      = set_varAtts(nino34_reg_arr(1,:,:),"nino3.4 tas regression pattern (MJJASO)","","")
+              z_arr->nino34_regress_tas_monthly     = set_varAtts(nino34_reg_arr(2,:,:),"nino3.4 tas regression pattern (Monthly)","","")
+              z_arr->shsstpc1_regress_tas_ndjfma    = set_varAtts(shsstpc1_reg_arr(0,:,:),"shsstpc1 tas regression pattern (NDJFMA)","","")
+              z_arr->shsstpc1_regress_tas_mjjaso    = set_varAtts(shsstpc1_reg_arr(1,:,:),"shsstpc1 tas regression pattern (MJJASO)","","")
+              z_arr->shsstpc1_regress_tas_monthly   = set_varAtts(shsstpc1_reg_arr(2,:,:),"shsstpc1 tas regression pattern (Monthly)","","")
            end if
            if (hh.eq.2) then
               z_arr@notes = "Data from "+names_psl(ee)+" from "+syear_psl(ee)+"-"+eyear_psl(ee)
@@ -678,6 +726,13 @@ begin
               z_arr->nino34_lanina_spacomp_psl_son0 = set_varAtts(sc_arr_lo(9,:,:),"nino3.4 psl La Nina spatial composite (SON+0)","","")
               z_arr->nino34_lanina_spacomp_psl_djf1 = set_varAtts(sc_arr_lo(12,:,:),"nino3.4 psl La Nina spatial composite (DJF+1)","","")
               z_arr->nino34_lanina_spacomp_psl_mam1 = set_varAtts(sc_arr_lo(15,:,:),"nino3.4 psl La Nina spatial composite (MAM+1)","","") 
+
+              z_arr->nino34_regress_psl_ndjfma      = set_varAtts(nino34_reg_arr(0,:,:),"nino3.4 psl regression pattern (NDJFMA)","","")
+              z_arr->nino34_regress_psl_mjjaso      = set_varAtts(nino34_reg_arr(1,:,:),"nino3.4 psl regression pattern (MJJASO)","","")
+              z_arr->nino34_regress_psl_monthly     = set_varAtts(nino34_reg_arr(2,:,:),"nino3.4 psl regression pattern (Monthly)","","")
+              z_arr->shsstpc1_regress_psl_ndjfma    = set_varAtts(shsstpc1_reg_arr(0,:,:),"shsstpc1 psl regression pattern (NDJFMA)","","")
+              z_arr->shsstpc1_regress_psl_mjjaso    = set_varAtts(shsstpc1_reg_arr(1,:,:),"shsstpc1 psl regression pattern (MJJASO)","","")
+              z_arr->shsstpc1_regress_psl_monthly   = set_varAtts(shsstpc1_reg_arr(2,:,:),"shsstpc1 psl regression pattern (Monthly)","","")
            end if
            if (hh.eq.3) then
               z_arr@notes = "Data from "+names_pr(ee)+" from "+syear_pr(ee)+"-"+eyear_pr(ee)
@@ -696,6 +751,13 @@ begin
               z_arr->nino34_lanina_spacomp_pr_son0 = set_varAtts(sc_arr_lo(9,:,:),"nino3.4 pr La Nina spatial composite (SON+0)","","")
               z_arr->nino34_lanina_spacomp_pr_djf1 = set_varAtts(sc_arr_lo(12,:,:),"nino3.4 pr La Nina spatial composite (DJF+1)","","")
               z_arr->nino34_lanina_spacomp_pr_mam1 = set_varAtts(sc_arr_lo(15,:,:),"nino3.4 pr La Nina spatial composite (MAM+1)","","") 
+
+              z_arr->nino34_regress_pr_ndjfma      = set_varAtts(nino34_reg_arr(0,:,:),"nino3.4 pr regression pattern (NDJFMA)","","")
+              z_arr->nino34_regress_pr_mjjaso      = set_varAtts(nino34_reg_arr(1,:,:),"nino3.4 pr regression pattern (MJJASO)","","")
+              z_arr->nino34_regress_pr_monthly     = set_varAtts(nino34_reg_arr(2,:,:),"nino3.4 pr regression pattern (Monthly)","","")
+              z_arr->shsstpc1_regress_pr_ndjfma    = set_varAtts(shsstpc1_reg_arr(0,:,:),"shsstpc1 pr regression pattern (NDJFMA)","","")
+              z_arr->shsstpc1_regress_pr_mjjaso    = set_varAtts(shsstpc1_reg_arr(1,:,:),"shsstpc1 pr regression pattern (MJJASO)","","")
+              z_arr->shsstpc1_regress_pr_monthly   = set_varAtts(shsstpc1_reg_arr(2,:,:),"shsstpc1 pr regression pattern (Monthly)","","")
            end if
            if (hh.ge.1) then
               delete(z_arr)
@@ -2987,7 +3049,7 @@ begin
            fnt = getenv("OUTDIR")+modname(cntr)+".cvdp_data.sst.indices."+syear(cntr)+"-"+eyear(cntr)+".nc"
            fnt2 = getenv("OUTDIR")+modname(cntr)+".cvdp_data."+syear(cntr)+"-"+eyear(cntr)+".nc"
            arr := read_cvdp_le_data(fnt,fnt2,variname(dd))
-           obs0_rg = linint2_Wrap(obs0&longitude,obs0&time_mon1,obs0,True,arr&longitude,arr&time_mon1,0)
+           obs0_rg = linint2_Wrap(obs0&lon0,obs0&time_mon1,obs0,True,arr&lon0,arr&time_mon1,0)
            obs_diff = arr
            obs_diff = (/ arr - obs0_rg /)
 
@@ -3029,12 +3091,12 @@ begin
            end if
 
            if (.not.isvar("arr_store")) then  ; create an array to house all members, to be used to calculate EM
-              arr_store = new((/nens,dimsizes(arr&time_mon1),dimsizes(arr&longitude)/),typeof(arr))
+              arr_store = new((/nens,dimsizes(arr&time_mon1),dimsizes(arr&lon0)/),typeof(arr))
               arr_store!0 = "ensmem"
               arr_store!1 = "time_mon1"
               arr_store&time_mon1 = arr&time_mon1
-              arr_store!2 = "longitude"
-              arr_store&longitude = arr&longitude
+              arr_store!2 = "lon0"
+              arr_store&lon0 = arr&lon0
               arr_store@nens = 0
               copy_VarAtts(arr,arr_store)
               arr_store_events = new(nens,float)
@@ -3060,7 +3122,7 @@ begin
                  obs0_rg = arr
                  obs0_rg = obs0_rg@_FillValue
               else
-                 obs0_rg = linint2_Wrap(obs0&longitude,obs0&time_mon1,obs0,True,arr&longitude,arr&time_mon1,0)
+                 obs0_rg = linint2_Wrap(obs0&lon0,obs0&time_mon1,obs0,True,arr&lon0,arr&time_mon1,0)
               end if
            end if
            obs_diff = arr

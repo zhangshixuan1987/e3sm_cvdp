@@ -1,13 +1,19 @@
-; Calculates eof of regional model biases, as well as hovmollers, spectra, 
+; Calculates a variety of polar jet indices, as well as spectra, 
 ; monthly standard deviations, running standard deviations, and spatial
-; composites based on the bias PCs index. 
-;
-; Variables used: ts, psl, pr and tas
+; composites based on the jet latitude index.
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
+; Positive values of the jet latitude index correspond with equatorward shift of stronger-than-average westerlies 
+; over the mid-high latitudes (50S-70S) and weaker westerlies in the mid-latitudes (30S-50S).  
+; Its spatial structure comprises synchronous pressure anomalies of opposite sign in 
+; mid and high latitudes: when pressures are anomalously high over Antarctica the JET 
+; is defined as being in its positive phase and vice versa. 
+
+; Variables used: u850, ts, psl, pr and tas
 ;
 load "$CVDP_SCRIPTS/functions.ncl"
 
 begin
-  print("Starting: terr.indices.ncl")
+  print("Starting: polar.jet.indices.ncl")
   CREATE_GRAPHICS  = getenv("CREATE_GRAPHICS")  
   PNG_SCALE        = tofloat(getenv("PNG_SCALE"))
   OUTPUT_TYPE      = getenv("OUTPUT_TYPE") 
@@ -23,14 +29,14 @@ begin
     rlatn =  90.0
     rlats =  20.0
   else
-    rlatn =  90.0
-    rlats = -90.0
+    rlatn =   90.0
+    rlats =  -90.0
   end if
   end if
 
-  nsim = numAsciiRow("namelist_byvar/namelist_ts")
+  nsim = numAsciiRow("namelist_byvar/namelist_psl")
 
-  na = asciiread("namelist_byvar/namelist_ts",(/nsim/),"string")
+  na = asciiread("namelist_byvar/namelist_psl",(/nsim/),"string")
   names = new(nsim,"string")
   paths = new(nsim,"string")
   syear = new(nsim,"integer",-999)
@@ -57,9 +63,7 @@ begin
      end do
   end do
   nyr = eyear-syear+1
-
-  numobs = num(EM_num.eq.0)
-  nEM = max(EM_num)
+  nyr_max = max(nyr)
 
 ;-------TAS variable metadata------------------------------------
   nsim_tas = numAsciiRow("namelist_byvar/namelist_trefht")
@@ -82,31 +86,29 @@ begin
      end do
   end do
   delete(na_tas)
-  nyr_tas = eyear_tas-syear_tas+1
+  nyr_tas = eyear_tas-syear_tas+1  
+;---------SST variable metadata------------------------------------------------------------
+  nsim_sst = numAsciiRow("namelist_byvar/namelist_ts")
+  na_sst = asciiread("namelist_byvar/namelist_ts",(/nsim_sst/),"string")
+  names_sst = new(nsim_sst,"string")
+  paths_sst = new(nsim_sst,"string")
+  syear_sst = new(nsim_sst,"integer",-999)
+  eyear_sst = new(nsim_sst,"integer",-999)
 
-;---------PSL variable metadata------------------------------------------------------------
-  nsim_psl  = numAsciiRow("namelist_byvar/namelist_psl")
-  na_psl    = asciiread("namelist_byvar/namelist_psl",(/nsim_psl/),"string")
-  names_psl = new(nsim_psl,"string")
-  paths_psl = new(nsim_psl,"string")
-  syear_psl = new(nsim_psl,"integer",-999)
-  eyear_psl = new(nsim_psl,"integer",-999)
-
-  do gg = 0,nsim_psl-1
-     names_psl(gg) = str_strip(str_get_field(na_psl(gg),1,delim))
-     paths_psl(gg) = str_strip(str_get_field(na_psl(gg),2,delim))
-     syear_psl(gg) = stringtointeger(str_strip(str_get_field(na_psl(gg),3,delim)))
-     eyear_psl(gg) = stringtointeger(str_strip(str_get_field(na_psl(gg),4,delim)))
+  do gg = 0,nsim_sst-1
+     names_sst(gg) = str_strip(str_get_field(na_sst(gg),1,delim))
+     paths_sst(gg) = str_strip(str_get_field(na_sst(gg),2,delim))
+     syear_sst(gg) = stringtointeger(str_strip(str_get_field(na_sst(gg),3,delim)))
+     eyear_sst(gg) = stringtointeger(str_strip(str_get_field(na_sst(gg),4,delim)))
   end do
-  modname_psl = str_sub_str(names_psl," ","_")
-  do ff = 0,dimsizes(modname_pr)-1
+  modname_sst = str_sub_str(names_sst," ","_")
+  do ff = 0,dimsizes(modname_sst)-1
      do gg = 0,dimsizes(bc)-1
-        modname_psl(ff) = str_sub_str(modname_psl(ff),bc(gg),"_")
+        modname_sst(ff) = str_sub_str(modname_sst(ff),bc(gg),"_")
      end do
   end do
-  delete(na_psl)
-  nyr_psl = eyear_psl-syear_psl+1
-
+  delete(na_sst)
+  nyr_sst = eyear_sst-syear_sst+1  
 ;---------PR variable metadata------------------------------------------------------------
   nsim_pr = numAsciiRow("namelist_byvar/namelist_prect")
   na_pr = asciiread("namelist_byvar/namelist_prect",(/nsim_pr/),"string")
@@ -128,7 +130,30 @@ begin
      end do
   end do
   delete(na_pr)
-  nyr_pr = eyear_pr-syear_pr+1
+  nyr_pr = eyear_pr-syear_pr+1  
+
+;---------u850 variable metadata------------------------------------------------------------
+  nsim_ua = numAsciiRow("namelist_byvar/namelist_u850")
+  na_ua = asciiread("namelist_byvar/namelist_u850",(/nsim_ua/),"string")
+  names_ua = new(nsim_ua,"string")
+  paths_ua = new(nsim_ua,"string")
+  syear_ua = new(nsim_ua,"integer",-999)
+  eyear_ua = new(nsim_ua,"integer",-999)
+
+  do gg = 0,nsim_pr-1
+     names_ua(gg) = str_strip(str_get_field(na_ua(gg),1,delim))
+     paths_ua(gg) = str_strip(str_get_field(na_ua(gg),2,delim))
+     syear_ua(gg) = stringtointeger(str_strip(str_get_field(na_ua(gg),3,delim)))
+     eyear_ua(gg) = stringtointeger(str_strip(str_get_field(na_ua(gg),4,delim)))
+  end do
+  modname_ua = str_sub_str(names_ua," ","_")
+  do ff = 0,dimsizes(modname_ua)-1
+     do gg = 0,dimsizes(bc)-1
+        modname_ua(ff) = str_sub_str(modname_ua(ff),bc(gg),"_")
+     end do
+  end do
+  delete(na_ua)
+  nyr_ua = eyear_ua-syear_ua+1
 
 ;-------------------------------------------------------------------------------
   wgt = (/1.,2.,1./)   
@@ -138,251 +163,123 @@ begin
   val1 = .95
   val2 = .99
 
-  ;;read and calculate the ensemble mean obs;; 
-  if (numobs.eq.0) then
-     print("no observations show up, should not to run this script....")
-     print("Finished: terr.indices.ncl")
-     exit
-  else
-    do gg = 0,numobs-1    ; 
-      fnt = getenv("OUTDIR")+modname(ee)+".cvdp_data.terr.indices."+syear(ee)+"-"+eyear(ee)+".nc"
-      fnt2 = getenv("OUTDIR")+modname(ee)+".cvdp_data."+syear(ee)+"-"+eyear(ee)+".nc"
-      f_test := read_cvdp_le_data(fnt,fnt2,"temobs_mon")
-      if (.not.isatt(f_test,"is_all_missing")) then
-         data_flag = True    ; data is present, but need raw data to compute EM
-      else
-         data_flag = False
-      end if
-      arr = data_read_in(paths_mod,"TS",syear_mod,eyear_mod)    ; read in data, orient lats/lons correctly, set time coordinate variable up
-      if (isatt(arr,"is_all_missing")) then
-         delete(arr)
-         continue
-      end if
-
-     ;arr = rmMonAnnCycTLL(arr)
-      if (.not.isvar("arr_EM")) then    ; create an array to house all members, to be used to calculate EM
-         obs_EM = arr
-         obs_EM = 0.
-         obs_EM = 0
-      end if
-      obs_EM = (/ obs_EM+arr /)
-      cntr_EM = cntr_EM+1
-    end do 
-    if (isvar("obs_EM")) then
-       obs_EM = (/ obs_EM/cntr_EM /)
-    end if
-  end if
-
   do ee = 0,nsim-1
-     fnt = getenv("OUTDIR")+modname(ee)+".cvdp_data.terr.indices."+syear(ee)+"-"+eyear(ee)+".nc"
+     fnt = getenv("OUTDIR")+modname(ee)+".cvdp_data.polar.jet.indices."+syear(ee)+"-"+eyear(ee)+".nc"
      fnt2 = getenv("OUTDIR")+modname(ee)+".cvdp_data."+syear(ee)+"-"+eyear(ee)+".nc"
-     f_test := read_cvdp_le_data(fnt,fnt2,"terr")
+     f_test := read_cvdp_le_data(fnt,fnt2,"jet_loci")
+
      if (.not.isatt(f_test,"is_all_missing")) then
         continue
      end if
 
-     print(paths(ee))
-     exit
-
-     sst := data_read_in(paths(ee),"TS",syear(ee),eyear(ee))    ; read in data, orient lats/lons correctly, set time coordinate variable up
-     if (isatt(sst,"is_all_missing")) then
-        delete(sst)
+     ua := data_read_in(paths_ua(ee),"U850",syear(ee),eyear(ee))    ; read in data, orient lats/lons correctly, set time coordinate variable up
+     if (isatt(ua,"is_all_missing")) then
+        delete(ua)
         continue
      end if 
-     sst = where(sst.le.-1.8,-1.8,sst)    ; set all values below -1.8 to -1.8
-     m = addfile("$NCARG_ROOT/lib/ncarg/data/cdf/landsea.nc","r")   ; mask out land (this is redundant for data that is already masked)
-     sst = mask(sst,conform(sst,landsea_mask(m->LSMASK,sst&lat,sst&lon),(/1,2/)).ge.1,False)
-     delete(m)  
 
-     sst = rmMonAnnCycTLL(sst)
+     llats   = -70. ; jet index region 
+     llatn   = -20.
+     llonw   = 0.
+     llone   = 360.
 
-     coswgt=cos(rad*sst&lat)
-     coswgt!0 = "lat" 
-     coswgt&lat= sst&lat        
-     llats = -5.     ; nino3.4
-     llatn = 5.
-     llonw = 190.
-     llone = 240.
-     terr = wgt_areaave_Wrap(sst(:,{llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0)  
-     terr@comment_cvdp = "area average domain ("+llats+":"+llatn+"N, "+llonw+":"+llone+"E)"
-     terr@units = sst@units
-     terr@long_name = "nino3.4 timeseries (monthly)" 
+     finjet  = calculate_polar_jet(ua,llats,llatn,llonw,llone)
 
-    ;cumulative terr index
-     scterr = cumsum(terr, 2)
-     scterr = dim_standardize(scterr,0)
-     scterr@comment_cvdp = "area average mean domain ("+llats+":"+llatn+"N, "+llonw+":"+llone+"E)"
-     copy_VarCoords(terr,scterr)
-     scterr@units = "C"
-     scterr@long_name = "Cumulative terr index (monthly)"
+     jet_ins               = finjet(0,:)
+     jet_ins@comment_cvdp  = "jet domain ("+llatn+":"+llats+"S, "+llonw+":"+llone+"E)"
+     jet_ins@units         = "m s~S~-1~N~"
+     jet_ins@long_name     = "jet intensity (u850) timeseries (monthly)"
 
-     llats = -5.    ; nino3
-     llatn = 5.
-     llonw = 210.
-     llone = 270.
-     nino3 = wgt_areaave(sst(:,{llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0)  
-     nino3@comment_cvdp = "area average domain ("+llats+":"+llatn+"N, "+llonw+":"+llone+"E)"
-     copy_VarCoords(terr,nino3)
-     nino3@units = sst@units
-     nino3@long_name = "nino3 timeseries (monthly)"       
-     
-     llats = -5.    ; nino4
-     llatn = 5.
-     llonw = 160.
-     llone = 210.
-     nino4 = wgt_areaave(sst(:,{llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0)  
-     nino4@comment_cvdp = "area average domain ("+llats+":"+llatn+"N, "+llonw+":"+llone+"E)"
-     copy_VarCoords(terr,nino4)
-     nino4@units = sst@units
-     nino4@long_name = "nino4 timeseries (monthly)"       
-     
-     llats = -10.    ; nino1+2
-     llatn = 0.
-     llonw = 270.
-     llone = 280.
-     nino12 = wgt_areaave(sst(:,{llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0)  
-     nino12@comment_cvdp = "area average domain ("+llats+":"+llatn+"N, "+llonw+":"+llone+"E)"
-     copy_VarCoords(terr,nino12)
-     nino12@units = sst@units
-     nino12@long_name = "nino1+2 timeseries (monthly)"       
+     jet_loc               = finjet(1,:)
+     jet_loc@comment_cvdp  = "jet domain ("+llatn+":"+llats+"S, "+llonw+":"+llone+"E)"
+     jet_loc@units         = "degree south"
+     jet_loc@long_name     = "jet latitude timeseries (monthly)"
 
-     ssttemp = lonFlip(sst) 
-     amm_n = wgt_areaave(ssttemp(:,{5.:15.},{-50.:-20.}),coswgt({5.:15.}),1.0,0)      ;  Atlantic Meridional Mode
-     amm_s = wgt_areaave(ssttemp(:,{-15.:-5.},{-20.:10.}),coswgt({-15.:-5.}),1.0,0)
-     amm = amm_n
-     amm = (/ amm_n - amm_s /)
-     delete([/amm_n,amm_s/])
-     amm@comment_cvdp = "area average domain (-5:20N, 80W:0E) - (-10:5N, 60W:15E)"
-     copy_VarCoords(terr,amm)
-     amm@units = sst@units
-     amm@long_name = "Atlantic Meridional Mode Index (monthly)"   
+     jet_insi              = finjet(2,:)
+     jet_insi@comment_cvdp = "jet domain ("+llatn+":"+llats+"S, "+llonw+":"+llone+"E)"
+     jet_insi@units        = "1"
+     jet_insi@long_name    = "Standardized jet intensity (u850) timeseries (monthly)"
 
-     llats = -3.    ;  Atlantic Nino (ATL3)
-     llatn = 3.
-     llonw = -20. 
-     llone = 0. 
-     atl3 = wgt_areaave(ssttemp(:,{llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0)  
-     atl3@comment_cvdp = "area average domain ("+llats+":"+llatn+"N, "+llonw+":"+llone+"E)"
-     copy_VarCoords(terr,atl3)
-     atl3@units = sst@units
-     atl3@long_name = "Atlantic Nino Index (monthly)"     
+     jet_loci               = finjet(3,:)
+     jet_loci@comment_cvdp  = "jet domain ("+llatn+":"+llats+"S, "+llonw+":"+llone+"E)"
+     jet_loci@units         = "1"
+     jet_loci@long_name     = "Standardized jet latitude timeseries (monthly)" 
 
-     llats = 0.    ;  North Atlantic
-     llatn = 60.
-     llonw = -80. 
-     llone = 0. 
-     natl = wgt_areaave(ssttemp(:,{llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0)  
-     natl@comment_cvdp = "area average domain ("+llats+":"+llatn+"N, "+llonw+":"+llone+"E)"
-     copy_VarCoords(terr,natl)
-     natl@units = sst@units
-     natl@long_name = "North Atlantic timeseries (monthly)" 
-     
-     llats = -20.    ;  Tropical Southern Atlantic Index
-     llatn = 0.
-     llonw = -30.
-     llone = 10.
-     tsa = wgt_areaave(ssttemp(:,{llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0)  
-     tsa@comment_cvdp = "area average domain ("+llats+":"+llatn+"N, "+llonw+":"+llone+"E)"
-     copy_VarCoords(terr,tsa)
-     tsa@units = sst@units
-     tsa@long_name = "Tropical Southern Atlantic SST timeseries (monthly)"       
-     delete(ssttemp)
-     
-     llats = 5.5    ;  Tropical Northern Atlantic Index
-     llatn = 23.5
-     llonw = 302.5
-     llone = 345.
-     tna = wgt_areaave(sst(:,{llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0)  
-     tna@comment_cvdp = "area average domain ("+llats+":"+llatn+"N, "+llonw+":"+llone+"E)"
-     copy_VarCoords(terr,tna)
-     tna@units = sst@units
-     tna@long_name = "Tropical Northern Atlantic SST timeseries (monthly)"       
+     delete([/finjet,ua/])
 
-     llats = -15.    ;  Indian Ocean SST index
-     llatn = 15.
-     llonw = 40.
-     llone = 110.
-     tio = wgt_areaave(sst(:,{llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0)  
-     tio@comment_cvdp = "area average domain ("+llats+":"+llatn+"N, "+llonw+":"+llone+"E)"
-     copy_VarCoords(terr,tio)
-     tio@units = sst@units
-     tio@long_name = "Tropical Indian Ocean SST timeseries (monthly)"       
-     
-                     ; Indian Ocean Dipole Index http://www.bom.gov.au/climate/IOD/about_IOD.shtml
-     iod = wgt_areaave(sst(:,{-10.:10.},{50.:70.}),coswgt({-10.:10.}),1.0,0) - wgt_areaave(sst(:,{-10.:0.},{90.:110.}),coswgt({-10.:0.}),1.0,0)  
-     iod@comment_cvdp = "area average domain (-10:10N, 50:70E) - (-10:0N, 90:110E)"
-     copy_VarCoords(terr,iod)
-     iod@units = sst@units
-     iod@long_name = "Indian Ocean Dipole Index (monthly)"       
-
-     socn = wgt_areaave(sst(:,{-70.:-50.},:),coswgt({-70.:-50.}),1.0,0) 
-     socn@comment_cvdp = "area average domain (-70:-50N, 0:360E)"
-     copy_VarCoords(terr,socn)
-     socn@units = sst@units
-     socn@long_name = "Southern Ocean Index (monthly)"   
-     delete(coswgt)
 ;------------------------------------------------------------------------------------------
-     sst_dt = dtrend_msg_n(ispan(0,nyr(ee)*12-1,1),sst,False,False,0) ; detrend the sst array for some calculations
-     copy_VarMeta(sst,sst_dt)
-;------------------------------------------------------------------------------------------
-;  Pacific Meridional Modes
-  
-     sst_CW = SqrtCosWeight(sst_dt)
-  
-     evecv = eofunc(sst_CW({lat|-20:20},{lon|220:290},time|:),2,75)
-     pcts  = eofunc_ts_n(sst_CW(:,{-20:20},{220:290}),evecv,False,0)
-     pc1   = dim_standardize(pcts(0,:),0) 
-     finsst0 = regCoef_n(pc1,sst_dt,0,0)
-     finsst0_sc = sst_dt
-     finsst0_sc = finsst0_sc@_FillValue
-     do hh = 0,dimsizes(sst_dt&time)-1
-        finsst0_sc(hh,:,:) = (/ finsst0*pc1(hh) /)
+;  cumulative JET index 
+    scjet_loci = cumsum(jet_loci, 2)
+    scjet_loci = dim_standardize(scjet_loci,0) 
+    scjet_loci@comment_cvdp = "zonal mean domain ("+llatn+":"+llats+"S, "+llonw+":"+llone+"E)" 
+    copy_VarCoords(jet_loci,scjet_loci)
+    scjet_loci@units = "1"
+    scjet_loci@long_name = "Cumulative JET index (monthly)"
+
+;--------------------------------------------------------------------
+; JET(+) - JET(-) (PSL)
+; This index is defined as the number of positive JET months minus the number of negative JET months 
+; over 8-year running periods. JET events are identified using the 3-month running mean JET index 
+; and an amplitude threshold of 1 standard deviation. SP-SN measures the extent 
+; to which JET dominates each 8-year period
+     jet_loci_3mo = jet_loci
+     jet_loci_3mo = wgt_runave(jet_loci,wgt,1)
+     jet_loci_3mo = dtrend_msg(ispan(0,dimsizes(jet_loci&time)-1,1),jet_loci_3mo,True,False)
+     jet_loci_3mo = dim_standardize(jet_loci_3mo,0)
+     njetps    = jet_loci
+     njetns    = jet_loci
+     njetps    = 0
+     njetns    = 0
+     mocntr     = 8 * 12 / 2 ; 8 year running window
+     do gg = 0,dimsizes(jet_loci_3mo)-1
+        if(gg.lt.mocntr) then
+          njetps(gg) = num(jet_loci_3mo(:gg).ge.1.0)
+          njetns(gg) = num(jet_loci_3mo(:gg).le.-1.0)
+        else if (gg.gt.(dimsizes(jet_loci_3mo)-mocntr-1))
+          njetps(gg) = num(jet_loci_3mo(gg:).ge.1.0)
+          njetns(gg) = num(jet_loci_3mo(gg:).le.-1.0)
+        else
+          njetps(gg) = num(jet_loci_3mo((gg-mocntr+1):(gg+mocntr)).ge.1.0)
+          njetns(gg) = num(jet_loci_3mo((gg-mocntr+1):(gg+mocntr)).le.-1.0)
+        end if
+        end if
      end do
+     jet_ps_nmon                 = njetps
+     jet_ps_nmon@comment_cvdp    = "jet_loci >= std"
+     jet_ps_nmon@units           = "#"
+     jet_ps_nmon@long_name       = "number of JET(+) events (month)"
+     copy_VarCoords(jet_loci,jet_ps_nmon)
+     jet_ns_nmon                 = njetns
+     jet_ns_nmon@comment_cvdp    = "jet_loci <= - std"
+     jet_ns_nmon@units           = "#"
+     jet_ns_nmon@long_name       = "number of JET(-) events (month)"
+     copy_VarCoords(jet_loci,jet_ns_nmon)
+     jet_psmns_nmon              = njetps - njetns
+     jet_psmns_nmon@comment_cvdp = "jet_loci +/- std"
+     jet_psmns_nmon@units        = "#"
+     jet_psmns_nmon@long_name    = "JET(+) - JET(-) events (month)"
+     copy_VarCoords(jet_loci,jet_psmns_nmon)
+     delete([/njetps,njetns,jet_loci_3mo/])
 
-     sstresid = sst_dt - finsst0_sc   ; subtract out ENSO
-     copy_VarMeta(sst_dt,sstresid)
-     delete([/evecv,pcts,pc1,finsst0,finsst0_sc,sst_CW/])
-
-     sstresid_CW = SqrtCosWeight(sstresid)
-     evecv = eofunc(sstresid_CW({lat|-20:30},{lon|175:265},time|:),2,75)
-     pcts  = eofunc_ts_n(sstresid_CW(:,{-20:30},{175:265}),evecv,False,0)
-     npmm   = dim_standardize(pcts(0,:),0) 
-     npmm_pattern = regCoef_n(npmm,sstresid,0,0)
-     copy_VarMeta(sst_dt(0,:,:),npmm_pattern)
-     copy_VarCoords(terr,npmm)
-     npmm@units = "1"
-     npmm@long_name = "North Pacific Meridional Mode (monthly)"   
-     npmm@comment_cvdp = "1st EOF of SST-residual (-20:30N, 175:265E)"
-     if (npmm_pattern({22},{240}).lt.0) then
-        npmm = npmm*-1.
-        npmm_pattern = npmm_pattern*-1.
-     end if
-     delete([/evecv,pcts,npmm_pattern/])
-
-     evecv = eofunc(sstresid_CW({lat|-35:-20},{lon|180:290},time|:),2,75)
-     pcts  = eofunc_ts_n(sstresid_CW(:,{-35:-20},{180:290}),evecv,False,0)
-     spmm   = dim_standardize(pcts(0,:),0) 
-     spmm_pattern := regCoef_n(spmm,sstresid,0,0)
-     copy_VarMeta(sst_dt(0,:,:),spmm_pattern)
-     copy_VarCoords(terr,spmm)
-     spmm@units = "1"
-     spmm@long_name = "South Pacific Meridional Mode (monthly)"   
-     spmm@comment_cvdp = "1st EOF of SST-residual (-35:-20N, 180:290E)"
-     if (spmm_pattern({-25},{280}).lt.0) then
-        spmm = spmm*-1.
-        spmm_pattern = spmm_pattern*-1.
-     end if
-     delete([/evecv,pcts,sstresid_CW,sstresid,spmm_pattern/])
 ;------------------------------------------------------------------------------------------
-;  Nino3.4 monthly standard deviation
+     psl := data_read_in(paths(ee),"PSL",syear(ee),eyear(ee))    ; read in data, orient lats/lons correctly, set time coordinate variable up
+     if (isatt(psl,"is_all_missing")) then
+        delete(psl)
+        continue
+     end if
+     psl_dt = dtrend_msg_n(ispan(0,nyr(ee)*12-1,1),psl,False,False,0) ; detrend the sst array for some calculations
+     copy_VarMeta(psl,psl_dt)
 
-     terr_dt = dtrend_msg(ispan(0,dimsizes(terr&time)-1,1),terr,True,False)
-     terr_mon_sd = new(12,typeof(terr))
+;------------------------------------------------------------------------------------------
+;  jet_loci monthly standard deviation
+
+     jet_loci_dt = dtrend_msg(ispan(0,dimsizes(jet_loci&time)-1,1),jet_loci,True,False)
+     jet_loci_mon_sd = new(12,typeof(jet_loci))
      
      do hh = 0,11
-        terr_mon_sd(hh) = (/ dim_stddev(terr_dt(hh::12)) /)
+        jet_loci_mon_sd(hh) = (/ dim_stddev(jet_loci_dt(hh::12)) /)
      end do
-     terr_mon_sd@units = "C"
+     jet_loci_mon_sd@units = "1"
      time_mon2 = ispan(0,11,1)
      time_mon2@units = "months since 0000-01-01 00:00:00"
      time_mon2@long_name = "Time"
@@ -390,27 +287,27 @@ begin
      time_mon2@calendar = "standard"
      time_mon2!0 = "time_mon2"
      time_mon2&time_mon2 = time_mon2
-     terr_mon_sd!0 = "time_mon2"
-     terr_mon_sd&time_mon2 = time_mon2
+     jet_loci_mon_sd!0 = "time_mon2"
+     jet_loci_mon_sd&time_mon2 = time_mon2
      delete(time_mon2)
 ;--------------------------------------------------------------------
-;  Spatial Hovmoller composites (SST)
+;  Spatial Hovmoller composites (PSL)
 
-     terrT := wgt_runave(terr,wgt,1)     ; for use in ENSO composites / hovmuellers / running standard deviations
-     terr_ndj := terrT(11:dimsizes(terrT)-13:12)   ; cannot count last 1yr as spatial composite uses +1yrs data betond NDJ..  
-     terr_ndj!0 = "time"
-     terr_ndj&time = ispan(syear(ee),eyear(ee)-1,1)    
-     terr_ndj = dtrend_msg(ispan(0,dimsizes(terr_ndj&time)-1,1),terr_ndj,True,False)
-     terr_ndj = dim_standardize(terr_ndj,0)
+     jet_lociT := wgt_runave(jet_loci,wgt,1)  ; for use in JET composites / hovmuellers / running standard deviations
+     jet_loci_ndj := jet_lociT(11:dimsizes(jet_lociT)-13:12)   ; cannot count last 1yr as spatial composite uses +1yrs data betond NDJ..  
+     jet_loci_ndj!0 = "time"
+     jet_loci_ndj&time = ispan(syear(ee),eyear(ee)-1,1)    
+     jet_loci_ndj = dtrend_msg(ispan(0,dimsizes(jet_loci_ndj&time)-1,1),jet_loci_ndj,True,False)
+     jet_loci_ndj = dim_standardize(jet_loci_ndj,0)
 
      if (nyr(ee).ge.10) then   ; 10+yrs required for hovmollers
-        sstr = sst_dt(:,{-3:3},{120:280})                        ; ENSO hovmuellers based on NDJ terr
-        finsst_hi := sstr(:60,0,:)    ; for Jan-2 -> Jan+3
-        finsst_hi!0 = "time"
-        finsst_hi&time = ispan(0,60,1)
-        finsst_hi = 0.
-        finsst_lo := finsst_hi
-        finsst_mid := finsst_hi
+        pslr = psl_dt(:,{-70:-30},{0:360})  ; JET hovmuellers based on NDJ jet_loci
+        finpsl_hi := pslr(:60,0,:)    ; for Jan-2 -> Jan+3
+        finpsl_hi!0 = "time"
+        finpsl_hi&time = ispan(0,60,1)
+        finpsl_hi = 0.
+        finpsl_lo := finpsl_hi
+        finpsl_mid := finpsl_hi
         cntr_hi = 0
         cntr_lo = 0
         cntr_mid = 0
@@ -419,33 +316,33 @@ begin
         cntr_hi@_FillValue = default_fillvalue(typeof(cntr_hi)) 
         
         mocntr = 24   ; note: if this is set at 24 gg should start at 2
-        do gg = 2,dimsizes(terr_ndj)-3   ; remember that Dec is month 11. End @ -3 because we need to grab + 3 yrs and 1 month from there (terr_ndj already ends at eyear-1)
-           if (.not.ismissing(terr_ndj(gg))) then    ; note that finsst_* indices 24:52 (Jan+0 -> May +2) are all that is shown in the hovmoller plots 
-              if (terr_ndj(gg).ge.1.) then
-                 finsst_hi = (/ finsst_hi+dim_avg_n(sstr(mocntr-24:mocntr+36,:,:),1) /)    ; terr_ndj value is at sstr index mocntr+11     
+        do gg = 2,dimsizes(jet_loci_ndj)-3   ; remember that Dec is month 11. End @ -3 because we need to grab + 3 yrs and 1 month from there (jet_loci_ndj already ends at eyear-1)
+           if (.not.ismissing(jet_loci_ndj(gg))) then    ; note that finpsl_* indices 24:52 (Jan+0 -> May +2) are all that is shown in the hovmoller plots 
+              if (jet_loci_ndj(gg).ge.1.) then
+                 finpsl_hi = (/ finpsl_hi+ (dim_avg_n(pslr(mocntr-24:mocntr+36,{-50:-30},:),1) - dim_avg_n(pslr(mocntr-24:mocntr+36,{-70:-50},:),1))/) ; jet_loci_ndj value is at pslr index mocntr+11     
                  cntr_hi = cntr_hi+1
               end if
-              if (terr_ndj(gg).ge.-0.5.and.terr_ndj(gg).le.0.5) then
-                 finsst_mid = (/ finsst_mid+dim_avg_n(sstr(mocntr-24:mocntr+36,:,:),1) /)          
+              if (jet_loci_ndj(gg).ge.-0.5.and.jet_loci_ndj(gg).le.0.5) then
+                 finpsl_mid = (/ finpsl_mid + (dim_avg_n(pslr(mocntr-24:mocntr+36,{-50:-30},:),1) - dim_avg_n(pslr(mocntr-24:mocntr+36,{-70:-50},:),1)) /)
                  cntr_mid = cntr_mid+1
               end if
-              if (terr_ndj(gg).le.-1.) then
-                 finsst_lo = (/ finsst_lo+dim_avg_n(sstr(mocntr-24:mocntr+36,:,:),1) /)            
+              if (jet_loci_ndj(gg).le.-1.) then
+                 finpsl_lo = (/ finpsl_lo + (dim_avg_n(pslr(mocntr-24:mocntr+36,{-50:-30},:),1) - dim_avg_n(pslr(mocntr-24:mocntr+36,{-70:-50},:),1)) /)
                  cntr_lo = cntr_lo+1
               end if
            end if
            mocntr = mocntr+12
         end do
-        delete([/sstr,mocntr,sst_dt/])
+        delete([/pslr,mocntr,psl_dt/])
 
         cntr_hi  = where(cntr_hi.eq.0, cntr_hi@_FillValue, cntr_hi)
         cntr_mid = where(cntr_mid.eq.0,cntr_mid@_FillValue,cntr_mid)
         cntr_lo  = where(cntr_lo.eq.0, cntr_lo@_FillValue, cntr_lo)
-        finsst_hi  = (/ finsst_hi/cntr_hi /)
-        finsst_mid = (/ finsst_mid/cntr_mid /)
-        finsst_lo  = (/ finsst_lo/cntr_lo /)
+        finpsl_hi  = (/ finpsl_hi/cntr_hi /)
+        finpsl_mid = (/ finpsl_mid/cntr_mid /)
+        finpsl_lo  = (/ finpsl_lo/cntr_lo /)
 
-        hov_hi := (/ finsst_hi(24:52,:) /)  ; 24:52 runs from Jan+0->May+2 and matches range shown in plot
+        hov_hi := (/ finpsl_hi(24:52,:) /)  ; 24:52 runs from Jan+0->May+2 and matches range shown in plot
         time_mon1 = ispan(0,28,1)
         time_mon1@units = "months since 0000-01-01 00:00:00"
         time_mon1@long_name = "Time"
@@ -455,129 +352,81 @@ begin
         time_mon1&time_mon1 = time_mon1
         hov_hi!0 = "time_mon1"
         hov_hi&time_mon1 = time_mon1
-        longitude = finsst_hi&lon
-        longitude@standard_name = "longitude"
-        hov_hi!1 = "longitude"
-        hov_hi&longitude = longitude
-        hov_hi@units = "C"
-        delete([/time_mon1,longitude/])
-        hov_lo := (/ finsst_lo(24:52,:) /)  ; 24:52 runs from Jan+0->May+2 and matches range shown in plot
+        lon1 = finpsl_hi&lon
+        lon1@standard_name = "longitude"
+        hov_hi!1 = "lon1"
+        hov_hi&lon1 = lon1
+        hov_hi@units = "hPa"
+        delete([/time_mon1,lon1/])
+        hov_lo := (/ finpsl_lo(24:52,:) /)  ; 24:52 runs from Jan+0->May+2 and matches range shown in plot
         copy_VarMeta(hov_hi,hov_lo)
     
         hov_hi@number_of_events = cntr_hi
         hov_lo@number_of_events = cntr_lo
      end if
 
-;--------------------------------------------------------------------
-; El Niño- La Niña index (SST) 
-; This index is defined as the number of El Niño years minus the number of La Niña years 
-; over 8-year running periods. ENSO events are identified using the December Niño3.4 index \ 
-; and an amplitude threshold of 1 standard deviation. Following Power et.al. (2021), E-L is a 
-; measure of the extent to which El Niño dominates each 8-year period
-
-     terr_3mo = terr
-     terr_3mo = wgt_runave(terr,wgt,1) 
-     terr_3mo = dtrend_msg(ispan(0,dimsizes(terr&time)-1,1),terr_3mo,True,False)
-     terr_3mo = dim_standardize(terr_3mo,0) 
-     nelnino    = terr
-     nlanina    = terr 
-     nelnino    = 0 
-     nlanina    = 0 
-     mocntr     = 8 * 12 / 2 ; 8 year running window
-     do gg = 0,dimsizes(terr_3mo)-1
-        if(gg.lt.mocntr) then
-          nelnino(gg) = num(terr_3mo(:gg).ge.1.0)
-          nlanina(gg) = num(terr_3mo(:gg).le.-1.0)
-        else if (gg.gt.(dimsizes(terr_3mo)-mocntr-1))  
-          nelnino(gg) = num(terr_3mo(gg:).ge.1.0)
-          nlanina(gg) = num(terr_3mo(gg:).le.-1.0)
-        else 
-          nelnino(gg) = num(terr_3mo((gg-mocntr+1):(gg+mocntr)).ge.1.0)
-          nlanina(gg) = num(terr_3mo((gg-mocntr+1):(gg+mocntr)).le.-1.0)
-        end if 
-        end if 
-     end do 
-     nino_el_nmon                 = nelnino 
-     nino_el_nmon@comment_cvdp    = "terr >= std"
-     nino_el_nmon@units           = "#"
-     nino_el_nmon@long_name       = "number of El Nino events (month)"
-     copy_VarCoords(terr,nino_el_nmon)
-     nino_la_nmon                 = nlanina
-     nino_la_nmon@comment_cvdp    = "terr <= - std"
-     nino_la_nmon@units           = "#"
-     nino_la_nmon@long_name       = "number of La Nina events (month)"
-     copy_VarCoords(terr,nino_la_nmon)
-     nino_elmla_nmon              = nelnino - nlanina 
-     nino_elmla_nmon@comment_cvdp = "terr +/- std"
-     nino_elmla_nmon@units        = "#"
-     nino_elmla_nmon@long_name    = "El Nino - La Nina events (month)" 
-     copy_VarCoords(terr,nino_elmla_nmon)
-     delete([/nelnino,nlanina,terr_3mo/])
-  
 ;------------------------------------------------------------------------------------------
-     if(isfilepresent(fnt)) then
-       system("/bin/rm " + fnt)
-     end if
      z = addfile(fnt,"c")
      set_global_ncfile_attributes(z,names(ee),syear(ee),eyear(ee),getenv("VERSION"))
 
-     z->terr = set_varAtts(terr,"","","")
-     z->nino12 = set_varAtts(nino12,"","","")
-     z->nino3  = set_varAtts(nino3,"","","")
-     z->nino4  = set_varAtts(nino4,"","","")
-     z->north_tropical_atlantic = set_varAtts(tna,"","","")
-     z->north_atlantic = set_varAtts(natl,"","","")
-     z->south_tropical_atlantic = set_varAtts(tsa,"","","")
-     z->tropical_indian_ocean = set_varAtts(tio,"","","")
-     z->indian_ocean_dipole = set_varAtts(iod,"","","")
-     z->southern_ocean = set_varAtts(socn,"","","")
-     z->atlantic_meridional_mode = set_varAtts(amm,"","","")
-     z->atlantic_nino = set_varAtts(atl3,"","","")
-     z->north_pacific_meridional_mode = set_varAtts(npmm,"","","")
-     z->south_pacific_meridional_mode = set_varAtts(spmm,"","","")
-     z->nino_el_nmon = set_varAtts(nino_el_nmon,"","","")
-     z->nino_la_nmon = set_varAtts(nino_la_nmon,"","","")
-     z->nino_elmla_nmon = set_varAtts(nino_elmla_nmon,"","","")
-     z->scterr = set_varAtts(scterr,"","","")
-
-     z->terr_monthly_stddev = set_varAtts(terr_mon_sd,"nino3.4 monthly standard deviation","","")
+     z->jet_loci    = set_varAtts(jet_loci,"","","")
+     z->jet_insi    = set_varAtts(jet_insi,"","","")
+     z->jet_loc     = set_varAtts(jet_loc,"","","")
+     z->jet_ins     = set_varAtts(jet_ins,"","","")
+     z->scjet_loci  = set_varAtts(scjet_loci,"","","")
+     z->jet_ps_nmon = set_varAtts(jet_ps_nmon,"","","")
+     z->jet_ns_nmon = set_varAtts(jet_ns_nmon,"","","")
+     z->jet_psmns_nmon = set_varAtts(jet_psmns_nmon,"","","")
+     z->jet_loci_monthly_stddev = set_varAtts(jet_loci_mon_sd,"jet monthly standard deviation","","")
      if (nyr(ee).ge.10) then
-        z->terr_hov_elnino = set_varAtts(hov_hi,"nino3.4 El Nino Hovmoller sst composite","","")
-        z->terr_hov_lanina = set_varAtts(hov_lo,"nino3.4 La Nina Hovmoller sst composite","","")
+        z->jet_loci_hov_pjet = set_varAtts(hov_hi,"jet positive phase Hovmoller psl composite","","")
+        z->jet_loci_hov_njet = set_varAtts(hov_lo,"jet negative phase Hovmoller psl composite","","")
         delete([/hov_hi,hov_lo/])
      end if 
-     delete([/nino3,nino4,nino12,amm,atl3,tsa,tna,tio,iod,socn,natl,npmm,spmm/])
+     delete([/jet_insi,jet_loc,jet_ins,scjet_loci,jet_loci_mon_sd,jet_ps_nmon,jet_ns_nmon,jet_psmns_nmon/])
+
 ;-----------------------------------------------------------------------------------------
-;   nino3.4 running standard deviations
+;   jet_loci running standard deviations
 ;
-     if (nyr(ee).ge.35) then    ; need a minimum number of years to compute running nino3.4 standard deviations
-        terra  := dtrend_msg(ispan(0,dimsizes(terrT)-1,1),terrT,True,False)
-        terra!0 = "time"
-        terra&time = terr&time
-        sd_run := terra
+     if (nyr(ee).ge.35) then    ; need a minimum number of years to compute running jet_loci standard deviations
+        jet_locia  := dtrend_msg(ispan(0,dimsizes(jet_lociT)-1,1),jet_lociT,True,False)
+        jet_locia!0 = "time"
+        jet_locia&time = jet_loci&time
+        sd_run := jet_locia
         sd_run  = sd_run@_FillValue
-        sd_run@units = terr@units
-        sd_run@long_name = "nino3.4 30yr running standard deviation"
-        do gg = 180,dimsizes(terra)-180
-           sd_run(gg) = (/ dim_stddev(terra(gg-180:gg+179)) /)
+        sd_run@units = jet_loci@units
+        sd_run@long_name = "jet_loci 30yr running standard deviation"
+        do gg = 180,dimsizes(jet_locia)-180
+           sd_run(gg) = (/ dim_stddev(jet_locia(gg-180:gg+179)) /)
         end do
-        z->terr_runstddev = set_varAtts(sd_run,"","","")
+        z->jet_loci_runstddev = set_varAtts(sd_run,"","","")
      end if
 ;-----------------------------------------------------------------------------------------
-;   nino3.4 spatial composites (sst, tas, psl, pr) 
+;   jet spatial composites (sst, tas, psl, pr) 
+;   jet_loci shsstpc1 regression patterns (sst, tas, psl, pr)
+
+     seas   = (/"ndjfma","mjjaso","monthly"/)
+     seayr  = new(dimsizes(jet_loci&time),integer)
+     do hh = 0,11
+       if(hh.ge.4.and.hh.le.9) then
+         seayr(hh::12) = 1
+       else
+         seayr(hh::12) = 0
+       end if
+     end do
 
      hicntr = 0
      locntr = 0
-     hiyr = new(dimsizes(terr_ndj&time),integer)
+     hiyr = new(dimsizes(jet_loci_ndj&time),integer)
      loyr = hiyr
-     do hh = 0,dimsizes(terr_ndj)-1
-        if (.not.ismissing(terr_ndj(hh))) then
-           if (terr_ndj(hh).ge.1) then
-              hiyr(hicntr) = terr_ndj&time(hh)
+     do hh = 0,dimsizes(jet_loci_ndj)-1
+        if (.not.ismissing(jet_loci_ndj(hh))) then
+           if (jet_loci_ndj(hh).ge.1) then
+              hiyr(hicntr) = jet_loci_ndj&time(hh)
               hicntr = hicntr+1
            end if
-           if (terr_ndj(hh).le.-1) then
-              loyr(locntr) = terr_ndj&time(hh)
+           if (jet_loci_ndj(hh).le.-1) then
+              loyr(locntr) = jet_loci_ndj&time(hh)
               locntr = locntr+1
            end if
         end if
@@ -595,26 +444,31 @@ begin
      delete([/loyr,locntr,hiyr,hicntr/])
 
      do hh = 0,3     ; for each variable: sst, tas, psl, pr
+
         if (hh.eq.0) then
-           plot_flag = 0
-           arr := sst
+           plot_flag = check_years_match(syear(ee),syear_sst(ee),eyear(ee),eyear_sst(ee))
+           fnt = getenv("OUTDIR")+modname_sst(ee)+".cvdp_data.polar.jet.indices.sst."+syear_sst(ee)+"-"+eyear_sst(ee)+".nc"
+           f_test := read_cvdp_le_data(fnt,fnt2,"jet_loci_spacomp_sst_mam1")
+           arr := data_read_in(paths_sst(ee),"TS",syear_sst(ee),eyear_sst(ee))
+           arr = where(arr.le.-1.8,-1.8,arr)    ; set all values below -1.8 to -1.8
+           m = addfile("$NCARG_ROOT/lib/ncarg/data/cdf/landsea.nc","r")   ; mask out land (this is redundant for data that is already masked)
+           arr = mask(arr,conform(arr,landsea_mask(m->LSMASK,arr&lat,arr&lon),(/1,2/)).ge.1,False)
+           delete(m)
         end if
         if (hh.eq.1) then 
            plot_flag = check_years_match(syear(ee),syear_tas(ee),eyear(ee),eyear_tas(ee))
-           fnt = getenv("OUTDIR")+modname_tas(ee)+".cvdp_data.terr.indices.tas."+syear_tas(ee)+"-"+eyear_tas(ee)+".nc"
-           f_test := read_cvdp_le_data(fnt,fnt2,"terr_spacomp_tas_mam1")
+           fnt = getenv("OUTDIR")+modname_tas(ee)+".cvdp_data.polar.jet.indices.tas."+syear_tas(ee)+"-"+eyear_tas(ee)+".nc"
+           f_test := read_cvdp_le_data(fnt,fnt2,"jet_loci_spacomp_tas_mam1")
            arr := data_read_in(paths_tas(ee),"TREFHT",syear_tas(ee),eyear_tas(ee))
         end if
         if (hh.eq.2) then 
-           plot_flag = check_years_match(syear(ee),syear_psl(ee),eyear(ee),eyear_psl(ee))
-           fnt = getenv("OUTDIR")+modname_psl(ee)+".cvdp_data.terr.indices.psl."+syear_psl(ee)+"-"+eyear_psl(ee)+".nc"
-           f_test := read_cvdp_le_data(fnt,fnt2,"terr_spacomp_psl_mam1")
-           arr := data_read_in(paths_psl(ee),"PSL",syear_psl(ee),eyear_psl(ee))
+           plot_flag = 0
+           arr := psl
         end if
         if (hh.eq.3) then 
            plot_flag = check_years_match(syear(ee),syear_pr(ee),eyear(ee),eyear_pr(ee))
-           fnt = getenv("OUTDIR")+modname_pr(ee)+".cvdp_data.terr.indices.pr."+syear_pr(ee)+"-"+eyear_pr(ee)+".nc"
-           f_test := read_cvdp_le_data(fnt,fnt2,"terr_spacomp_pr_mam1")
+           fnt = getenv("OUTDIR")+modname_pr(ee)+".cvdp_data.polar.jet.indices.pr."+syear_pr(ee)+"-"+eyear_pr(ee)+".nc"
+           f_test := read_cvdp_le_data(fnt,fnt2,"jet_loci_spacomp_pr_mam1")
            arr := data_read_in(paths_pr(ee),"PRECT",syear_pr(ee),eyear_pr(ee))
         end if
 
@@ -626,6 +480,18 @@ begin
            arr&time = fspan(tmin*1.,(tmax*1.)+(11/12.),dimsizes(yyyymm))  ; then convert time from YYYYMM->YYYY.frac
 
            arr = rmMonAnnCycTLL(arr) 
+
+           jet_loci_reg_arr   = arr(0:2,:,:)
+           do ss = 0,dimsizes(seas)-1
+             if (ss.le.1) then
+               indtx = ind (seayr.eq.ss)
+             else
+               indtx = ind (seayr.gt.-1)
+             end if
+             jet_loci_reg_arr(ss,:,:)   = (/ regCoef_n(jet_loci(indtx),arr(indtx,:,:),0,0) /)
+             delete([/indtx/])
+           end do
+
            arr = (/ dtrend_msg_n(ispan(0,dimsizes(arr&time)-1,1),arr,False,False,0) /)
            arr = runave_n_Wrap(arr,3,0,0)
            arr(0,:,:) = (/ dim_avg_n(arr(:1,:,:),0) /)
@@ -649,111 +515,125 @@ begin
            n34sc_arr = (/ sc_arr_hi - sc_arr_lo /)
            n34sc_arr&lat@standard_name = "latitude"
            n34sc_arr&lon@standard_name = "longitude"
-           n34sc_arr@number_of_elnino_events = dimsizes(highyr)
-           n34sc_arr@number_of_lanina_events = dimsizes(lowyr)
+           n34sc_arr@number_of_pjet_events = dimsizes(highyr)
+           n34sc_arr@number_of_njet_events = dimsizes(lowyr)
 
            sc_arr_hi&lat@standard_name = "latitude"
            sc_arr_hi&lon@standard_name = "longitude"
-           sc_arr_hi@number_of_elnino_events = dimsizes(highyr)
+           sc_arr_hi@number_of_pjet_events = dimsizes(highyr)
 
            sc_arr_lo&lat@standard_name = "latitude"
            sc_arr_lo&lon@standard_name = "longitude"
-           sc_arr_lo@number_of_lanina_events = dimsizes(lowyr)
+           sc_arr_lo@number_of_njet_events = dimsizes(lowyr)
 
-           if (hh.eq.0) then
-              z->terr_spacomp_sst_jja0 = set_varAtts(n34sc_arr(6,:,:),"nino3.4 sst EN-LN spatial composite (JJA+0)","","")
-              z->terr_spacomp_sst_son0 = set_varAtts(n34sc_arr(9,:,:),"nino3.4 sst EN-LN spatial composite (SON+0)","","")
-              z->terr_spacomp_sst_djf1 = set_varAtts(n34sc_arr(12,:,:),"nino3.4 sst EN-LN spatial composite (DJF+1)","","")
-              z->terr_spacomp_sst_mam1 = set_varAtts(n34sc_arr(15,:,:),"nino3.4 sst EN-LN spatial composite (MAM+1)","","")
-
-              z->terr_elnino_spacomp_sst_jja0 = set_varAtts(sc_arr_hi(6,:,:),"nino3.4 sst El Nino spatial composite (JJA+0)","","")
-              z->terr_elnino_spacomp_sst_son0 = set_varAtts(sc_arr_hi(9,:,:),"nino3.4 sst El Nino spatial composite (SON+0)","","")
-              z->terr_elnino_spacomp_sst_djf1 = set_varAtts(sc_arr_hi(12,:,:),"nino3.4 sst El Nino spatial composite (DJF+1)","","")
-              z->terr_elnino_spacomp_sst_mam1 = set_varAtts(sc_arr_hi(15,:,:),"nino3.4 sst El Nino spatial composite (MAM+1)","","")
-
-              z->terr_lanina_spacomp_sst_jja0 = set_varAtts(sc_arr_lo(6,:,:),"nino3.4 sst La Nina spatial composite (JJA+0)","","")
-              z->terr_lanina_spacomp_sst_son0 = set_varAtts(sc_arr_lo(9,:,:),"nino3.4 sst La Nina spatial composite (SON+0)","","")
-              z->terr_lanina_spacomp_sst_djf1 = set_varAtts(sc_arr_lo(12,:,:),"nino3.4 sst La Nina spatial composite (DJF+1)","","")
-              z->terr_lanina_spacomp_sst_mam1 = set_varAtts(sc_arr_lo(15,:,:),"nino3.4 sst La Nina spatial composite (MAM+1)","","")
-           end if
-           if (hh.ge.1) then
-              if(isfilepresent(fnt)) then
-                 system("/bin/rm " + fnt)
-              end if
+           if (hh.ne.2) then
               z_arr = addfile(fnt,"c")
               z_arr@source = "NCAR Climate Analysis Section's Climate Variability Diagnostics Package - LE v"+getenv("VERSION")
               z_arr@Conventions = "CF-1.6"
            end if
+
+           if (hh.eq.0) then
+              z_arr@notes = "Data from "+names_sst(ee)+" from "+syear_sst(ee)+"-"+eyear_sst(ee)
+              z_arr@climatology = syear_sst(ee)+"-"+eyear_sst(ee)+" climatology removed prior to all calculations (other than means)"
+              z_arr->jet_loci_spacomp_sst_jja0 = set_varAtts(n34sc_arr(6,:,:),"jet_loci sst JET+/- spatial composite (JJA+0)","","")
+              z_arr->jet_loci_spacomp_sst_son0 = set_varAtts(n34sc_arr(9,:,:),"jet_loci sst JET+/- spatial composite (SON+0)","","")
+              z_arr->jet_loci_spacomp_sst_djf1 = set_varAtts(n34sc_arr(12,:,:),"jet_loci sst JET+/- spatial composite (DJF+1)","","")
+              z_arr->jet_loci_spacomp_sst_mam1 = set_varAtts(n34sc_arr(15,:,:),"jet_loci sst JET+/- spatial composite (MAM+1)","","")
+
+              z_arr->jet_loci_pjet_spacomp_sst_jja0 = set_varAtts(sc_arr_hi(6,:,:),"jet_loci sst JET+ spatial composite (JJA+0)","","")
+              z_arr->jet_loci_pjet_spacomp_sst_son0 = set_varAtts(sc_arr_hi(9,:,:),"jet_loci sst JET+ spatial composite (SON+0)","","")
+              z_arr->jet_loci_pjet_spacomp_sst_djf1 = set_varAtts(sc_arr_hi(12,:,:),"jet_loci sst JET+ spatial composite (DJF+1)","","")
+              z_arr->jet_loci_pjet_spacomp_sst_mam1 = set_varAtts(sc_arr_hi(15,:,:),"jet_loci sst JET+ spatial composite (MAM+1)","","")
+
+              z_arr->jet_loci_njet_spacomp_sst_jja0 = set_varAtts(sc_arr_lo(6,:,:),"jet_loci sst JET- spatial composite (JJA+0)","","")
+              z_arr->jet_loci_njet_spacomp_sst_son0 = set_varAtts(sc_arr_lo(9,:,:),"jet_loci sst JET- spatial composite (SON+0)","","")
+              z_arr->jet_loci_njet_spacomp_sst_djf1 = set_varAtts(sc_arr_lo(12,:,:),"jet_loci sst JET- spatial composite (DJF+1)","","")
+              z_arr->jet_loci_njet_spacomp_sst_mam1 = set_varAtts(sc_arr_lo(15,:,:),"jet_loci sst JET- spatial composite (MAM+1)","","")
+
+              z_arr->jet_loci_regress_sst_ndjfma     = set_varAtts(jet_loci_reg_arr(0,:,:),"jet_loci sst regression pattern (NDJFMA)","","")
+              z_arr->jet_loci_regress_sst_mjjaso     = set_varAtts(jet_loci_reg_arr(1,:,:),"jet_loci sst regression pattern (MJJASO)","","")
+              z_arr->jet_loci_regress_sst_monthly    = set_varAtts(jet_loci_reg_arr(2,:,:),"jet_loci sst regression pattern (Monthly)","","")
+           end if
            if (hh.eq.1) then
               z_arr@notes = "Data from "+names_tas(ee)+" from "+syear_tas(ee)+"-"+eyear_tas(ee)
               z_arr@climatology = syear_tas(ee)+"-"+eyear_tas(ee)+" climatology removed prior to all calculations (other than means)"
-              z_arr->terr_spacomp_tas_jja0 = set_varAtts(n34sc_arr(6,:,:),"nino3.4 tas EN-LN spatial composite (JJA+0)","","")
-              z_arr->terr_spacomp_tas_son0 = set_varAtts(n34sc_arr(9,:,:),"nino3.4 tas EN-LN spatial composite (SON+0)","","")
-              z_arr->terr_spacomp_tas_djf1 = set_varAtts(n34sc_arr(12,:,:),"nino3.4 tas EN-LN spatial composite (DJF+1)","","")
-              z_arr->terr_spacomp_tas_mam1 = set_varAtts(n34sc_arr(15,:,:),"nino3.4 tas EN-LN spatial composite (MAM+1)","","") 
+              z_arr->jet_loci_spacomp_tas_jja0 = set_varAtts(n34sc_arr(6,:,:),"jet_loci tas JET+/- spatial composite (JJA+0)","","")
+              z_arr->jet_loci_spacomp_tas_son0 = set_varAtts(n34sc_arr(9,:,:),"jet_loci tas JET+/- spatial composite (SON+0)","","")
+              z_arr->jet_loci_spacomp_tas_djf1 = set_varAtts(n34sc_arr(12,:,:),"jet_loci tas JET+/- spatial composite (DJF+1)","","")
+              z_arr->jet_loci_spacomp_tas_mam1 = set_varAtts(n34sc_arr(15,:,:),"jet_loci tas JET+/- spatial composite (MAM+1)","","") 
 
-              z_arr->terr_elnino_spacomp_tas_jja0 = set_varAtts(sc_arr_hi(6,:,:),"nino3.4 tas El Nino spatial composite (JJA+0)","","")
-              z_arr->terr_elnino_spacomp_tas_son0 = set_varAtts(sc_arr_hi(9,:,:),"nino3.4 tas El Nino spatial composite (SON+0)","","")
-              z_arr->terr_elnino_spacomp_tas_djf1 = set_varAtts(sc_arr_hi(12,:,:),"nino3.4 tas El Nino spatial composite (DJF+1)","","")
-              z_arr->terr_elnino_spacomp_tas_mam1 = set_varAtts(sc_arr_hi(15,:,:),"nino3.4 tas El Nino spatial composite (MAM+1)","","")
+              z_arr->jet_loci_pjet_spacomp_tas_jja0 = set_varAtts(sc_arr_hi(6,:,:),"jet_loci tas JET+ spatial composite (JJA+0)","","")
+              z_arr->jet_loci_pjet_spacomp_tas_son0 = set_varAtts(sc_arr_hi(9,:,:),"jet_loci tas JET+ spatial composite (SON+0)","","")
+              z_arr->jet_loci_pjet_spacomp_tas_djf1 = set_varAtts(sc_arr_hi(12,:,:),"jet_loci tas JET+ spatial composite (DJF+1)","","")
+              z_arr->jet_loci_pjet_spacomp_tas_mam1 = set_varAtts(sc_arr_hi(15,:,:),"jet_loci tas JET+ spatial composite (MAM+1)","","")
 
-              z_arr->terr_lanina_spacomp_tas_jja0 = set_varAtts(sc_arr_lo(6,:,:),"nino3.4 tas La Nina spatial composite (JJA+0)","","")
-              z_arr->terr_lanina_spacomp_tas_son0 = set_varAtts(sc_arr_lo(9,:,:),"nino3.4 tas La Nina spatial composite (SON+0)","","")
-              z_arr->terr_lanina_spacomp_tas_djf1 = set_varAtts(sc_arr_lo(12,:,:),"nino3.4 tas La Nina spatial composite (DJF+1)","","")
-              z_arr->terr_lanina_spacomp_tas_mam1 = set_varAtts(sc_arr_lo(15,:,:),"nino3.4 tas La Nina spatial composite (MAM+1)","","") 
+              z_arr->jet_loci_njet_spacomp_tas_jja0 = set_varAtts(sc_arr_lo(6,:,:),"jet_loci tas JET- spatial composite (JJA+0)","","")
+              z_arr->jet_loci_njet_spacomp_tas_son0 = set_varAtts(sc_arr_lo(9,:,:),"jet_loci tas JET- spatial composite (SON+0)","","")
+              z_arr->jet_loci_njet_spacomp_tas_djf1 = set_varAtts(sc_arr_lo(12,:,:),"jet_loci tas JET- spatial composite (DJF+1)","","")
+              z_arr->jet_loci_njet_spacomp_tas_mam1 = set_varAtts(sc_arr_lo(15,:,:),"jet_loci tas JET- spatial composite (MAM+1)","","") 
+
+              z_arr->jet_loci_regress_tas_ndjfma      = set_varAtts(jet_loci_reg_arr(0,:,:),"jet_loci tas regression pattern (NDJFMA)","","")
+              z_arr->jet_loci_regress_tas_mjjaso      = set_varAtts(jet_loci_reg_arr(1,:,:),"jet_loci tas regression pattern (MJJASO)","","")
+              z_arr->jet_loci_regress_tas_monthly     = set_varAtts(jet_loci_reg_arr(2,:,:),"jet_loci tas regression pattern (Monthly)","","")
            end if
            if (hh.eq.2) then
-              z_arr@notes = "Data from "+names_psl(ee)+" from "+syear_psl(ee)+"-"+eyear_psl(ee)
-              z_arr@climatology = syear_psl(ee)+"-"+eyear_psl(ee)+" climatology removed prior to all calculations (other than means)"
-              z_arr->terr_spacomp_psl_jja0 = set_varAtts(n34sc_arr(6,:,:),"nino3.4 psl EN-LN spatial composite (JJA+0)","","")
-              z_arr->terr_spacomp_psl_son0 = set_varAtts(n34sc_arr(9,:,:),"nino3.4 psl EN-LN spatial composite (SON+0)","","")
-              z_arr->terr_spacomp_psl_djf1 = set_varAtts(n34sc_arr(12,:,:),"nino3.4 psl EN-LN spatial composite (DJF+1)","","")
-              z_arr->terr_spacomp_psl_mam1 = set_varAtts(n34sc_arr(15,:,:),"nino3.4 psl EN-LN spatial composite (MAM+1)","","")  
+              z->jet_loci_spacomp_psl_jja0 = set_varAtts(n34sc_arr(6,:,:),"jet_loci psl JET+/- spatial composite (JJA+0)","","")
+              z->jet_loci_spacomp_psl_son0 = set_varAtts(n34sc_arr(9,:,:),"jet_loci psl JET+/- spatial composite (SON+0)","","")
+              z->jet_loci_spacomp_psl_djf1 = set_varAtts(n34sc_arr(12,:,:),"jet_loci psl JET+/- spatial composite (DJF+1)","","")
+              z->jet_loci_spacomp_psl_mam1 = set_varAtts(n34sc_arr(15,:,:),"jet_loci psl JET+/- spatial composite (MAM+1)","","")  
 
-              z_arr->terr_elnino_spacomp_psl_jja0 = set_varAtts(sc_arr_hi(6,:,:),"nino3.4 psl El Nino spatial composite (JJA+0)","","")
-              z_arr->terr_elnino_spacomp_psl_son0 = set_varAtts(sc_arr_hi(9,:,:),"nino3.4 psl El Nino spatial composite (SON+0)","","")
-              z_arr->terr_elnino_spacomp_psl_djf1 = set_varAtts(sc_arr_hi(12,:,:),"nino3.4 psl El Nino spatial composite (DJF+1)","","")
-              z_arr->terr_elnino_spacomp_psl_mam1 = set_varAtts(sc_arr_hi(15,:,:),"nino3.4 psl El Nino spatial composite (MAM+1)","","")
+              z->jet_loci_pjet_spacomp_psl_jja0 = set_varAtts(sc_arr_hi(6,:,:),"jet_loci psl JET+ spatial composite (JJA+0)","","")
+              z->jet_loci_pjet_spacomp_psl_son0 = set_varAtts(sc_arr_hi(9,:,:),"jet_loci psl JET+ spatial composite (SON+0)","","")
+              z->jet_loci_pjet_spacomp_psl_djf1 = set_varAtts(sc_arr_hi(12,:,:),"jet_loci psl JET+ spatial composite (DJF+1)","","")
+              z->jet_loci_pjet_spacomp_psl_mam1 = set_varAtts(sc_arr_hi(15,:,:),"jet_loci psl JET+ spatial composite (MAM+1)","","")
 
-              z_arr->terr_lanina_spacomp_psl_jja0 = set_varAtts(sc_arr_lo(6,:,:),"nino3.4 psl La Nina spatial composite (JJA+0)","","")
-              z_arr->terr_lanina_spacomp_psl_son0 = set_varAtts(sc_arr_lo(9,:,:),"nino3.4 psl La Nina spatial composite (SON+0)","","")
-              z_arr->terr_lanina_spacomp_psl_djf1 = set_varAtts(sc_arr_lo(12,:,:),"nino3.4 psl La Nina spatial composite (DJF+1)","","")
-              z_arr->terr_lanina_spacomp_psl_mam1 = set_varAtts(sc_arr_lo(15,:,:),"nino3.4 psl La Nina spatial composite (MAM+1)","","") 
+              z->jet_loci_njet_spacomp_psl_jja0 = set_varAtts(sc_arr_lo(6,:,:),"jet_loci psl JET- spatial composite (JJA+0)","","")
+              z->jet_loci_njet_spacomp_psl_son0 = set_varAtts(sc_arr_lo(9,:,:),"jet_loci psl JET- spatial composite (SON+0)","","")
+              z->jet_loci_njet_spacomp_psl_djf1 = set_varAtts(sc_arr_lo(12,:,:),"jet_loci psl JET- spatial composite (DJF+1)","","")
+              z->jet_loci_njet_spacomp_psl_mam1 = set_varAtts(sc_arr_lo(15,:,:),"jet_loci psl JET- spatial composite (MAM+1)","","") 
+
+              z->jet_loci_regress_psl_ndjfma      = set_varAtts(jet_loci_reg_arr(0,:,:),"jet_loci psl regression pattern (NDJFMA)","","")
+              z->jet_loci_regress_psl_mjjaso      = set_varAtts(jet_loci_reg_arr(1,:,:),"jet_loci psl regression pattern (MJJASO)","","")
+              z->jet_loci_regress_psl_monthly     = set_varAtts(jet_loci_reg_arr(2,:,:),"jet_loci psl regression pattern (Monthly)","","")
            end if
            if (hh.eq.3) then
               z_arr@notes = "Data from "+names_pr(ee)+" from "+syear_pr(ee)+"-"+eyear_pr(ee)
               z_arr@climatology = syear_pr(ee)+"-"+eyear_pr(ee)+" climatology removed prior to all calculations (other than means)"
-              z_arr->terr_spacomp_pr_jja0 = set_varAtts(n34sc_arr(6,:,:),"nino3.4 pr EN-LN spatial composite (JJA+0)","","")
-              z_arr->terr_spacomp_pr_son0 = set_varAtts(n34sc_arr(9,:,:),"nino3.4 pr EN-LN spatial composite (SON+0)","","")
-              z_arr->terr_spacomp_pr_djf1 = set_varAtts(n34sc_arr(12,:,:),"nino3.4 pr EN-LN spatial composite (DJF+1)","","")
-              z_arr->terr_spacomp_pr_mam1 = set_varAtts(n34sc_arr(15,:,:),"nino3.4 pr EN-LN spatial composite (MAM+1)","","")  
+              z_arr->jet_loci_spacomp_pr_jja0 = set_varAtts(n34sc_arr(6,:,:),"jet_loci pr JET+/- spatial composite (JJA+0)","","")
+              z_arr->jet_loci_spacomp_pr_son0 = set_varAtts(n34sc_arr(9,:,:),"jet_loci pr JET+/- spatial composite (SON+0)","","")
+              z_arr->jet_loci_spacomp_pr_djf1 = set_varAtts(n34sc_arr(12,:,:),"jet_loci pr JET+/- spatial composite (DJF+1)","","")
+              z_arr->jet_loci_spacomp_pr_mam1 = set_varAtts(n34sc_arr(15,:,:),"jet_loci pr JET+/- spatial composite (MAM+1)","","")  
 
-              z_arr->terr_elnino_spacomp_pr_jja0 = set_varAtts(sc_arr_hi(6,:,:),"nino3.4 pr El Nino spatial composite (JJA+0)","","")
-              z_arr->terr_elnino_spacomp_pr_son0 = set_varAtts(sc_arr_hi(9,:,:),"nino3.4 pr El Nino spatial composite (SON+0)","","")
-              z_arr->terr_elnino_spacomp_pr_djf1 = set_varAtts(sc_arr_hi(12,:,:),"nino3.4 pr El Nino spatial composite (DJF+1)","","")
-              z_arr->terr_elnino_spacomp_pr_mam1 = set_varAtts(sc_arr_hi(15,:,:),"nino3.4 pr El Nino spatial composite (MAM+1)","","")
+              z_arr->jet_loci_pjet_spacomp_pr_jja0 = set_varAtts(sc_arr_hi(6,:,:),"jet_loci pr JET+ spatial composite (JJA+0)","","")
+              z_arr->jet_loci_pjet_spacomp_pr_son0 = set_varAtts(sc_arr_hi(9,:,:),"jet_loci pr JET+ spatial composite (SON+0)","","")
+              z_arr->jet_loci_pjet_spacomp_pr_djf1 = set_varAtts(sc_arr_hi(12,:,:),"jet_loci pr JET+ spatial composite (DJF+1)","","")
+              z_arr->jet_loci_pjet_spacomp_pr_mam1 = set_varAtts(sc_arr_hi(15,:,:),"jet_loci pr JET+ spatial composite (MAM+1)","","")
 
-              z_arr->terr_lanina_spacomp_pr_jja0 = set_varAtts(sc_arr_lo(6,:,:),"nino3.4 pr La Nina spatial composite (JJA+0)","","")
-              z_arr->terr_lanina_spacomp_pr_son0 = set_varAtts(sc_arr_lo(9,:,:),"nino3.4 pr La Nina spatial composite (SON+0)","","")
-              z_arr->terr_lanina_spacomp_pr_djf1 = set_varAtts(sc_arr_lo(12,:,:),"nino3.4 pr La Nina spatial composite (DJF+1)","","")
-              z_arr->terr_lanina_spacomp_pr_mam1 = set_varAtts(sc_arr_lo(15,:,:),"nino3.4 pr La Nina spatial composite (MAM+1)","","") 
+              z_arr->jet_loci_njet_spacomp_pr_jja0 = set_varAtts(sc_arr_lo(6,:,:),"jet_loci pr JET- spatial composite (JJA+0)","","")
+              z_arr->jet_loci_njet_spacomp_pr_son0 = set_varAtts(sc_arr_lo(9,:,:),"jet_loci pr JET- spatial composite (SON+0)","","")
+              z_arr->jet_loci_njet_spacomp_pr_djf1 = set_varAtts(sc_arr_lo(12,:,:),"jet_loci pr JET- spatial composite (DJF+1)","","")
+              z_arr->jet_loci_njet_spacomp_pr_mam1 = set_varAtts(sc_arr_lo(15,:,:),"jet_loci pr JET- spatial composite (MAM+1)","","") 
+
+              z_arr->jet_loci_regress_pr_ndjfma      = set_varAtts(jet_loci_reg_arr(0,:,:),"jet_loci pr regression pattern (NDJFMA)","","")
+              z_arr->jet_loci_regress_pr_mjjaso      = set_varAtts(jet_loci_reg_arr(1,:,:),"jet_loci pr regression pattern (MJJASO)","","")
+              z_arr->jet_loci_regress_pr_monthly     = set_varAtts(jet_loci_reg_arr(2,:,:),"jet_loci pr regression pattern (Monthly)","","")
            end if
-           if (hh.ge.1) then
+           if (hh.ne.2) then
               delete(z_arr)
            end if
         end if
      end do
 ;-----------------------------------------------------------------------------------------
-;   nino3.4 spectra
+;   jet_loci spectra
 
-     iopt = 0                ; nino3.4 power spectra
+     iopt = 0                ; jet_loci power spectra
      jave = (7*nyr(ee))/100
      pct = 0.1 
-     spectra_mvf = False        ; missing value flag for nino3.4
-     if (any(ismissing(terr_dt))) then     ; check for missing data                                                            
+     spectra_mvf = False        ; missing value flag for jet_loci
+     if (any(ismissing(jet_loci_dt))) then     ; check for missing data                                                            
         spectra_mvf = True
      else
-        sdof = specx_anal(terr_dt,iopt,jave,pct)
+        sdof = specx_anal(jet_loci_dt,iopt,jave,pct)
         mval = sum(1/(1.+((sdof@xlag1)^2)-((2*sdof@xlag1)*cos(6.28318*sdof@frq))))
         if (mval.eq.0) then ; check for cyclic data that results in sum of Markov elements = 0.
            spectra_mvf = True
@@ -768,16 +648,16 @@ begin
            splt1&frequency@long_name = "power spectra frequency"
            splt1&frequency@units = "1"
            splt1@units_info = "df refers to frequency interval"
-           splt1@units = "C^2/df"
+           splt1@units = "1^2/df"
            splt1@comment_cvdp = "(0,:)=spectrum,(1,:)=Markov red noise spectrum, (2,:)="+val1+"% confidence bound for Markhov, (3,:)="+val2+"% confidence bound for Markhov"
         end if
         delete([/iopt,jave,pct,mval/])
      end if
 ;-----------------------------------------------------------------------
-;    nino3.4 wavelet analysis, autocorrelation
+;    jet_loci wavelet analysis, autocorrelation
 
      if (spectra_mvf.eq.False) then
-        N    = dimsizes(terr)       
+        N    = dimsizes(jet_loci)       
         mother  = 0
         param   = 6.0
         dt      = 1./12.            
@@ -789,7 +669,7 @@ begin
         noise   = 1 
         siglvl  = .05
         isigtest= 0
-        wave34 = wavelet(terr_dt,mother,dt,param,s0,dj,jtot,npad,noise,isigtest,siglvl,nadof)
+        wave34 = wavelet(jet_loci_dt,mother,dt,param,s0,dj,jtot,npad,noise,isigtest,siglvl,nadof)
 
         power34            = onedtond(wave34@power,(/jtot,N/))
         power34!0          = "period"                    
@@ -797,12 +677,12 @@ begin
         power34&period@long_name = "wavelet period"
         power34&period@units = "1"
         power34!1          = "time"                     
-        power34&time       = terr&time
-        power34@units      = terr@units+"^2"
+        power34&time       = jet_loci&time
+        power34@units      = jet_loci@units+"^2"
 
         coi                = wave34@coi
         coi!0              = "time"
-        coi&time           = terr&time
+        coi&time           = jet_loci&time
         coi@units          = ""
         coi@long_name      = "wavelet_cone_of_influence"
 
@@ -814,7 +694,7 @@ begin
 
         delete([/N,mother,param,dt,s0,dj,jtot,npad,nadof,noise,siglvl,isigtest/])
 
-        ac34 = esacr(terr_dt,48)
+        ac34 = esacr(jet_loci_dt,48)
         time_mon3 = ispan(0,48,1)
         time_mon3@units = "months since 0000-01-01 00:00:00"
         time_mon3@long_name = "Time"
@@ -825,18 +705,18 @@ begin
         ac34!0 = "time_mon3"
         ac34&time_mon3 = time_mon3
         ac34@units = "1"
-        z->terr_spectra = set_varAtts(splt1,"nino3.4 power spectra","","")
-        z->terr_autocorrelation = set_varAtts(ac34,"nino3.4 autocorrelation","","")
-        z->terr_wavelet_power = set_varAtts(power34,"nino3.4 wavelet power","","")
-        z->terr_wavelet_significance = set_varAtts(sig34,"nino3.4 wavelet significance","","")
-        z->terr_wavelet_coi = set_varAtts(coi,"","","")
+        z->jet_loci_spectra = set_varAtts(splt1,"jet_loci power spectra","","")
+        z->jet_loci_autocorrelation = set_varAtts(ac34,"jet_loci autocorrelation","","")
+        z->jet_loci_wavelet_power = set_varAtts(power34,"jet_loci wavelet power","","")
+        z->jet_loci_wavelet_significance = set_varAtts(sig34,"jet_loci wavelet significance","","")
+        z->jet_loci_wavelet_coi = set_varAtts(coi,"","","")
         delete([/splt1,sig34,power34,ac34,wave34,coi/])
      end if
-     delete([/z,terr,terr_dt/])
+     delete([/z,jet_loci,jet_loci_dt/])
   end do
 
   if (CREATE_GRAPHICS.eq."False") then
-     print("Finished: terr.indices.ncl")
+     print("Finished: polar.jet.indices.ncl")
      exit
   end if
 ;==========================================================================================
@@ -930,7 +810,7 @@ begin
 
   csubtitle_color = set_subtitle_colors(max(EM_num))
 
-  wks = gsn_open_wks(wks_type,getenv("OUTDIR")+"terr.powspec")
+  wks = gsn_open_wks(wks_type,getenv("OUTDIR")+"jet_loci.powspec")
 
   plot_indmem      = new(nsim,"graphic")
   plot_obs_overlay = new(nsim,"graphic")
@@ -944,15 +824,15 @@ begin
 
   numobs = num(EM_num.eq.0) 
   if (numobs.eq.0) then
-     fnt = getenv("OUTDIR")+"obs.cvdp_data.terr.indices."+syear(0)+"-"+eyear(0)+".nc"
+     fnt = getenv("OUTDIR")+"obs.cvdp_data.polar.jet.indices."+syear(0)+"-"+eyear(0)+".nc"
      fnt2 = getenv("OUTDIR")+"obs.cvdp_data."+syear(0)+"-"+eyear(0)+".nc"
      cntr = 0
   else
-     fnt = getenv("OUTDIR")+modname(0)+".cvdp_data.terr.indices."+syear(0)+"-"+eyear(0)+".nc"
+     fnt = getenv("OUTDIR")+modname(0)+".cvdp_data.polar.jet.indices."+syear(0)+"-"+eyear(0)+".nc"
      fnt2 = getenv("OUTDIR")+modname(0)+".cvdp_data."+syear(0)+"-"+eyear(0)+".nc"
      cntr = 1
   end if
-  obs0 := read_cvdp_le_data(fnt,fnt2,"terr_spectra")
+  obs0 := read_cvdp_le_data(fnt,fnt2,"jet_loci_spectra")
   if (isatt(obs0,"is_all_missing")) then
      obs0New = new((/4,11/),float)
      copy_VarAtts(obs0,obs0New)
@@ -977,9 +857,9 @@ begin
   cntr_EM = 0
   if (numobs.ge.2) then     ; plot obs #2-
      do ff = 1,numobs-1
-        fnt = getenv("OUTDIR")+modname(cntr)+".cvdp_data.terr.indices."+syear(cntr)+"-"+eyear(cntr)+".nc"
+        fnt = getenv("OUTDIR")+modname(cntr)+".cvdp_data.polar.jet.indices."+syear(cntr)+"-"+eyear(cntr)+".nc"
         fnt2 = getenv("OUTDIR")+modname(cntr)+".cvdp_data."+syear(cntr)+"-"+eyear(cntr)+".nc"
-        arr := read_cvdp_le_data(fnt,fnt2,"terr_spectra")
+        arr := read_cvdp_le_data(fnt,fnt2,"jet_loci_spectra")
         if (isatt(arr,"is_all_missing")) then
            cntr = cntr+1
            continue
@@ -1008,9 +888,9 @@ begin
         names_mod = names(cntr_ens(hh))
         names_EM_mod = names_EM(cntr_ens(hh))
 
-        fnt = getenv("OUTDIR")+modname_mod+".cvdp_data.terr.indices."+syear_mod+"-"+eyear_mod+".nc"
+        fnt = getenv("OUTDIR")+modname_mod+".cvdp_data.polar.jet.indices."+syear_mod+"-"+eyear_mod+".nc"
         fnt2 = getenv("OUTDIR")+modname_mod+".cvdp_data."+syear_mod+"-"+eyear_mod+".nc"
-        arr := read_cvdp_le_data(fnt,fnt2,"terr_spectra")
+        arr := read_cvdp_le_data(fnt,fnt2,"jet_loci_spectra")
         if (isatt(arr,"is_all_missing")) then
            cntr = cntr+1
            continue
@@ -1099,16 +979,16 @@ begin
      overlay(plot_summary(cntr_EM),plot_summary2(cntr_EM))
      overlay(plot_summary(cntr_EM),plot_obs_summary(cntr_EM))
      overlay(plot_summary(cntr_EM),plot_summary_em(cntr_EM))
-     fout = getenv("OUTDIR")+str_sub_str(names_EM_mod," ","_")+"_EM.cvdp_data.terr.indices."+syear_mod+"-"+eyear_mod+".nc"
+     fout = getenv("OUTDIR")+str_sub_str(names_EM_mod," ","_")+"_EM.cvdp_data.polar.jet.indices."+syear_mod+"-"+eyear_mod+".nc"
      if (isfilepresent2(fout)) then
         z = addfile(fout,"w")
      else
         z = addfile(fout,"c")
         set_global_ncfile_attributes(z,names_EM_mod,syear_mod,eyear_mod,getenv("VERSION"))
      end if
-     z->terr_spectra_em = set_varAtts(arr_EM,arr_EM@long_name+" Ensemble Mean","","")
-     z->terr_spectra_2575range = set_varAtts(arr_range1,arr_EM@long_name+" 25/75% range","","")
-     z->terr_spectra_1090range = set_varAtts(arr_range2,arr_EM@long_name+" 10/90% range","","")
+     z->jet_loci_spectra_em = set_varAtts(arr_EM,arr_EM@long_name+" Ensemble Mean","","")
+     z->jet_loci_spectra_2575range = set_varAtts(arr_range1,arr_EM@long_name+" 25/75% range","","")
+     z->jet_loci_spectra_1090range = set_varAtts(arr_range2,arr_EM@long_name+" 10/90% range","","")
      delete([/arr_store,arr_EM,arr_range1,arr_range2/])
      cntr_EM = cntr_EM+1
   end do
@@ -1148,16 +1028,16 @@ begin
   delete([/wks,plot_indmem,plot_summary,pres,pres2,txres/])
 
   if (wks_type.eq."png") then
-     system("mv "+OUTDIR+"terr.powspec.000001.png "+OUTDIR+"terr.powspec.indmem.png")
-     system("mv "+OUTDIR+"terr.powspec.000002.png "+OUTDIR+"terr.powspec.summary.png")
+     system("mv "+OUTDIR+"jet_loci.powspec.000001.png "+OUTDIR+"jet_loci.powspec.indmem.png")
+     system("mv "+OUTDIR+"jet_loci.powspec.000002.png "+OUTDIR+"jet_loci.powspec.summary.png")
      if (PNG_SCALE_SUMMARY.ne.100) then
-        system("convert -resize "+PNG_SCALE_SUMMARY+"% "+OUTDIR+"terr.powspec.summary.png "+OUTDIR+"terr.powspec.summary.png")
+        system("convert -resize "+PNG_SCALE_SUMMARY+"% "+OUTDIR+"jet_loci.powspec.summary.png "+OUTDIR+"jet_loci.powspec.summary.png")
      end if
   else
-     system("psplit "+OUTDIR+"terr.powspec.ps "+OUTDIR+"terr.powspec")
-     system("mv "+OUTDIR+"terr.powspec0001.ps "+OUTDIR+"terr.powspec.indmem.ps")
-     system("mv "+OUTDIR+"terr.powspec0002.ps "+OUTDIR+"terr.powspec.summary.ps")
-     system("rm "+OUTDIR+"terr.powspec.ps")
+     system("psplit "+OUTDIR+"jet_loci.powspec.ps "+OUTDIR+"jet_loci.powspec")
+     system("mv "+OUTDIR+"jet_loci.powspec0001.ps "+OUTDIR+"jet_loci.powspec.indmem.ps")
+     system("mv "+OUTDIR+"jet_loci.powspec0002.ps "+OUTDIR+"jet_loci.powspec.summary.ps")
+     system("rm "+OUTDIR+"jet_loci.powspec.ps")
   end if
 ;-------------------------------------------------------------------------------------------------------------------
 ; Autocorrelation plotting section
@@ -1173,7 +1053,7 @@ begin
   xyres@tiMainOn = False
   xyres@trXMinF = 0.0
   xyres@trXMaxF = 48.0
-  xyres@trYMinF = -1.05
+  xyres@trYMinF = -0.25
   xyres@trYMaxF = 1.05
   if (wks_type.eq."png") then
      xyres@xyLineThicknessF = 7.5
@@ -1184,8 +1064,8 @@ begin
   xyres@gsnAboveYRefLineColor = "firebrick2"
   xyres@gsnBelowYRefLineColor = "dodgerblue3"
   xyres@tmYLMode = "Explicit"
-  xyres@tmYLValues := (/-1,-0.5,0,0.5,1/)
-  xyres@tmYLLabels := (/"-1","-0.5","0","0.5","1"/)
+  xyres@tmYLValues := (/-0.2,0,0.2,0.5,1/)
+  xyres@tmYLLabels := (/"-0.2","0","0.2","0.5","1"/)
   xyres@tmYLMinorValues = fspan(-1,1,9)
   xyres@tmXBMode = "Explicit"
   xyres@tmXBValues = (/0,12,24,36,48/)
@@ -1220,7 +1100,7 @@ begin
   txres@txFontHeightF = 0.010
   txres@txFontColor = "gray60"
 
-  wks = gsn_open_wks(wks_type,getenv("OUTDIR")+"terr.autocor")
+  wks = gsn_open_wks(wks_type,getenv("OUTDIR")+"jet_loci.autocor")
   plot_indmem      := new(nsim,"graphic")
   plot_obs_overlay := new(nsim,"graphic")
   plot_summary     := new(nEM,"graphic")    ; for ensemble plots to show the 10-90% range
@@ -1231,15 +1111,15 @@ begin
 
   numobs = num(EM_num.eq.0) 
   if (numobs.eq.0) then
-     fnt = getenv("OUTDIR")+"obs.cvdp_data.terr.indices."+syear(0)+"-"+eyear(0)+".nc"
+     fnt = getenv("OUTDIR")+"obs.cvdp_data.polar.jet.indices."+syear(0)+"-"+eyear(0)+".nc"
      fnt2 = getenv("OUTDIR")+"obs.cvdp_data."+syear(0)+"-"+eyear(0)+".nc"
      cntr = 0
   else
-     fnt = getenv("OUTDIR")+modname(0)+".cvdp_data.terr.indices."+syear(0)+"-"+eyear(0)+".nc"
+     fnt = getenv("OUTDIR")+modname(0)+".cvdp_data.polar.jet.indices."+syear(0)+"-"+eyear(0)+".nc"
      fnt2 = getenv("OUTDIR")+modname(0)+".cvdp_data."+syear(0)+"-"+eyear(0)+".nc"
      cntr = 1
   end if
-  obs0 := read_cvdp_le_data(fnt,fnt2,"terr_autocorrelation")
+  obs0 := read_cvdp_le_data(fnt,fnt2,"jet_loci_autocorrelation")
   if (isatt(obs0,"is_all_missing")) then
      obs0New = new(6,float)
      copy_VarAtts(obs0,obs0New)
@@ -1262,9 +1142,9 @@ begin
            xyres@xyLineThicknessF = 1.75
            xyres_obs@xyLineThicknessF = 1.75
         end if
-        fnt = getenv("OUTDIR")+modname(cntr)+".cvdp_data.terr.indices."+syear(cntr)+"-"+eyear(cntr)+".nc"
+        fnt = getenv("OUTDIR")+modname(cntr)+".cvdp_data.polar.jet.indices."+syear(cntr)+"-"+eyear(cntr)+".nc"
         fnt2 = getenv("OUTDIR")+modname(cntr)+".cvdp_data."+syear(cntr)+"-"+eyear(cntr)+".nc"
-        arr := read_cvdp_le_data(fnt,fnt2,"terr_autocorrelation")
+        arr := read_cvdp_le_data(fnt,fnt2,"jet_loci_autocorrelation")
         if (isatt(arr,"is_all_missing")) then
            cntr = cntr+1
            continue
@@ -1295,9 +1175,9 @@ begin
         names_mod = names(cntr_ens(hh))
         names_EM_mod = names_EM(cntr_ens(hh))
 
-        fnt = getenv("OUTDIR")+modname_mod+".cvdp_data.terr.indices."+syear_mod+"-"+eyear_mod+".nc"
+        fnt = getenv("OUTDIR")+modname_mod+".cvdp_data.polar.jet.indices."+syear_mod+"-"+eyear_mod+".nc"
         fnt2 = getenv("OUTDIR")+modname_mod+".cvdp_data."+syear_mod+"-"+eyear_mod+".nc"
-        arr := read_cvdp_le_data(fnt,fnt2,"terr_autocorrelation")
+        arr := read_cvdp_le_data(fnt,fnt2,"jet_loci_autocorrelation")
         if (isatt(arr,"is_all_missing")) then
            cntr = cntr+1
            continue
@@ -1386,16 +1266,16 @@ begin
         overlay(plot_summary(cntr_EM),plot_obs_summary(cntr_EM))
         overlay(plot_summary(cntr_EM),plot_summary_em(cntr_EM))
      end if
-     fout = getenv("OUTDIR")+str_sub_str(names_EM_mod," ","_")+"_EM.cvdp_data.terr.indices."+syear_mod+"-"+eyear_mod+".nc"
+     fout = getenv("OUTDIR")+str_sub_str(names_EM_mod," ","_")+"_EM.cvdp_data.polar.jet.indices."+syear_mod+"-"+eyear_mod+".nc"
      if (isfilepresent2(fout)) then
         z = addfile(fout,"w")
      else
         z = addfile(fout,"c")
         set_global_ncfile_attributes(z,names_EM_mod,syear_mod,eyear_mod,getenv("VERSION"))
      end if
-     z->terr_autocorrelation_em = set_varAtts(arr_EM,arr_EM@long_name+" Ensemble Mean","","")
-     z->terr_autocorrelation_2575range = set_varAtts(arr_range1,arr_EM@long_name+" 25/75% range","","")
-     z->terr_autocorrelation_1090range = set_varAtts(arr_range2,arr_EM@long_name+" 10/90% range","","")
+     z->jet_loci_autocorrelation_em = set_varAtts(arr_EM,arr_EM@long_name+" Ensemble Mean","","")
+     z->jet_loci_autocorrelation_2575range = set_varAtts(arr_range1,arr_EM@long_name+" 25/75% range","","")
+     z->jet_loci_autocorrelation_1090range = set_varAtts(arr_range2,arr_EM@long_name+" 10/90% range","","")
      delete([/arr_store,arr_EM,arr_range1,arr_range2/])
      cntr_EM = cntr_EM+1
   end do
@@ -1431,19 +1311,19 @@ begin
   delete([/wks,plot_indmem,plot_summary,plot_final,xyres,xyres_obs,xyres2,txres/])
 
   if (wks_type.eq."png") then
-     system("mv "+OUTDIR+"terr.autocor.000001.png "+OUTDIR+"terr.autocor.indmem.png")
-     system("mv "+OUTDIR+"terr.autocor.000002.png "+OUTDIR+"terr.autocor.summary.png")
+     system("mv "+OUTDIR+"jet_loci.autocor.000001.png "+OUTDIR+"jet_loci.autocor.indmem.png")
+     system("mv "+OUTDIR+"jet_loci.autocor.000002.png "+OUTDIR+"jet_loci.autocor.summary.png")
      if (PNG_SCALE_SUMMARY.ne.100) then
-        system("convert -resize "+PNG_SCALE_SUMMARY+"% "+OUTDIR+"terr.autocor.summary.png "+OUTDIR+"terr.autocor.summary.png")
+        system("convert -resize "+PNG_SCALE_SUMMARY+"% "+OUTDIR+"jet_loci.autocor.summary.png "+OUTDIR+"jet_loci.autocor.summary.png")
      end if
   else
-     system("psplit "+OUTDIR+"terr.autocor.ps "+OUTDIR+"terr.autocor")
-     system("mv "+OUTDIR+"terr.autocor0001.ps "+OUTDIR+"terr.autocor.indmem.ps")
-     system("mv "+OUTDIR+"terr.autocor0002.ps "+OUTDIR+"terr.autocor.summary.ps")
-     system("rm "+OUTDIR+"terr.autocor.ps")
+     system("psplit "+OUTDIR+"jet_loci.autocor.ps "+OUTDIR+"jet_loci.autocor")
+     system("mv "+OUTDIR+"jet_loci.autocor0001.ps "+OUTDIR+"jet_loci.autocor.indmem.ps")
+     system("mv "+OUTDIR+"jet_loci.autocor0002.ps "+OUTDIR+"jet_loci.autocor.summary.ps")
+     system("rm "+OUTDIR+"jet_loci.autocor.ps")
   end if
 ;-------------------------------------------------------------------------------------------------------------------
-;    monthly nino3.4 standard deviations plotting section
+;    monthly jet_loci standard deviations plotting section
 ;
   xyres = True
   xyres@gsnDraw = False
@@ -1515,7 +1395,7 @@ begin
   txres@txFontHeightF = 0.010
   txres@txFontColor = polyres@gsLineColor
 
-  wks = gsn_open_wks(wks_type,getenv("OUTDIR")+"terr.monstddev")
+  wks = gsn_open_wks(wks_type,getenv("OUTDIR")+"jet_loci.monstddev")
   plot_indmem      = new(nsim,"graphic")
   polyline_overlay = new((/nsim,12/),"graphic")
   plot_summary     = new(nEM,"graphic")
@@ -1523,15 +1403,15 @@ begin
 
   numobs = num(EM_num.eq.0) 
   if (numobs.eq.0) then
-     fnt = getenv("OUTDIR")+"obs.cvdp_data.terr.indices."+syear(0)+"-"+eyear(0)+".nc"
+     fnt = getenv("OUTDIR")+"obs.cvdp_data.polar.jet.indices."+syear(0)+"-"+eyear(0)+".nc"
      fnt2 = getenv("OUTDIR")+"obs.cvdp_data."+syear(0)+"-"+eyear(0)+".nc"
      cntr = 0
   else
-     fnt = getenv("OUTDIR")+modname(0)+".cvdp_data.terr.indices."+syear(0)+"-"+eyear(0)+".nc"
+     fnt = getenv("OUTDIR")+modname(0)+".cvdp_data.polar.jet.indices."+syear(0)+"-"+eyear(0)+".nc"
      fnt2 = getenv("OUTDIR")+modname(0)+".cvdp_data."+syear(0)+"-"+eyear(0)+".nc"
      cntr = 1
   end if
-  obs0 := read_cvdp_le_data(fnt,fnt2,"terr_monthly_stddev")
+  obs0 := read_cvdp_le_data(fnt,fnt2,"jet_loci_monthly_stddev")
   if (isatt(obs0,"is_all_missing")) then
      obs0New = new(12,float)
      copy_VarAtts(obs0,obs0New)
@@ -1550,9 +1430,9 @@ begin
   polyres@gsLineThicknessF = 5.5
   if (numobs.ge.2) then     ; plot obs #2-
      do ff = 1,numobs-1
-        fnt = getenv("OUTDIR")+modname(cntr)+".cvdp_data.terr.indices."+syear(cntr)+"-"+eyear(cntr)+".nc"
+        fnt = getenv("OUTDIR")+modname(cntr)+".cvdp_data.polar.jet.indices."+syear(cntr)+"-"+eyear(cntr)+".nc"
         fnt2 = getenv("OUTDIR")+modname(cntr)+".cvdp_data."+syear(cntr)+"-"+eyear(cntr)+".nc"
-        arr := read_cvdp_le_data(fnt,fnt2,"terr_monthly_stddev")
+        arr := read_cvdp_le_data(fnt,fnt2,"jet_loci_monthly_stddev")
         if (isatt(arr,"is_all_missing")) then
            cntr = cntr+1
            continue
@@ -1580,9 +1460,9 @@ begin
         names_mod = names(cntr_ens(hh))
         names_EM_mod = names_EM(cntr_ens(hh))
 
-        fnt = getenv("OUTDIR")+modname_mod+".cvdp_data.terr.indices."+syear_mod+"-"+eyear_mod+".nc"
+        fnt = getenv("OUTDIR")+modname_mod+".cvdp_data.polar.jet.indices."+syear_mod+"-"+eyear_mod+".nc"
         fnt2 = getenv("OUTDIR")+modname_mod+".cvdp_data."+syear_mod+"-"+eyear_mod+".nc"
-        arr := read_cvdp_le_data(fnt,fnt2,"terr_monthly_stddev")
+        arr := read_cvdp_le_data(fnt,fnt2,"jet_loci_monthly_stddev")
         if (isatt(arr,"is_all_missing")) then
            cntr = cntr+1
            continue
@@ -1622,7 +1502,7 @@ begin
      arrEM!1 = "ncurves4"
      arrEM&ncurves4 = ispan(0,4,1)
      arrEM&ncurves4@long_name = "10/25/50/75/90% threshold"
-     arrEM&ncurves4@units = "C"
+     arrEM&ncurves4@units = "1"
      do ii = 0,11
         ds := boxplot_stat(arr_store(:,ii))
         arrEM(ii,:) =  (/ds(0),ds(1),dim_avg(arr_store(:,ii)),ds(3),ds(4)/)
@@ -1636,21 +1516,21 @@ begin
            polyline_overlay_em(cntr_EM,jj)   = gsn_add_polyline(wks,plot_summary(cntr_EM),(/(jj+1)-.4,(jj+1)+.4/),(/obs0(jj),obs0(jj)/),polyres)
         end do
      end if
-     fout = getenv("OUTDIR")+str_sub_str(names_EM_mod," ","_")+"_EM.cvdp_data.terr.indices."+syear_mod+"-"+eyear_mod+".nc"
+     fout = getenv("OUTDIR")+str_sub_str(names_EM_mod," ","_")+"_EM.cvdp_data.polar.jet.indices."+syear_mod+"-"+eyear_mod+".nc"
      if (isfilepresent2(fout)) then
         z = addfile(fout,"w")
      else
         z = addfile(fout,"c")
         set_global_ncfile_attributes(z,names_EM_mod,syear_mod,eyear_mod,getenv("VERSION"))
      end if
-     z->terr_monthly_stddev_stats = set_varAtts(arrEM,"","","")
+     z->jet_loci_monthly_stddev_stats = set_varAtts(arrEM,"","","")
      delete([/arr_store,arrEM,z/])
      cntr_EM = cntr_EM+1
   end do
-  panres@txString = "Nin~H-13V2F35~D~FV-2H3F21~o3.4 Standard Deviation (Monthly)"
+  panres@txString = "JET Index Standard Deviation (Monthly)"
   gsn_panel2(wks,plot_indmem,(/nrow,ncol/),panres)
 
-  panres2@gsnPanelMainString = "Ensemble Summary: Nin~H-13V2F35~D~FV-2H3F21~o3.4 Standard Deviation (Monthly)"
+  panres2@gsnPanelMainString = "Ensemble Summary: JET Index Standard Deviation (Monthly)"
   panres2@gsnPanelXWhiteSpacePercent = 3.0
   panres2@gsnPanelYWhiteSpacePercent = 3.0
   panres2@gsnPanelTop = 0.94
@@ -1666,18 +1546,18 @@ begin
   delete([/wks,plot_indmem,plot_summary,xyres,opti,bres,llres,polyres,polyline_overlay,panres,panres2/])
 
   if (wks_type.eq."png") then
-     system("mv "+OUTDIR+"terr.monstddev.000001.png "+OUTDIR+"terr.monstddev.indmem.png")
-     system("mv "+OUTDIR+"terr.monstddev.000002.png "+OUTDIR+"terr.monstddev.summary.png")
+     system("mv "+OUTDIR+"jet_loci.monstddev.000001.png "+OUTDIR+"jet_loci.monstddev.indmem.png")
+     system("mv "+OUTDIR+"jet_loci.monstddev.000002.png "+OUTDIR+"jet_loci.monstddev.summary.png")
      if (PNG_SCALE_SUMMARY.ne.100) then
-        system("convert -resize "+PNG_SCALE_SUMMARY+"% "+OUTDIR+"terr.monstddev.summary.png "+OUTDIR+"terr.monstddev.summary.png")
+        system("convert -resize "+PNG_SCALE_SUMMARY+"% "+OUTDIR+"jet_loci.monstddev.summary.png "+OUTDIR+"jet_loci.monstddev.summary.png")
      end if
   else
-     system("psplit "+OUTDIR+"terr.monstddev.ps "+OUTDIR+"terr.monstddev")
-     system("mv "+OUTDIR+"terr.monstddev0001.ps "+OUTDIR+"terr.monstddev.indmem.ps")
-     system("mv "+OUTDIR+"terr.monstddev0002.ps "+OUTDIR+"terr.monstddev.summary.ps")
-     system("rm "+OUTDIR+"terr.monstddev.ps")
+     system("psplit "+OUTDIR+"jet_loci.monstddev.ps "+OUTDIR+"jet_loci.monstddev")
+     system("mv "+OUTDIR+"jet_loci.monstddev0001.ps "+OUTDIR+"jet_loci.monstddev.indmem.ps")
+     system("mv "+OUTDIR+"jet_loci.monstddev0002.ps "+OUTDIR+"jet_loci.monstddev.summary.ps")
+     system("rm "+OUTDIR+"jet_loci.monstddev.ps")
   end if
-;---ENSO TAS/SST/PSL Spatial Composite plotting section---------------------------------------------------------------------------
+;--- TAS/SST/PSL Spatial Composite plotting section---------------------------------------------------------------------------
   res = True      ; spatial plot resource list
   if (abs(rlats).lt.90.0.or.abs(rlatn).lt.90.0) then
     res@mpGeophysicalLineColor = "gray42"
@@ -1716,7 +1596,6 @@ begin
   res@cnLineLabelsOn = False
   res@cnFillOn     = True
   res@cnLinesOn    = False
-  res@cnConstFEnableFill = True
 
   res@lbLabelBarOn    = False
   res@pmLabelBarWidthF = 0.55
@@ -1770,6 +1649,7 @@ begin
   res3@cnLineLabelsOn = False
   res3@cnFillOn        = True
   res3@cnLinesOn       = False
+  res3@cnFillMode = "AreaFill"
   res3@lbLabelBarOn    = False
   res3@cnInfoLabelOn = False
   res3@gsnRightString = ""
@@ -1777,11 +1657,6 @@ begin
   res3@gsnCenterString = ""   
   res3@gsnAddCyclic = True
   res3@cnNoDataLabelOn = False
-
-  res3@cnFillMode      = "AreaFill"
- ;res3@cnFillMode      = "RasterFill"
- ;res3@cnRasterSmoothingOn = True 
- ;res3@cnConstFEnableFill  = True 
 
   res4 = res3   ; res4 = tas regression differences resources for overlays
   res4@cnLevels := res2@cnLevels
@@ -1840,22 +1715,22 @@ begin
   panres2@txFontHeightF = 0.016
   panres2@gsnPanelBottom = 0.05
 
-  variname = (/"terr_spacomp_var_","terr_spacomp_var_","terr_spacomp_var_","terr_spacomp_var_",\
-               "terr_elnino_spacomp_var_","terr_elnino_spacomp_var_","terr_elnino_spacomp_var_","terr_elnino_spacomp_var_",\
-               "terr_lanina_spacomp_var_","terr_lanina_spacomp_var_","terr_lanina_spacomp_var_","terr_lanina_spacomp_var_"/)
+  variname = (/"jet_loci_spacomp_var_","jet_loci_spacomp_var_","jet_loci_spacomp_var_","jet_loci_spacomp_var_",\
+               "jet_loci_pjet_spacomp_var_","jet_loci_pjet_spacomp_var_","jet_loci_pjet_spacomp_var_","jet_loci_pjet_spacomp_var_",\
+               "jet_loci_njet_spacomp_var_","jet_loci_njet_spacomp_var_","jet_loci_njet_spacomp_var_","jet_loci_njet_spacomp_var_"/)
   variname_seas = (/"jja0","son0","djf1","mam1","jja0","son0","djf1","mam1","jja0","son0","djf1","mam1"/)
   variname = variname+variname_seas
   variname_title_seas = (/"(JJA~S~0~N~)","(SON~S~0~N~)","(DJF~S~+1~N~)","(MAM~S~+1~N~)",\
                           "(JJA~S~0~N~)","(SON~S~0~N~)","(DJF~S~+1~N~)","(MAM~S~+1~N~)",\
                           "(JJA~S~0~N~)","(SON~S~0~N~)","(DJF~S~+1~N~)","(MAM~S~+1~N~)"/)
   variname_panel_title_subs = new(12,string)
-  variname_panel_title_subs(:3) = "El Nin~H-13V2F35~D~FV-2H3F21~o - La Nin~H-13V2F35~D~FV-2H3F21~a"
-  variname_panel_title_subs(4:7) = "El Nin~H-13V2F35~D~FV-2H3F21~o"
-  variname_panel_title_subs(8:) = "La Nin~H-13V2F35~D~FV-2H3F21~a"
-  fnaddsub = (/"","","","",".elnino",".elnino",".elnino",".elnino",".lanina",".lanina",".lanina",".lanina"/) ; add to workstation output file name
+  variname_panel_title_subs(:3) = "JET~S~+~N~ - JET~S~-~N~"
+  variname_panel_title_subs(4:7) = "JET~S~+~N~"
+  variname_panel_title_subs(8:) = "JET~S~-~N~"
+  fnaddsub = (/"","","","",".pjet",".pjet",".pjet",".pjet",".njet",".njet",".njet",".njet"/) ; add to workstation output file name
 
   do dd = 0,dimsizes(variname)-1
-     wks = gsn_open_wks(wks_type,getenv("OUTDIR")+"terr_spacomp")
+     wks = gsn_open_wks(wks_type,getenv("OUTDIR")+"jet_loci_spacomp")
      res5@gsnContourNegLineDashPattern  = NhlNewDashPattern(wks,"$_$_$_$_$_$_$_$_$_")
      res6@gsnContourNegLineDashPattern  = NhlNewDashPattern(wks,"$_$_$_$_$_$_$_$_$_")
 
@@ -1871,25 +1746,25 @@ begin
 
      numobs = num(EM_num.eq.0) 
      if (numobs.eq.0) then
-        fnt = getenv("OUTDIR")+"obs.cvdp_data.terr.indices.tas."+syear_tas(0)+"-"+eyear_tas(0)+".nc"      
+        fnt = getenv("OUTDIR")+"obs.cvdp_data.polar.jet.indices.tas."+syear_tas(0)+"-"+eyear_tas(0)+".nc"      
         fnt2 = getenv("OUTDIR")+"obs.cvdp_data."+syear_tas(0)+"-"+eyear_tas(0)+".nc"
         obs0 := read_cvdp_le_data(fnt,fnt2,str_sub_str(variname(dd),"var","tas"))
-        fnt = getenv("OUTDIR")+"obs.cvdp_data.terr.indices."+syear(0)+"-"+eyear(0)+".nc"
-        fnt2 = getenv("OUTDIR")+"obs.cvdp_data."+syear(0)+"-"+eyear(0)+".nc"
+        fnt = getenv("OUTDIR")+"obs.cvdp_data.polar.jet.indices.sst."+syear_sst(0)+"-"+eyear_sst(0)+".nc"
+        fnt2 = getenv("OUTDIR")+"obs.cvdp_data."+syear_sst(0)+"-"+eyear_sst(0)+".nc"
         sst0 := read_cvdp_le_data(fnt,fnt2,str_sub_str(variname(dd),"var","sst"))
-        fnt = getenv("OUTDIR")+"obs.cvdp_data.terr.indices.psl."+syear_psl(0)+"-"+eyear_psl(0)+".nc"     
-        fnt2 = getenv("OUTDIR")+"obs.cvdp_data."+syear_psl(0)+"-"+eyear_psl(0)+".nc"
+        fnt = getenv("OUTDIR")+"obs.cvdp_data.polar.jet.indices."+syear(0)+"-"+eyear(0)+".nc"     
+        fnt2 = getenv("OUTDIR")+"obs.cvdp_data."+syear(0)+"-"+eyear(0)+".nc"
         psl0 := read_cvdp_le_data(fnt,fnt2,str_sub_str(variname(dd),"var","psl"))
         cntr = 0
      else
-        fnt = getenv("OUTDIR")+modname_tas(0)+".cvdp_data.terr.indices.tas."+syear_tas(0)+"-"+eyear_tas(0)+".nc"      
+        fnt = getenv("OUTDIR")+modname_tas(0)+".cvdp_data.polar.jet.indices.tas."+syear_tas(0)+"-"+eyear_tas(0)+".nc"      
         fnt2 = getenv("OUTDIR")+modname_tas(0)+".cvdp_data."+syear_tas(0)+"-"+eyear_tas(0)+".nc"
         obs0 := read_cvdp_le_data(fnt,fnt2,str_sub_str(variname(dd),"var","tas"))
-        fnt = getenv("OUTDIR")+modname(0)+".cvdp_data.terr.indices."+syear(0)+"-"+eyear(0)+".nc"
-        fnt2 = getenv("OUTDIR")+modname(0)+".cvdp_data."+syear(0)+"-"+eyear(0)+".nc"
+        fnt = getenv("OUTDIR")+modname_sst(0)+".cvdp_data.polar.jet.indices.sst."+syear_sst(0)+"-"+eyear_sst(0)+".nc"
+        fnt2 = getenv("OUTDIR")+modname_sst(0)+".cvdp_data."+syear_sst(0)+"-"+eyear_sst(0)+".nc"
         sst0 := read_cvdp_le_data(fnt,fnt2,str_sub_str(variname(dd),"var","sst"))
-        fnt = getenv("OUTDIR")+modname_psl(0)+".cvdp_data.terr.indices.psl."+syear_psl(0)+"-"+eyear_psl(0)+".nc"     
-        fnt2 = getenv("OUTDIR")+modname_psl(0)+".cvdp_data."+syear_psl(0)+"-"+eyear_psl(0)+".nc"
+        fnt = getenv("OUTDIR")+modname(0)+".cvdp_data.polar.jet.indices."+syear(0)+"-"+eyear(0)+".nc"     
+        fnt2 = getenv("OUTDIR")+modname(0)+".cvdp_data."+syear(0)+"-"+eyear(0)+".nc"
         psl0 := read_cvdp_le_data(fnt,fnt2,str_sub_str(variname(dd),"var","psl"))
         cntr = 1
      end if
@@ -1905,7 +1780,7 @@ begin
      tres@lbLabelBarOn = False
      res@gsnLeftString = syear_tas(0)+"-"+eyear_tas(0) 
      res@gsnRightString = set_subtitle_enso_numevents(obs0,"Tot")
-     res@gsnCenterString = names(0)+" / "+names_tas(0)+" / "+names_psl(0)      
+     res@gsnCenterString = names_sst(0)+" / "+names_tas(0)+" / "+names(0)      
      plot_indmem(0) = gsn_csm_contour_map(wks,obs0,res)
      plot_indmem_ov(0) = gsn_csm_contour(wks,sst0,res3)
      plot_indmem_ov2(0) = gsn_csm_contour(wks,psl0,res5)
@@ -1914,18 +1789,18 @@ begin
      cntr_EM = 0
      if (numobs.ge.2) then     ; plot obs #2-
         do ff = 1,numobs-1
-           fnt = getenv("OUTDIR")+modname_tas(cntr)+".cvdp_data.terr.indices.tas."+syear_tas(cntr)+"-"+eyear_tas(cntr)+".nc"
+           fnt = getenv("OUTDIR")+modname_tas(cntr)+".cvdp_data.polar.jet.indices.tas."+syear_tas(cntr)+"-"+eyear_tas(cntr)+".nc"
            fnt2 = getenv("OUTDIR")+modname_tas(cntr)+".cvdp_data."+syear_tas(cntr)+"-"+eyear_tas(cntr)+".nc"
            arr := read_cvdp_le_data(fnt,fnt2,str_sub_str(variname(dd),"var","tas"))
-           fnt = getenv("OUTDIR")+modname(cntr)+".cvdp_data.terr.indices."+syear(cntr)+"-"+eyear(cntr)+".nc"
-           fnt2 = getenv("OUTDIR")+modname(cntr)+".cvdp_data."+syear(cntr)+"-"+eyear(cntr)+".nc"
+           fnt = getenv("OUTDIR")+modname_sst(cntr)+".cvdp_data.polar.jet.indices.sst."+syear_sst(cntr)+"-"+eyear_sst(cntr)+".nc"
+           fnt2 = getenv("OUTDIR")+modname_sst(cntr)+".cvdp_data."+syear_sst(cntr)+"-"+eyear_sst(cntr)+".nc"
            sst := read_cvdp_le_data(fnt,fnt2,str_sub_str(variname(dd),"var","sst"))
            if (isatt(sst,"is_all_missing")) then 
               cntr = cntr+1
               continue
            end if
-           fnt = getenv("OUTDIR")+modname_psl(cntr)+".cvdp_data.terr.indices.psl."+syear_psl(cntr)+"-"+eyear_psl(cntr)+".nc"
-           fnt2 = getenv("OUTDIR")+modname_psl(cntr)+".cvdp_data."+syear_psl(cntr)+"-"+eyear_psl(cntr)+".nc"
+           fnt = getenv("OUTDIR")+modname(cntr)+".cvdp_data.polar.jet.indices."+syear(cntr)+"-"+eyear(cntr)+".nc"
+           fnt2 = getenv("OUTDIR")+modname(cntr)+".cvdp_data."+syear(cntr)+"-"+eyear(cntr)+".nc"
            psl := read_cvdp_le_data(fnt,fnt2,str_sub_str(variname(dd),"var","psl"))
 
            m = addfile("$NCARG_ROOT/lib/ncarg/data/cdf/landsea.nc","r")     ; mask ocean for TAS array
@@ -1942,7 +1817,7 @@ begin
            psl_diff = (/ psl - psl0_rg /)   
 
            res@gsnLeftString = syear_tas(cntr)+"-"+eyear_tas(cntr)
-           res@gsnCenterString = names(cntr)+" / "+names_tas(cntr)+" / "+names_psl(cntr)
+           res@gsnCenterString = names_sst(cntr)+" / "+names_tas(cntr)+" / "+names(cntr)
            res@gsnRightString = set_subtitle_enso_numevents(arr,"Tot")+"~C~   r="+pattern_correlation(sst0_rg,sst)+"/"+pattern_correlation(obs0_rg,arr)+"/"+pattern_correlation(psl0_rg,psl)
            plot_indmem(cntr) = gsn_csm_contour_map(wks,sst,res)
            plot_indmem_ov(cntr)  = gsn_csm_contour(wks,arr,res3)
@@ -1951,7 +1826,7 @@ begin
            overlay(plot_indmem(cntr),plot_indmem_ov2(cntr))
            res2@gsnLeftString = ""  
            res2@gsnRightString = ""
-           res2@gsnCenterString = names(cntr)+"/"+names_tas(cntr)+"/"+names_psl(cntr)+" -~C~"+names(0)+"/"+names_tas(0)+"/"+names_psl(0)
+           res2@gsnCenterString = names_sst(cntr)+"/"+names_tas(cntr)+"/"+names(cntr)+" -~C~"+names_sst(0)+"/"+names_tas(0)+"/"+names(0)
            plot_indmem_diff(cntr) = gsn_csm_contour_map(wks,sst_diff,res2)   
            plot_indmem_diff_ov(cntr) = gsn_csm_contour(wks,obs_diff,res4)
            plot_indmem_diff_ov2(cntr) = gsn_csm_contour(wks,psl_diff,res6)
@@ -1966,32 +1841,32 @@ begin
         nens = num(EM_num.eq.gg) ; determines how many model simulations in each ensemble
         cntr_ens := ind(EM_num.eq.gg)   ; cntr_ens(hh) are the indices where each ensemble member of an ensemble reside 
         do hh = 0,nens-1
-           modname_mod = modname_tas(cntr_ens(hh))
-           syear_mod = syear_tas(cntr_ens(hh))
-           eyear_mod = eyear_tas(cntr_ens(hh))
-           names_mod = names_tas(cntr_ens(hh))
-           names_EM_mod = names_EM(cntr_ens(hh))
-           modname_mod_sst = modname(cntr_ens(hh))
-           syear_mod_sst = syear(cntr_ens(hh))
-           eyear_mod_sst = eyear(cntr_ens(hh))
-           names_mod_sst = names(cntr_ens(hh))
-           modname_mod_psl = modname_psl(cntr_ens(hh))
-           syear_mod_psl = syear_psl(cntr_ens(hh))
-           eyear_mod_psl = eyear_psl(cntr_ens(hh))
-           names_mod_psl = names_psl(cntr_ens(hh))
+           modname_mod_tas = modname_tas(cntr_ens(hh))
+           syear_mod_tas = syear_tas(cntr_ens(hh))
+           eyear_mod_tas = eyear_tas(cntr_ens(hh))
+           names_mod_tas = names_tas(cntr_ens(hh))
+           modname_mod_sst = modname_sst(cntr_ens(hh))
+           syear_mod_sst = syear_sst(cntr_ens(hh))
+           eyear_mod_sst = eyear_sst(cntr_ens(hh))
+           names_mod_sst = names_sst(cntr_ens(hh))
+           names_EM_mod  = names_EM(cntr_ens(hh))
+           modname_mod   = modname(cntr_ens(hh))
+           syear_mod     = syear(cntr_ens(hh))
+           eyear_mod     = eyear(cntr_ens(hh))
+           names_mod     = names(cntr_ens(hh))
    
-           fnt = getenv("OUTDIR")+modname_mod+".cvdp_data.terr.indices.tas."+syear_mod+"-"+eyear_mod+".nc"
-           fnt2 = getenv("OUTDIR")+modname_mod+".cvdp_data."+syear_mod+"-"+eyear_mod+".nc"
+           fnt = getenv("OUTDIR")+modname_mod_tas+".cvdp_data.polar.jet.indices.tas."+syear_mod_tas+"-"+eyear_mod_tas+".nc"
+           fnt2 = getenv("OUTDIR")+modname_mod_tas+".cvdp_data."+syear_mod_tas+"-"+eyear_mod_tas+".nc"
            arr := read_cvdp_le_data(fnt,fnt2,str_sub_str(variname(dd),"var","tas"))
-           fnt = getenv("OUTDIR")+modname_mod_sst+".cvdp_data.terr.indices."+syear_mod_sst+"-"+eyear_mod_sst+".nc"
-           fnt2 = getenv("OUTDIR")+modname_mod_sst+".cvdp_data."+syear_mod+"-"+eyear_mod+".nc"
+           fnt = getenv("OUTDIR")+modname_mod_sst+".cvdp_data.polar.jet.indices.sst."+syear_mod_sst+"-"+eyear_mod_sst+".nc"
+           fnt2 = getenv("OUTDIR")+modname_mod_sst+".cvdp_data."+syear_mod_sst+"-"+eyear_mod_sst+".nc"
            sst := read_cvdp_le_data(fnt,fnt2,str_sub_str(variname(dd),"var","sst"))
            if (isatt(sst,"is_all_missing")) then 
               cntr = cntr+1
               continue
            end if
-           fnt = getenv("OUTDIR")+modname_mod_psl+".cvdp_data.terr.indices.psl."+syear_mod_psl+"-"+eyear_mod_psl+".nc"
-           fnt2 = getenv("OUTDIR")+modname_mod_psl+".cvdp_data."+syear_mod+"-"+eyear_mod+".nc"
+           fnt = getenv("OUTDIR")+modname_mod+".cvdp_data.polar.jet.indices."+syear_mod+"-"+eyear_mod+".nc"
+           fnt2 = getenv("OUTDIR")+modname_mod+".cvdp_data."+syear_mod+"-"+eyear_mod+".nc"
            psl := read_cvdp_le_data(fnt,fnt2,str_sub_str(variname(dd),"var","psl"))
 
            m = addfile("$NCARG_ROOT/lib/ncarg/data/cdf/landsea.nc","r")     ; mask ocean for TAS array
@@ -2025,8 +1900,8 @@ begin
               arr_store_psl@nens = 0
               copy_VarAtts(psl,arr_store_psl)
    
-              arr_store_events_E = new(nens,float)
-              arr_store_events_L = new(nens,float)      
+              arr_store_events_P = new(nens,float)
+              arr_store_events_N = new(nens,float)      
 
               syear_em0 = syear_mod
               eyear_em0 = eyear_mod
@@ -2052,11 +1927,11 @@ begin
               arr_store_psl(hh,:,:) = (/ psl /)
               arr_store_psl@nens = arr_store_psl@nens+1
            end if
-           if (isatt(arr,"number_of_elnino_events")) then
-              arr_store_events_E(hh) = arr@number_of_elnino_events
+           if (isatt(arr,"number_of_pjet_events")) then
+              arr_store_events_P(hh) = arr@number_of_pjet_events
            end if
-           if (isatt(arr,"number_of_lanina_events")) then
-              arr_store_events_L(hh) = arr@number_of_lanina_events
+           if (isatt(arr,"number_of_njet_events")) then
+              arr_store_events_N(hh) = arr@number_of_njet_events
            end if
 
            if (.not.isvar("obs0_rg")) then  
@@ -2095,7 +1970,7 @@ begin
 
            res2@gsnLeftString = "" 
            res2@gsnRightString = ""
-           res2@gsnCenterString = names_mod+" - "+names(0)+"/"+names_tas(0)+"/"+names_psl(0)
+           res2@gsnCenterString = names_mod+" - "+names_sst(0)+"/"+names_tas(0)+"/"+names(0)
            plot_indmem_diff(cntr) = gsn_csm_contour_map(wks,obs_diff,res2)
            plot_indmem_diff_ov(cntr) = gsn_csm_contour(wks,sst_diff,res4)
            plot_indmem_diff_ov2(cntr) = gsn_csm_contour(wks,psl_diff,res6)
@@ -2126,7 +2001,7 @@ begin
         res@lbTitleString = arr_EM@units   
         res@gsnLeftString = syear_tas(0)+"-"+eyear_tas(0) 
         res@gsnRightString = set_subtitle_enso_numevents(obs0,"Tot")
-        res@gsnCenterString = "Observations ("+names(0)+"/"+names_tas(0)+"/"+names_psl(0)+")"     
+        res@gsnCenterString = "Observations ("+names_sst(0)+"/"+names_tas(0)+"/"+names(0)+")"     
         plot_summary(cntr_EM+1) = gsn_csm_contour_map(wks,obs0,res)
         plot_summary_ov(cntr_EM+1) = gsn_csm_contour(wks,sst0,res3)
         plot_summary_ov2(cntr_EM+1) = gsn_csm_contour(wks,psl0,res5)
@@ -2144,18 +2019,18 @@ begin
         res@gsnRightStringParallelPosF = 1.03
         res@gsnRightStringOrthogonalPosF = -0.97
         res@gsnRightString = ""
-        if (.not.all(ismissing(arr_store_events_E))) then
-           if (.not.all(ismissing(arr_store_events_L))) then
-              res@gsnRightString = decimalPlaces(avg(arr_store_events_E),0,True)+" EN/"+decimalPlaces(avg(arr_store_events_L),0,True)+" LN Avg~C~"+\
-                             "   "+sum(arr_store_events_E)+" EN/"+sum(arr_store_events_E)+" LN Tot~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~"+\
+        if (.not.all(ismissing(arr_store_events_P))) then
+           if (.not.all(ismissing(arr_store_events_N))) then
+              res@gsnRightString = decimalPlaces(avg(arr_store_events_P),0,True)+" PS/"+decimalPlaces(avg(arr_store_events_N),0,True)+" NS Avg~C~"+\
+                             "   "+sum(arr_store_events_P)+" PS/"+sum(arr_store_events_P)+" NS Tot~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~"+\
                              "   r="+pattern_correlation(sst0_rg,arr_sst_EM)+"/"+pattern_correlation(obs0_rg,arr_EM)+"/"+pattern_correlation(psl0_rg,arr_psl_EM)
            else
-              res@gsnRightString = decimalPlaces(avg(arr_store_events_E),0,True)+" EN Avg/"+sum(arr_store_events_E)+" EN Tot~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~"+\
+              res@gsnRightString = decimalPlaces(avg(arr_store_events_P),0,True)+" PS Avg/"+sum(arr_store_events_P)+" PS Tot~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~"+\
                              "   r="+pattern_correlation(sst0_rg,arr_sst_EM)+"/"+pattern_correlation(obs0_rg,arr_EM)+"/"+pattern_correlation(psl0_rg,arr_psl_EM)
            end if
         else
-           if (.not.all(ismissing(arr_store_events_L))) then
-              res@gsnRightString = decimalPlaces(avg(arr_store_events_L),0,True)+" LN Avg/"+sum(arr_store_events_L)+" LN Tot~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~"+\
+           if (.not.all(ismissing(arr_store_events_N))) then
+              res@gsnRightString = decimalPlaces(avg(arr_store_events_N),0,True)+" NS Avg/"+sum(arr_store_events_N)+" NS Tot~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~"+\
                              "   r="+pattern_correlation(sst0_rg,arr_sst_EM)+"/"+pattern_correlation(obs0_rg,arr_EM)+"/"+pattern_correlation(psl0_rg,arr_psl_EM)
            end if
         end if
@@ -2203,7 +2078,7 @@ begin
         plot_summary(cntr_EM+4) = gsn_csm_contour_map(wks,p_val3,tres)
 
    
-        fno = getenv("OUTDIR")+str_sub_str(names_EM_mod," ","_")+"_EM.cvdp_data.terr.indices.tas."+syear_mod+"-"+eyear_mod+".nc"
+        fno = getenv("OUTDIR")+str_sub_str(names_EM_mod," ","_")+"_EM.cvdp_data.polar.jet.indices.tas."+syear_mod+"-"+eyear_mod+".nc"
         if (isfilepresent2(fno)) then
            z = addfile(fno,"w")
         else
@@ -2215,7 +2090,7 @@ begin
         z->$(/str_sub_str(variname(dd),"var","tas")+"_pval"/)$ = set_varAtts(p_val,arr_EM@long_name+" p-val statistic","%","")   
         delete(z)
 
-        fno = getenv("OUTDIR")+str_sub_str(names_EM_mod," ","_")+"_EM.cvdp_data.terr.indices."+syear_mod_sst+"-"+eyear_mod_sst+".nc"
+        fno = getenv("OUTDIR")+str_sub_str(names_EM_mod," ","_")+"_EM.cvdp_data.polar.jet.indices.sst."+syear_mod_sst+"-"+eyear_mod_sst+".nc"
         if (isfilepresent2(fno)) then
            z = addfile(fno,"w")
         else
@@ -2227,18 +2102,18 @@ begin
         z->$(/str_sub_str(variname(dd),"var","sst")+"_pval"/)$ = set_varAtts(p_val2,arr_sst_EM@long_name+" p-val statistic","%","")   
         delete(z)
 
-        fno = getenv("OUTDIR")+str_sub_str(names_EM_mod," ","_")+"_EM.cvdp_data.terr.indices.psl."+syear_mod_psl+"-"+eyear_mod_psl+".nc"
+        fno = getenv("OUTDIR")+str_sub_str(names_EM_mod," ","_")+"_EM.cvdp_data.polar.jet.indices."+syear_mod+"-"+eyear_mod+".nc"
         if (isfilepresent2(fno)) then
            z = addfile(fno,"w")
         else
            z = addfile(fno,"c")
-           set_global_ncfile_attributes(z,names_EM_mod,syear_mod_psl,eyear_mod_psl,getenv("VERSION"))
+           set_global_ncfile_attributes(z,names_EM_mod,syear_mod,eyear_mod,getenv("VERSION"))
         end if
         z->$(/str_sub_str(variname(dd),"var","psl")+"_em"/)$ = set_varAtts(arr_psl_EM,arr_psl_EM@long_name+" Ensemble Mean","","")
         z->$(/str_sub_str(variname(dd),"var","psl")+"_em_diffobs"/)$ = set_varAtts(psl_diff,psl_diff@long_name+" Ensemble Mean difference from observations","","")           
         z->$(/str_sub_str(variname(dd),"var","psl")+"_pval"/)$ = set_varAtts(p_val2,arr_psl_EM@long_name+" p-val statistic","%","")   
         delete([/arr_store,arr_store_sst,arr_store_psl,obs0_rg,obs_diff,arr_EM,z,arr_sst_EM,arr_psl_EM,sst_diff,sst0_rg,psl_diff,psl0_rg,p_val,p_val2,p_val3/])
-        delete([/arr_store_events_E,arr_store_events_L/])
+        delete([/arr_store_events_P,arr_store_events_N/])
         cntr_EM = cntr_EM+5
      end do
      panres@txString = variname_panel_title_subs(dd)+" Spatial Composite SST,TAS,PSL "+variname_title_seas(dd)
@@ -2254,21 +2129,21 @@ begin
      delete(wks)
 
      if (wks_type.eq."png") then
-        system("mv "+OUTDIR+"terr_spacomp.000001.png "+OUTDIR+"terr.spatialcomp"+fnaddsub(dd)+".indmem."+variname_seas(dd)+".png")
-        system("mv "+OUTDIR+"terr_spacomp.000002.png "+OUTDIR+"terr.spatialcomp"+fnaddsub(dd)+".indmemdiff."+variname_seas(dd)+".png")
-        system("mv "+OUTDIR+"terr_spacomp.000003.png "+OUTDIR+"terr.spatialcomp"+fnaddsub(dd)+".summary."+variname_seas(dd)+".png")
+        system("mv "+OUTDIR+"jet_loci_spacomp.000001.png "+OUTDIR+"jet_loci.spatialcomp"+fnaddsub(dd)+".indmem."+variname_seas(dd)+".png")
+        system("mv "+OUTDIR+"jet_loci_spacomp.000002.png "+OUTDIR+"jet_loci.spatialcomp"+fnaddsub(dd)+".indmemdiff."+variname_seas(dd)+".png")
+        system("mv "+OUTDIR+"jet_loci_spacomp.000003.png "+OUTDIR+"jet_loci.spatialcomp"+fnaddsub(dd)+".summary."+variname_seas(dd)+".png")
         if (PNG_SCALE_SUMMARY.ne.100) then
-           system("convert -resize "+PNG_SCALE_SUMMARY+"% "+OUTDIR+"terr.spatialcomp"+fnaddsub(dd)+".summary."+variname_seas(dd)+".png "+OUTDIR+"terr.spatialcomp"+fnaddsub(dd)+".summary."+variname_seas(dd)+".png")
+           system("convert -resize "+PNG_SCALE_SUMMARY+"% "+OUTDIR+"jet_loci.spatialcomp"+fnaddsub(dd)+".summary."+variname_seas(dd)+".png "+OUTDIR+"jet_loci.spatialcomp"+fnaddsub(dd)+".summary."+variname_seas(dd)+".png")
         end if
      else
-        system("psplit "+OUTDIR+"terr_spacomp.ps "+OUTDIR+"terr.spatialcomp")
-        system("mv "+OUTDIR+"terr_spatialcomp0001.ps "+OUTDIR+"terr.spatialcomp"+fnaddsub(dd)+".indmem."+variname_seas(dd)+".ps")
-        system("mv "+OUTDIR+"terr_spatialcomp0002.ps "+OUTDIR+"terr.spatialcomp"+fnaddsub(dd)+".indmemdiff."+variname_seas(dd)+".ps")
-        system("mv "+OUTDIR+"terr_spatialcomp0003.ps "+OUTDIR+"terr.spatialcomp"+fnaddsub(dd)+".summary."+variname_seas(dd)+".ps")
-        system("rm "+OUTDIR+"terr_spacomp.ps")
+        system("psplit "+OUTDIR+"jet_loci_spacomp.ps "+OUTDIR+"jet_loci.spatialcomp")
+        system("mv "+OUTDIR+"jet_loci.spatialcomp0001.ps "+OUTDIR+"jet_loci.spatialcomp"+fnaddsub(dd)+".indmem."+variname_seas(dd)+".ps")
+        system("mv "+OUTDIR+"jet_loci.spatialcomp0002.ps "+OUTDIR+"jet_loci.spatialcomp"+fnaddsub(dd)+".indmemdiff."+variname_seas(dd)+".ps")
+        system("mv "+OUTDIR+"jet_loci.spatialcomp0003.ps "+OUTDIR+"jet_loci.spatialcomp"+fnaddsub(dd)+".summary."+variname_seas(dd)+".ps")
+        system("rm "+OUTDIR+"jet_loci_spacomp.ps")
      end if
   end do
-;---ENSO PR Spatial Composite plotting section---------------------------------------------------------------------------
+;--- PR Spatial Composite plotting section---------------------------------------------------------------------------
   delete([/res@cnLevels,res2@cnLevels,res@cnFillPalette,res2@cnFillPalette,res@lbLabelStrings,res2@lbLabelStrings/]) 
 
   res@lbLabelFontHeightF = 0.018   ; make summary label bars labels a bit smaller to print additional labels
@@ -2293,18 +2168,18 @@ begin
   res@gsnRightStringOrthogonalPosF = -0.07
   res@gsnRightStringParallelPosF = 1.025
   do dd = 0,dimsizes(variname)-1
-     wks = gsn_open_wks(wks_type,getenv("OUTDIR")+"terr_spacomp")
+     wks = gsn_open_wks(wks_type,getenv("OUTDIR")+"jet_loci_spacomp")
      plot_indmem      := new(nsim,"graphic")
      plot_indmem_diff := new(nsim,"graphic")
      plot_summary     := new((nEM*4),"graphic")
 
      numobs = num(EM_num.eq.0) 
      if (numobs.eq.0) then
-        fnt = getenv("OUTDIR")+"obs.cvdp_data.terr.indices.pr."+syear_pr(0)+"-"+eyear_pr(0)+".nc"      
+        fnt = getenv("OUTDIR")+"obs.cvdp_data.polar.jet.indices.pr."+syear_pr(0)+"-"+eyear_pr(0)+".nc"      
         fnt2 = getenv("OUTDIR")+"obs.cvdp_data."+syear_pr(0)+"-"+eyear_pr(0)+".nc"
         cntr = 0
      else
-        fnt = getenv("OUTDIR")+modname_pr(0)+".cvdp_data.terr.indices.pr."+syear_pr(0)+"-"+eyear_pr(0)+".nc"      
+        fnt = getenv("OUTDIR")+modname_pr(0)+".cvdp_data.polar.jet.indices.pr."+syear_pr(0)+"-"+eyear_pr(0)+".nc"      
         fnt2 = getenv("OUTDIR")+modname_pr(0)+".cvdp_data."+syear_pr(0)+"-"+eyear_pr(0)+".nc"
         cntr = 1
      end if
@@ -2322,7 +2197,7 @@ begin
      cntr_EM = 0
      if (numobs.ge.2) then     ; plot obs #2-
         do ff = 1,numobs-1
-           fnt = getenv("OUTDIR")+modname_pr(cntr)+".cvdp_data.terr.indices.pr."+syear_pr(cntr)+"-"+eyear_pr(cntr)+".nc"
+           fnt = getenv("OUTDIR")+modname_pr(cntr)+".cvdp_data.polar.jet.indices.pr."+syear_pr(cntr)+"-"+eyear_pr(cntr)+".nc"
            fnt2 = getenv("OUTDIR")+modname_pr(cntr)+".cvdp_data."+syear_pr(cntr)+"-"+eyear_pr(cntr)+".nc"
            arr := read_cvdp_le_data(fnt,fnt2,str_sub_str(variname(dd),"var","pr"))
            if (isatt(arr,"is_all_missing")) then 
@@ -2357,7 +2232,7 @@ begin
            names_mod = names_pr(cntr_ens(hh))
            names_EM_mod = names_EM(cntr_ens(hh))
    
-           fnt = getenv("OUTDIR")+modname_mod+".cvdp_data.terr.indices.pr."+syear_mod+"-"+eyear_mod+".nc"
+           fnt = getenv("OUTDIR")+modname_mod+".cvdp_data.polar.jet.indices.pr."+syear_mod+"-"+eyear_mod+".nc"
            fnt2 = getenv("OUTDIR")+modname_mod+".cvdp_data."+syear_mod+"-"+eyear_mod+".nc"
            arr := read_cvdp_le_data(fnt,fnt2,str_sub_str(variname(dd),"var","pr"))
            if (isatt(arr,"is_all_missing")) then
@@ -2375,8 +2250,8 @@ begin
               arr_store@nens = 0
               copy_VarAtts(arr,arr_store)
 
-              arr_store_events_E = new(nens,float)
-              arr_store_events_L = new(nens,float) 
+              arr_store_events_P = new(nens,float)
+              arr_store_events_N = new(nens,float) 
 
               syear_em0 = syear_mod
               eyear_em0 = eyear_mod
@@ -2391,11 +2266,11 @@ begin
            res2@gsnCenterStringFontColor = csubtitle_color(gg-1)
            arr_store(hh,:,:) = (/ arr /)
            arr_store@nens = arr_store@nens+1
-           if (isatt(arr,"number_of_elnino_events")) then
-              arr_store_events_E(hh) = arr@number_of_elnino_events
+           if (isatt(arr,"number_of_pjet_events")) then
+              arr_store_events_P(hh) = arr@number_of_pjet_events
            end if
-           if (isatt(arr,"number_of_lanina_events")) then
-              arr_store_events_L(hh) = arr@number_of_lanina_events
+           if (isatt(arr,"number_of_njet_events")) then
+              arr_store_events_N(hh) = arr@number_of_njet_events
            end if
 
            if (.not.isvar("obs0_rg")) then  
@@ -2447,18 +2322,18 @@ begin
         res@gsnRightStringOrthogonalPosF = -0.97
         res@gsnCenterStringFontColor = csubtitle_color(gg-1)
         res@gsnRightString = ""
-        if (.not.all(ismissing(arr_store_events_E))) then
-           if (.not.all(ismissing(arr_store_events_L))) then
-              res@gsnRightString = decimalPlaces(avg(arr_store_events_E),0,True)+" EN/"+decimalPlaces(avg(arr_store_events_L),0,True)+" LN Avg~C~"+\
-                             "   "+sum(arr_store_events_E)+" EN/"+sum(arr_store_events_E)+" LN Tot~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~"+\
+        if (.not.all(ismissing(arr_store_events_P))) then
+           if (.not.all(ismissing(arr_store_events_N))) then
+              res@gsnRightString = decimalPlaces(avg(arr_store_events_P),0,True)+" PS/"+decimalPlaces(avg(arr_store_events_N),0,True)+" NS Avg~C~"+\
+                             "   "+sum(arr_store_events_P)+" PS/"+sum(arr_store_events_P)+" NS Tot~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~"+\
                              "   r="+pattern_correlation(obs0_rg,arr_EM)
            else
-              res@gsnRightString = decimalPlaces(avg(arr_store_events_E),0,True)+" EN Avg/"+sum(arr_store_events_E)+" EN Tot~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~"+\
+              res@gsnRightString = decimalPlaces(avg(arr_store_events_P),0,True)+" PS Avg/"+sum(arr_store_events_P)+" PS Tot~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~"+\
                              "   r="+pattern_correlation(obs0_rg,arr_EM)
            end if
         else
-           if (.not.all(ismissing(arr_store_events_L))) then
-              res@gsnRightString = decimalPlaces(avg(arr_store_events_L),0,True)+" LN Avg/"+sum(arr_store_events_L)+" LN Tot~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~"+\
+           if (.not.all(ismissing(arr_store_events_N))) then
+              res@gsnRightString = decimalPlaces(avg(arr_store_events_N),0,True)+" NS Avg/"+sum(arr_store_events_N)+" NS Tot~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~~C~"+\
                              "   r="+pattern_correlation(obs0_rg,arr_EM)
            end if
         end if
@@ -2478,17 +2353,17 @@ begin
 
         plot_summary(cntr_EM+3) = gsn_csm_contour_map(wks,p_val,tres)
    
-        fno = getenv("OUTDIR")+str_sub_str(names_EM_mod," ","_")+"_EM.cvdp_data.terr.indices.pr."+syear_mod+"-"+eyear_mod+".nc"
+        fno = getenv("OUTDIR")+str_sub_str(names_EM_mod," ","_")+"_EM.cvdp_data.polar.jet.indices.pr."+syear_mod+"-"+eyear_mod+".nc"
         if (isfilepresent2(fno)) then
            z = addfile(fno,"w")
         else
            z = addfile(fno,"c")
            set_global_ncfile_attributes(z,names_EM_mod,syear_mod,eyear_mod,getenv("VERSION"))
         end if
-        z->$(/"terr_spacomp_pr_"+variname_seas(dd)+"_em"/)$ = set_varAtts(arr_EM,arr_EM@long_name+" Ensemble Mean","","")
-        z->$(/"terr_spacomp_pr_"+variname_seas(dd)+"_em_diffobs"/)$ = set_varAtts(obs_diff,obs_diff@long_name+" Ensemble Mean difference from observations","","")           
-        z->$(/"terr_spacomp_pr_"+variname_seas(dd)+"_pval"/)$ = set_varAtts(p_val,arr_EM@long_name+" p-val statistic","%","")   
-        delete([/arr_store,obs0_rg,obs_diff,arr_EM,z,p_val,arr_store_events_E,arr_store_events_L/])
+        z->$(/"jet_loci_spacomp_pr_"+variname_seas(dd)+"_em"/)$ = set_varAtts(arr_EM,arr_EM@long_name+" Ensemble Mean","","")
+        z->$(/"jet_loci_spacomp_pr_"+variname_seas(dd)+"_em_diffobs"/)$ = set_varAtts(obs_diff,obs_diff@long_name+" Ensemble Mean difference from observations","","")           
+        z->$(/"jet_loci_spacomp_pr_"+variname_seas(dd)+"_pval"/)$ = set_varAtts(p_val,arr_EM@long_name+" p-val statistic","%","")   
+        delete([/arr_store,obs0_rg,obs_diff,arr_EM,z,p_val,arr_store_events_P,arr_store_events_N/])
         cntr_EM = cntr_EM+4
      end do
      panres@txString = variname_panel_title_subs(dd)+" Spatial Composite PR "+variname_title_seas(dd)
@@ -2504,18 +2379,18 @@ begin
      delete(wks)
 
      if (wks_type.eq."png") then
-        system("mv "+OUTDIR+"terr_spacomp.000001.png "+OUTDIR+"terr.spatialcomp"+fnaddsub(dd)+".pr.indmem."+variname_seas(dd)+".png")
-        system("mv "+OUTDIR+"terr_spacomp.000002.png "+OUTDIR+"terr.spatialcomp"+fnaddsub(dd)+".pr.indmemdiff."+variname_seas(dd)+".png")
-        system("mv "+OUTDIR+"terr_spacomp.000003.png "+OUTDIR+"terr.spatialcomp"+fnaddsub(dd)+".pr.summary."+variname_seas(dd)+".png")
+        system("mv "+OUTDIR+"jet_loci_spacomp.000001.png "+OUTDIR+"jet_loci.spatialcomp"+fnaddsub(dd)+".pr.indmem."+variname_seas(dd)+".png")
+        system("mv "+OUTDIR+"jet_loci_spacomp.000002.png "+OUTDIR+"jet_loci.spatialcomp"+fnaddsub(dd)+".pr.indmemdiff."+variname_seas(dd)+".png")
+        system("mv "+OUTDIR+"jet_loci_spacomp.000003.png "+OUTDIR+"jet_loci.spatialcomp"+fnaddsub(dd)+".pr.summary."+variname_seas(dd)+".png")
         if (PNG_SCALE_SUMMARY.ne.100) then
-           system("convert -resize "+PNG_SCALE_SUMMARY+"% "+OUTDIR+"terr.spatialcomp"+fnaddsub(dd)+".pr.summary."+variname_seas(dd)+".png "+OUTDIR+"terr.spatialcomp"+fnaddsub(dd)+".pr.summary."+variname_seas(dd)+".png")
+           system("convert -resize "+PNG_SCALE_SUMMARY+"% "+OUTDIR+"jet_loci.spatialcomp"+fnaddsub(dd)+".pr.summary."+variname_seas(dd)+".png "+OUTDIR+"jet_loci.spatialcomp"+fnaddsub(dd)+".pr.summary."+variname_seas(dd)+".png")
         end if
      else
-        system("psplit "+OUTDIR+"terr_spacomp.ps "+OUTDIR+"terr.spacomp")
-        system("mv "+OUTDIR+"terr.spacomp0001.ps "+OUTDIR+"terr.spatialcomp"+fnaddsub(dd)+".pr.indmem."+variname_seas(dd)+".ps")
-        system("mv "+OUTDIR+"terr.spacomp0002.ps "+OUTDIR+"terr.spatialcomp"+fnaddsub(dd)+".pr.indmemdiff."+variname_seas(dd)+".ps")
-        system("mv "+OUTDIR+"terr.spacomp0003.ps "+OUTDIR+"terr.spatialcomp"+fnaddsub(dd)+".pr.summary."+variname_seas(dd)+".ps")
-        system("rm "+OUTDIR+"terr_spacomp.ps")
+        system("psplit "+OUTDIR+"jet_loci_spacomp.ps "+OUTDIR+"jet_loci.spacomp")
+        system("mv "+OUTDIR+"jet_loci.spacomp0001.ps "+OUTDIR+"jet_loci.spatialcomp"+fnaddsub(dd)+".pr.indmem."+variname_seas(dd)+".ps")
+        system("mv "+OUTDIR+"jet_loci.spacomp0002.ps "+OUTDIR+"jet_loci.spatialcomp"+fnaddsub(dd)+".pr.indmemdiff."+variname_seas(dd)+".ps")
+        system("mv "+OUTDIR+"jet_loci.spacomp0003.ps "+OUTDIR+"jet_loci.spatialcomp"+fnaddsub(dd)+".pr.summary."+variname_seas(dd)+".ps")
+        system("rm "+OUTDIR+"jet_loci_spacomp.ps")
      end if
   end do
   delete([/res,res2,res3,res4,res5,res6,panres,panres2,tres2/])
@@ -2601,25 +2476,13 @@ begin
   txres@txFontHeightF = 0.010
   txres@txFontColor = xyres2@xyLineColor
 
-  variname := (/"terr","scterr","nino12","nino3","nino4","atlantic_meridional_mode","atlantic_nino",\
-                "north_tropical_atlantic","south_tropical_atlantic","indian_ocean_dipole","tropical_indian_ocean",\
-                "southern_ocean","terr_runstddev","north_atlantic","north_pacific_meridional_mode",\
-                "south_pacific_meridional_mode", "nino_el_nmon","nino_la_nmon","nino_elmla_nmon"/)
-  variname_title := (/"Nin~H-13V2F35~D~FV-2H3F21~o3.4", "Cunulative Nin~H-13V2F35~D~FV-2H3F21~o3.4", \
-                     "Nin~H-13V2F35~D~FV-2H3F21~o1+2",\
-                     "Nin~H-13V2F35~D~FV-2H3F21~o3","Nin~H-13V2F35~D~FV-2H3F21~o4",\
-                     "Atlantic Meridional Mode","Atlantic Nin~H-13V2F35~D~FV-2H3F21~o3",\
-                     "Tropical North Atlantic","Tropical South Atlantic",\
-                     "Indian Ocean Dipole","Tropical Indian Ocean","Southern Ocean", \
-                     "Nin~H-13V2F35~D~FV-2H3F21~o3.4 30yr Running Standard Deviations",\
-                     "North Atlantic","North Pacific Meridional Mode","South Pacific Meridional Mode", \
-                     "El Nin~H-13V2F35~D~FV-2H3F21~o occurance in 8yr sliding window", \
-                     "La Nin~H-13V2F35~D~FV-2H3F21~a occurance in 8yr sliding window", \ 
-                     "El Nin~H-13V2F35~D~FV-2H3F21~o - La Nin~H-13V2F35~D~FV-2H3F21~a occurance in 8yr running window" /)
+  variname       := (/"jet_loci","scjet_loci","jet_psl_hi","jet_psl_lo","jet_ps_nmon","jet_ns_nmon","jet_psmns_nmon"/)
+  variname_title := (/"JET index", "Cumulative JET index", "JET PSL at 40S", "JET PSL at 65S", \
+                      "JET(+) event", "JET(-) event","JET(+) - JET(-) event"/) 
   variname_title = variname_title +" (Monthly)" 
 
   do dd = 0,dimsizes(variname)-1
-     wks = gsn_open_wks(wks_type,getenv("OUTDIR")+"sst.tseries")
+     wks = gsn_open_wks(wks_type,getenv("OUTDIR")+"jet_loci.tseries")
      plot_indmem      := new(nsim,"graphic")   ; for individual obs/models
      plot_obs_overlay := new(nsim,"graphic")   ; for obs overlaid onto individual models
      plot_summary     := new(nEM,"graphic")    ; for ensemble plots  to show the 10-90% range
@@ -2635,11 +2498,11 @@ begin
 
      numobs = num(EM_num.eq.0) 
      if (numobs.eq.0) then
-        fnt = getenv("OUTDIR")+"obs.cvdp_data.terr.indices."+syear(0)+"-"+eyear(0)+".nc"
+        fnt = getenv("OUTDIR")+"obs.cvdp_data.polar.jet.indices."+syear(0)+"-"+eyear(0)+".nc"
         fnt2 = getenv("OUTDIR")+"obs.cvdp_data."+syear(0)+"-"+eyear(0)+".nc"
         cntr = 0
      else
-        fnt = getenv("OUTDIR")+modname(0)+".cvdp_data.terr.indices."+syear(0)+"-"+eyear(0)+".nc"
+        fnt = getenv("OUTDIR")+modname(0)+".cvdp_data.polar.jet.indices."+syear(0)+"-"+eyear(0)+".nc"
         fnt2 = getenv("OUTDIR")+modname(0)+".cvdp_data."+syear(0)+"-"+eyear(0)+".nc"
         cntr = 1
      end if
@@ -2675,7 +2538,7 @@ begin
      cntr_EM = 0
      if (numobs.ge.2) then     ; plot obs #2-
         do ff = 1,numobs-1
-           fnt = getenv("OUTDIR")+modname(cntr)+".cvdp_data.terr.indices."+syear(cntr)+"-"+eyear(cntr)+".nc"
+           fnt = getenv("OUTDIR")+modname(cntr)+".cvdp_data.polar.jet.indices."+syear(cntr)+"-"+eyear(cntr)+".nc"
            fnt2 = getenv("OUTDIR")+modname(cntr)+".cvdp_data."+syear(cntr)+"-"+eyear(cntr)+".nc"
            arr := read_cvdp_le_data(fnt,fnt2,variname(dd))
            arr!0 = "time"
@@ -2713,7 +2576,7 @@ begin
            names_mod = names(cntr_ens(hh))
            names_EM_mod = names_EM(cntr_ens(hh))
 
-           fnt = getenv("OUTDIR")+modname_mod+".cvdp_data.terr.indices."+syear_mod+"-"+eyear_mod+".nc"
+           fnt = getenv("OUTDIR")+modname_mod+".cvdp_data.polar.jet.indices."+syear_mod+"-"+eyear_mod+".nc"
            fnt2 = getenv("OUTDIR")+modname_mod+".cvdp_data."+syear_mod+"-"+eyear_mod+".nc"
            arr := read_cvdp_le_data(fnt,fnt2,variname(dd))
            if (isatt(arr,"is_all_missing")) then 
@@ -2820,7 +2683,7 @@ begin
         arr_range1&time = time_save
         arr_range2&time = time_save
 
-        fout = getenv("OUTDIR")+str_sub_str(names_EM_mod," ","_")+"_EM.cvdp_data.terr.indices."+syear_mod+"-"+eyear_mod+".nc"
+        fout = getenv("OUTDIR")+str_sub_str(names_EM_mod," ","_")+"_EM.cvdp_data.polar.jet.indices."+syear_mod+"-"+eyear_mod+".nc"
         if (isfilepresent2(fout)) then
            z = addfile(fout,"w")
         else
@@ -2859,7 +2722,7 @@ begin
         plot_final(nEM)    = plot_sum(ii_ind)
      end if
      panres4@gsnPanelMainPosYF = set_panel_title_YF(nEM+1,xyres) 
-     panres4@gsnPanelMainPosYF = panres4@gsnPanelMainPosYF + .035
+     panres4@gsnPanelMainPosYF = panres4@gsnPanelMainPosYF + .01
      panres4@gsnPanelMainString = "Ensemble Summary: "+variname_title(dd)
      gsn_panel2(wks,plot_final,(/nrowE,ncolE/),panres4)
      if (variname(dd).eq."north_pacific_meridional_mode".or.variname(dd).eq."south_pacific_meridional_mode") then ; do not show trend values for NPMM/SPMM
@@ -2875,16 +2738,16 @@ begin
      delete(wks)
 
      if (wks_type.eq."png") then
-        system("mv "+OUTDIR+"sst.tseries.000001.png "+OUTDIR+variname(dd)+".timeseries.indmem.png")
-        system("mv "+OUTDIR+"sst.tseries.000002.png "+OUTDIR+variname(dd)+".timeseries.summary.png")
+        system("mv "+OUTDIR+"jet_loci.tseries.000001.png "+OUTDIR+variname(dd)+".timeseries.indmem.png")
+        system("mv "+OUTDIR+"jet_loci.tseries.000002.png "+OUTDIR+variname(dd)+".timeseries.summary.png")
         if (PNG_SCALE_SUMMARY.ne.100) then
            system("convert -resize "+PNG_SCALE_SUMMARY+"% "+OUTDIR+variname(dd)+".timeseries.summary.png "+OUTDIR+variname(dd)+".timeseries.summary.png")
         end if
      else
-        system("psplit "+OUTDIR+"sst.tseries.ps "+OUTDIR+"sst.tseries")
-        system("mv "+OUTDIR+"sst.tseries0001.ps "+OUTDIR+variname(dd)+".timeseries.indmem.ps")
-        system("mv "+OUTDIR+"sst.tseries0002.ps "+OUTDIR+variname(dd)+".timeseries.summary.ps")
-        system("rm "+OUTDIR+"sst.tseries.ps")
+        system("psplit "+OUTDIR+"jet_loci.tseries.ps "+OUTDIR+"jet_loci.tseries")
+        system("mv "+OUTDIR+"jet_loci.tseries0001.ps "+OUTDIR+variname(dd)+".timeseries.indmem.ps")
+        system("mv "+OUTDIR+"jet_loci.tseries0002.ps "+OUTDIR+variname(dd)+".timeseries.summary.ps")
+        system("rm "+OUTDIR+"jet_loci.tseries.ps")
      end if
   end do
 ;------Hovmoller plotting section--------------------------------------------------------------------------------------------------
@@ -2911,7 +2774,7 @@ begin
   hres@cnInfoLabelOn = False
   hres@cnLinesOn = True
   hres@cnLevelSelectionMode = "ExplicitLevels"
-  hres@cnLevels = (/-3,-2.5,-2,-1.5,-1,-.75,-.5,-.25,0,.25,.5,.75,1,1.5,2,2.5,3/)   ;fspan(-2.,2.,17)
+  hres@cnLevels = (/-3,-2.5,-2,-1.5,-1,-.75,-.5,-.25,0,.25,.5,.75,1,1.5,2,2.5,3/)
   carr = new(dimsizes(hres@cnLevels),"string")
   carr = "transparent"
   carr(8) = "gray50"
@@ -2920,8 +2783,8 @@ begin
   hres@cnLineLabelsOn = False
   hres@tmYLLabelFontHeightF = 0.014
   hres@tmXBLabelFontHeightF = 0.014
-  hres@gsnMajorLonSpacing = 30.
-  hres@gsnMinorLonSpacing = 10.
+  hres@gsnMajorLonSpacing = 90.
+  hres@gsnMinorLonSpacing = 30.
   hres@tiYAxisOn = False  
   if (wks_type.eq."png") then
      hres@cnLineThicknessF = 2.  
@@ -2991,22 +2854,22 @@ begin
   panres2@gsnPanelBottom = 0.05
   panres2@lbTitleOn = False
 
-  variname := (/"terr_hov_elnino","terr_hov_lanina"/)
-  etxt = (/"EN","LN"/)  ; for right substring title
+  variname := (/"jet_loci_hov_pjet","jet_loci_hov_njet"/)
+  etxt = (/"JET~S~+~N~","JET~S~-~N~"/)  ; for right substring title
 
   do dd = 0,dimsizes(variname)-1
-     wks = gsn_open_wks(wks_type,getenv("OUTDIR")+"terr.hov")
+     wks = gsn_open_wks(wks_type,getenv("OUTDIR")+"jet_loci.hov")
      plot_indmem      := new(nsim,"graphic")
      plot_indmem_diff := new(nsim,"graphic")
      plot_summary     := new((nEM*4),"graphic")
 
      numobs = num(EM_num.eq.0) 
      if (numobs.eq.0) then
-        fnt = getenv("OUTDIR")+"obs.cvdp_data.terr.indices."+syear(0)+"-"+eyear(0)+".nc"      
+        fnt = getenv("OUTDIR")+"obs.cvdp_data.polar.jet.indices."+syear(0)+"-"+eyear(0)+".nc"      
         fnt2 = getenv("OUTDIR")+"obs.cvdp_data."+syear(0)+"-"+eyear(0)+".nc"
         cntr = 0
      else
-        fnt = getenv("OUTDIR")+modname(0)+".cvdp_data.terr.indices."+syear(0)+"-"+eyear(0)+".nc"      
+        fnt = getenv("OUTDIR")+modname(0)+".cvdp_data.polar.jet.indices."+syear(0)+"-"+eyear(0)+".nc"      
         fnt2 = getenv("OUTDIR")+modname(0)+".cvdp_data."+syear(0)+"-"+eyear(0)+".nc"
         cntr = 1
      end if
@@ -3025,10 +2888,10 @@ begin
      cntr_EM = 0
      if (numobs.ge.2) then     ; plot obs #2-
         do ff = 1,numobs-1
-           fnt = getenv("OUTDIR")+modname(cntr)+".cvdp_data.terr.indices."+syear(cntr)+"-"+eyear(cntr)+".nc"
+           fnt = getenv("OUTDIR")+modname(cntr)+".cvdp_data.polar.jet.indices."+syear(cntr)+"-"+eyear(cntr)+".nc"
            fnt2 = getenv("OUTDIR")+modname(cntr)+".cvdp_data."+syear(cntr)+"-"+eyear(cntr)+".nc"
            arr := read_cvdp_le_data(fnt,fnt2,variname(dd))
-           obs0_rg = linint2_Wrap(obs0&longitude,obs0&time_mon1,obs0,True,arr&longitude,arr&time_mon1,0)
+           obs0_rg = linint2_Wrap(obs0&lon1,obs0&time_mon1,obs0,True,arr&lon1,arr&time_mon1,0)
            obs_diff = arr
            obs_diff = (/ arr - obs0_rg /)
 
@@ -3061,7 +2924,7 @@ begin
            names_mod = names(cntr_ens(hh))
            names_EM_mod = names_EM(cntr_ens(hh))
    
-           fnt = getenv("OUTDIR")+modname_mod+".cvdp_data.terr.indices."+syear_mod+"-"+eyear_mod+".nc"
+           fnt = getenv("OUTDIR")+modname_mod+".cvdp_data.polar.jet.indices."+syear_mod+"-"+eyear_mod+".nc"
            fnt2 = getenv("OUTDIR")+modname_mod+".cvdp_data."+syear_mod+"-"+eyear_mod+".nc"
            arr := read_cvdp_le_data(fnt,fnt2,variname(dd))
            if (isatt(arr,"is_all_missing")) then
@@ -3070,12 +2933,12 @@ begin
            end if
 
            if (.not.isvar("arr_store")) then  ; create an array to house all members, to be used to calculate EM
-              arr_store = new((/nens,dimsizes(arr&time_mon1),dimsizes(arr&longitude)/),typeof(arr))
+              arr_store = new((/nens,dimsizes(arr&time_mon1),dimsizes(arr&lon1)/),typeof(arr))
               arr_store!0 = "ensmem"
               arr_store!1 = "time_mon1"
               arr_store&time_mon1 = arr&time_mon1
-              arr_store!2 = "longitude"
-              arr_store&longitude = arr&longitude
+              arr_store!2 = "lon1"
+              arr_store&lon1 = arr&lon1
               arr_store@nens = 0
               copy_VarAtts(arr,arr_store)
               arr_store_events = new(nens,float)
@@ -3101,7 +2964,7 @@ begin
                  obs0_rg = arr
                  obs0_rg = obs0_rg@_FillValue
               else
-                 obs0_rg = linint2_Wrap(obs0&longitude,obs0&time_mon1,obs0,True,arr&longitude,arr&time_mon1,0)
+                 obs0_rg = linint2_Wrap(obs0&lon1,obs0&time_mon1,obs0,True,arr&lon1,arr&time_mon1,0)
               end if
            end if
            obs_diff = arr
@@ -3187,7 +3050,7 @@ begin
         tres@gsnRightString = sprintf("%4.0f",(sum(p_val1D)/dimsizes(p_val1D)*100.))+"%"
         plot_summary(cntr_EM+3) = gsn_csm_hov(wks,p_val,tres)
    
-        fno = getenv("OUTDIR")+str_sub_str(names_EM_mod," ","_")+"_EM.cvdp_data.terr.indices."+syear_mod+"-"+eyear_mod+".nc"
+        fno = getenv("OUTDIR")+str_sub_str(names_EM_mod," ","_")+"_EM.cvdp_data.polar.jet.indices."+syear_mod+"-"+eyear_mod+".nc"
         if (isfilepresent2(fno)) then
            z = addfile(fno,"w")
         else
@@ -3200,21 +3063,21 @@ begin
         delete([/arr_store,obs0_rg,obs_diff,arr_EM,z,p_val,arr_store_events/])
         cntr_EM = cntr_EM+4
      end do
-     if (variname(dd).eq."terr_hov_elnino") then
-        panres@txString = "El Nin~H-13V2F35~D~FV-2H3F21~o Composite (3~S~o~N~S:3~S~o~N~N)"
+     if (variname(dd).eq."jet_loci_hov_pjet") then
+        panres@txString = "JET~S~+~N~ Composite (45~S~o~N~S:60~S~o~N~S)"
         gsn_panel2(wks,plot_indmem,(/nrow,ncol/),panres)
-        panres@txString = "El Nin~H-13V2F35~D~FV-2H3F21~o Composite Differences (3~S~o~N~S:3~S~o~N~N)"
+        panres@txString = "JET~S~+~N~ Composite Differences (45~S~o~N~S:60~S~o~N~S)"
         gsn_panel2(wks,plot_indmem_diff,(/nrow,ncol/),panres)
-        panres2@txString = "Ensemble Summary: El Nin~H-13V2F35~D~FV-2H3F21~o Composite (3~S~o~N~S:3~S~o~N~N)"
+        panres2@txString = "Ensemble Summary: JET~S~+~N~ Composite (45~S~o~N~S:60~S~o~N~S)"
         panres2@gsnPanelXWhiteSpacePercent = 3.0
         gsn_panel2(wks,plot_summary,(/nEM,4/),panres2)
      end if
-     if (variname(dd).eq."terr_hov_lanina") then
-        panres@txString = "La Nin~H-13V2F35~D~FV-2H3F21~a Composite (3~S~o~N~S:3~S~o~N~N)"
+     if (variname(dd).eq."jet_loci_hov_njet") then
+        panres@txString = "JET~S~-~N~ Composite (45~S~o~N~S:60~S~o~N~S)"
         gsn_panel2(wks,plot_indmem,(/nrow,ncol/),panres)
-        panres@txString = "La Nin~H-13V2F35~D~FV-2H3F21~a Composite Differences (3~S~o~N~S:3~S~o~N~N)"
+        panres@txString = "JET~S~-~N~ Composite Differences (45~S~o~N~S:60~S~o~N~S)"
         gsn_panel2(wks,plot_indmem_diff,(/nrow,ncol/),panres)
-        panres2@txString = "Ensemble Summary: La Nin~H-13V2F35~D~FV-2H3F21~a Composite (3~S~o~N~S:3~S~o~N~N)"
+        panres2@txString = "Ensemble Summary: JET~S~-~N~ Composite (45~S~o~N~S:60~S~o~N~S)"
         panres2@gsnPanelXWhiteSpacePercent = 3.0
         gsn_panel2(wks,plot_summary,(/nEM,4/),panres2)
      end if
@@ -3222,18 +3085,18 @@ begin
      delete(wks)
 
      if (wks_type.eq."png") then
-        system("mv "+OUTDIR+"terr.hov.000001.png "+OUTDIR+str_sub_str(variname(dd),"_",".")+".indmem.png")
-        system("mv "+OUTDIR+"terr.hov.000002.png "+OUTDIR+str_sub_str(variname(dd),"_",".")+".indmemdiff.png")
-        system("mv "+OUTDIR+"terr.hov.000003.png "+OUTDIR+str_sub_str(variname(dd),"_",".")+".summary.png")
+        system("mv "+OUTDIR+"jet_loci.hov.000001.png "+OUTDIR+str_sub_str(variname(dd),"_",".")+".indmem.png")
+        system("mv "+OUTDIR+"jet_loci.hov.000002.png "+OUTDIR+str_sub_str(variname(dd),"_",".")+".indmemdiff.png")
+        system("mv "+OUTDIR+"jet_loci.hov.000003.png "+OUTDIR+str_sub_str(variname(dd),"_",".")+".summary.png")
         if (PNG_SCALE_SUMMARY.ne.100) then
            system("convert -resize "+PNG_SCALE_SUMMARY+"% "+OUTDIR+str_sub_str(variname(dd),"_",".")+".summary.png "+OUTDIR+str_sub_str(variname(dd),"_",".")+".summary.png")
         end if
      else
-        system("psplit "+OUTDIR+"terr.hov.ps "+OUTDIR+"terr.hovm")
-        system("mv "+OUTDIR+"terr.hovm0001.ps "+OUTDIR+str_sub_str(variname(dd),"_",".")+".indmem.ps")
-        system("mv "+OUTDIR+"terr.hovm0002.ps "+OUTDIR+str_sub_str(variname(dd),"_",".")+".indmemdiff.ps")
-        system("mv "+OUTDIR+"terr.hovm0003.ps "+OUTDIR+str_sub_str(variname(dd),"_",".")+".summary.ps")
-        system("rm "+OUTDIR+"terr.hov.ps")
+        system("psplit "+OUTDIR+"jet_loci.hov.ps "+OUTDIR+"jet_loci.hovm")
+        system("mv "+OUTDIR+"jet_loci.hovm0001.ps "+OUTDIR+str_sub_str(variname(dd),"_",".")+".indmem.ps")
+        system("mv "+OUTDIR+"jet_loci.hovm0002.ps "+OUTDIR+str_sub_str(variname(dd),"_",".")+".indmemdiff.ps")
+        system("mv "+OUTDIR+"jet_loci.hovm0003.ps "+OUTDIR+str_sub_str(variname(dd),"_",".")+".summary.ps")
+        system("rm "+OUTDIR+"jet_loci.hov.ps")
      end if
   end do
   delete([/panres,panres2/])
@@ -3354,7 +3217,7 @@ begin
   panres2@gsnPanelBottom = 0.05
   panres2@lbTitleOn = False
 
-  wks = gsn_open_wks(wks_type,getenv("OUTDIR")+"terr.wavelet")
+  wks = gsn_open_wks(wks_type,getenv("OUTDIR")+"jet_loci.wavelet")
   plot_indmem    := new(nsim,"graphic")
   plot_indmem_ov := new(nsim,"graphic")
   plot_indmem_diff := new(nsim,"graphic")
@@ -3362,17 +3225,17 @@ begin
 
   numobs = num(EM_num.eq.0) 
   if (numobs.eq.0) then
-     fnt = getenv("OUTDIR")+"obs.cvdp_data.terr.indices."+syear(0)+"-"+eyear(0)+".nc"
+     fnt = getenv("OUTDIR")+"obs.cvdp_data.polar.jet.indices."+syear(0)+"-"+eyear(0)+".nc"
      fnt2 = getenv("OUTDIR")+"obs.cvdp_data."+syear(0)+"-"+eyear(0)+".nc"
      cntr = 0
   else
-     fnt = getenv("OUTDIR")+modname(0)+".cvdp_data.terr.indices."+syear(0)+"-"+eyear(0)+".nc"
+     fnt = getenv("OUTDIR")+modname(0)+".cvdp_data.polar.jet.indices."+syear(0)+"-"+eyear(0)+".nc"
      fnt2 = getenv("OUTDIR")+modname(0)+".cvdp_data."+syear(0)+"-"+eyear(0)+".nc"
      cntr = 1
   end if
-  obs0 := read_cvdp_le_data(fnt,fnt2,"terr_wavelet_power")
-  obs0_sig := read_cvdp_le_data(fnt,fnt2,"terr_wavelet_significance")
-  obs0@coi := read_cvdp_le_data(fnt,fnt2,"terr_wavelet_coi")
+  obs0 := read_cvdp_le_data(fnt,fnt2,"jet_loci_wavelet_power")
+  obs0_sig := read_cvdp_le_data(fnt,fnt2,"jet_loci_wavelet_significance")
+  obs0@coi := read_cvdp_le_data(fnt,fnt2,"jet_loci_wavelet_coi")
 
   if (isatt(obs0,"is_all_missing")) then
      delete([/obs0,obs0_sig/])
@@ -3408,11 +3271,11 @@ begin
   cntr_EM = 0
   if (numobs.ge.2) then     ; plot obs #2-
      do ff = 1,numobs-1
-        fnt = getenv("OUTDIR")+modname(cntr)+".cvdp_data.terr.indices."+syear(cntr)+"-"+eyear(cntr)+".nc"
+        fnt = getenv("OUTDIR")+modname(cntr)+".cvdp_data.polar.jet.indices."+syear(cntr)+"-"+eyear(cntr)+".nc"
         fnt2 = getenv("OUTDIR")+modname(cntr)+".cvdp_data."+syear(cntr)+"-"+eyear(cntr)+".nc"
-        arr     := read_cvdp_le_data(fnt,fnt2,"terr_wavelet_power")
-        arr_sig := read_cvdp_le_data(fnt,fnt2,"terr_wavelet_significance")
-        arr@coi := read_cvdp_le_data(fnt,fnt2,"terr_wavelet_coi")
+        arr     := read_cvdp_le_data(fnt,fnt2,"jet_loci_wavelet_power")
+        arr_sig := read_cvdp_le_data(fnt,fnt2,"jet_loci_wavelet_significance")
+        arr@coi := read_cvdp_le_data(fnt,fnt2,"jet_loci_wavelet_coi")
         delete([/arr&time,arr_sig&time/])
         arr&time = fspan(syear(cntr),eyear(cntr)+.91667,nyr(cntr)*12)
         arr_sig&time = arr&time
@@ -3470,11 +3333,11 @@ begin
         names_EM_mod = names_EM(cntr_ens(hh))
         nyr_mod = nyr(cntr_ens(hh))
 
-        fnt = getenv("OUTDIR")+modname_mod+".cvdp_data.terr.indices."+syear_mod+"-"+eyear_mod+".nc"
+        fnt = getenv("OUTDIR")+modname_mod+".cvdp_data.polar.jet.indices."+syear_mod+"-"+eyear_mod+".nc"
         fnt2 = getenv("OUTDIR")+modname_mod+".cvdp_data."+syear_mod+"-"+eyear_mod+".nc"
-        arr     := read_cvdp_le_data(fnt,fnt2,"terr_wavelet_power")
-        arr_sig := read_cvdp_le_data(fnt,fnt2,"terr_wavelet_significance")
-        arr@coi := read_cvdp_le_data(fnt,fnt2,"terr_wavelet_coi")
+        arr     := read_cvdp_le_data(fnt,fnt2,"jet_loci_wavelet_power")
+        arr_sig := read_cvdp_le_data(fnt,fnt2,"jet_loci_wavelet_significance")
+        arr@coi := read_cvdp_le_data(fnt,fnt2,"jet_loci_wavelet_coi")
         if (isatt(arr,"is_all_missing")) then
            cntr = cntr+1
            continue
@@ -3610,16 +3473,16 @@ begin
      tres@gsnRightString = sprintf("%4.0f",(sum(p_val1D)/dimsizes(p_val1D)*100.))+"%"
      plot_summary(cntr_EM+3) = gsn_csm_contour(wks,p_val,tres)
    
-     fno = getenv("OUTDIR")+str_sub_str(names_EM_mod," ","_")+"_EM.cvdp_data.terr.indices."+syear_mod+"-"+eyear_mod+".nc"
+     fno = getenv("OUTDIR")+str_sub_str(names_EM_mod," ","_")+"_EM.cvdp_data.polar.jet.indices."+syear_mod+"-"+eyear_mod+".nc"
      if (isfilepresent2(fno)) then
         z = addfile(fno,"w")
      else
         z = addfile(fno,"c")
         set_global_ncfile_attributes(z,names_EM_mod,syear_mod,eyear_mod,getenv("VERSION"))
      end if       
-     z->$(/"terr_wavelet_power_em"/)$ = set_varAtts(arr_EM,arr_EM@long_name+" Ensemble Mean","","")
-     z->$(/"terr_wavelet_power_em_diffobs"/)$ = set_varAtts(obs_diff,obs_diff@long_name+" Ensemble Mean difference from observations","","")           
-     z->$(/"terr_wavelet_power_pval"/)$ = set_varAtts(p_val,arr_EM@long_name+" p-val statistic","%","")   
+     z->$(/"jet_loci_wavelet_power_em"/)$ = set_varAtts(arr_EM,arr_EM@long_name+" Ensemble Mean","","")
+     z->$(/"jet_loci_wavelet_power_em_diffobs"/)$ = set_varAtts(obs_diff,obs_diff@long_name+" Ensemble Mean difference from observations","","")           
+     z->$(/"jet_loci_wavelet_power_pval"/)$ = set_varAtts(p_val,arr_EM@long_name+" p-val statistic","%","")   
      delete([/arr_store,obs0_rg,obs_diff,arr_EM,z,p_val,arr_store_events/])
      cntr_EM = cntr_EM+4
   end do
@@ -3634,20 +3497,20 @@ begin
   delete([/wks,panres,tres,panres2,wres,wres2,wsres,wavecoi/])
 
   if (wks_type.eq."png") then
-     system("mv "+OUTDIR+"terr.wavelet.000001.png "+OUTDIR+"terr.wavelet.indmem.png")
-     system("mv "+OUTDIR+"terr.wavelet.000002.png "+OUTDIR+"terr.wavelet.indmemdiff.png")
-     system("mv "+OUTDIR+"terr.wavelet.000003.png "+OUTDIR+"terr.wavelet.summary.png")
+     system("mv "+OUTDIR+"jet_loci.wavelet.000001.png "+OUTDIR+"jet_loci.wavelet.indmem.png")
+     system("mv "+OUTDIR+"jet_loci.wavelet.000002.png "+OUTDIR+"jet_loci.wavelet.indmemdiff.png")
+     system("mv "+OUTDIR+"jet_loci.wavelet.000003.png "+OUTDIR+"jet_loci.wavelet.summary.png")
      if (PNG_SCALE_SUMMARY.ne.100) then
-        system("convert -resize "+PNG_SCALE_SUMMARY+"% "+OUTDIR+"terr.wavelet.summary.png "+OUTDIR+"terr.wavelet.summary.png")
+        system("convert -resize "+PNG_SCALE_SUMMARY+"% "+OUTDIR+"jet_loci.wavelet.summary.png "+OUTDIR+"jet_loci.wavelet.summary.png")
      end if
   else
-     system("psplit "+OUTDIR+"terr.wavelet.ps "+OUTDIR+"terr.wavelet")
-     system("mv "+OUTDIR+"terr.wavelet0001.ps "+OUTDIR+"terr.wavelet.indmem.ps")
-     system("mv "+OUTDIR+"terr.wavelet0002.ps "+OUTDIR+"terr.wavelet.indmemdiff.ps")
-     system("mv "+OUTDIR+"terr.wavelet0003.ps "+OUTDIR+"terr.wavelet.summary.ps")
-     system("rm "+OUTDIR+"terr.wavelet.ps")
+     system("psplit "+OUTDIR+"jet_loci.wavelet.ps "+OUTDIR+"jet_loci.wavelet")
+     system("mv "+OUTDIR+"jet_loci.wavelet0001.ps "+OUTDIR+"jet_loci.wavelet.indmem.ps")
+     system("mv "+OUTDIR+"jet_loci.wavelet0002.ps "+OUTDIR+"jet_loci.wavelet.indmemdiff.ps")
+     system("mv "+OUTDIR+"jet_loci.wavelet0003.ps "+OUTDIR+"jet_loci.wavelet.summary.ps")
+     system("rm "+OUTDIR+"jet_loci.wavelet.ps")
   end if
 
-  print("Finished: terr.indices.ncl")
+  print("Finished: polar.jet.indices.ncl")
 end
 

@@ -375,12 +375,12 @@ begin
         time_mon1&time_mon1 = time_mon1
         hov_hi!0 = "time_mon1"
         hov_hi&time_mon1 = time_mon1
-        longitude = finpsl_hi&lon
-        longitude@standard_name = "longitude"
-        hov_hi!1 = "longitude"
-        hov_hi&longitude = longitude
+        lon2 = finpsl_hi&lon
+        lon2@standard_name = "longitude"
+        hov_hi!1 = "lon2"
+        hov_hi&lon2 = lon2
         hov_hi@units = "hPa"
-        delete([/time_mon1,longitude/])
+        delete([/time_mon1,lon2/])
         hov_lo := (/ finpsl_lo(24:52,:) /)  ; 24:52 runs from Jan+0->May+2 and matches range shown in plot
         copy_VarMeta(hov_hi,hov_lo)
     
@@ -389,9 +389,6 @@ begin
      end if
 
 ;------------------------------------------------------------------------------------------
-     if(isfilepresent(fnt)) then
-       system("/bin/rm " + fnt)
-     end if
      z = addfile(fnt,"c")
      set_global_ncfile_attributes(z,names(ee),syear(ee),eyear(ee),getenv("VERSION"))
 
@@ -431,6 +428,17 @@ begin
      end if
 ;-----------------------------------------------------------------------------------------
 ;   asl spatial composites (sst, tas, psl, pr) 
+;   aslind shsstpc1 regression patterns (sst, tas, psl, pr)
+
+     seas   = (/"ndjfma","mjjaso","monthly"/)
+     seayr  = new(dimsizes(aslind&time),integer)
+     do hh = 0,11
+       if(hh.ge.4.and.hh.le.9) then
+         seayr(hh::12) = 1
+       else
+         seayr(hh::12) = 0
+       end if
+     end do
 
      hicntr = 0
      locntr = 0
@@ -497,6 +505,18 @@ begin
            arr&time = fspan(tmin*1.,(tmax*1.)+(11/12.),dimsizes(yyyymm))  ; then convert time from YYYYMM->YYYY.frac
 
            arr = rmMonAnnCycTLL(arr) 
+
+           aslind_reg_arr   = arr(0:2,:,:)
+           do ss = 0,dimsizes(seas)-1
+             if (ss.le.1) then
+               indtx = ind (seayr.eq.ss)
+             else
+               indtx = ind (seayr.gt.-1)
+             end if
+             aslind_reg_arr(ss,:,:)   = (/ regCoef_n(aslind(indtx),arr(indtx,:,:),0,0) /)
+             delete([/indtx/])
+           end do
+
            arr = (/ dtrend_msg_n(ispan(0,dimsizes(arr&time)-1,1),arr,False,False,0) /)
            arr = runave_n_Wrap(arr,3,0,0)
            arr(0,:,:) = (/ dim_avg_n(arr(:1,:,:),0) /)
@@ -532,9 +552,6 @@ begin
            sc_arr_lo@number_of_nasl_events = dimsizes(lowyr)
 
            if (hh.ne.2) then
-              if(isfilepresent(fnt)) then
-                 system("/bin/rm " + fnt)
-              end if
               z_arr = addfile(fnt,"c")
               z_arr@source = "NCAR Climate Analysis Section's Climate Variability Diagnostics Package - LE v"+getenv("VERSION")
               z_arr@Conventions = "CF-1.6"
@@ -557,6 +574,10 @@ begin
               z_arr->aslind_nasl_spacomp_sst_son0 = set_varAtts(sc_arr_lo(9,:,:),"aslind sst ASL- spatial composite (SON+0)","","")
               z_arr->aslind_nasl_spacomp_sst_djf1 = set_varAtts(sc_arr_lo(12,:,:),"aslind sst ASL- spatial composite (DJF+1)","","")
               z_arr->aslind_nasl_spacomp_sst_mam1 = set_varAtts(sc_arr_lo(15,:,:),"aslind sst ASL- spatial composite (MAM+1)","","")
+
+              z_arr->aslind_regress_sst_ndjfma     = set_varAtts(aslind_reg_arr(0,:,:),"aslind sst regression pattern (NDJFMA)","","")
+              z_arr->aslind_regress_sst_mjjaso     = set_varAtts(aslind_reg_arr(1,:,:),"aslind sst regression pattern (MJJASO)","","")
+              z_arr->aslind_regress_sst_monthly    = set_varAtts(aslind_reg_arr(2,:,:),"aslind sst regression pattern (Monthly)","","")
            end if
            if (hh.eq.1) then
               z_arr@notes = "Data from "+names_tas(ee)+" from "+syear_tas(ee)+"-"+eyear_tas(ee)
@@ -575,6 +596,10 @@ begin
               z_arr->aslind_nasl_spacomp_tas_son0 = set_varAtts(sc_arr_lo(9,:,:),"aslind tas ASL- spatial composite (SON+0)","","")
               z_arr->aslind_nasl_spacomp_tas_djf1 = set_varAtts(sc_arr_lo(12,:,:),"aslind tas ASL- spatial composite (DJF+1)","","")
               z_arr->aslind_nasl_spacomp_tas_mam1 = set_varAtts(sc_arr_lo(15,:,:),"aslind tas ASL- spatial composite (MAM+1)","","") 
+
+              z_arr->aslind_regress_tas_ndjfma      = set_varAtts(aslind_reg_arr(0,:,:),"aslind tas regression pattern (NDJFMA)","","")
+              z_arr->aslind_regress_tas_mjjaso      = set_varAtts(aslind_reg_arr(1,:,:),"aslind tas regression pattern (MJJASO)","","")
+              z_arr->aslind_regress_tas_monthly     = set_varAtts(aslind_reg_arr(2,:,:),"aslind tas regression pattern (Monthly)","","")
            end if
            if (hh.eq.2) then
               z->aslind_spacomp_psl_jja0 = set_varAtts(n34sc_arr(6,:,:),"aslind psl ASL+/- spatial composite (JJA+0)","","")
@@ -591,6 +616,10 @@ begin
               z->aslind_nasl_spacomp_psl_son0 = set_varAtts(sc_arr_lo(9,:,:),"aslind psl ASL- spatial composite (SON+0)","","")
               z->aslind_nasl_spacomp_psl_djf1 = set_varAtts(sc_arr_lo(12,:,:),"aslind psl ASL- spatial composite (DJF+1)","","")
               z->aslind_nasl_spacomp_psl_mam1 = set_varAtts(sc_arr_lo(15,:,:),"aslind psl ASL- spatial composite (MAM+1)","","") 
+
+              z->aslind_regress_psl_ndjfma      = set_varAtts(aslind_reg_arr(0,:,:),"aslind psl regression pattern (NDJFMA)","","")
+              z->aslind_regress_psl_mjjaso      = set_varAtts(aslind_reg_arr(1,:,:),"aslind psl regression pattern (MJJASO)","","")
+              z->aslind_regress_psl_monthly     = set_varAtts(aslind_reg_arr(2,:,:),"aslind psl regression pattern (Monthly)","","")
            end if
            if (hh.eq.3) then
               z_arr@notes = "Data from "+names_pr(ee)+" from "+syear_pr(ee)+"-"+eyear_pr(ee)
@@ -609,6 +638,10 @@ begin
               z_arr->aslind_nasl_spacomp_pr_son0 = set_varAtts(sc_arr_lo(9,:,:),"aslind pr ASL- spatial composite (SON+0)","","")
               z_arr->aslind_nasl_spacomp_pr_djf1 = set_varAtts(sc_arr_lo(12,:,:),"aslind pr ASL- spatial composite (DJF+1)","","")
               z_arr->aslind_nasl_spacomp_pr_mam1 = set_varAtts(sc_arr_lo(15,:,:),"aslind pr ASL- spatial composite (MAM+1)","","") 
+
+              z_arr->aslind_regress_pr_ndjfma      = set_varAtts(aslind_reg_arr(0,:,:),"aslind pr regression pattern (NDJFMA)","","")
+              z_arr->aslind_regress_pr_mjjaso      = set_varAtts(aslind_reg_arr(1,:,:),"aslind pr regression pattern (MJJASO)","","")
+              z_arr->aslind_regress_pr_monthly     = set_varAtts(aslind_reg_arr(2,:,:),"aslind pr regression pattern (Monthly)","","")
            end if
            if (hh.ne.2) then
               delete(z_arr)
@@ -2885,7 +2918,7 @@ begin
            fnt = getenv("OUTDIR")+modname(cntr)+".cvdp_data.polar.asl.indices."+syear(cntr)+"-"+eyear(cntr)+".nc"
            fnt2 = getenv("OUTDIR")+modname(cntr)+".cvdp_data."+syear(cntr)+"-"+eyear(cntr)+".nc"
            arr := read_cvdp_le_data(fnt,fnt2,variname(dd))
-           obs0_rg = linint2_Wrap(obs0&longitude,obs0&time_mon1,obs0,True,arr&longitude,arr&time_mon1,0)
+           obs0_rg = linint2_Wrap(obs0&lon2,obs0&time_mon1,obs0,True,arr&lon2,arr&time_mon1,0)
            obs_diff = arr
            obs_diff = (/ arr - obs0_rg /)
 
@@ -2927,12 +2960,12 @@ begin
            end if
 
            if (.not.isvar("arr_store")) then  ; create an array to house all members, to be used to calculate EM
-              arr_store = new((/nens,dimsizes(arr&time_mon1),dimsizes(arr&longitude)/),typeof(arr))
+              arr_store = new((/nens,dimsizes(arr&time_mon1),dimsizes(arr&lon2)/),typeof(arr))
               arr_store!0 = "ensmem"
               arr_store!1 = "time_mon1"
               arr_store&time_mon1 = arr&time_mon1
-              arr_store!2 = "longitude"
-              arr_store&longitude = arr&longitude
+              arr_store!2 = "lon2"
+              arr_store&lon2 = arr&lon2
               arr_store@nens = 0
               copy_VarAtts(arr,arr_store)
               arr_store_events = new(nens,float)
@@ -2958,7 +2991,7 @@ begin
                  obs0_rg = arr
                  obs0_rg = obs0_rg@_FillValue
               else
-                 obs0_rg = linint2_Wrap(obs0&longitude,obs0&time_mon1,obs0,True,arr&longitude,arr&time_mon1,0)
+                 obs0_rg = linint2_Wrap(obs0&lon2,obs0&time_mon1,obs0,True,arr&lon2,arr&time_mon1,0)
               end if
            end if
            obs_diff = arr
