@@ -1,36 +1,0 @@
-nohup: ignoring input
-[1] 41950
-[2] 41951
- Copyright (C) 1995-2018 - All Rights Reserved
- University Corporation for Atmospheric Research
- NCAR Command Language Version 6.5.0
- The use of this software is governed by a License Agreement.
- See http://www.ncl.ucar.edu/ for more details.
-(0)	Starting: samind.sfcvar_regr.ncl
-warning:dim_median: 1 rightmost sections of the input array contained all missing values
-fatal:The result of the conditional expression yields a missing value. NCL can not determine branch, see ismissing function
-fatal:["Execute.c":8637]:Execute: Error occurred at or near line 502 in file samind.sfcvar_regr.ncl
-
- Copyright (C) 1995-2018 - All Rights Reserved
- University Corporation for Atmospheric Research
- NCAR Command Language Version 6.5.0
- The use of this software is governed by a License Agreement.
- See http://www.ncl.ucar.edu/ for more details.
-(0)	Starting: nino34.sfcvar_regr.ncl
-warning:dim_median: 1 rightmost sections of the input array contained all missing values
-fatal:The result of the conditional expression yields a missing value. NCL can not determine branch, see ismissing function
-fatal:["Execute.c":8637]:Execute: Error occurred at or near line 498 in file nino34.sfcvar_regr.ncl
-
-input in flex scanner failed
-[2]  - Done                          ncl samind.sfcvar_regr.ncl
- Copyright (C) 1995-2018 - All Rights Reserved
- University Corporation for Atmospheric Research
- NCAR Command Language Version 6.5.0
- The use of this software is governed by a License Agreement.
- See http://www.ncl.ucar.edu/ for more details.
-(0)	Starting: sam_psa.sfcvar_regr.ncl
-warning:dim_median: 1 rightmost sections of the input array contained all missing values
-fatal:The result of the conditional expression yields a missing value. NCL can not determine branch, see ismissing function
-fatal:["Execute.c":8637]:Execute: Error occurred at or near line 482 in file sam_psa.sfcvar_regr.ncl
-
-[1]    Done                          ncl sam_psa.sfcvar_regr.ncl
