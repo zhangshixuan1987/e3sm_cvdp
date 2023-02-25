@@ -1,0 +1,231 @@
+3c3
+< ; Variables used: namsfcvar  
+---
+> ; Variables used: samsfcvar  
+8c8
+<  print("Starting: nam.rgpatt.ncl")
+---
+>  print("Starting: sam_psa.rgpatt.ncl")
+14c14
+<  POLAR            = "NH"
+---
+>  POLAR            = "SH"
+46c46
+<  namsfcvars = (/"psl","sst","trefht","prect","u10","v10","taux","tauy","sh","lh", "eth", \
+---
+>  samsfcvars = (/"psl","sst","trefht","prect","u10","v10","taux","tauy","sh","lh", "eth", \
+48c48
+<  nsvars  = dimsizes(namsfcvars)
+---
+>  nsvars  = dimsizes(samsfcvars)
+52c52
+<   vnm   = namsfcvars(ss)
+---
+>   vnm   = samsfcvars(ss)
+95c95
+<      fnt = getenv("OUTDIR")+modname(ee)+".cvdp_data.nam_regr."+syear(ee)+"-"+eyear(ee)+".nc"
+---
+>      fnt = getenv("OUTDIR")+modname(ee)+".cvdp_data.sam_psa_regr."+syear(ee)+"-"+eyear(ee)+".nc"
+97c97
+<      f_test := read_cvdp_le_data(fnt,fnt2,vnm+"_regon_nam_pattern_ann")
+---
+>      f_test := read_cvdp_le_data(fnt,fnt2,vnm+"_regon_psa1_pattern_ann")
+148c148
+<        tarr      = arr_indv(indxx,{20:90},{0:360})
+---
+>        tarr      = arr_indv(indxx,{-90:-20},{0:360})
+154,156c154,156
+<        latcheck  = (/ 85./)  ; make signs consistent if possible
+<        loncheck  = (/  5./)
+<        climmodes = vnm+ "_regon_"+(/"nam"/)
+---
+>        latcheck  = (/-85.,-62.,-60./)  ; make signs consistent if possible
+>        loncheck  = (/  5., 210,280./)
+>        climmodes = vnm+ "_regon_"+(/"sam","psa1","psa2"/)
+158c158
+<        do ff = 0,0
+---
+>        do ff = 0,2
+176a177
+>           ;coefficients of determination  
+179,186c180,188
+<           fpval      = fpval*fpval * 100.0  ;variance explained
+< 
+<           fieof = (/ regCoef_n(pcts,tarr,0,0) /)
+< 
+<           fieof!0   = "lat"
+<           fieof!1   = "lon"
+<           fieof&lat = tarr&lat
+<           fieof&lon = tarr&lon
+---
+>           fpval      = fpval*fpval * 100.0  ;variance explained (r-square)
+>           ;adjusted with freedom 
+>           fpval      = 1 - (1-fpval) *((dimsizes(pcts)-1)/(dimsizes(pcts)-2))
+>   
+>           fieof      = (/ regCoef_n(pcts,tarr,0,0) /)
+>           fieof!0    = "lat"
+>           fieof!1    = "lon"
+>           fieof&lat  = tarr&lat
+>           fieof&lon  = tarr&lon
+250c252
+<     print("Finished: nam.rgpatt.ncl")
+---
+>     print("Finished: sam_psa.rgpatt.ncl")
+256,257c258,259
+<   vnm   = namsfcvars(ss)
+<   if(namsfcvars(ss).eq."sst") then
+---
+>   vnm   = samsfcvars(ss)
+>   if(samsfcvars(ss).eq."sst") then
+421,422c423,428
+<   variname = (/"nam_pattern_djf","nam_pattern_jfm","nam_pattern_mam","nam_pattern_jja","nam_pattern_jas",\
+<                "nam_pattern_son","nam_pattern_ndjfma","nam_pattern_mjjaso","nam_pattern_ann"/)
+---
+>   variname = (/"sam_pattern_djf","sam_pattern_jfm","sam_pattern_mam","sam_pattern_jja","sam_pattern_jas",\
+>                "sam_pattern_son","sam_pattern_ndjfma","sam_pattern_mjjaso","sam_pattern_ann",\
+>                "psa1_pattern_djf","psa1_pattern_jfm","psa1_pattern_mam","psa1_pattern_jja","psa1_pattern_jas",\
+>                "psa1_pattern_son","psa1_pattern_ndjfma","psa1_pattern_mjjaso","psa1_pattern_ann",\
+>                "psa2_pattern_djf","psa2_pattern_jfm","psa2_pattern_mam","psa2_pattern_jja","psa2_pattern_jas",\
+>                "psa2_pattern_son","psa2_pattern_ndjfma","psa2_pattern_mjjaso","psa2_pattern_ann"/)
+445c451
+<         fnt = getenv("OUTDIR")+"obs.cvdp_data.nam_regr."+syear(0)+"-"+eyear(0)+".nc"
+---
+>         fnt = getenv("OUTDIR")+"obs.cvdp_data.sam_psa_regr."+syear(0)+"-"+eyear(0)+".nc"
+449c455
+<         fnt = getenv("OUTDIR")+modname(0)+".cvdp_data.nam_regr."+syear(0)+"-"+eyear(0)+".nc"
+---
+>         fnt = getenv("OUTDIR")+modname(0)+".cvdp_data.sam_psa_regr."+syear(0)+"-"+eyear(0)+".nc"
+454c460
+<      obs0 := read_cvdp_le_data(fnt,fnt2,variname(dd))
+---
+>      obs0  := read_cvdp_le_data(fnt,fnt2,variname(dd))
+493c499
+<            fnt = getenv("OUTDIR")+modname(cntr)+".cvdp_data.nam_regr."+syear(cntr)+"-"+eyear(cntr)+".nc"
+---
+>            fnt = getenv("OUTDIR")+modname(cntr)+".cvdp_data.sam_psa_regr."+syear(cntr)+"-"+eyear(cntr)+".nc"
+508c514,515
+<            obs0_rg = linint2_Wrap(obs0&lon,obs0&lat,obs0,True,arr&lon,arr&lat,0)
+---
+> 
+>            obs0_rg  = linint2_Wrap(obs0&lon,obs0&lat,obs0,True,arr&lon,arr&lat,0)
+514,519c521,526
+<            res@gsnLeftString = syear(cntr)+"-"+eyear(cntr) 
+<            res@gsnRightString = arr@pcvar+"~C~   r="+pattern_correlation(obs0_rg({20:},:),arr({20:},:))
+<            res@gsnCenterString = names(cntr)   
+<            plot_indmem(cntr) = gsn_csm_contour_map(wks,arr,res)
+<            res2@gsnLeftString = ""  
+<            res2@gsnRightString = "" 
+---
+>            res@gsnLeftString    = syear(cntr)+"-"+eyear(cntr) 
+>            res@gsnRightString   = arr@pcvar+"~C~   r="+pattern_correlation(obs0_rg({:-20},:),arr({:-20},:))
+>            res@gsnCenterString  = names(cntr)   
+>            plot_indmem(cntr)    = gsn_csm_contour_map(wks,arr,res)
+>            res2@gsnLeftString   = ""  
+>            res2@gsnRightString  = "" 
+538,540c545,547
+<            fnt = getenv("OUTDIR")+modname_mod+".cvdp_data.nam_regr."+syear_mod+"-"+eyear_mod+".nc"
+<            fnt2 = getenv("OUTDIR")+modname_mod+".cvdp_data."+syear_mod+"-"+eyear_mod+".nc"
+<            arr := read_cvdp_le_data(fnt,fnt2,variname(dd))
+---
+>            fnt   = getenv("OUTDIR")+modname_mod+".cvdp_data.sam_psa_regr."+syear_mod+"-"+eyear_mod+".nc"
+>            fnt2  = getenv("OUTDIR")+modname_mod+".cvdp_data."+syear_mod+"-"+eyear_mod+".nc"
+>            arr  := read_cvdp_le_data(fnt,fnt2,variname(dd))
+557a565
+> 
+559,564c567,572
+<               arr_store = new((/nens,dimsizes(arr&lat),dimsizes(arr&lon)/),typeof(arr))
+<               arr_store!0 = "ensmem"
+<               arr_store!1 = "lat"
+<               arr_store&lat = arr&lat
+<               arr_store!2 = "lon"
+<               arr_store&lon = arr&lon
+---
+>               arr_store      = new((/nens,dimsizes(arr&lat),dimsizes(arr&lon)/),typeof(arr))
+>               arr_store!0    = "ensmem"
+>               arr_store!1    = "lat"
+>               arr_store&lat  = arr&lat
+>               arr_store!2    = "lon"
+>               arr_store&lon  = arr&lon
+599c607
+<            res@gsnRightString = arr@pcvar+"~C~   r="+pattern_correlation(obs0_rg({20:},:),arr({20:},:))
+---
+>            res@gsnRightString = arr@pcvar+"~C~   r="+pattern_correlation(obs0_rg({:-20},:),arr({:-20},:))
+619d626
+< 
+639c646
+<         if(.not.all(ismissing(arr_store_pcvar))) then
+---
+>         if(.not.all(ismissing(arr_store_pcvar))) then 
+645c652
+<         else
+---
+>         else 
+649c656,657
+<         end if
+---
+>         end if 
+> 
+666c674
+<         arr_pval_EM = dim_avg_n_Wrap(arr_store_pval,0) ; variance explained
+---
+>         arr_pval_EM = dim_avg_n_Wrap(arr_store_pval,0) ; variance explained 
+670c678
+<         fno = getenv("OUTDIR")+str_sub_str(names_EM_mod," ","_")+"_EM.cvdp_data.nam_regr."+syear_mod+"-"+eyear_mod+".nc"
+---
+>         fno = getenv("OUTDIR")+str_sub_str(names_EM_mod," ","_")+"_EM.cvdp_data.sam_psa_regr."+syear_mod+"-"+eyear_mod+".nc"
+679c687
+<         z->$(/variname(dd)+"_pval"/)$       = set_varAtts(arr_pval_EM,arr_EM@long_name+" variance explained statistic","%","")
+---
+>         z->$(/variname(dd)+"_pval"/)$       = set_varAtts(arr_pval_EM,arr_EM@long_name+" variance explained statistic","%","")   
+793,794c801,806
+<   variname := (/"nam_timeseries_djf","nam_timeseries_jfm","nam_timeseries_mam","nam_timeseries_jja","nam_timeseries_jas",\
+<                 "nam_timeseries_son","nam_timeseries_ndjfma","nam_timeseries_mjjaso","nam_timeseries_ann"/)
+---
+>   variname := (/"sam_timeseries_djf","sam_timeseries_jfm","sam_timeseries_mam","sam_timeseries_jja","sam_timeseries_jas",\
+>                 "sam_timeseries_son","sam_timeseries_ndjfma","sam_timeseries_mjjaso","sam_timeseries_ann",\
+>                 "psa1_timeseries_djf","psa1_timeseries_jfm","psa1_timeseries_mam","psa1_timeseries_jja","psa1_timeseries_jas",\
+>                 "psa1_timeseries_son","psa1_timeseries_ndjfma","psa1_timeseries_mjjaso","psa1_timeseries_ann",\
+>                 "psa2_timeseries_djf","psa2_timeseries_jfm","psa2_timeseries_mam","psa2_timeseries_jja","psa2_timeseries_jas",\
+>                 "psa2_timeseries_son","psa2_timeseries_ndjfma","psa2_timeseries_mjjaso","psa2_timeseries_ann"/)
+823c835
+<         fnt = getenv("OUTDIR")+"obs.cvdp_data.nam_regr."+syear(0)+"-"+eyear(0)+".nc"
+---
+>         fnt = getenv("OUTDIR")+"obs.cvdp_data.sam_psa_regr."+syear(0)+"-"+eyear(0)+".nc"
+827c839
+<         fnt = getenv("OUTDIR")+modname(0)+".cvdp_data.nam_regr."+syear(0)+"-"+eyear(0)+".nc"
+---
+>         fnt = getenv("OUTDIR")+modname(0)+".cvdp_data.sam_psa_regr."+syear(0)+"-"+eyear(0)+".nc"
+867c879
+<            fnt = getenv("OUTDIR")+modname(cntr)+".cvdp_data.nam_regr."+syear(cntr)+"-"+eyear(cntr)+".nc"
+---
+>            fnt = getenv("OUTDIR")+modname(cntr)+".cvdp_data.sam_psa_regr."+syear(cntr)+"-"+eyear(cntr)+".nc"
+900c912
+<            fnt = getenv("OUTDIR")+modname_mod+".cvdp_data.nam_regr."+syear_mod+"-"+eyear_mod+".nc"
+---
+>            fnt = getenv("OUTDIR")+modname_mod+".cvdp_data.sam_psa_regr."+syear_mod+"-"+eyear_mod+".nc"
+907a920,924
+> 
+>            TTIME     = cd_calendar(arr&time, -1)
+>            yyyyFrac0 = yyyymm_to_yyyyfrac(TTIME, 0.0)
+>            delete(TTIME)
+> 
+983,985c1000,1002
+<         plot_summary(cntr_EM) = gsn_csm_xy(wks,ispan(toint(min(arr_EM&time)),toint(max(arr_EM&time)),1),arr_range2,xyres3_sum)
+<         plot_summary1(cntr_EM) = gsn_csm_xy(wks,ispan(toint(min(arr_EM&time)),toint(max(arr_EM&time)),1),arr_range1,xyres3b_sum)
+<         plot_summary2(cntr_EM) = gsn_csm_xy(wks,ispan(toint(min(arr_EM&time)),toint(max(arr_EM&time)),1),arr_EM,xyres_sum)
+---
+>         plot_summary(cntr_EM) = gsn_csm_xy(wks,yyyyFrac0,arr_range2,xyres3_sum)
+>         plot_summary1(cntr_EM) = gsn_csm_xy(wks,yyyyFrac0,arr_range1,xyres3b_sum)
+>         plot_summary2(cntr_EM) = gsn_csm_xy(wks,yyyyFrac0,arr_EM,xyres_sum)
+987c1004
+<         plot_sum(cntr_EM) = gsn_csm_xy(wks,ispan(toint(min(arr_EM&time)),toint(max(arr_EM&time)),1),arr_EM,xyres_sumA)
+---
+>         plot_sum(cntr_EM) = gsn_csm_xy(wks,yyyyFrac0,arr_EM,xyres_sumA)
+992c1009
+<         fout = getenv("OUTDIR")+str_sub_str(names_EM_mod," ","_")+"_EM.cvdp_data.nam_regr."+syear_mod+"-"+eyear_mod+".nc"
+---
+>         fout = getenv("OUTDIR")+str_sub_str(names_EM_mod," ","_")+"_EM.cvdp_data.sam_psa_regr."+syear_mod+"-"+eyear_mod+".nc"
+1061c1078
+<  print("Finished: nam.rgpatt.ncl")
+---
+>  print("Finished: sam_psa.rgpatt.ncl")
