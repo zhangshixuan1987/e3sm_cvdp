@@ -1,0 +1,876 @@
+; Calculates nino34 indices as well as nino34 index 
+; timeseries onto selected quantities (see reg_var)
+;
+; Variables used: sst and selected quantities 
+; 
+load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/gsn_code.ncl"
+load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/gsn_csm.ncl"
+load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/contributed.ncl"
+load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/shea_util.ncl"
+load "$CVDP_SCRIPTS/functions.ncl"
+
+begin
+  print("Starting: sst.nino34_regpatt.ncl")
+  
+  SCALE_TIMESERIES = getenv("SCALE_TIMESERIES")  
+  OUTPUT_DATA      = getenv("OUTPUT_DATA")  
+  PNG_SCALE        = tofloat(getenv("PNG_SCALE"))
+  OPT_CLIMO        = getenv("OPT_CLIMO")
+  CLIMO_SYEAR      = toint(getenv("CLIMO_SYEAR"))
+  CLIMO_EYEAR      = toint(getenv("CLIMO_EYEAR"))
+  OUTPUT_TYPE      = getenv("OUTPUT_TYPE") 
+  COMPUTE_MODES_MON = getenv("COMPUTE_MODES_MON")
+  COLORMAP         = getenv("COLORMAP")  
+  
+  nsim = numAsciiRow("namelist_byvar/namelist_ts")
+  na = asciiread("namelist_byvar/namelist_ts",(/nsim/),"string")
+  names = new(nsim,"string")
+  paths = new(nsim,"string")
+  syear = new(nsim,"integer",-999)
+  eyear = new(nsim,"integer",-999)
+  delim = "|"
+
+  do gg = 0,nsim-1
+     names(gg) = str_strip(str_get_field(na(gg),1,delim))
+     paths(gg) = str_strip(str_get_field(na(gg),2,delim))
+     syear(gg) = stringtointeger(str_strip(str_get_field(na(gg),3,delim)))
+     eyear(gg) = stringtointeger(str_strip(str_get_field(na(gg),4,delim)))
+  end do
+  nyr = eyear-syear+1
+  nyr_max = max(nyr)
+
+  pi=4.*atan(1.0)
+  rad=(pi/180.)
+ 
+ regvars = (/"psl","sst","trefht","prect","u10","v10","taux","tauy","sh","lh", "eth", \
+             "swcre","fldsc","cldtot","u850","v850","th850","z500","u200","v200"/)
+ landmsk = (/    0,    1,       0,      0,    0,    0,     0,     0,   0,   0,     1, \
+                 0,    0,       0,      0,    0,    0,     0,     0,   0 /)
+ nsvars  = dimsizes(regvars)
+
+ do ss = 0, nsvars-1,1
+  ;---------Regressions coding-------------------------------------------------
+  if(regvars(ss).eq."sst") then 
+    vnm   = "ts"
+  else 
+    vnm   = regvars(ss)
+  end if 
+  lmsk  = landmsk(ss)
+  nsim_reg = numAsciiRow("namelist_byvar/namelist_"+vnm)
+  na_reg   = asciiread("namelist_byvar/namelist_"+vnm,(/nsim_reg/),"string")
+
+  names_reg = new(nsim_reg,"string")
+  paths_reg = new(nsim_reg,"string")
+  syear_reg = new(nsim_reg,"integer",-999)
+  eyear_reg = new(nsim_reg,"integer",-999)
+
+  do gg = 0,nsim_reg-1
+     names_reg(gg) = str_strip(str_get_field(na_reg(gg),1,delim))
+     paths_reg(gg) = str_strip(str_get_field(na_reg(gg),2,delim))
+     syear_reg(gg) = stringtointeger(str_strip(str_get_field(na_reg(gg),3,delim)))
+     eyear_reg(gg) = stringtointeger(str_strip(str_get_field(na_reg(gg),4,delim)))
+  end do
+  delete(na_reg)
+  nyr_reg = eyear_reg-syear_reg+1 
+ 
+;-------------------------------------------------------------------------------------------------
+  wks_type = OUTPUT_TYPE
+  if (wks_type.eq."png") then
+     wks_type@wkWidth = 1500*PNG_SCALE
+     wks_type@wkHeight = 1500*PNG_SCALE
+  end if
+  
+  wks_nino34  = gsn_open_wks(wks_type,getenv("OUTDIR")+"nino34.vxreg")
+  
+  if (COLORMAP.eq.0) then
+     gsn_define_colormap(wks_nino34,"MPL_RdBu")  
+  end if
+  if (COLORMAP.eq.1) then
+     gsn_define_colormap(wks_nino34,"NCV_jaisnd")  
+  end if
+  
+  reg_nino34_djf = new(nsim,"graphic")  
+  reg_nino34_mam = new(nsim,"graphic")  
+  reg_nino34_jja = new(nsim,"graphic")  
+  reg_nino34_son = new(nsim,"graphic")  
+  reg_nino34_ann = new(nsim,"graphic")  
+  reg_nino34_mon = new(nsim,"graphic")  
+  
+  vxreg_frame    = 1 
+
+  do ee = 0,nsim-1
+;    print(paths(ee)+" "+syear(ee)+" "+eyear(ee)) 
+     arr = data_read_in(paths(ee),"TS",syear(ee),eyear(ee))    ; read in data, orient lats/lons correctly, set time coordinate variable up
+     if (isatt(arr,"is_all_missing")) then
+        delete(arr)
+        continue
+     end if 
+ 
+     arr = where(arr.le.-1.8,-1.8,arr)    ; set all values below -1.8 to -1.8
+     d = addfile("$NCARG_ROOT/lib/ncarg/data/cdf/landsea.nc","r")   ; mask out land (this is redundant for data that is already masked)
+     basemap = d->LSMASK
+     lsm = landsea_mask(basemap,arr&lat,arr&lon)
+     arr = mask(arr,conform(arr,lsm,(/1,2/)).ge.1,False)
+     delete([/lsm,basemap/])
+     delete(d)
+    
+     if (OPT_CLIMO.eq."Full") then
+        arr = rmMonAnnCycTLL(arr)
+     else
+        check_custom_climo(names(ee),syear(ee),eyear(ee),CLIMO_SYEAR,CLIMO_EYEAR)
+        temp_arr = arr
+        delete(temp_arr&time)
+        temp_arr&time = cd_calendar(arr&time,-1)
+        if (CLIMO_SYEAR.lt.0) then
+           climo = clmMonTLL(temp_arr({(eyear(ee)+CLIMO_SYEAR)*100+1:(eyear(ee)+CLIMO_EYEAR)*100+12},:,:))       
+        else
+           climo = clmMonTLL(temp_arr({CLIMO_SYEAR*100+1:CLIMO_EYEAR*100+12},:,:))                 
+        end if   
+        delete(temp_arr)
+        arr   = calcMonAnomTLL(arr,climo) 
+        delete(climo)
+     end if
+
+     arrT =  runave_n_Wrap(arr,3,0,0)               ; form DJF averages
+     arrT(0,:,:) = (/ dim_avg_n(arr(:1,:,:),0) /)   
+     arr_djf = arrT(0::12,:,:)
+     arr_mam = arrT(3::12,:,:)
+     arr_jja = arrT(6::12,:,:)                       ; form JJA averages
+     arr_son = arrT(9::12,:,:)
+     delete(arrT)
+     
+     arrV = runave_n_Wrap(arr,12,0,0)
+     arr_ann = arrV(5::12,:,:)
+     delete(arrV)
+;          
+;     arr_djf = (/ dtrend_msg_n(ispan(0,dimsizes(arr_djf&time)-1,1),arr_djf,True,False,0) /)
+;     arr_mam = (/ dtrend_msg_n(ispan(0,dimsizes(arr_mam&time)-1,1),arr_mam,True,False,0) /)
+;     arr_jja = (/ dtrend_msg_n(ispan(0,dimsizes(arr_jja&time)-1,1),arr_jja,True,False,0) /)
+;     arr_son = (/ dtrend_msg_n(ispan(0,dimsizes(arr_son&time)-1,1),arr_son,True,False,0) /)
+;     
+;     arr_ann = (/ dtrend_msg_n(ispan(0,dimsizes(arr_ann&time)-1,1),arr_ann,True,False,0) /)
+;     
+;     arr_ndjfm = (/ dtrend_msg_n(ispan(0,dimsizes(arr_ndjfm&time)-1,1),arr_ndjfm,True,False,0) /)
+;     
+;     arr = (/ dtrend_msg_n(ispan(0,dimsizes(arr&time)-1,1),arr,True,False,0) /)
+;---------Regressions coding-------------------------------------------------
+     if (any(ismissing((/syear(ee),syear_reg(ee),eyear(ee),eyear_reg(ee)/)))) then
+        vxreg_plot_flag = 1
+     else
+        if (syear(ee).eq.syear_reg(ee)) then     ; check that the start and end years match for regression variable 
+           if (eyear(ee).eq.eyear_reg(ee)) then
+              vxreg_plot_flag = 0
+           else
+              vxreg_plot_flag = 1
+           end if
+        else
+           vxreg_plot_flag = 1
+        end if
+     end if 
+
+     if (vxreg_plot_flag.eq.0) then 
+        ; print("Data to be read in: "+paths_reg(ee)+" from "+syear_reg(ee)+":"+eyear_reg(ee))
+        if(vnm.eq."qnet") then
+          vnmi = "Qn"
+        else
+          vnmi = str_upper(vnm)
+        end if
+        vreg = data_read_in(paths_reg(ee),vnmi,syear_reg(ee),eyear_reg(ee))
+        if (isatt(vreg,"is_all_missing")) then
+           vxreg_plot_flag = 1
+           delete(vreg)
+        end if
+        
+        if (vxreg_plot_flag.eq.0) then     ; only continue if both PSL/TS fields are present
+           if(vnm.eq."ts") then 
+             vreg = where(vreg.le.-1.8,-1.8,vreg)
+           end if 
+           if(vnm.eq."trefht") then
+             d = addfile("$NCARG_ROOT/lib/ncarg/data/cdf/landsea.nc","r")    
+             basemap = d->LSMASK
+             lsm = landsea_mask(basemap,vreg&lat,vreg&lon)
+             vreg = mask(vreg,conform(vreg,lsm,(/1,2/)).eq.0,False)
+             delete(lsm)
+           end if 
+           if(lmsk.eq.1) then 
+             d = addfile("$NCARG_ROOT/lib/ncarg/data/cdf/landsea.nc","r")   
+             basemap = d->LSMASK
+             lsm = landsea_mask(basemap,vreg&lat,vreg&lon)
+             vreg = mask(vreg,conform(vreg,lsm,(/1,2/)).ge.1,False)
+             delete(lsm)
+           end if   
+           if (OPT_CLIMO.eq."Full") then
+              vreg = rmMonAnnCycTLL(vreg)
+           else
+              check_custom_climo(names_reg(ee),syear_reg(ee),eyear_reg(ee),CLIMO_SYEAR,CLIMO_EYEAR)
+              temp_arr = vreg
+              delete(temp_arr&time)
+              temp_arr&time = cd_calendar(vreg&time,1)
+              if (CLIMO_SYEAR.lt.0) then
+                 climo = clmMonTLL(temp_arr({(eyear(ee)+CLIMO_SYEAR)*100+1:(eyear(ee)+CLIMO_EYEAR)*100+12},:,:))       
+              else
+                 climo = clmMonTLL(temp_arr({CLIMO_SYEAR*100+1:CLIMO_EYEAR*100+12},:,:))                 
+              end if   
+              delete(temp_arr)
+              vreg   = calcMonAnomTLL(vreg,climo) 
+              delete(climo)
+           end if
+;           vreg = (/ dtrend_msg_n(ispan(0,dimsizes(vreg&time)-1,1),vreg,False,False,0) /)  
+        
+           vregT =  runave_n_Wrap(vreg,3,0,0)               ; form DJF averages
+           vregT(0,:,:) = (/ dim_avg_n(vreg(:1,:,:),0) /)   
+           vreg_djf = vregT(0::12,:,:)
+           vreg_mam = vregT(3::12,:,:)
+           vreg_jja = vregT(6::12,:,:)                       ; form JJA averages
+           vreg_son = vregT(9::12,:,:)
+           delete(vregT)
+     
+           vregV = runave_n_Wrap(vreg,12,0,0)
+           vreg_ann = vregV(5::12,:,:)
+           delete(vregV)
+        end if
+     end if 
+   
+;----------nino34 definition----------------------------------------------------------------------
+     coswgt=cos(rad*arr_djf&lat)
+     coswgt!0 = "lat"
+     coswgt&lat= arr_djf&lat
+     llats = -5.     ; nino3.4
+     llatn = 5.
+     llonw = 190.
+     llone = 240.
+
+    ;nino34 = wgt_areaave_Wrap(sst(:,{llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0)
+    ;nino34@comment_cvdp = "area average domain ("+llats+":"+llatn+"N, "+llonw+":"+llone+"E)"
+    ;nino34@units = sst@units
+    ;nino34@long_name = "nino3.4 timeseries (monthly)"
+
+;----------nino34 calculations----------------------------------------------------------------------
+     pcts = wgt_areaave_Wrap(arr_djf(:,{llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0) 
+     nino34_pc_djf = dim_standardize(pcts,0)
+     nino34_djf = arr_djf(0,:,:)
+     nino34_djf = (/ regCoef(nino34_pc_djf,arr_djf(lat|:,lon|:,time|:)) /)
+     
+     if (vxreg_plot_flag.eq.0) then
+        rc        = regCoef_n(nino34_pc_djf, vreg_djf, 0, 0) ; rc(nlat,mlon)
+        tval      = onedtond(rc@tval , dimsizes(rc))
+        df        = onedtond(rc@nptxy, dimsizes(rc)) - 2
+        b         = tval    
+        b         = 0.5
+        nino34_vreg_djf  = vreg_djf(0,:,:)
+        nino34_prob_djf  = vreg_djf(0,:,:)
+        nino34_vreg_djf  = (/ rc /) 
+        nino34_prob_djf  = (/(1-betainc(df/(df+tval^2),df/2.0,b))*100.0/)
+        delete([/rc,tval,df,b,vreg_djf/]) 
+     end if     
+     
+     if (.not.ismissing(nino34_djf({0},{230}))) then
+        if (nino34_djf({0},{230}).lt.0) then  ; arbitrary attempt to make all plots have the nino34e sign..
+           nino34_djf = nino34_djf*-1.
+           nino34_pc_djf = nino34_pc_djf*-1.
+           if (vxreg_plot_flag.eq.0) then
+              nino34_vreg_djf = nino34_vreg_djf*-1.
+           end if
+        end if
+     end if
+     
+     rc    = arr_djf(0,:,:) 
+     rc    = (/escorc_n(nino34_pc_djf,arr_djf,0,0)/)
+     rc    = rc*rc*100.0
+     pcvar = wgt_areaave_Wrap(rc({llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0)
+     sig_pcv = eofunc_north2(pcvar,dimsizes(nino34_pc_djf),False)
+     if (sig_pcv(0)) then    ; if True then significant
+        nino34_djf@pcvar = tofloat(sprintf("%4.1f", pcvar))+"%*"
+     else
+        nino34_djf@pcvar = tofloat(sprintf("%4.1f", pcvar))+"%"
+     end if
+     delete([/sig_pcv,pcvar,rc/])    
+     nino34_pc_djf!0 = "TIME"
+     nino34_pc_djf&TIME = ispan(syear(ee),eyear(ee),1)
+     nino34_pc_djf&TIME@units = "YYYY"
+     nino34_pc_djf&TIME@long_name = "time"     
+     delete([/pcts/])
+ 
+     pcts = wgt_areaave_Wrap(arr_mam(:,{llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0)
+     nino34_pc_mam = dim_standardize(pcts,0)
+     nino34_mam = arr_mam(0,:,:)
+     nino34_mam = (/ regCoef(nino34_pc_mam,arr_mam(lat|:,lon|:,time|:)) /)
+     if (vxreg_plot_flag.eq.0) then
+        rc        = regCoef_n(nino34_pc_mam, vreg_mam, 0, 0) ; rc(nlat,mlon)
+        tval      = onedtond(rc@tval , dimsizes(rc))
+        df        = onedtond(rc@nptxy, dimsizes(rc)) - 2
+        b         = tval
+        b         = 0.5
+        nino34_vreg_mam  = vreg_mam(0,:,:)
+        nino34_prob_mam  = vreg_mam(0,:,:)
+        nino34_vreg_mam  = (/ rc /)
+        nino34_prob_mam  = (/(1-betainc(df/(df+tval^2),df/2.0,b))*100.0/) 
+        delete([/rc,tval,df,b,vreg_mam/])
+     end if
+
+     if (.not.ismissing(nino34_mam({0},{230}))) then
+        if (nino34_mam({0},{230}).lt.0) then  ; arbitrary attempt to make all plots have the nino34e sign..
+           nino34_mam = nino34_mam*-1.
+           nino34_pc_mam = nino34_pc_mam*-1.
+           if (vxreg_plot_flag.eq.0) then
+              nino34_vreg_mam = nino34_vreg_mam*-1.
+           end if
+        end if
+     end if
+     rc    = arr_djf(0,:,:)
+     rc    = (/escorc_n(nino34_pc_mam,arr_mam,0,0)/)
+     rc    = rc*rc*100.0
+     pcvar = wgt_areaave_Wrap(rc({llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0)
+     sig_pcv = eofunc_north2(pcvar,dimsizes(nino34_pc_mam),False)
+     if (sig_pcv(0)) then    ; if True then significant
+        nino34_mam@pcvar = tofloat(sprintf("%4.1f", pcvar))+"%*"
+     else
+        nino34_mam@pcvar = tofloat(sprintf("%4.1f", pcvar))+"%"
+     end if
+     delete([/sig_pcv,pcvar,rc/])
+     copy_VarCoords(nino34_pc_djf,nino34_pc_mam) 
+     delete([/pcts/])
+     
+     pcts = wgt_areaave_Wrap(arr_jja(:,{llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0)
+     nino34_pc_jja = dim_standardize(pcts,0)
+     nino34_jja = arr_jja(0,:,:)
+     nino34_jja = (/ regCoef(nino34_pc_jja,arr_jja(lat|:,lon|:,time|:)) /)
+     if (vxreg_plot_flag.eq.0) then
+        rc        = regCoef_n(nino34_pc_jja, vreg_jja, 0, 0) ; rc(nlat,mlon)
+        tval      = onedtond(rc@tval , dimsizes(rc))
+        df        = onedtond(rc@nptxy, dimsizes(rc)) - 2
+        b         = tval
+        b         = 0.5
+        nino34_vreg_jja  = vreg_jja(0,:,:)
+        nino34_prob_jja  = vreg_jja(0,:,:)
+        nino34_vreg_jja  = (/ rc /)
+        nino34_prob_jja  = (/(1-betainc(df/(df+tval^2),df/2.0,b))*100.0/) 
+        delete([/rc,tval,df,b,vreg_jja/])
+     end if
+
+     if (.not.ismissing(nino34_jja({0},{230}))) then
+        if (nino34_jja({0},{230}).lt.0) then  ; arbitrary attempt to make all plots have the nino34e sign..
+           nino34_jja = nino34_jja*-1.
+           nino34_pc_jja = nino34_pc_jja*-1.
+           if (vxreg_plot_flag.eq.0) then
+              nino34_vreg_jja = nino34_vreg_jja*-1.
+           end if
+        end if
+     end if
+
+     rc    = arr_jja(0,:,:)
+     rc    = (/escorc_n(nino34_pc_jja,arr_jja,0,0)/)
+     rc    = rc*rc*100.0
+     pcvar = wgt_areaave_Wrap(rc({llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0)
+     sig_pcv = eofunc_north2(pcvar,dimsizes(nino34_pc_jja),False)
+     if (sig_pcv(0)) then    ; if True then significant
+        nino34_jja@pcvar = tofloat(sprintf("%4.1f", pcvar))+"%*"
+     else
+        nino34_jja@pcvar = tofloat(sprintf("%4.1f", pcvar))+"%"
+     end if
+     delete([/sig_pcv,pcvar,rc/])
+     copy_VarCoords(nino34_pc_djf,nino34_pc_jja) 
+     delete([/pcts/])
+ 
+     pcts = wgt_areaave_Wrap(arr_son(:,{llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0)
+     nino34_pc_son = dim_standardize(pcts,0)
+     nino34_son = arr_son(0,:,:)
+     nino34_son = (/ regCoef(nino34_pc_son,arr_son(lat|:,lon|:,time|:)) /)
+     if (vxreg_plot_flag.eq.0) then
+        rc        = regCoef_n(nino34_pc_son, vreg_son, 0, 0) ; rc(nlat,mlon)
+        tval      = onedtond(rc@tval , dimsizes(rc))
+        df        = onedtond(rc@nptxy, dimsizes(rc)) - 2
+        b         = tval
+        b         = 0.5
+        nino34_vreg_son  = vreg_son(0,:,:)
+        nino34_prob_son  = vreg_son(0,:,:)
+        nino34_vreg_son  = (/ rc /)
+        nino34_prob_son  = (/(1-betainc(df/(df+tval^2),df/2.0,b))*100.0/) 
+        delete([/rc,tval,df,b,vreg_son/])
+     end if
+
+     if (.not.ismissing(nino34_son({0},{230}))) then
+        if (nino34_son({0},{230}).lt.0) then  ; arbitrary attempt to make all plots have the nino34e sign..
+           nino34_son = nino34_son*-1.
+           nino34_pc_son = nino34_pc_son*-1.
+           if (vxreg_plot_flag.eq.0) then
+              nino34_vreg_son = nino34_vreg_son*-1.
+           end if
+        end if
+     end if
+     rc    = arr_son(0,:,:)
+     rc    = (/escorc_n(nino34_pc_son,arr_son,0,0)/)
+     rc    = rc*rc*100.0
+     pcvar = wgt_areaave_Wrap(rc({llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0)
+     sig_pcv = eofunc_north2(pcvar,dimsizes(nino34_pc_son),False)
+     if (sig_pcv(0)) then    ; if True then significant
+        nino34_son@pcvar = tofloat(sprintf("%4.1f", pcvar))+"%*"
+     else
+        nino34_son@pcvar = tofloat(sprintf("%4.1f", pcvar))+"%"
+     end if
+     delete([/sig_pcv,pcvar,rc/])
+     copy_VarCoords(nino34_pc_djf,nino34_pc_son) 
+     delete([/pcts/])
+
+     pcts = wgt_areaave_Wrap(arr_ann(:,{llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0)
+     nino34_pc_ann = dim_standardize(pcts,0)
+     nino34_ann = arr_ann(0,:,:)
+     nino34_ann = (/ regCoef(nino34_pc_ann,arr_ann(lat|:,lon|:,time|:)) /)
+     if (vxreg_plot_flag.eq.0) then
+        rc        = regCoef_n(nino34_pc_ann, vreg_ann, 0, 0) ; rc(nlat,mlon)
+        tval      = onedtond(rc@tval , dimsizes(rc))
+        df        = onedtond(rc@nptxy, dimsizes(rc)) - 2
+        b         = tval
+        b         = 0.5
+        nino34_vreg_ann  = vreg_ann(0,:,:)
+        nino34_prob_ann  = vreg_ann(0,:,:)
+        nino34_vreg_ann  = (/ rc /)
+        nino34_prob_ann  = (/(1-betainc(df/(df+tval^2),df/2.0,b))*100.0/) 
+        delete([/rc,tval,df,b,vreg_ann/])
+     end if
+
+     if (.not.ismissing(nino34_ann({0},{230}))) then
+        if (nino34_ann({0},{230}).lt.0) then  ; arbitrary attempt to make all plots have the nino34e sign..
+           nino34_ann = nino34_ann*-1.
+           nino34_pc_ann = nino34_pc_ann*-1.
+           if (vxreg_plot_flag.eq.0) then
+              nino34_vreg_ann = nino34_vreg_ann*-1.
+           end if
+        end if
+     end if
+     rc    = arr_ann(0,:,:)
+     rc    = (/escorc_n(nino34_pc_ann,arr_ann,0,0)/)
+     rc    = rc*rc*100.0
+     pcvar = wgt_areaave_Wrap(rc({llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0)
+     sig_pcv = eofunc_north2(pcvar,dimsizes(nino34_pc_ann),False)
+     if (sig_pcv(0)) then    ; if True then significant
+        nino34_ann@pcvar = tofloat(sprintf("%4.1f", pcvar))+"%*"
+     else
+        nino34_ann@pcvar = tofloat(sprintf("%4.1f", pcvar))+"%"
+     end if
+     delete([/sig_pcv,pcvar,rc/])
+     copy_VarCoords(nino34_pc_djf,nino34_pc_ann) 
+     delete([/pcts/])
+     
+     if (COMPUTE_MODES_MON.eq."True") then     
+        pcts = wgt_areaave_Wrap(arr(:,{llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0)
+        nino34_pc_mon = dim_standardize(pcts,0)
+        nino34_mon = arr(0,:,:)
+        nino34_mon = (/ regCoef(nino34_pc_mon,arr(lat|:,lon|:,time|:)) /)
+        if (vxreg_plot_flag.eq.0) then
+           rc           = regCoef_n(nino34_pc_mon, vreg, 0, 0) ; rc(nlat,mlon)
+           tval         = onedtond(rc@tval , dimsizes(rc))
+           df           = onedtond(rc@nptxy, dimsizes(rc)) - 2
+           b            = tval
+           b            = 0.5
+           nino34_vreg_mon  = vreg(0,:,:)
+           nino34_prob_mon  = vreg(0,:,:)
+           nino34_vreg_mon  = (/ rc /)
+           nino34_prob_mon  = (/(1-betainc(df/(df+tval^2),df/2.0,b))*100.0/) 
+           delete([/rc,tval,df,b,vreg/])
+        end if
+
+        if (.not.ismissing(nino34_mon({0},{230}))) then
+           if (nino34_mon({0},{230}).lt.0) then  ; arbitrary attempt to make all plots have the nino34e sign..
+              nino34_mon = nino34_mon*-1.
+              nino34_pc_mon = nino34_pc_mon*-1.
+              if (vxreg_plot_flag.eq.0) then
+                 nino34_vreg_mon = nino34_vreg_mon*-1.
+              end if
+           end if
+        end if
+        rc    = arr(0,:,:)
+        rc    = (/escorc_n(nino34_pc_mon,arr,0,0)/)
+        rc    = rc*rc*100.0
+        pcvar = wgt_areaave_Wrap(rc({llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0)
+        sig_pcv = eofunc_north2(pcvar,dimsizes(nino34_pc_djf),False)
+        if (sig_pcv(0)) then    ; if True then significant
+           nino34_mon@pcvar = tofloat(sprintf("%4.1f", pcvar))+"%*"
+        else
+           nino34_mon@pcvar = tofloat(sprintf("%4.1f", pcvar))+"%"
+        end if
+        delete([/sig_pcv,pcvar,rc/])
+        nino34_pc_mon!0 = "time"
+        nino34_pc_mon&time = arr&time   
+        delete([/pcts,arr/])
+     end if
+     delete([/arr_djf,arr_mam,arr_jja,arr_son,arr_ann/])
+
+     if (isvar("arr")) then
+        delete(arr)
+     end if
+     if (isvar("vreg")) then
+        delete(vreg)
+     end if
+;------------------------------------------------------------------------------------------------------
+     if (vxreg_frame.eq.1.and.vxreg_plot_flag.eq.0) then      ; vxreg_frame = flag to create regressions .ps/.png files 
+        vxreg_frame = 0
+     end if            
+;------------------------------------------------------------------------------------------------------
+     if (OUTPUT_DATA.eq."True") then
+        if (vxreg_plot_flag.eq.0) then
+           modname = str_sub_str(names_reg(ee)," ","_")
+           bc = (/"/","'","(",")"/)
+           do gg = 0,dimsizes(bc)-1
+              modname = str_sub_str(modname,bc(gg),"_")
+           end do
+           fn = getenv("OUTDIR")+modname+".cvdp_data.sst.nino34."+vnm+"."+syear_reg(ee)+"-"+eyear_reg(ee)+".nc"
+           if (.not.isfilepresent2(fn)) then
+              z = addfile(fn,"c")
+              z@source = "NCAR Climate Analysis Section's Climate Variability Diagnostics Package v"+getenv("VERSION")
+              z@notes = "Data from "+names_reg(ee)+" from "+syear_reg(ee)+"-"+eyear_reg(ee)
+              if (OPT_CLIMO.eq."Full") then
+                 z@climatology = syear_reg(ee)+"-"+eyear_reg(ee)+" climatology removed prior to all calculations (other than means)"
+              else
+                 if (CLIMO_SYEAR.lt.0) then
+                    z@climatology = (eyear(ee)+CLIMO_SYEAR)+"-"+(eyear(ee)+CLIMO_EYEAR)+" climatology removed prior to all calculations (other than means)"
+                 else
+                    z@climatology = CLIMO_SYEAR+"-"+CLIMO_EYEAR+" climatology removed prior to all calculations (other than means)"
+                 end if
+              end if
+              z@Conventions = "CF-1.6"
+           else
+              z = addfile(fn,"w")
+           end if
+
+           z->nino34_timeseries_djf = set_varAtts(nino34_pc_djf,"ENSO(Nino34) normalized principal component timeseries (DJF)","1","")
+           z->nino34_timeseries_mam = set_varAtts(nino34_pc_mam,"ENSO(Nino34) normalized principal component timeseries (MAM)","1","")
+           z->nino34_timeseries_jja = set_varAtts(nino34_pc_jja,"ENSO(Nino34) normalized principal component timeseries (JJA)","1","")
+           z->nino34_timeseries_son = set_varAtts(nino34_pc_son,"ENSO(Nino34) normalized principal component timeseries (SON)","1","")
+           z->nino34_timeseries_ann = set_varAtts(nino34_pc_ann,"ENSO(Nino34) normalized principal component timeseries (annual)","1","")
+           vout = "nino34_"+vnm+"_regression_djf"
+           vosr = vnm+" regression onto ENSO(Nino34) principal component timeseries (DJF)"
+           z->$vout$ = set_varAtts(nino34_vreg_djf,vosr,"","") 
+           vout = "nino34_"+vnm+"_regression_mam"
+           vosr = vnm+" regression onto ENSO(Nino34) principal component timeseries (MAM)"
+           z->$vout$ = set_varAtts(nino34_vreg_mam,vosr,"","")  
+           vout = "nino34_"+vnm+"_regression_jja"
+           vosr = vnm+" regression onto ENSO(Nino34) principal component timeseries (JJA)"
+           z->$vout$ = set_varAtts(nino34_vreg_jja,vosr,"","")  
+           vout = "nino34_"+vnm+"_regression_son"
+           vosr = vnm+" regression onto ENSO(Nino34) principal component timeseries (SON)"
+           z->$vout$ = set_varAtts(nino34_vreg_son,vosr,"","")  
+           vout = "nino34_"+vnm+"_regression_ann"
+           vosr = vnm+" regression onto ENSO(Nino34) principal component timeseries (annual)"
+           z->$vout$ = set_varAtts(nino34_vreg_ann,vosr,"","")  
+
+           vout = "nino34_"+vnm+"_regprob_djf"
+           vosr = vnm+" ENSO(Nino34) regression t-test probility(DJF)"
+           z->$vout$ = set_varAtts(nino34_prob_djf,vosr,"","")
+           vout = "nino34_"+vnm+"_regprob_mam"
+           vosr = vnm+" ENSO(Nino34) regression t-test probility(MAM)"
+           z->$vout$ = set_varAtts(nino34_prob_mam,vosr,"","")
+           vout = "nino34_"+vnm+"_regprob_jja"
+           vosr = vnm+" ENSO(Nino34) regression t-test probility(JJA)"
+           z->$vout$ = set_varAtts(nino34_prob_jja,vosr,"","")
+           vout = "nino34_"+vnm+"_regprob_son"
+           vosr = vnm+" ENSO(Nino34) regression t-test probility(SON)"
+           z->$vout$ = set_varAtts(nino34_prob_son,vosr,"","")
+           vout = "nino34_"+vnm+"_regprob_ann"
+           vosr = vnm+" ENSO(Nino34) regression t-test probility(annual)"
+           z->$vout$ = set_varAtts(nino34_prob_ann,vosr,"","")
+
+           if (COMPUTE_MODES_MON.eq."True") then   
+
+              z->nino34_timeseries_mon  = set_varAtts(nino34_pc_mon,"ENSO(Nino34) principal component timeseries (monthly)","","")
+
+              vout = "nino34_"+vnm+"_regression_mon"
+              vosr = vnm+" regression onto ENSO(Nino34) principal component timeseries (monthly)"
+              z->$vout$ = set_varAtts(nino34_vreg_mon,vosr,"","")
+
+              vout = "nino34_"+vnm+"_regprob_mon"
+              vosr = vnm+" ENSO(Nino34) regression t-test probility(monthly)"
+              z->$vout$ = set_varAtts(nino34_prob_mon,vosr,"","")
+
+           end if
+           delete(z)
+           delete([/modname,fn/])
+        end if
+     end if     
+     delete([/nino34_pc_djf,nino34_pc_jja,nino34_pc_mam,nino34_pc_son,nino34_pc_mon/])
+
+     x1d = ndtooned((/nino34_vreg_djf({:-20},:)/))
+     xm  = dim_median(x1d)
+     sfcfacs = 1.0
+     if(xm.gt.1) then
+       sfcfacs= toint(xm)*1.0
+     else if (xm.gt.1e-1) then
+       sfcfacs = 1.0
+     else if (xm.gt.1e-2) then
+       sfcfacs = 0.1
+     else if (xm.gt.1e-3) then
+       sfcfacs = 0.01
+     end if
+     end if
+     end if
+     end if
+     delete([/xm,x1d/])
+
+;========================================================================
+     res = True
+     res@mpProjection = "WinkelTripel"
+     res@mpGeophysicalLineColor = "gray42"
+     res@mpPerimOn    = False
+     res@mpGridLatSpacingF =  90            ; change latitude  line spacing
+     res@mpGridLonSpacingF = 180.           ; change longitude line spacing
+     res@mpGridLineColor   = "transparent"  ; trick ncl into drawing perimeter
+     res@mpGridAndLimbOn   = True           ; turn on lat/lon lines
+
+     res@mpCenterLonF = 210.
+     res@mpOutlineOn = True
+     if (wks_type.eq."png") then
+        res@mpGeophysicalLineThicknessF = 2.
+     else
+        res@mpGeophysicalLineThicknessF = 1.
+     end if
+     res@gsnDraw      = False
+     res@gsnFrame     = False
+
+     res@cnLevelSelectionMode = "ExplicitLevels"
+     res@cnLineLabelsOn = False
+     res@cnFillOn        = True
+     res@cnLinesOn       = False
+     res@lbLabelBarOn    = False
+
+     res@gsnLeftStringOrthogonalPosF = -0.05
+     res@gsnLeftStringParallelPosF = .005
+     res@gsnRightStringOrthogonalPosF = -0.05
+     res@gsnRightStringParallelPosF = 0.96
+     res@gsnRightString = ""
+     res@gsnLeftString = ""
+     res@gsnLeftStringFontHeightF = 0.014
+     res@gsnCenterStringFontHeightF = 0.018
+     res@gsnRightStringFontHeightF = 0.014
+
+     res@cnLevels := (/-0.8,-0.6,-0.4,-0.2,-0.1,0,0.1,0.2,0.4,0.6,0.8/)
+     res@cnLevels = res@cnLevels * sfcfacs
+     res@gsnLeftString = syear(ee)+"-"+eyear(ee)
+     res@gsnCenterString = names(ee)
+ 
+     res2 = True
+     res2@gsnDraw         = False
+     res2@gsnFrame        = False
+     res2@lbLabelBarOn    = False
+     res2@gsnTickMarksOn  = False     ; no tickmarks
+     res2@tiMainString    = ""
+     res2@gsnLeftString   = ""
+     res2@gsnRightString  = ""
+     res2@cnLevelSelectionMode = "ExplicitLevels"
+     res2@cnLevels          = (/95/) ;-- draw only the 5% contour line
+     res2@cnMonoFillPattern = True
+     res2@cnMonoFillColor   = True
+     res2@cnFillOn          = False      ; color fill
+     res2@cnLinesOn         = True
+     res2@cnLineThicknessF  = 0.5
+     res2@cnLineLabelsOn    = False        ; True is default
+     res2@cnInfoLabelOn     = False                ; turn off info label
+     res2@gsnAddCyclic      = False
+
+     opt = True
+     opt@gsnShadeFillType      = "pattern" ;-- shading is a pattern fill
+     opt@gsnShadeHigh          = 17 ;-- pattern type is dots (#17) for all values <= 0.05
+     opt@gsnShadeFillScaleF    = 0.75 ;-- density of fill pattern (the lower the denser); default=1.0
+     opt@gsnShadeFillDotSizeF  = 0.002
+    
+     if (isfilepresent2("obs_ts").and.ee.eq.0) then    ; for pattern correlation table. Save entire lat/lon array
+        patcor_nino34_djf = new((/nsim,dimsizes(nino34_djf&lat),dimsizes(nino34_djf&lon)/),typeof(nino34_djf))
+        patcor_nino34_djf!1 = "lat"
+        patcor_nino34_djf&lat = nino34_djf&lat
+        patcor_nino34_djf!2 = "lon"
+        patcor_nino34_djf&lon = nino34_djf&lon
+        patcor_nino34_jja = patcor_nino34_djf
+        patcor_nino34_ann = patcor_nino34_djf
+        patcor_nino34_djf(ee,:,:) = (/ nino34_djf /)
+        patcor_nino34_jja(ee,:,:) = (/ nino34_jja /)
+        patcor_nino34_ann(ee,:,:) = (/ nino34_ann /)
+     end if
+     if (isfilepresent2("obs_ts").and.ee.ge.1.and.isvar("patcor_nino34_djf")) then       
+        patcor_nino34_djf(ee,:,:) = (/ totype(linint2(nino34_djf&lon,nino34_djf&lat,nino34_djf,True,patcor_nino34_djf&lon,patcor_nino34_djf&lat,0),typeof(patcor_nino34_djf)) /)
+        patcor_nino34_jja(ee,:,:) = (/ totype(linint2(nino34_jja&lon,nino34_jja&lat,nino34_jja,True,patcor_nino34_jja&lon,patcor_nino34_jja&lat,0),typeof(patcor_nino34_jja)) /)
+        patcor_nino34_ann(ee,:,:) = (/ totype(linint2(nino34_ann&lon,nino34_ann&lat,nino34_ann,True,patcor_nino34_ann&lon,patcor_nino34_ann&lat,0),typeof(patcor_nino34_ann)) /)
+     end if
+      
+     if (vxreg_plot_flag.eq.0) then
+        res@gsnCenterString = names_reg(ee)
+        res@gsnRightString = ""
+        reg_nino34_djf(ee) = gsn_csm_contour_map(wks_nino34,nino34_vreg_djf,res)
+        reg_nino34_mam(ee) = gsn_csm_contour_map(wks_nino34,nino34_vreg_mam,res)
+        reg_nino34_jja(ee) = gsn_csm_contour_map(wks_nino34,nino34_vreg_jja,res)
+        reg_nino34_son(ee) = gsn_csm_contour_map(wks_nino34,nino34_vreg_son,res)
+        reg_nino34_ann(ee) = gsn_csm_contour_map(wks_nino34,nino34_vreg_ann,res)     
+        delete([/nino34_vreg_djf,nino34_vreg_mam,nino34_vreg_jja,nino34_vreg_son,nino34_vreg_ann/])
+        o_djf = gsn_csm_contour(wks_nino34,nino34_prob_djf,res2)
+        o_djf = gsn_contour_shade(o_djf,-999,95,opt) 
+        o_mam = gsn_csm_contour(wks_nino34,nino34_prob_mam,res2)
+        o_mam = gsn_contour_shade(o_mam,-999,95,opt) 
+        o_jja = gsn_csm_contour(wks_nino34,nino34_prob_jja,res2)
+        o_jja = gsn_contour_shade(o_jja,-999,95,opt)
+        o_son = gsn_csm_contour(wks_nino34,nino34_prob_son,res2)
+        o_son = gsn_contour_shade(o_son,-999,95,opt)
+        o_ann = gsn_csm_contour(wks_nino34,nino34_prob_ann,res2)
+        o_ann = gsn_contour_shade(o_ann,-999,95,opt)
+        delete([/nino34_prob_djf,nino34_prob_mam,nino34_prob_jja,nino34_prob_son,nino34_prob_ann/])
+        overlay(reg_nino34_djf(ee),o_djf)
+        overlay(reg_nino34_mam(ee),o_mam)
+        overlay(reg_nino34_jja(ee),o_jja)
+        overlay(reg_nino34_son(ee),o_son)
+        overlay(reg_nino34_ann(ee),o_ann)
+        delete([/o_djf,o_mam,o_jja,o_son,o_ann/])
+        if (COMPUTE_MODES_MON.eq."True") then                    
+           reg_nino34_mon(ee) = gsn_csm_contour_map(wks_nino34,nino34_vreg_mon,res)
+           delete([/nino34_vreg_mon/])
+           o_mon = gsn_csm_contour(wks_nino34,nino34_prob_mon,res2)
+           o_mon = gsn_contour_shade(o_mon,-999,95,opt)
+           overlay(reg_nino34_mon(ee),o_mon)
+           delete([/o_mon,nino34_prob_mon/])
+        end if
+     
+     end if
+
+     delete(vxreg_plot_flag)  
+  end do
+  
+  if (isvar("clim_syear")) then
+     delete(clim_syear)
+  end if
+  if (isvar("clim_eyear")) then
+     delete(clim_eyear)
+  end if
+  
+  if (isvar("patcor_nino34_djf")) then    ; for pattern correlation table  
+     clat = cos(0.01745329*patcor_nino34_djf&lat)
+     clat!0 = "lat"
+     clat&lat = patcor_nino34_djf&lat
+     line3   = "                  "    ; Must be 18 characters long
+     line4   = line3
+     header = (/"","Pattern Correlations   Observations vs. Model(s)",""/)
+     finpr_nino34_djf  = "ENSO(Nino34) (DJF)         "     
+     do hh = 1,nsim-1
+        dimY = dimsizes(tochar(names(hh)))
+        nchar = dimY
+        nchar = where(nchar.le.10,10,nchar)
+        if (dimY.lt.10) then
+           ntb = ""
+           do ii = 0,10-dimY-1
+              ntb = ntb+" "
+           end do
+           ntb = ntb+names(hh)
+        else
+           ntb = names(hh)
+        end if
+        
+        ntc = ""
+        do ii = 0,nchar-1
+           ntc = ntc+"-"
+        end do
+        format2 = "%"+(nchar-5+1)+".2f"
+        format3 = "%4.2f"
+        line3 = line3+" "+ntb   
+        line4 = line4+" "+ntc 
+        if (all(ismissing(patcor_nino34_djf(hh,{:-20},:)))) then
+           finpr_nino34_djf = finpr_nino34_djf+sprintf(format2,9.99)+"/"+sprintf(format3,9.99)
+        else
+           finpr_nino34_djf = finpr_nino34_djf+sprintf(format2,(pattern_cor(patcor_nino34_djf(0,{:-20},:),patcor_nino34_djf(hh,{:-20},:),clat({:-20}),0)))+"/"+sprintf(format3,(wgt_arearmse(patcor_nino34_djf(0,{:-20},:),patcor_nino34_djf(hh,{:-20},:),clat({:-20}),1.0,0)))
+        end if        
+     end do
+;     
+     if (dimsizes(tochar(line4)).ge.8190) then   ; system or fortran compiler limit
+        print("Metrics table warning: Not creating metrics table as size of comparison results in a invalid ascii row size.")   
+     else           
+        write_table(getenv("OUTDIR")+"metrics.sst.nino34_"+vnm+"_regpatt.txt","w",[/header/],"%s")
+        write_table(getenv("OUTDIR")+"metrics.sst.nino34_"+vnm+"_regpatt.txt","a",[/line3/],"%s")
+        write_table(getenv("OUTDIR")+"metrics.sst.nino34_"+vnm+"_regpatt.txt","a",[/line4/],"%s")  
+        write_table(getenv("OUTDIR")+"metrics.sst.nino34_"+vnm+"_regpatt.txt","a",[/finpr_nino34_djf/],"%s")
+     end if
+     delete([/line3,line4,format2,format3,nchar,ntc,clat,patcor_nino34_djf,patcor_nino34_jja,patcor_nino34_ann/])
+     delete([/dimY,ntb,header/])
+  end if 
+
+  panres = True
+  panres@gsnMaximize = True
+  panres@gsnPaperOrientation = "portrait"
+  panres@gsnPanelLabelBar = True
+  panres@gsnPanelYWhiteSpacePercent = 3.0
+  panres@pmLabelBarHeightF = 0.05
+  panres@pmLabelBarWidthF = 0.55
+  panres@lbTitleOn = False
+  panres@lbBoxLineColor = "gray70"
+  if (nsim.le.4) then
+     if (nsim.eq.1) then
+        panres@txFontHeightF = 0.022
+        panres@gsnPanelBottom = 0.50
+     else
+        panres@txFontHeightF = 0.0145
+        panres@gsnPanelBottom = 0.50
+     end if
+  else
+     panres@txFontHeightF = 0.016
+     panres@gsnPanelBottom = 0.05
+  end if
+  ncol = floattointeger(sqrt(nsim))
+  nrow = (nsim/ncol)+mod(nsim,ncol) 
+  
+  if (vxreg_frame.eq.0) then
+     if(vnm.eq."qnet") then
+       txt0 = "Qnet"
+     else
+       txt0 = str_upper(vnm)
+     end if
+     panres@txString = "ENSO(Nino34) "+txt0+" Regressions (DJF)" 
+     gsn_panel2(wks_nino34,reg_nino34_djf,(/nrow,ncol/),panres)
+     delete(reg_nino34_djf)
+     panres@txString = "ENSO(Nino34) "+txt0+" Regressions (MAM)"
+     gsn_panel2(wks_nino34,reg_nino34_mam,(/nrow,ncol/),panres)
+     delete(reg_nino34_mam)
+     panres@txString = "ENSO(Nino34) "+txt0+" Regressions (JJA)"
+     gsn_panel2(wks_nino34,reg_nino34_jja,(/nrow,ncol/),panres)
+     delete(reg_nino34_jja)
+     panres@txString = "ENSO(Nino34) "+txt0+" Regressions (SON)"
+     gsn_panel2(wks_nino34,reg_nino34_son,(/nrow,ncol/),panres)
+     delete(reg_nino34_son)
+     panres@txString = "ENSO(Nino34) "+txt0+" Regressions (Annual)"
+     gsn_panel2(wks_nino34,reg_nino34_ann,(/nrow,ncol/),panres)
+     delete(reg_nino34_ann)
+     if (COMPUTE_MODES_MON.eq."True") then    
+        panres@txString = "ENSO(Nino34) "+txt0+" Regressions (Monthly)"
+        gsn_panel2(wks_nino34,reg_nino34_mon,(/nrow,ncol/),panres)
+        delete(reg_nino34_mon)
+     end if
+     delete(wks_nino34)
+  end if
+  
+;--------------------------------------------------------------------------------------------------
+  OUTDIR = getenv("OUTDIR") 
+  if (wks_type.eq."png") then       
+     if (vxreg_frame.eq.0) then
+        system("mv "+OUTDIR+"nino34.vxreg.000001.png "+OUTDIR+"nino34."+vnm+"reg.djf.png")
+        system("mv "+OUTDIR+"nino34.vxreg.000002.png "+OUTDIR+"nino34."+vnm+"reg.mam.png")
+        system("mv "+OUTDIR+"nino34.vxreg.000003.png "+OUTDIR+"nino34."+vnm+"reg.jja.png")
+        system("mv "+OUTDIR+"nino34.vxreg.000004.png "+OUTDIR+"nino34."+vnm+"reg.son.png")
+        system("mv "+OUTDIR+"nino34.vxreg.000005.png "+OUTDIR+"nino34."+vnm+"reg.ann.png")
+        if (COMPUTE_MODES_MON.eq."True") then
+          system("mv "+OUTDIR+"nino34.vxreg.000006.png "+OUTDIR+"nino34."+vnm+"reg.mon.png")   
+        end if 
+     end if
+
+  else     
+     system("psplit "+OUTDIR+"nino34.vxreg.ps "+OUTDIR+"vx_sp")
+     if (vxreg_frame.eq.0) then
+        system("mv "+OUTDIR+"vx_sp0001.ps "+OUTDIR+"nino34."+vnm+"reg.djf.ps") 
+        system("mv "+OUTDIR+"vx_sp0002.ps "+OUTDIR+"nino34."+vnm+"reg.mam.ps") 
+        system("mv "+OUTDIR+"vx_sp0003.ps "+OUTDIR+"nino34."+vnm+"reg.jja.ps") 
+        system("mv "+OUTDIR+"vx_sp0004.ps "+OUTDIR+"nino34."+vnm+"reg.son.ps") 
+        system("mv "+OUTDIR+"vx_sp0005.ps "+OUTDIR+"nino34."+vnm+"reg.ann.ps")
+        if (COMPUTE_MODES_MON.eq."True") then
+           system("mv "+OUTDIR+"vx_sp0006.ps "+OUTDIR+"nino34."+vnm+"reg.mon.ps") 
+        end if
+     end if
+
+  end if
+
+  delete([/vnm,lmsk,nsim_reg,names_reg,paths_reg,syear_reg,syear_reg,eyear_reg,nyr_reg,sfcfacs/])
+ end do 
+    
+ print("Finished: sst.nino34_regpatt.ncl")
+
+end  
