@@ -1,6 +1,6 @@
-; Calculates a variety of oceanic indices, as well as hovmollers, spectra, 
+; Calculates a variety of pressure indices, as well as hovmollers, spectra, 
 ; monthly standard deviations, running standard deviations, and spatial
-; composites based on the nino3.4 index. 
+; composites based on the sam index. 
 ;
 ; Variables used: ts, psl, and tas
 ;
@@ -11,7 +11,7 @@ load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/shea_util.ncl"
 load "$CVDP_SCRIPTS/functions.ncl"
 
 begin
-  print("Starting: sst.indices.ncl")
+  print("Starting: u850.indices.ncl")
   
   SCALE_TIMESERIES = getenv("SCALE_TIMESERIES")  
   OUTPUT_DATA      = getenv("OUTPUT_DATA")  
@@ -22,8 +22,8 @@ begin
   OUTPUT_TYPE      = getenv("OUTPUT_TYPE") 
   COLORMAP         = getenv("COLORMAP")  
   
-  nsim = numAsciiRow("namelist_byvar/namelist_ts")
-  na = asciiread("namelist_byvar/namelist_ts",(/nsim/),"string")
+  nsim = numAsciiRow("namelist_byvar/namelist_u850")
+  na = asciiread("namelist_byvar/namelist_u850",(/nsim/),"string")
   names = new(nsim,"string")
   paths = new(nsim,"string")
   syear = new(nsim,"integer",-999)
@@ -39,15 +39,17 @@ begin
   delete(na)
   nyr = eyear-syear+1
   nyr_max = max(nyr)
-;----------- nino3.4 spatial composite coding-------------  
+
+;----------- jet spatial composite coding-------------
   nsim_psl = numAsciiRow("namelist_byvar/namelist_psl")
-  na_psl = asciiread("namelist_byvar/namelist_psl",(/nsim_psl/),"string")
+  na_psl = asciiread("namelist_byvar/namelist_psl",(/nsim/),"string")
   names_psl = new(nsim_psl,"string")
   paths_psl = new(nsim_psl,"string")
   syear_psl = new(nsim_psl,"integer",-999)
   eyear_psl = new(nsim_psl,"integer",-999)
-
-  do gg = 0,nsim_psl-1
+  delim = "|"
+     
+  do gg = 0,nsim-1
      names_psl(gg) = str_strip(str_get_field(na_psl(gg),1,delim))
      paths_psl(gg) = str_strip(str_get_field(na_psl(gg),2,delim))
      syear_psl(gg) = stringtointeger(str_strip(str_get_field(na_psl(gg),3,delim)))
@@ -55,6 +57,22 @@ begin
   end do
   delete(na_psl)
   nyr_psl = eyear_psl-syear_psl+1
+
+  nsim_ts = numAsciiRow("namelist_byvar/namelist_ts")
+  na_ts = asciiread("namelist_byvar/namelist_ts",(/nsim_ts/),"string")
+  names_ts = new(nsim_ts,"string")
+  paths_ts = new(nsim_ts,"string")
+  syear_ts = new(nsim_ts,"integer",-999)
+  eyear_ts = new(nsim_ts,"integer",-999)
+
+  do gg = 0,nsim_ts-1
+     names_ts(gg) = str_strip(str_get_field(na_ts(gg),1,delim))
+     paths_ts(gg) = str_strip(str_get_field(na_ts(gg),2,delim))
+     syear_ts(gg) = stringtointeger(str_strip(str_get_field(na_ts(gg),3,delim)))
+     eyear_ts(gg) = stringtointeger(str_strip(str_get_field(na_ts(gg),4,delim)))
+  end do
+  delete(na_ts)
+  nyr_ts = eyear_ts-syear_ts+1
     
   nsim_trefht = numAsciiRow("namelist_byvar/namelist_trefht")
   na_trefht = asciiread("namelist_byvar/namelist_trefht",(/nsim_trefht/),"string")
@@ -94,62 +112,45 @@ begin
      wks_type@wkWidth = 1500*PNG_SCALE
      wks_type@wkHeight = 1500*PNG_SCALE
   end if
-  wks_n34 = gsn_open_wks(wks_type,getenv("OUTDIR")+"nino34.timeseries")  
-  wks_n4 = gsn_open_wks(wks_type,getenv("OUTDIR")+"nino4.timeseries")
-  wks_n3 = gsn_open_wks(wks_type,getenv("OUTDIR")+"nino3.timeseries")
-  wks_n12 = gsn_open_wks(wks_type,getenv("OUTDIR")+"nino12.timeseries")
-  wks_tna = gsn_open_wks(wks_type,getenv("OUTDIR")+"tna.timeseries")
-  wks_tsa = gsn_open_wks(wks_type,getenv("OUTDIR")+"tsa.timeseries")
-  wks_tio = gsn_open_wks(wks_type,getenv("OUTDIR")+"tio.timeseries")
+  wks_pjetins = gsn_open_wks(wks_type,getenv("OUTDIR")+"pjetins.timeseries")  
+  wks_jetins  = gsn_open_wks(wks_type,getenv("OUTDIR")+"jetins.timeseries")
 
-  wks_n34_tlon_hi = gsn_open_wks(wks_type,getenv("OUTDIR")+"nino34.hov.elnino")
-  wks_n34_tlon_lo = gsn_open_wks(wks_type,getenv("OUTDIR")+"nino34.hov.lanina")
+  wks_jetlat_tlon = gsn_open_wks(wks_type,getenv("OUTDIR")+"jetlat.hov")
 
-  wks_n34_p = gsn_open_wks(wks_type,getenv("OUTDIR")+"nino34.powspec")
+  wks_pjetins_p = gsn_open_wks(wks_type,getenv("OUTDIR")+"pjetins.powspec")
   
-  wks_n34_rst = gsn_open_wks(wks_type,getenv("OUTDIR")+"nino34.runstddev")
+  wks_pjetins_rst = gsn_open_wks(wks_type,getenv("OUTDIR")+"pjetins.runstddev")
 
-  wks_n34_mst = gsn_open_wks(wks_type,getenv("OUTDIR")+"nino34.monstddev")
+  wks_pjetins_mst = gsn_open_wks(wks_type,getenv("OUTDIR")+"pjetins.monstddev")
   
-  wks_n34sc = gsn_open_wks(wks_type,getenv("OUTDIR")+"nino34.spatialcomp")
+  wks_pjetinssc = gsn_open_wks(wks_type,getenv("OUTDIR")+"pjetins.spatialcomp")
 
-  wks_n34sc_ppt = gsn_open_wks(wks_type,getenv("OUTDIR")+"nino34.spatialcomp.ppt")
+  wks_pjetinssc_ppt = gsn_open_wks(wks_type,getenv("OUTDIR")+"pjetins.spatialcomp.ppt")
   
   if (COLORMAP.eq.0) then
-     gsn_define_colormap(wks_n34,"ncl_default") 
-     gsn_define_colormap(wks_n4,"ncl_default")  
-     gsn_define_colormap(wks_n3,"ncl_default")  
-     gsn_define_colormap(wks_n12,"ncl_default")   
-     gsn_define_colormap(wks_tna,"ncl_default")
-     gsn_define_colormap(wks_tsa,"ncl_default")
-     gsn_define_colormap(wks_tio,"ncl_default")  
-     gsn_merge_colormaps(wks_n34_tlon_hi,"BlueDarkRed18",(/"gray30","gray50","gray70"/))
-     gsn_merge_colormaps(wks_n34_tlon_lo,"BlueDarkRed18",(/"gray30","gray50","gray70"/))
-     gsn_define_colormap(wks_n34_p,"cb_9step")
-     gsn_define_colormap(wks_n34_rst,"ncl_default")   
-     gsn_define_colormap(wks_n34_mst,"ncl_default")   
-     gsn_define_colormap(wks_n34sc,"ncl_default")   
-     gsn_define_colormap(wks_n34sc_ppt,"MPL_BrBG")  
+     gsn_define_colormap(wks_pjetins,"ncl_default") 
+     gsn_define_colormap(wks_jetins,"ncl_default")
+     gsn_merge_colormaps(wks_jetlat_tlon,"cmp_flux",(/"gray30","gray50","gray70"/))
+     gsn_define_colormap(wks_pjetins_p,"cb_9step")
+     gsn_define_colormap(wks_pjetins_rst,"ncl_default")   
+     gsn_define_colormap(wks_pjetins_mst,"ncl_default")   
+     gsn_define_colormap(wks_pjetinssc,"ncl_default")   
+     gsn_define_colormap(wks_pjetinssc_ppt,"MPL_BrBG")  
   end if
   if (COLORMAP.eq.1) then
-     gsn_define_colormap(wks_n34,"ncl_default") 
-     gsn_define_colormap(wks_n4,"ncl_default")  
-     gsn_define_colormap(wks_n3,"ncl_default")  
-     gsn_define_colormap(wks_n12,"ncl_default")   
-     gsn_define_colormap(wks_tna,"ncl_default")
-     gsn_define_colormap(wks_tsa,"ncl_default")
-     gsn_define_colormap(wks_tio,"ncl_default")  
-     gsn_merge_colormaps(wks_n34_tlon_hi,"BlueDarkRed18",(/"gray30","gray50","gray70"/))
-     gsn_merge_colormaps(wks_n34_tlon_lo,"BlueDarkRed18",(/"gray30","gray50","gray70"/))
-     gsn_define_colormap(wks_n34_p,"cb_9step")
-     gsn_define_colormap(wks_n34_rst,"ncl_default")   
-     gsn_define_colormap(wks_n34_mst,"ncl_default")   
-     gsn_define_colormap(wks_n34sc,"BlueDarkRed18")   
-     gsn_define_colormap(wks_n34sc_ppt,"BrownBlue12")    
+     gsn_define_colormap(wks_pjetins,"ncl_default") 
+     gsn_define_colormap(wks_jetins,"ncl_default")   
+     gsn_merge_colormaps(wks_jetlat_tlon,"MPL_rainbow",(/"gray30","gray50","gray70"/))
+     gsn_define_colormap(wks_pjetins_p,"cb_9step")
+     gsn_define_colormap(wks_pjetins_rst,"ncl_default")   
+     gsn_define_colormap(wks_pjetins_mst,"ncl_default")   
+     gsn_define_colormap(wks_pjetinssc,"BlueDarkRed18")   
+     gsn_define_colormap(wks_pjetinssc_ppt,"BrownBlue12")    
   end if
 
-  xyn34 = new(nsim,"graphic")  
-  xyoni = new(nsim,"graphic")
+  xypjetins = new(nsim,"graphic")
+  xyn6  = new(nsim,"graphic")  
+  xyn5  = new(nsim,"graphic")  
   xyn4  = new(nsim,"graphic")  
   xyn3  = new(nsim,"graphic")  
   xyn12 = new(nsim,"graphic")  
@@ -159,30 +160,28 @@ begin
   xyiod = new(nsim,"graphic")  
   xysocn = new(nsim,"graphic")  
   xyamm  = new(nsim,"graphic")  
-  xyatl3 = new(nsim,"graphic")  
   
-  plot_n34hi = new(nsim,"graphic")  
-  plot_n34lo = new(nsim,"graphic")  
+  plot_jetlat = new(nsim,"graphic")  
   
-  map_n34sc_jja0 = new(nsim,"graphic")  
-  map_n34sc_son0 = new(nsim,"graphic")  
-  map_n34sc_djf1 = new(nsim,"graphic")  
-  map_n34sc_mam1 = new(nsim,"graphic")  
+  map_pjetinssc_jja0 = new(nsim,"graphic")  
+  map_pjetinssc_son0 = new(nsim,"graphic")  
+  map_pjetinssc_djf1 = new(nsim,"graphic")  
+  map_pjetinssc_mam1 = new(nsim,"graphic")  
 
-  map_n34sc_ppt_jja0 = new(nsim,"graphic")  
-  map_n34sc_ppt_son0 = new(nsim,"graphic")  
-  map_n34sc_ppt_djf1 = new(nsim,"graphic")  
-  map_n34sc_ppt_mam1 = new(nsim,"graphic")  
+  map_pjetinssc_ppt_jja0 = new(nsim,"graphic")  
+  map_pjetinssc_ppt_son0 = new(nsim,"graphic")  
+  map_pjetinssc_ppt_djf1 = new(nsim,"graphic")  
+  map_pjetinssc_ppt_mam1 = new(nsim,"graphic")  
 
-  xyn34_rst = new(nsim,"graphic")  
-  xyn34_mst = new(nsim,"graphic")  
-  xyn34_ac = new(nsim,"graphic") 
+  xypjetins_rst = new(nsim,"graphic")  
+  xypjetins_mst = new(nsim,"graphic")  
+  xypjetins_ac = new(nsim,"graphic") 
   plot_wave34 = new(nsim,"graphic")  
 
   pspec = new(nsim,"graphic")
   if (isfilepresent2("obs_ts")) then
      pspec_obs = new(nsim,"graphic")
-     xyn34_ac_obs = new(nsim,"graphic")
+     xypjetins_ac_obs = new(nsim,"graphic")
   end if
 
   wgt = (/1.,2.,1./)   
@@ -191,151 +190,66 @@ begin
   rad=(pi/180.)
 
   do ee = 0,nsim-1
-     sst = data_read_in(paths(ee),"TS",syear(ee),eyear(ee))    ; read in data, orient lats/lons correctly, set time coordinate variable up
+     ua = data_read_in(paths(ee),"U850",syear(ee),eyear(ee))    ; read in data, orient lats/lons correctly, set time coordinate variable up
      
-     if (isatt(sst,"is_all_missing")) then
-        delete(sst)
+     if (isatt(ua,"is_all_missing")) then
+        delete(ua)
         continue
      end if
-
-     sst = where(sst.le.-1.8,-1.8,sst)    ; set all values below -1.8 to -1.8
-     d = addfile("$NCARG_ROOT/lib/ncarg/data/cdf/landsea.nc","r")   ; mask out land (this is redundant for data that is already masked)
-     basemap = d->LSMASK
-     lsm = landsea_mask(basemap,sst&lat,sst&lon)
-     sst = mask(sst,conform(sst,lsm,(/1,2/)).ge.1,False)
-     delete([/lsm,basemap/])
-     delete(d)  
+ 
+     ;calcualte jet info with raw ua field  
+     finjet  = calculate_jet_info(ua,llats,llatn,llonw,llone)
 
      if (OPT_CLIMO.eq."Full") then
-        sst = rmMonAnnCycTLL(sst)
+        ua = rmMonAnnCycTLL(ua)
      else
         check_custom_climo(names(ee),syear(ee),eyear(ee),CLIMO_SYEAR,CLIMO_EYEAR)
-        temp_arr = sst
+        temp_arr = ua
         delete(temp_arr&time)
-        temp_arr&time = cd_calendar(sst&time,-1)
+        temp_arr&time = cd_calendar(ua&time,-1)
         if (CLIMO_SYEAR.lt.0) then
-           climo = clmMonTLL(temp_arr({(eyear(ee)+CLIMO_SYEAR)*100+1:(eyear(ee)+CLIMO_EYEAR)*100+12},:,:))       
+           climo = clmMonTLL(temp_arr({(eyear(ee)+CLIMO_SYEAR)*100+1:(eyear(ee)+CLIMO_EYEAR)*100+12},:,:))
         else
-           climo = clmMonTLL(temp_arr({CLIMO_SYEAR*100+1:CLIMO_EYEAR*100+12},:,:))                 
-        end if   
+           climo = clmMonTLL(temp_arr({CLIMO_SYEAR*100+1:CLIMO_EYEAR*100+12},:,:))
+        end if
         delete(temp_arr)
-        sst   = calcMonAnomTLL(sst,climo) 
+        ua   = calcMonAnomTLL(ua,climo)
         delete(climo)
      end if
-     
-     coswgt=cos(rad*sst&lat)
+
+     coswgt=cos(rad*ua&lat)
      coswgt!0 = "lat" 
-     coswgt&lat= sst&lat        
-     llats = -5.     ; nino3.4
-     llatn = 5.
-     llonw = 190.
-     llone = 240.
-     nino34 = wgt_areaave_Wrap(sst(:,{llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0)  
-     nino34@comment_cvdp = "area average domain ("+llats+":"+llatn+"N, "+llonw+":"+llone+"E)"
-     nino34@units = sst@units
-     nino34@long_name = "nino3.4 timeseries (monthly)"       
+     coswgt&lat= ua&lat  
 
-     oni = runave_n(nino34, 3, 1, 0)
-     oni@comment_cvdp = "area average domain ("+llats+":"+llatn+"N, "+llonw+":"+llone+"E)"
-     copy_VarCoords(nino34,oni)
-     oni@units = sst@units
-     oni@long_name = "oceanic nino index (oni) timeseries (monthly)"
+     llats = -70. ; sam index
+     llatn = -20.
+     llonw = 0.
+     llone = 360.
 
-     llats = -5.    ; nino3
-     llatn = 5.
-     llonw = 210.
-     llone = 270.
-     nino3 = wgt_areaave(sst(:,{llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0)  
-     nino3@comment_cvdp = "area average domain ("+llats+":"+llatn+"N, "+llonw+":"+llone+"E)"
-     copy_VarCoords(nino34,nino3)
-     nino3@units = sst@units
-     nino3@long_name = "nino3 timeseries (monthly)"       
-     
-     llats = -5.    ; nino4
-     llatn = 5.
-     llonw = 160.
-     llone = 210.
-     nino4 = wgt_areaave(sst(:,{llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0)  
-     nino4@comment_cvdp = "area average domain ("+llats+":"+llatn+"N, "+llonw+":"+llone+"E)"
-     copy_VarCoords(nino34,nino4)
-     nino4@units = sst@units
-     nino4@long_name = "nino4 timeseries (monthly)"       
-     
-     llats = -10.    ; nino1+2
-     llatn = 0.
-     llonw = 270.
-     llone = 280.
-     nino12 = wgt_areaave(sst(:,{llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0)  
-     nino12@comment_cvdp = "area average domain ("+llats+":"+llatn+"N, "+llonw+":"+llone+"E)"
-     copy_VarCoords(nino34,nino12)
-     nino12@units = sst@units
-     nino12@long_name = "nino1+2 timeseries (monthly)"       
+     pjetins               = finjet(0,:)
+     pjetins@comment_cvdp  = "domain ("+llatn+":"+llats+"S, "+llonw+":"+llone+"E)"
+     pjetins@units         = "m s~S~-1~N~"
+     pjetins@long_name     = "Polar jet intensity (u850) timeseries (monthly)"
 
-     ssttemp = lonFlip(sst)   
-     amm_n = wgt_areaave(ssttemp(:,{5.:15.},{-50.:-20.}),coswgt({5.:15.}),1.0,0)      ;  Atlantic Meridional Mode
-     amm_s = wgt_areaave(ssttemp(:,{-15.:-5.},{-20.:10.}),coswgt({-15.:-5.}),1.0,0)
-     amm = amm_n
-     amm = (/ amm_n - amm_s /)
-     delete([/amm_n,amm_s/])
-     amm@comment_cvdp = "area average domain (-5:20N, 80W:0E) - (-10:5N, 60W:15E)"
-     copy_VarCoords(nino34,amm)
-     amm@units = sst@units
-     amm@long_name = "Atlantic Meridional Mode Index (monthly)"   
+     pjetloc               = finjet(1,:)
+     pjetloc@comment_cvdp  = "domain ("+llatn+":"+llats+"S, "+llonw+":"+llone+"E)"
+     pjetloc@units         = "degree south"
+     pjetloc@long_name     = "Polar jet latitude timeseries (monthly)"
 
-     llats = -3.    ;  Atlantic Nino (ATL3)
-     llatn = 3.
-     llonw = -20.
-     llone = 0.
-     atl3 = wgt_areaave(ssttemp(:,{llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0)  
-     atl3@comment_cvdp = "area average domain ("+llats+":"+llatn+"N, "+llonw+":"+llone+"E)"
-     copy_VarCoords(nino34,atl3)
-     atl3@units = sst@units
-     atl3@long_name = "Atlantic Nino Index (monthly)"     
-     
-     llats = -20.    ;  Tropical Southern Atlantic Index
-     llatn = 0.
-     llonw = -30.
-     llone = 10.
-     tsa = wgt_areaave(ssttemp(:,{llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0)  
-     tsa@comment_cvdp = "area average domain ("+llats+":"+llatn+"N, "+llonw+":"+llone+"E)"
-     copy_VarCoords(nino34,tsa)
-     tsa@units = sst@units
-     tsa@long_name = "Tropical Southern Atlantic SST timeseries (monthly)"       
-     delete(ssttemp)
-     
-     llats = 5.5    ;  Tropical Northern Atlantic Index
-     llatn = 23.5
-     llonw = 302.5
-     llone = 345.
-     tna = wgt_areaave(sst(:,{llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0)  
-     tna@comment_cvdp = "area average domain ("+llats+":"+llatn+"N, "+llonw+":"+llone+"E)"
-     copy_VarCoords(nino34,tna)
-     tna@units = sst@units
-     tna@long_name = "Tropical Northern Atlantic SST timeseries (monthly)"       
+     pjetins = finjet(2,:) 
+     copy_VarCoords(pjet_loc,pjetins)
+     pjetins@comment_cvdp   = "domain ("+llats+":"+llatn+"N, "+llonw+":"+llone+"E)"
+     pjetins@units          = "1"
+     pjetins@long_name      = "Polar Jet latitude location index timeseries (monthly)"
 
-     llats = -15.    ;  Indian Ocean SST index
-     llatn = 15.
-     llonw = 40.
-     llone = 110.
-     tio = wgt_areaave(sst(:,{llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0)  
-     tio@comment_cvdp = "area average domain ("+llats+":"+llatn+"N, "+llonw+":"+llone+"E)"
-     copy_VarCoords(nino34,tio)
-     tio@units = sst@units
-     tio@long_name = "Tropical Indian Ocean SST timeseries (monthly)"       
-     
-                     ; Indian Ocean Dipole Index http://www.bom.gov.au/climate/IOD/about_IOD.shtml
-     iod = wgt_areaave(sst(:,{-10.:10.},{50.:70.}),coswgt({-10.:10.}),1.0,0) - wgt_areaave(sst(:,{-10.:0.},{90.:110.}),coswgt({-10.:0.}),1.0,0)  
-     iod@comment_cvdp = "area average domain (-10:10N, 50:70E) - (-10:0N, 90:110E)"
-     copy_VarCoords(nino34,iod)
-     iod@units = sst@units
-     iod@long_name = "Indian Ocean Dipole Index (monthly)"       
+     pjetisd = finjet(3,:)  
+     copy_VarCoords(pjetins,pjetisd)
+     pjetisd@comment_cvdp = "domain ("+llats+":"+llatn+"N, "+llonw+":"+llone+"E)"
+     pjetisd@units = "1"
+     pjetisd@long_name = "Normalized sam (Mashall) index timeseries (monthly)"
 
-     socn = wgt_areaave(sst(:,{-70.:-50.},:),coswgt({-70.:-50.}),1.0,0) 
-     socn@comment_cvdp = "area average domain (-70:-50N, 0:360E)"
-     copy_VarCoords(nino34,socn)
-     socn@units = sst@units
-     socn@long_name = "Southern Ocean Index (monthly)"    
-     delete(coswgt)   
+     delete([/finjet,ua/])
+
 ;---------------------------------------------------------------------------------------------     
      if (OUTPUT_DATA.eq."True") then
         modname = str_sub_str(names(ee)," ","_")
@@ -343,7 +257,7 @@ begin
         do gg = 0,dimsizes(bc)-1
            modname = str_sub_str(modname,bc(gg),"_")
         end do
-        fn = getenv("OUTDIR")+modname+".cvdp_data.sst.indices."+syear(ee)+"-"+eyear(ee)+".nc"
+        fn = getenv("OUTDIR")+modname+".cvdp_data.u850.indices."+syear(ee)+"-"+eyear(ee)+".nc"
         if (.not.isfilepresent2(fn)) then
            z = addfile(fn,"c")
            z@source = "NCAR Climate Analysis Section's Climate Variability Diagnostics Package v"+getenv("VERSION")
@@ -358,133 +272,177 @@ begin
               end if
            end if
            z@Conventions = "CF-1.6"
-           date = cd_calendar(nino34&time,-1)
+           date = cd_calendar(pjetins&time,-1)
            date@long_name = "current date (YYYYMM)"
            delete(date@calendar)
            date!0 = "time"
-           date&time = nino34&time
+           date&time = pjetins&time
            date@units = "1"
            z->date = date
            delete(date)
         else
            z = addfile(fn,"w")
         end if
-        z->nino34 = set_varAtts(nino34,"","","")
-        z->oni    = set_varAtts(oni,"","","")
-        z->nino12 = set_varAtts(nino12,"","","")
-        z->nino3  = set_varAtts(nino3,"","","")
-        z->nino4  = set_varAtts(nino4,"","","")
-        z->north_tropical_atlantic = set_varAtts(tna,"","","")
-        z->south_tropical_atlantic = set_varAtts(tsa,"","","")
-        z->tropical_indian_ocean = set_varAtts(tio,"","","")
-        z->indian_ocean_dipole = set_varAtts(iod,"","","")
-        z->southern_ocean = set_varAtts(socn,"","","")
-        z->atlantic_meridional_mode = set_varAtts(amm,"","","")
-        z->atlantic_nino = set_varAtts(atl3,"","","")
+        z->pjetind   = set_varAtts(pjetind,"","","")
+        z->pjetisd   = set_varAtts(pjetisd,"","","")
+        z->pjetins   = set_varAtts(pjetins,"","","")
+        z->pjetloc   = set_varAtts(pjetloc,"","","")
         delete([/modname,fn/])
      end if
+
 ;---------------------------------------------------------------------------------------------
-     nino34T = wgt_runave(nino34,wgt,1)     ; for use in ENSO composites / hovmuellers / running standard deviations
-     nino34_ndj = nino34T(11:dimsizes(nino34T)-13:12)   ; cannot count last 1yr as spatial composite uses +1yrs data betond NDJ..  
-     nino34_ndj!0 = "time"
-     nino34_ndj&time = ispan(syear(ee),eyear(ee)-1,1)    
-     nino34_ndj = dtrend_msg(ispan(0,dimsizes(nino34_ndj&time)-1,1),nino34_ndj,True,False)
-     nino34_ndj = dim_standardize(nino34_ndj,0)
+     if (nyr(ee).ge.15) then   ; 15+ years needed for this metric
+        finua              = ua(:,0,:)
+        finua              = ua@_FillValue 
+        finua@long_name    = "Polar Jet Latitude Position"
+        finua@units        = "degree"
+        finua_mave         = finua(lon|0:2,time|:) 
+        finua_tave         = finua(time|0:2,lon|:) 
 
-     sst = (/ dtrend_msg_n(ispan(0,nyr(ee)*12-1,1),sst,False,False,0) /) ; detrend the sst array
-     
-     if (nyr(ee).ge.15) then   ; 15+ years needed for composites
-        sstr = sst(:,{-3:3},{120:280})                        ; ENSO hovmuellers based on NDJ nino34
-        finsst_hi = sstr(:60,0,:)    ; for Jan-2 -> Jan+3
-        finsst_hi!0 = "time"
-        finsst_hi&time = ispan(0,60,1)
-        finsst_hi = 0.
-        finsst_lo = finsst_hi
-        finsst_mid = finsst_hi
-        cntr_hi = 0
-        cntr_lo = 0
-        cntr_mid = 0
-        cntr_lo@_FillValue = default_fillvalue(typeof(cntr_lo)) 
-        cntr_mid@_FillValue = default_fillvalue(typeof(cntr_mid)) 
-        cntr_hi@_FillValue = default_fillvalue(typeof(cntr_hi)) 
-        
-        mocntr = 24   ; note: if this is set at 24 gg should start at 2
-        do gg = 2,dimsizes(nino34_ndj)-3   ; remember that Dec is month 11. End @ -3 because we need to grab + 3 yrs and 1 month from there (nino34_ndj already ends at eyear-1)
-           if (.not.ismissing(nino34_ndj(gg))) then    ; note that finsst_* indices 24:52 (Jan+0 -> May +2) are all that is shown in the hovmoller plots 
-              if (nino34_ndj(gg).ge.1.) then
-                 finsst_hi = (/ finsst_hi+dim_avg_n(sstr(mocntr-24:mocntr+36,:,:),1) /)    ; nino34_ndj value is at sstr index mocntr+11     
-                 cntr_hi = cntr_hi+1
-              end if
-              if (nino34_ndj(gg).ge.-0.5.and.nino34_ndj(gg).le.0.5) then
-                 finsst_mid = (/ finsst_mid+dim_avg_n(sstr(mocntr-24:mocntr+36,:,:),1) /)          
-                 cntr_mid = cntr_mid+1
-              end if
-              if (nino34_ndj(gg).le.-1.) then
-                 finsst_lo = (/ finsst_lo+dim_avg_n(sstr(mocntr-24:mocntr+36,:,:),1) /)            
-                 cntr_lo = cntr_lo+1
-              end if
-           end if
-           mocntr = mocntr+12
+        uar = ua
+        uar = ua@_FillValue 
+        do gg = 30,dimsizes(jetinsd)-31
+          mocntr1 = gg - 30  
+          mocntr2 = gg + 30
+          uar(gg,:,:) = escovc(jetinsd(time|mocntr1:mocntr2), psl({lat|:},{lon|:},time|mocntr1:mocntr2)) 
+          vsec = uar(gg,{-90:-20},:) 
+          vsec = abs(vsec)
+          ;Polar Jet latitude is search as location with smallest absolute covariance (Paul Wachter et al., 2020)
+          mind = dim_minind(vsec,0)
+          do hh = 0,dimsizes(vsec(0,:))-1
+            finua(gg,hh) =  tofloat(vsec&lat(mind(hh)))
+          end do 
+          delete([/vsec,mocntr1,mocntr2,mind/])
         end do
-        delete([/sstr,mocntr/])
 
-        cntr_hi  = where(cntr_hi.eq.0, cntr_hi@_FillValue, cntr_hi)
-        cntr_mid = where(cntr_mid.eq.0,cntr_mid@_FillValue,cntr_mid)
-        cntr_lo  = where(cntr_lo.eq.0, cntr_lo@_FillValue, cntr_lo)
-        finsst_hi  = (/ finsst_hi/cntr_hi /)
-        finsst_mid = (/ finsst_mid/cntr_mid /)
-        finsst_lo  = (/ finsst_lo/cntr_lo /)
-     
-        if (OUTPUT_DATA.eq."True") then
-           hov_hi = (/ finsst_hi(24:52,:) /)  ; 24:52 runs from Jan+0->May+2 and matches range shown in plot
-           time_mon1 = ispan(0,28,1)
-           time_mon1@units = "months since 0000-01-01 00:00:00"
+        ; apply a smoothing to reduce noise  
+        finua_sm = smth9(finua, 0.50,  0.25, True)
+        finua_sm = where(abs(finua_sm).ge.89,finua,finua_sm)
+        finua    = (/finua_sm/) 
+        delete([/finua_sm/])
+
+        ;calculate the zonal and time  average and varibility 
+        finua_mave(0,:) = dim_avg_n(finua,1)
+        finua_mave(1,:) = dim_min_n(finua,1)
+        finua_mave(2,:) = dim_max_n(finua,1)
+        finua_tave(0,:) = dim_avg_n(finua,0)
+        finua_tave(1,:) = dim_min_n(finua,0)
+        finua_tave(2,:) = dim_max_n(finua,0)
+        delete([/uar/])
+        
+        if (OUTPUT_DATA.eq."True") then 
+           hov_all = (/ finua /)  
+           time_mon1 = cd_calendar(psl&time,1) 
            time_mon1@long_name = "Time"
            time_mon1@standard_name = "time"
            time_mon1@calendar = "standard"
            time_mon1!0 = "time_mon1"
            time_mon1&time_mon1 = time_mon1
-           hov_hi!0 = "time_mon1"
-           hov_hi&time_mon1 = time_mon1
-           longitude = finsst_hi&lon
-           longitude@standard_name = "longitude"
-           hov_hi!1 = "longitude"
-           hov_hi&longitude = longitude
-           delete([/time_mon1,longitude/])
-           hov_lo = (/ finsst_lo(24:52,:) /)  ; 24:52 runs from Jan+0->May+2 and matches range shown in plot
-           copy_VarCoords(hov_hi,hov_lo)
-           hov_hi@number_of_events = cntr_hi
-           hov_lo@number_of_events = cntr_lo
-           hov_hi@units = "C"
-           hov_lo@units = "C"
-           z->nino34_hov_elnino = set_varAtts(hov_hi,"nino3.4 El Nino Hovmoller sst composite","","")
-           z->nino34_hov_lanina = set_varAtts(hov_lo,"nino3.4 La Nina Hovmoller sst composite","","")
-           delete([/hov_hi,hov_lo/])
+           hov_all!0 = "time_mon1"
+           hov_all&time_mon1 = time_mon1
+           lon1 = finua&lon
+           lon1@standard_name = "longitude"
+           hov_all!1    = "lon1"
+           hov_all&lon1 = lon1
+           hov_all@_FillValue = finua@_FillValue 
+           delete([/time_mon1,lon1/])
+           hov_mave = (/ finua_mave /)  
+           hov_tave = (/ finua_tave /)
+           hov_mave!0 = "nx"
+           hov_mave!1 = "time_mon1"
+           hov_mave&time_mon1 = hov_all&time_mon1
+           hov_tave!0 = "nx"
+           hov_mave!1 = "lon1"
+           hov_mave&lon1  = hov_all&lon1 
+           hov_all@units  = "degree"
+           hov_mave@units = "degree"
+           hov_tave@units = "degree"
+           z->jetlat_hov_all  = set_varAtts(hov_all, "Polar Jet latitude Hovmoller (time-lon)","","")
+           z->jetlat_hov_mave = set_varAtts(hov_mave,"Polar Jet latitude time series (lon mean)","","")
+           z->jetlat_hov_tave = set_varAtts(hov_tave,"Polar Jet latitude meridional series (time mean)","","")
+           delete([/hov_mave,hov_tave,hov_all/])
         end if
      end if     
-;- - - - - -nino3.4 spatial composite section- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+;- - - - - -pjetins spatial composite section- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+     pjetinsT         = wgt_runave(pjetins,wgt,1)               ; for use in Polar Jet composites / running standard deviations
+     pjetins_jja      = pjetinsT(6:dimsizes(pjetinsT)-13:12)  ; cannot count last 1yr as spatial composite uses +1yrs data betond JAS..
+     pjetins_jja!0    = "time"
+     pjetins_jja&time = ispan(syear(ee),eyear(ee)-1,1)
+     pjetins_jja      = dtrend_msg(ispan(0,dimsizes(pjetins_jja&time)-1,1),pjetins_jja,True,False)
+     pjetins_jja      = dim_standardize(pjetins_jja,0)
+
      if (any(ismissing((/syear(ee),syear_trefht(ee),syear_psl(ee),eyear(ee),eyear_trefht(ee),eyear_psl(ee)/)))) then
-        taspslreg_plot_flag = 1
-     else 
+        tassstreg_plot_flag = 1
+     else
         if (syear(ee).eq.syear_trefht(ee).and.syear(ee).eq.syear_psl(ee)) then     ; check that the start and end years match for ts, trefht, and psl
            if (eyear(ee).eq.eyear_trefht(ee).and.eyear(ee).eq.eyear_psl(ee)) then
-              taspslreg_plot_flag = 0
+              tassstreg_plot_flag = 0
            else
-              taspslreg_plot_flag = 1
+              tassstreg_plot_flag = 1
            end if
         else
-           taspslreg_plot_flag = 1
+           tassstreg_plot_flag = 1
         end if
      end if
 
-     if (taspslreg_plot_flag.eq.0) then
-        tas = data_read_in(paths_trefht(ee),"TREFHT",syear_trefht(ee),eyear_trefht(ee))
-        psl = data_read_in(paths_psl(ee),"PSL",syear_psl(ee),eyear_psl(ee))
+     if (tassstreg_plot_flag.eq.0) then
 
-        TIME = sst&time
-        yyyymm = cd_calendar(sst&time,-1)  ; convert tas, ts, and sst from CF-conforming time to YYYYMM for coding below
-        delete(sst&time)
-        sst&time = yyyymm 
+       psl = data_read_in(paths(ee),"PSL",syear(ee),eyear(ee))    ; read in data, orient lats/lons correctly, set time coordinate variable up
+
+       if (isatt(psl,"is_all_missing")) then
+          delete(psl)
+          continue
+       end if
+
+       if (OPT_CLIMO.eq."Full") then
+          psl = rmMonAnnCycTLL(psl)
+       else
+          check_custom_climo(names_psl(ee),syear_psl(ee),eyear_psl(ee),CLIMO_SYEAR,CLIMO_EYEAR)
+          temp_arr = psl
+          delete(temp_arr&time)
+          temp_arr&time = cd_calendar(psl&time,-1)
+          if (CLIMO_SYEAR.lt.0) then
+             climo = clmMonTLL(temp_arr({(eyear_psl(ee)+CLIMO_SYEAR)*100+1:(eyear_psl(ee)+CLIMO_EYEAR)*100+12},:,:))
+          else
+             climo = clmMonTLL(temp_arr({CLIMO_SYEAR*100+1:CLIMO_EYEAR*100+12},:,:))
+          end if
+          delete(temp_arr)
+          psl   = calcMonAnomTLL(psl,climo)
+          delete(climo)
+       end if
+     end if 
+
+     if (any(ismissing((/syear(ee),syear_trefht(ee),syear_ts(ee),eyear(ee),eyear_trefht(ee),eyear_ts(ee)/)))) then
+        tassstreg_plot_flag = 1
+     else 
+        if (syear(ee).eq.syear_trefht(ee).and.syear(ee).eq.syear_ts(ee)) then     ; check that the start and end years match for ts, trefht, and psl
+           if (eyear(ee).eq.eyear_trefht(ee).and.eyear(ee).eq.eyear_ts(ee)) then
+              tassstreg_plot_flag = 0
+           else
+              tassstreg_plot_flag = 1
+           end if
+        else
+           tassstreg_plot_flag = 1
+        end if
+     end if
+
+     if (tassstreg_plot_flag.eq.0) then
+        tas = data_read_in(paths_trefht(ee),"TREFHT",syear_trefht(ee),eyear_trefht(ee))
+        sst = data_read_in(paths_ts(ee),"TS",syear_ts(ee),eyear_ts(ee))
+
+        sst = where(sst.le.-1.8,-1.8,sst)    ; set all values below -1.8 to -1.8
+        d = addfile("$NCARG_ROOT/lib/ncarg/data/cdf/landsea.nc","r")   ; mask out land (this is redundant for data that is already masked)
+        basemap = d->LSMASK
+        lsm = landsea_mask(basemap,sst&lat,sst&lon)
+        sst = mask(sst,conform(sst,lsm,(/1,2/)).ge.1,False)
+        delete([/lsm,basemap/])
+        delete(d)
+
+        TIME = psl&time
+        yyyymm = cd_calendar(psl&time,-1)  ; convert tas, ts, and psl from CF-conforming time to YYYYMM for coding below
+        delete(psl&time)
+        psl&time = yyyymm 
         delete(yyyymm)
 
         yyyymm = cd_calendar(tas&time,-1)  
@@ -492,24 +450,24 @@ begin
         tas&time = yyyymm 
         delete(yyyymm)
 
-        yyyymm = cd_calendar(psl&time,-1) 
-        delete(psl&time)
-        psl&time = yyyymm 
+        yyyymm = cd_calendar(sst&time,-1) 
+        delete(sst&time)
+        sst&time = yyyymm 
         delete(yyyymm)
 
-        if (isatt(tas,"is_all_missing").or.isatt(psl,"is_all_missing")) then
-           taspslreg_plot_flag = 1
+        if (isatt(tas,"is_all_missing").or.isatt(sst,"is_all_missing")) then
+           tassstreg_plot_flag = 1
            delete([/tas,psl/])
         end if
         
         if (nyr(ee).lt.15) then   ; 15+ years needed for composites
-           taspslreg_plot_flag = 1
+           tassstreg_plot_flag = 1
         end if
 
-        if (taspslreg_plot_flag.eq.0) then     ; only continue if all 3 fields are present
+        if (tassstreg_plot_flag.eq.0) then     ; only continue if all 3 fields are present
            if (OPT_CLIMO.eq."Full") then
               tas = rmMonAnnCycTLL(tas)
-              psl = rmMonAnnCycTLL(psl)           
+              sst = rmMonAnnCycTLL(sst)           
            else
               check_custom_climo(names_trefht(ee),syear_trefht(ee),eyear_trefht(ee),CLIMO_SYEAR,CLIMO_EYEAR)
               if (CLIMO_SYEAR.lt.0) then
@@ -520,17 +478,17 @@ begin
               tas   = calcMonAnomTLL(tas,climo) 
               delete(climo)
            
-              check_custom_climo(names_psl(ee),syear_psl(ee),eyear_psl(ee),CLIMO_SYEAR,CLIMO_EYEAR)
+              check_custom_climo(names_ts(ee),syear_ts(ee),eyear_ts(ee),CLIMO_SYEAR,CLIMO_EYEAR)
               if (CLIMO_SYEAR.lt.0) then
-                 climo = clmMonTLL(psl({(eyear(ee)+CLIMO_SYEAR)*100+1:(eyear(ee)+CLIMO_EYEAR)*100+12},:,:))       
+                 climo = clmMonTLL(sst({(eyear(ee)+CLIMO_SYEAR)*100+1:(eyear(ee)+CLIMO_EYEAR)*100+12},:,:))       
               else
-                 climo = clmMonTLL(psl({CLIMO_SYEAR*100+1:CLIMO_EYEAR*100+12},:,:))                 
+                 climo = clmMonTLL(sst({CLIMO_SYEAR*100+1:CLIMO_EYEAR*100+12},:,:))                 
               end if  
-              psl   = calcMonAnomTLL(psl,climo) 
+              sst   = calcMonAnomTLL(sst,climo) 
               delete(climo)
            end if
-           tas = (/ dtrend_msg_n(ispan(0,dimsizes(tas&time)-1,1),tas,False,False,0) /)     ; sst detrended up above
-           psl = (/ dtrend_msg_n(ispan(0,dimsizes(psl&time)-1,1),psl,False,False,0) /)  
+           tas = (/ dtrend_msg_n(ispan(0,dimsizes(tas&time)-1,1),tas,False,False,0) /)     ; psl detrended up above
+           sst = (/ dtrend_msg_n(ispan(0,dimsizes(sst&time)-1,1),sst,False,False,0) /)  
         
            ta = dim_avg_n(sst(:1,:,:),0)
            sst = runave_n_Wrap(sst,3,0,0)
@@ -549,17 +507,17 @@ begin
         
            hicntr = 0
            locntr = 0
-           hiyr = new(dimsizes(nino34_ndj&time),integer)
+           hiyr = new(dimsizes(pjetins_jja&time),integer)
            loyr = hiyr
 
-           do hh = 0,dimsizes(nino34_ndj)-1
-              if (.not.ismissing(nino34_ndj(hh))) then
-                 if (nino34_ndj(hh).ge.1) then
-                    hiyr(hicntr) = nino34_ndj&time(hh)
+           do hh = 0,dimsizes(pjetins_jja)-1
+              if (.not.ismissing(pjetins_jja(hh))) then
+                 if (pjetins_jja(hh).ge.1.0) then
+                    hiyr(hicntr) = pjetins_jja&time(hh)
                     hicntr = hicntr+1
                  end if
-                 if (nino34_ndj(hh).le.-1) then
-                    loyr(locntr) = nino34_ndj&time(hh)
+                 if (pjetins_jja(hh).le.-1.0) then
+                    loyr(locntr) = pjetins_jja&time(hh)
                     locntr = locntr+1
                  end if
               end if
@@ -594,7 +552,7 @@ begin
            delete(sst&time)
            sst&time = fspan(tmin*1.,(tmax*1.)+(11/12.),dimS)
            delete([/dimS,tmin,tmax/])
-           ; print(sst&time)
+           ; print(psl&time)
         
            sc_tas_hi = tas(:23,:,:)
            sc_tas_lo = tas(:23,:,:)    
@@ -611,7 +569,7 @@ begin
            sc_psl_lo = sc_psl_lo@_FillValue
            
            if (dimsizes(highyr).le.1) then
-              print("For "+names(ee)+", 1 or less (normalized) nino3.4 value greater than one standard deviation found, setting nino3.4 spatial composites to missing")  ; sc_*_hi arrays left to _FillValue
+              print("For "+names(ee)+", 1 or less (normalized) pjetins value greater than one standard deviation found, setting pjetins spatial composites to missing")  ; sc_*_hi arrays left to _FillValue
            else           
               do gg = 0,23
                  tt = gg/12.
@@ -623,7 +581,7 @@ begin
            end if
            delete(highyr)
            if (dimsizes(lowyr).le.1) then
-              print("For "+names(ee)+", 1 or less (normalized) nino3.4 value less than -1 standard deviation found, setting nino3.4 spatial composites to missing")   ; sc_*_lo arrays left to _FillValue
+              print("For "+names(ee)+", 1 or less (normalized) pjetins value less than -1 standard deviation found, setting pjetins spatial composites to missing")   ; sc_*_lo arrays left to _FillValue
            else           
               do gg = 0,23
                  tt = gg/12.
@@ -635,31 +593,31 @@ begin
            end if
            delete(lowyr)
            
-           n34sc_psl = sc_psl_hi
-           n34sc_psl = (/ sc_psl_hi - sc_psl_lo /)
-           n34sc_sst = sc_sst_hi
-           n34sc_sst = (/ sc_sst_hi - sc_sst_lo /)
-           n34sc_tas = sc_tas_hi
-           n34sc_tas = (/ sc_tas_hi - sc_tas_lo /)
+           pjetinssc_psl = sc_psl_hi
+           pjetinssc_psl = (/ sc_psl_hi - sc_psl_lo /)
+           pjetinssc_sst = sc_sst_hi
+           pjetinssc_sst = (/ sc_sst_hi - sc_sst_lo /)
+           pjetinssc_tas = sc_tas_hi
+           pjetinssc_tas = (/ sc_tas_hi - sc_tas_lo /)
            delete([/sc_psl_hi,sc_psl_lo,sc_sst_hi,sc_sst_lo,sc_tas_hi,sc_tas_lo/])
-           delete(sst&time)
-           sst&time = TIME    
+           delete(psl&time)
+           psl&time = TIME    
            delete(TIME)       
                       
            if (OUTPUT_DATA.eq."True") then
-              n34sc_sst&lat@standard_name = "latitude"
-              n34sc_sst&lon@standard_name = "longitude"
-              z->nino34_spacomp_sst_jja0 = set_varAtts(n34sc_sst(6,:,:),"nino3.4 sst spatial composite (JJA+0)","","")
-              z->nino34_spacomp_sst_son0 = set_varAtts(n34sc_sst(9,:,:),"nino3.4 sst spatial composite (SON+0)","","")
-              z->nino34_spacomp_sst_djf1 = set_varAtts(n34sc_sst(12,:,:),"nino3.4 sst spatial composite (DJF+1)","","")
-              z->nino34_spacomp_sst_mam1 = set_varAtts(n34sc_sst(15,:,:),"nino3.4 sst spatial composite (MAM+1)","","")
+              pjetinssc_psl&lat@standard_name = "latitude"
+              pjetinssc_psl&lon@standard_name = "longitude"
+              z->pjetins_spacomp_psl_jja0 = set_varAtts(pjetinssc_psl(6,:,:),"pjetins psl spatial composite (JJA+0)","","")
+              z->pjetins_spacomp_psl_son0 = set_varAtts(pjetinssc_psl(9,:,:),"pjetins psl spatial composite (SON+0)","","")
+              z->pjetins_spacomp_psl_djf1 = set_varAtts(pjetinssc_psl(12,:,:),"pjetins psl spatial composite (DJF+1)","","")
+              z->pjetins_spacomp_psl_mam1 = set_varAtts(pjetinssc_psl(15,:,:),"pjetins psl spatial composite (MAM+1)","","")
 
               modname = str_sub_str(names_trefht(ee)," ","_")
               bc = (/"/","'","(",")"/)
               do gg = 0,dimsizes(bc)-1
                  modname = str_sub_str(modname,bc(gg),"_")
               end do
-              fn = getenv("OUTDIR")+modname+".cvdp_data.psl.sst.indices.tas."+syear_trefht(ee)+"-"+eyear_trefht(ee)+".nc"
+              fn = getenv("OUTDIR")+modname+".cvdp_data.u850.u850.indices.tas."+syear_trefht(ee)+"-"+eyear_trefht(ee)+".nc"
               if (.not.isfilepresent2(fn)) then
                  z_tas = addfile(fn,"c")
                  z_tas@source = "NCAR Climate Analysis Section's Climate Variability Diagnostics Package v"+getenv("VERSION")
@@ -676,41 +634,41 @@ begin
               else
                  z_tas = addfile(fn,"w")
               end if
-              z_tas->nino34_spacomp_tas_jja0 = set_varAtts(n34sc_tas(6,:,:),"nino3.4 tas spatial composite (JJA+0)","","")   
-              z_tas->nino34_spacomp_tas_son0 = set_varAtts(n34sc_tas(9,:,:),"nino3.4 tas spatial composite (SON+0)","","") 
-              z_tas->nino34_spacomp_tas_djf1 = set_varAtts(n34sc_tas(12,:,:),"nino3.4 tas spatial composite (DJF+1)","","") 
-              z_tas->nino34_spacomp_tas_mam1 = set_varAtts(n34sc_tas(15,:,:),"nino3.4 tas spatial composite (MAM+1)","","") 
+              z_tas->pjetins_spacomp_tas_jja0 = set_varAtts(pjetinssc_tas(6,:,:),"pjetins tas spatial composite (JJA+0)","","")   
+              z_tas->pjetins_spacomp_tas_son0 = set_varAtts(pjetinssc_tas(9,:,:),"pjetins tas spatial composite (SON+0)","","") 
+              z_tas->pjetins_spacomp_tas_djf1 = set_varAtts(pjetinssc_tas(12,:,:),"pjetins tas spatial composite (DJF+1)","","") 
+              z_tas->pjetins_spacomp_tas_mam1 = set_varAtts(pjetinssc_tas(15,:,:),"pjetins tas spatial composite (MAM+1)","","") 
               delete(z_tas)
               delete(modname)
               
-              modname = str_sub_str(names_psl(ee)," ","_")
+              modname = str_sub_str(names_ts(ee)," ","_")
               bc = (/"/","'","(",")"/)
               do gg = 0,dimsizes(bc)-1
                  modname = str_sub_str(modname,bc(gg),"_")
               end do
-              fn = getenv("OUTDIR")+modname+".cvdp_data.sst.indices.psl."+syear_trefht(ee)+"-"+eyear_trefht(ee)+".nc"
+              fn = getenv("OUTDIR")+modname+".cvdp_data.u850.indices.sst."+syear_trefht(ee)+"-"+eyear_trefht(ee)+".nc"
               if (.not.isfilepresent2(fn)) then
-                 z_psl = addfile(fn,"c")
-                 z_psl@source = "NCAR Climate Analysis Section's Climate Variability Diagnostics Package v"+getenv("VERSION")
-                 z_psl@notes = "Data from "+names_trefht(ee)+" from "+syear_trefht(ee)+"-"+eyear_trefht(ee)
+                 z_sst = addfile(fn,"c")
+                 z_sst@source = "NCAR Climate Analysis Section's Climate Variability Diagnostics Package v"+getenv("VERSION")
+                 z_sst@notes = "Data from "+names_trefht(ee)+" from "+syear_trefht(ee)+"-"+eyear_trefht(ee)
                  if (OPT_CLIMO.eq."Full") then
-                    z_psl@climatology = syear_trefht(ee)+"-"+eyear_trefht(ee)+" climatology removed prior to all calculations (other than means)"
+                    z_sst@climatology = syear_trefht(ee)+"-"+eyear_trefht(ee)+" climatology removed prior to all calculations (other than means)"
                  else
                     if (CLIMO_SYEAR.lt.0) then
-                       z_psl@climatology = (eyear(ee)+CLIMO_SYEAR)+"-"+(eyear(ee)+CLIMO_EYEAR)+" climatology removed prior to all calculations (other than means)"
+                       z_sst@climatology = (eyear(ee)+CLIMO_SYEAR)+"-"+(eyear(ee)+CLIMO_EYEAR)+" climatology removed prior to all calculations (other than means)"
                     else
-                       z_psl@climatology = CLIMO_SYEAR+"-"+CLIMO_EYEAR+" climatology removed prior to all calculations (other than means)"
+                       z_sst@climatology = CLIMO_SYEAR+"-"+CLIMO_EYEAR+" climatology removed prior to all calculations (other than means)"
                     end if
                  end if
                  z@Conventions = "CF-1.6"
               else
-                 z_psl = addfile(fn,"w")
+                 z_sst = addfile(fn,"w")
               end if
-              z_psl->nino34_spacomp_psl_jja0 = set_varAtts(n34sc_psl(6,:,:),"nino3.4 psl spatial composite (JJA+0)","","")   
-              z_psl->nino34_spacomp_psl_son0 = set_varAtts(n34sc_psl(9,:,:),"nino3.4 psl spatial composite (SON+0)","","")   
-              z_psl->nino34_spacomp_psl_djf1 = set_varAtts(n34sc_psl(12,:,:),"nino3.4 psl spatial composite (DJF+1)","","")   
-              z_psl->nino34_spacomp_psl_mam1 = set_varAtts(n34sc_psl(15,:,:),"nino3.4 psl spatial composite (MAM+1)","","")   
-              delete(z_psl)
+              z_sst->pjetins_spacomp_sst_jja0 = set_varAtts(pjetinssc_sst(6,:,:),"pjetins sst spatial composite (JJA+0)","","")   
+              z_sst->pjetins_spacomp_sst_son0 = set_varAtts(pjetinssc_sst(9,:,:),"pjetins sst spatial composite (SON+0)","","")   
+              z_sst->pjetins_spacomp_sst_djf1 = set_varAtts(pjetinssc_sst(12,:,:),"pjetins sst spatial composite (DJF+1)","","")   
+              z_sst->pjetins_spacomp_sst_mam1 = set_varAtts(pjetinssc_sst(15,:,:),"pjetins sst spatial composite (MAM+1)","","")   
+              delete(z_sst)
               delete(modname)
            end if
         end if
@@ -718,13 +676,13 @@ begin
      if (isvar("TIME")) then
         delete(TIME)
      end if
-     if (isvar("psl")) then
-        delete(psl)
+     if (isvar("sst")) then
+        delete(sst)
      end if
      if (isvar("tas")) then
         delete(tas)
      end if
-;-------------nino3.4 composite (precipitation)-----------------------------------------------------
+;-------------pjetins composite (precipitation)-----------------------------------------------------
      if (any(ismissing((/syear(ee),syear_prect(ee),eyear(ee),eyear_prect(ee)/)))) then
         pptreg_plot_flag = 1
      else
@@ -760,7 +718,7 @@ begin
          ;  d = addfile("$NCARG_ROOT/lib/ncarg/data/cdf/landsea.nc","r")     ; mask ocean for TAS array
          ;  basemap = d->LSMASK                                              ; This is now done right before plotting.
          ;  lsm = landsea_mask(basemap,tas&lat,tas&lon)                      ; so that the entire TAS array is used
-         ;  tas = mask(tas,conform(tas,lsm,(/1,2/)).eq.0,False)              ; in the nino3.4 pattern correlations
+         ;  tas = mask(tas,conform(tas,lsm,(/1,2/)).eq.0,False)              ; in the pjetins pattern correlations
          ;  delete([/lsm,basemap/])                                          ; (Even if the land portion of TAS is the
          ;  delete(d)                                                        ; only portion plotted as SST shown over oceans.)
 
@@ -785,17 +743,17 @@ begin
         
            hicntr = 0
            locntr = 0
-           hiyr = new(dimsizes(nino34_ndj&time),integer)
+           hiyr = new(dimsizes(pjetins_jja&time),integer)
            loyr = hiyr
 
-           do hh = 0,dimsizes(nino34_ndj)-1
-              if (.not.ismissing(nino34_ndj(hh))) then
-                 if (nino34_ndj(hh).ge.1) then
-                    hiyr(hicntr) = nino34_ndj&time(hh)
+           do hh = 0,dimsizes(pjetins_jja)-1
+              if (.not.ismissing(pjetins_jja(hh))) then
+                 if (pjetins_jja(hh).ge.1) then
+                    hiyr(hicntr) = pjetins_jja&time(hh)
                     hicntr = hicntr+1
                  end if
-                 if (nino34_ndj(hh).le.-1) then
-                    loyr(locntr) = nino34_ndj&time(hh)
+                 if (pjetins_jja(hh).le.-1) then
+                    loyr(locntr) = pjetins_jja&time(hh)
                     locntr = locntr+1
                  end if
               end if
@@ -828,7 +786,7 @@ begin
            sc_ppt_lo = sc_ppt_lo@_FillValue
            
            if (dimsizes(highyr).le.1) then
-              print("For "+names(ee)+", 1 or less (normalized) nino3.4 value greater than one standard deviation found, setting nino3.4 spatial composites to missing")  ; sc_*_hi arrays left to _FillValue
+              print("For "+names(ee)+", 1 or less (normalized) pjetins value greater than one standard deviation found, setting pjetins spatial composites to missing")  ; sc_*_hi arrays left to _FillValue
            else           
               do gg = 0,23
                  tt = gg/12.
@@ -838,7 +796,7 @@ begin
            end if
            delete(highyr)
            if (dimsizes(lowyr).le.1) then
-              print("For "+names(ee)+", 1 or less (normalized) nino3.4 value less than -1 standard deviation found, setting nino3.4 spatial composites to missing")   ; sc_*_lo arrays left to _FillValue
+              print("For "+names(ee)+", 1 or less (normalized) pjetins value less than -1 standard deviation found, setting pjetins spatial composites to missing")   ; sc_*_lo arrays left to _FillValue
            else           
               do gg = 0,23
                  tt = gg/12.
@@ -848,8 +806,8 @@ begin
            end if
            delete(lowyr)
            
-           n34sc_ppt = sc_ppt_hi
-           n34sc_ppt = (/ sc_ppt_hi - sc_ppt_lo /)
+           pjetinssc_ppt = sc_ppt_hi
+           pjetinssc_ppt = (/ sc_ppt_hi - sc_ppt_lo /)
            delete([/sc_ppt_hi,sc_ppt_lo/])     
                       
            if (OUTPUT_DATA.eq."True") then
@@ -858,7 +816,7 @@ begin
               do gg = 0,dimsizes(bc)-1
                  modname = str_sub_str(modname,bc(gg),"_")
               end do
-              fn = getenv("OUTDIR")+modname+".cvdp_data.sst.indices.ppt."+syear_trefht(ee)+"-"+eyear_trefht(ee)+".nc"
+              fn = getenv("OUTDIR")+modname+".cvdp_data.u850.indices.ppt."+syear_trefht(ee)+"-"+eyear_trefht(ee)+".nc"
               if (.not.isfilepresent2(fn)) then
                  z_ppt = addfile(fn,"c")
                  z_ppt@source = "NCAR Climate Analysis Section's Climate Variability Diagnostics Package v"+getenv("VERSION")
@@ -876,10 +834,10 @@ begin
               else
                  z_ppt = addfile(fn,"w")
               end if
-              z_ppt->nino34_spacomp_pr_jja0 = set_varAtts(n34sc_ppt(6,:,:),"nino3.4 pr spatial composite (JJA+0)","","")      
-              z_ppt->nino34_spacomp_pr_son0 = set_varAtts(n34sc_ppt(9,:,:),"nino3.4 pr spatial composite (SON+0)","","")
-              z_ppt->nino34_spacomp_pr_djf1 = set_varAtts(n34sc_ppt(12,:,:),"nino3.4 pr spatial composite (DJF+1)","","")
-              z_ppt->nino34_spacomp_pr_mam1 = set_varAtts(n34sc_ppt(15,:,:),"nino3.4 pr spatial composite (MAM+1)","","")
+              z_ppt->pjetins_spacomp_pr_jja0 = set_varAtts(pjetinssc_ppt(6,:,:),"pjetins pr spatial composite (JJA+0)","","")      
+              z_ppt->pjetins_spacomp_pr_son0 = set_varAtts(pjetinssc_ppt(9,:,:),"pjetins pr spatial composite (SON+0)","","")
+              z_ppt->pjetins_spacomp_pr_djf1 = set_varAtts(pjetinssc_ppt(12,:,:),"pjetins pr spatial composite (DJF+1)","","")
+              z_ppt->pjetins_spacomp_pr_mam1 = set_varAtts(pjetinssc_ppt(15,:,:),"pjetins pr spatial composite (MAM+1)","","")
               delete(z_ppt)
               delete(modname)
            end if
@@ -891,49 +849,49 @@ begin
      if (isvar("ppt")) then
         delete(ppt)
      end if
-     delete([/sst,nino34_ndj/])
+     delete([/psl,pjetins_jja/])
 ;-----------------------------------------------------------------------------------------     
-     if (nyr(ee).ge.20) then    ; need a minimum number of years to compute running nino3.4 standard deviations
-        nino34T = dtrend_msg(ispan(0,dimsizes(nino34T)-1,1),nino34T,True,False)
-        nino34T!0 = "time"
-        nino34T&time = nino34&time
-        sd_run = nino34T
+     if (nyr(ee).ge.20) then    ; need a minimum number of years to compute running pjetins standard deviations
+        pjetinsT = dtrend_msg(ispan(0,dimsizes(pjetinsT)-1,1),pjetinsT,True,False)
+        pjetinsT!0 = "time"
+        pjetinsT&time = pjetins&time
+        sd_run = pjetinsT
         sd_run = sd_run@_FillValue
-        sd_run@units = nino34@units
-        sd_run@long_name = "nino3.4 15yr running standard deviation"
-        do gg = 90,dimsizes(nino34T)-90
-           sd_run(gg) = (/ dim_stddev(nino34T(gg-90:gg+89)) /)
+        sd_run@units = pjetins@units
+        sd_run@long_name = "pjetins 15yr running standard deviation"
+        do gg = 90,dimsizes(pjetinsT)-90
+           sd_run(gg) = (/ dim_stddev(pjetinsT(gg-90:gg+89)) /)
         end do
         if (OUTPUT_DATA.eq."True") then
-           z->nino34_runstddev = set_varAtts(sd_run,"","","")
+           z->pjetins_runstddev = set_varAtts(sd_run,"","","")
         end if
      end if
-     delete(nino34T)
+     delete(pjetinsT)
 ;-----------------------------------------------------------------------------------------
-     iopt = 0                ; nino3.4 power spectra
+     iopt = 0                ; pjetins power spectra
      jave = (7*nyr(ee))/100
      val1 = .95
      val2 = .99
      pct = 0.1 
-     spectra_mvf = False        ; missing value flag for nino3.4
-     if (any(ismissing(nino34))) then     ; check for missing data                                                            
-        print("Missing data detected for "+names(ee)+", not creating spectra in sst.indices.ncl") 
+     spectra_mvf = False        ; missing value flag for pjetins
+     if (any(ismissing(pjetins))) then     ; check for missing data                                                            
+        print("Missing data detected for "+names(ee)+", not creating spectra in u850.indices.ncl") 
         spectra_mvf = True
         if (isfilepresent2("obs_ts").and.ee.eq.0) then
            spectra_mvf_obs = True
         end if
      else
         if (isfilepresent2("obs_ts").and.ee.eq.0) then
-           spectra_mvf_obs = False   ; missing value flag for obs nino3.4
+           spectra_mvf_obs = False   ; missing value flag for obs pjetins
         end if
-        nino34_dt = dtrend_msg(ispan(0,dimsizes(nino34)-1,1),nino34,True,False) 
+        pjetins_dt = dtrend_msg(ispan(0,dimsizes(pjetins)-1,1),pjetins,True,False) 
     
-        sdof = specx_anal(nino34_dt,iopt,jave,pct)
+        sdof = specx_anal(pjetins_dt,iopt,jave,pct)
         mval = sum(1/(1.+((sdof@xlag1)^2)-((2*sdof@xlag1)*cos(6.28318*sdof@frq))))
         if (mval.eq.0) then ; check for cyclic data that results in sum of Markov elements = 0.
            spectra_mvf = True
            if (isfilepresent2("obs_ts").and.ee.eq.0) then
-              spectra_mvf_obs = True   ; missing value flag for obs nino3.4
+              spectra_mvf_obs = True   ; missing value flag for obs pjetins
            end if
         else
            splt1 = specx_ci(sdof,val1,val2)
@@ -947,24 +905,24 @@ begin
               splt1&frequency@long_name = "power spectra frequency"
               splt1&frequency@units = "1"
               splt1@units_info = "df refers to frequency interval"
-              splt1@units = "C^2/df"
+              splt1@units = "hPa^2/df"
               splt1@comment_cvdp = "(0,:)=spectrum,(1,:)=Markov red noise spectrum, (2,:)="+val1+"% confidence bound for Markhov, (3,:)="+val2+"% confidence bound for Markhov"
-              z->nino34_spectra = set_varAtts(splt1,"nino3.4 power spectra","","")
+              z->pjetins_spectra = set_varAtts(splt1,"pjetins power spectra","","")
            end if
            if (isfilepresent2("obs_ts").and.ee.eq.0) then
               sdof_obs = sdof
            end if
         end if
-        delete([/nino34_dt,iopt,jave,pct,mval/])
+        delete([/pjetins_dt,iopt,jave,pct,mval/])
      end if
 ;------------------------------------------------------------------------------------------
-     nino34_dt = dtrend_msg(ispan(0,dimsizes(nino34&time)-1,1),nino34,True,False)
-     nino34_mon_sd = new(12,typeof(nino34))
+     pjetins_dt = dtrend_msg(ispan(0,dimsizes(pjetins&time)-1,1),pjetins,True,False)
+     pjetins_mon_sd = new(12,typeof(pjetins))
      
      do hh = 0,11
-        nino34_mon_sd(hh) = (/ dim_stddev(nino34_dt(hh::12)) /)
+        pjetins_mon_sd(hh) = (/ dim_stddev(pjetins_dt(hh::12)) /)
      end do
-     nino34_mon_sd@units = "C"
+     pjetins_mon_sd@units = "C"
      if (OUTPUT_DATA.eq."True") then
         time_mon2 = ispan(0,11,1)
         time_mon2@units = "months since 0000-01-01 00:00:00"
@@ -973,16 +931,16 @@ begin
         time_mon2@calendar = "standard"
         time_mon2!0 = "time_mon2"
         time_mon2&time_mon2 = time_mon2
-        nino34_mon_sd!0 = "time_mon2"
-        nino34_mon_sd&time_mon2 = time_mon2
-        z->nino34_monthly_stddev = set_varAtts(nino34_mon_sd,"nino3.4 monthly standard deviation","","")
+        pjetins_mon_sd!0 = "time_mon2"
+        pjetins_mon_sd&time_mon2 = time_mon2
+        z->pjetins_monthly_stddev = set_varAtts(pjetins_mon_sd,"pjetins monthly standard deviation","","")
         delete(time_mon2)
      end if
 ;------------------------------------------------------------------------------------------
-;    nino3.4 wavelet analysis, autocorrelation
+;    pjetins wavelet analysis, autocorrelation
 
      if (spectra_mvf.eq.False) then
-        N    = dimsizes(nino34)       
+        N       = dimsizes(pjetins)       
         mother  = 0
         param   = 6.0
         dt      = 1./12.            
@@ -994,7 +952,7 @@ begin
         noise   = 1 
         siglvl  = .05
         isigtest= 0
-        wave34 = wavelet(nino34,mother,dt,param,s0,dj,jtot,npad,noise,isigtest,siglvl,nadof)
+        wave34 = wavelet(pjetins,mother,dt,param,s0,dj,jtot,npad,noise,isigtest,siglvl,nadof)
 
         power34            = onedtond(wave34@power,(/jtot,N/))
         power34!0          = "period"                    
@@ -1002,8 +960,8 @@ begin
         power34&period@long_name = "wavelet period"
         power34&period@units = "1"
         power34!1          = "time"                     
-        power34&time       = nino34&time
-        power34@units      = nino34@units+"^2"
+        power34&time       = pjetins&time
+        power34@units      = pjetins@units+"^2"
 
         sig34              = power34                       
         sig34              = power34/conform (power34,wave34@signif,0)
@@ -1011,7 +969,7 @@ begin
         sig34@units        = ""
         delete([/N,mother,param,dt,s0,dj,jtot,npad,nadof,noise,siglvl,isigtest/])
 
-        ac34 = esacr(nino34_dt,48)
+        ac34 = esacr(pjetins_dt,48)
         time_mon3 = ispan(0,48,1)
         time_mon3@units = "months since 0000-01-01 00:00:00"
         time_mon3@long_name = "Time"
@@ -1023,15 +981,15 @@ begin
         ac34&time_mon3 = time_mon3
         ac34@units = "1"
         if (OUTPUT_DATA.eq."True") then
-           z->nino34_wavelet_power = set_varAtts(power34,"nino3.4 wavelet power","","")
-           z->nino34_wavelet_significance = set_varAtts(sig34,"nino3.4 wavelet significance","","")
-           z->nino34_autocorrelation = set_varAtts(ac34,"nino3.4 autocorrelation","","")
+           z->pjetins_wavelet_power = set_varAtts(power34,"pjetins wavelet power","","")
+           z->pjetins_wavelet_significance = set_varAtts(sig34,"pjetins wavelet significance","","")
+           z->pjetins_autocorrelation = set_varAtts(ac34,"pjetins autocorrelation","","")
         end if
         if (isfilepresent2("obs_ts").and.ee.eq.0) then
            ac34_obs = ac34
         end if
      end if
-     delete(nino34_dt)    
+     delete(pjetins_dt)    
      if (isvar("z")) then
         delete(z)
      end if
@@ -1041,25 +999,33 @@ begin
      xyres@gsnFrame = False
      xyres@gsnRightString = ""
      xyres@gsnLeftString = ""
-     xyres@xyLineColor = "Black" ;"gray62"
+     xyres@gsnYRefLine      := 0.0
+     xyres@gsnYRefLineColor := "gray42"
+     xyres@xyLineColor := "Black" ;"gray62"
      if (wks_type.eq."png") then
-        xyres@xyLineThicknessF = .75  * 3.0 
+        xyres@xyLineThicknessF := .75  * 3.0 
      else
-        xyres@xyLineThicknessF = .5   * 3.0
+        xyres@xyLineThicknessF := .5   * 3.0
      end if   
-     xyres@tiYAxisString = ""
+     xyres@tiYAxisString   = ""
+     xyres@tiXAxisString  = "Time"      ; add an axis title
+
      if (nsim.le.5) then
         xyres@tmXBLabelFontHeightF = 0.0125
         xyres@tmYLLabelFontHeightF = 0.0125
         xyres@gsnLeftStringFontHeightF = 0.017
         xyres@gsnCenterStringFontHeightF = 0.017
         xyres@gsnRightStringFontHeightF = 0.013         
+        xyres@tiXAxisFontHeightF = 0.013
+        xyres@tiYAxisFontHeightF = 0.013
      else
         xyres@tmXBLabelFontHeightF = 0.018
         xyres@tmYLLabelFontHeightF = 0.018
         xyres@gsnLeftStringFontHeightF = 0.024
         xyres@gsnCenterStringFontHeightF = 0.024
         xyres@gsnRightStringFontHeightF = 0.020    
+        xyres@tiXAxisFontHeightF = 0.018
+        xyres@tiYAxisFontHeightF = 0.018
      end if
 ;     xyres@vpXF = 0.05
      xyres@vpHeightF = 0.3
@@ -1077,11 +1043,6 @@ begin
      xyres@gsnCenterStringOrthogonalPosF = xyres@gsnLeftStringOrthogonalPosF
      xyres@gsnRightStringOrthogonalPosF = xyres@gsnLeftStringOrthogonalPosF
 
-     xyres5 = xyres 
-
-     xyres@gsnYRefLine      = 0.0
-     xyres@gsnYRefLineColor = "gray42"
-     
      xyres2 = xyres
      xyres2@vpHeightF = 0.15
      xyres2@gsnXYBarChart = False
@@ -1098,7 +1059,7 @@ begin
      xyres2@gsnYRefLine = (/.3,.6,0.9,1.2,1.5,1.8/)
      xyres2@gsnYRefLineColor = "gray85"
      
-     xyres3 = xyres            ; resource list for monthly nino3.4 standard deviations
+     xyres3 = xyres            ; resource list for monthly pjetins standard deviations
      xyres3@trXMinF = 0.5
      xyres3@trXMaxF = 12.5
      xyres3@vpWidthF = 0.65
@@ -1119,7 +1080,7 @@ begin
      xyres3@tmXBLabels = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
      xyres3@tmXTOn = False
      
-     xyres4 = xyres      ; resource list for nino3.4 autocorrelations
+     xyres4 = xyres      ; resource list for pjetins autocorrelations
      xyres4@trXMinF = 0.0
      xyres4@trXMaxF = 48.0
      xyres4@trYMinF = -1.05
@@ -1158,12 +1119,13 @@ begin
      xyres4@gsnRightStringParallelPosF = 0.96
      xyres4@gsnCenterStringOrthogonalPosF = 0.025
 
-     xyres5@gsnYRefLine            = (/-0.5,0,0.5/) ; create a reference line   
-     xyres5@gsnBelowYRefLineColor  = (/ "blue", "transparent", "transparent"/)
-     xyres5@gsnAboveYRefLineColor  = (/ "transparent", "transparent", "red"/)
-     xyres5@gsnYRefLineColors      = (/ "blue", "transparent", "red"/)
-     xyres5@gsnYRefLineThicknesses = (/1.0,1.0,1.0/)
-     xyres5@gsnYRefLineDashPatterns= (/2,2,2/)
+     xyres5 = xyres
+     xyres5@gsnYRefLine             := (/-0.5,0,0.5/) ; create a reference line   
+     xyres5@gsnBelowYRefLineColor   := (/ "blue", "transparent", "transparent"/)
+     xyres5@gsnAboveYRefLineColor   := (/ "transparent", "transparent", "red"/)
+     xyres5@gsnYRefLineColors       := (/ "blue", "transparent", "red"/)
+     xyres5@gsnYRefLineThicknesses  := (/1.0,1.0,1.0/)
+     xyres5@gsnYRefLineDashPatterns := (/2,2,2/)
 
      gsLine = True 
      gsLine@gsLineThicknessF  = 2.0
@@ -1181,174 +1143,191 @@ begin
      txre1 = txres
      txre1@txFontColor      = "blue"
 
+     xyres6 = xyres
+     xyres6@xyLineColors      := (/"gray62","blue","red"/)  ; line colors
+     if (wks_type.eq."png") then
+       xyres6@xyLineThicknesses := (/1,3,2/)*2.0  ; line thicknesses
+     else
+       xyres6@xyLineThicknesses := (/1,3,2/)      ; line thicknesses
+     end if 
+     xyres6@xyDashPatterns    := (/0,0,2/)        ; line patterns
+
+     xyres7 = xyres
+     xyres7@gsnXYFillColors = "LightBlue"
+     xyres7@xyLineColor     = -1    
+
      xyres@gsnLeftString = names(ee)
      xyres5@gsnLeftString = names(ee)
+     xyres6@gsnLeftString = names(ee)
 
-     arr = new((/2,dimsizes(nino34)/),typeof(nino34))
+     arr = new((/3,dimsizes(pjetins)/),typeof(pjetins))
    
-     tttt = dtrend_msg(ispan(0,dimsizes(nino34)-1,1),nino34,False,True)
-     arr(0,:) = (/ nino34 /)
-     arr(1,:) = (/  (ispan(0,dimsizes(nino34)-1,1)*tttt@slope)+tttt@y_intercept /)
-     xyres@gsnRightString = "trend: "+ decimalPlaces(tttt@slope*dimsizes(nino34),2,True)+nino34@units+" "+nyr(ee)+"yr~S~-1~N~"
-     xyn34(ee) = gsn_csm_xy(wks_n34,fspan(syear(ee),eyear(ee)+.91667,dimsizes(nino34)),arr,xyres) 
+     tttt = dtrend_msg(ispan(0,dimsizes(pjetind)-1,1),pjetind,False,True)
+     arr(0,:) = (/ pjetind /)
+     arr(1,:) = (/ runave_n(pjetind, 11, 0, 0) /)
+     arr(2,:) = (/ (ispan(0,dimsizes(pjetind)-1,1)*tttt@slope)+tttt@y_intercept /)
+     xyres6@tiYAxisString  = ""      ; add an axis title
+     xyres6@tiXAxisString  = "Time"      ; add an axis title
+     xyres6@gsnRightString = "trend: "+ decimalPlaces(tttt@slope*dimsizes(pjetind),2,True)+pjetind@units+" "+nyr(ee)+"yr~S~-1~N~"
+     xypjetind(ee) = gsn_csm_xy(wks_pjetind,fspan(syear(ee),eyear(ee)+.91667,dimsizes(pjetind)),arr,xyres6) 
      delete(tttt)
  
-     tttt = dtrend_msg(ispan(0,dimsizes(nino3)-1,1),nino3,False,True)
-     arr(0,:) = (/ nino3 /)
-     arr(1,:) = (/  (ispan(0,dimsizes(nino3)-1,1)*tttt@slope)+tttt@y_intercept /)
-     xyres@gsnRightString = "trend: "+ decimalPlaces(tttt@slope*dimsizes(nino3),2,True)+nino3@units+" "+nyr(ee)+"yr~S~-1~N~"
-     xyn3(ee) = gsn_csm_xy(wks_n3,fspan(syear(ee),eyear(ee)+.91667,dimsizes(nino3)),arr,xyres) 
+     tttt = dtrend_msg(ispan(0,dimsizes(pjetins)-1,1),pjetins,False,True)
+     arr(0,:) = (/ pjetins /)
+     arr(1,:) = (/ runave_n(pjetins, 11, 0, 0) /)
+     arr(2,:) = (/ (ispan(0,dimsizes(pjetins)-1,1)*tttt@slope)+tttt@y_intercept /)
+     xyres6@tiYAxisString  = pjetins@units      ; add an axis title
+     xyres6@tiXAxisString  = "Time"      ; add an axis title
+     xyres6@gsnRightString = "trend: "+ decimalPlaces(tttt@slope*dimsizes(pjetins),2,True)+pjetins@units+" "+nyr(ee)+"yr~S~-1~N~"
+     xyn3(ee) = gsn_csm_xy(wks_pjetins,fspan(syear(ee),eyear(ee)+.91667,dimsizes(pjetins)),arr,xyres6) 
      delete(tttt)
      
-     tttt = dtrend_msg(ispan(0,dimsizes(nino4)-1,1),nino4,False,True)
-     arr(0,:) = (/ nino4 /)
-     arr(1,:) = (/  (ispan(0,dimsizes(nino4)-1,1)*tttt@slope)+tttt@y_intercept /)
-     xyres@gsnRightString = "trend: "+ decimalPlaces(tttt@slope*dimsizes(nino4),2,True)+nino4@units+" "+nyr(ee)+"yr~S~-1~N~"
-     xyn4(ee) = gsn_csm_xy(wks_n4,fspan(syear(ee),eyear(ee)+.91667,dimsizes(nino4)),arr,xyres)
+     tttt = dtrend_msg(ispan(0,dimsizes(pjetloc)-1,1),pjetloc,False,True)
+     arr(0,:) = (/ pjetloc /)
+     arr(1,:) = (/ runave_n(pjetloc, 11, 0, 0) /)
+     arr(2,:) = (/ (ispan(0,dimsizes(pjetloc)-1,1)*tttt@slope)+tttt@y_intercept /)
+     xyres6@tiYAxisString  = pjetloc@units      ; add an axis title
+     xyres6@tiXAxisString  = "Time"      ; add an axis title
+     xyres6@gsnRightString = "trend: "+ decimalPlaces(tttt@slope*dimsizes(pjetloc),2,True)+pjetloc@units+" "+nyr(ee)+"yr~S~-1~N~"
+     xyn4(ee) = gsn_csm_xy(wks_pjetins,fspan(syear(ee),eyear(ee)+.91667,dimsizes(pjetloc)),arr,xyres6)
      delete(tttt)
-     
-     tttt = dtrend_msg(ispan(0,dimsizes(nino12)-1,1),nino12,False,True)
-     arr(0,:) = (/ nino12 /)
-     arr(1,:) = (/  (ispan(0,dimsizes(nino12)-1,1)*tttt@slope)+tttt@y_intercept /)
-     xyres@gsnRightString = "trend: "+ decimalPlaces(tttt@slope*dimsizes(nino12),2,True)+nino12@units+" "+nyr(ee)+"yr~S~-1~N~"
-     xyn12(ee) = gsn_csm_xy(wks_n12,fspan(syear(ee),eyear(ee)+.91667,dimsizes(nino12)),arr,xyres)
-     delete(tttt)
-     
-     tttt = dtrend_msg(ispan(0,dimsizes(tna)-1,1),tna,False,True)
-     arr(0,:) = (/ tna /)
-     arr(1,:) = (/  (ispan(0,dimsizes(tna)-1,1)*tttt@slope)+tttt@y_intercept /)
-     xyres@gsnRightString = "trend: "+ decimalPlaces(tttt@slope*dimsizes(tna),2,True)+tna@units+" "+nyr(ee)+"yr~S~-1~N~"
-     xytna(ee) = gsn_csm_xy(wks_tna,fspan(syear(ee),eyear(ee)+.91667,dimsizes(tna)),arr,xyres)
-     delete(tttt)
-     
-     tttt = dtrend_msg(ispan(0,dimsizes(tsa)-1,1),tsa,False,True)
-     arr(0,:) = (/ tsa /)
-     arr(1,:) = (/  (ispan(0,dimsizes(tsa)-1,1)*tttt@slope)+tttt@y_intercept /)
-     xyres@gsnRightString = "trend: "+ decimalPlaces(tttt@slope*dimsizes(tsa),2,True)+tsa@units+" "+nyr(ee)+"yr~S~-1~N~"
-     xytsa(ee) = gsn_csm_xy(wks_tsa,fspan(syear(ee),eyear(ee)+.91667,dimsizes(tsa)),arr,xyres)
-     delete(tttt)
-     
-     tttt = dtrend_msg(ispan(0,dimsizes(tio)-1,1),tio,False,True)
-     arr(0,:) = (/ tio /)
-     arr(1,:) = (/  (ispan(0,dimsizes(tio)-1,1)*tttt@slope)+tttt@y_intercept /)
-     xyres@gsnRightString = "trend: "+decimalPlaces(tttt@slope*dimsizes(tio),2,True)+tio@units+" "+nyr(ee)+"yr~S~-1~N~"
-     xytio(ee) = gsn_csm_xy(wks_tio,fspan(syear(ee),eyear(ee)+.91667,dimsizes(tio)),arr,xyres)
-     delete(tttt)
-     
-     tttt = dtrend_msg(ispan(0,dimsizes(iod)-1,1),iod,False,True)
-     arr(0,:) = (/ iod /)
-     arr(1,:) = (/  (ispan(0,dimsizes(iod)-1,1)*tttt@slope)+tttt@y_intercept /)
-     xyres@gsnRightString = "trend: "+decimalPlaces(tttt@slope*dimsizes(iod),2,True)+iod@units+" "+nyr(ee)+"yr~S~-1~N~"
-     xyiod(ee) = gsn_csm_xy(wks_tio,fspan(syear(ee),eyear(ee)+.91667,dimsizes(iod)),arr,xyres)
-     delete([/tttt/])
 
-     tttt = dtrend_msg(ispan(0,dimsizes(socn)-1,1),socn,False,True)
-     arr(0,:) = (/ socn /)
-     arr(1,:) = (/  (ispan(0,dimsizes(socn)-1,1)*tttt@slope)+tttt@y_intercept /)
-     xyres@gsnRightString = "trend: "+decimalPlaces(tttt@slope*dimsizes(socn),2,True)+socn@units+" "+nyr(ee)+"yr~S~-1~N~"
-     xysocn(ee) = gsn_csm_xy(wks_tio,fspan(syear(ee),eyear(ee)+.91667,dimsizes(socn)),arr,xyres)
-     delete([/tttt/])
+     xyres61 = xyres6
+     tttt = dtrend_msg(ispan(0,dimsizes(finua_mave(0,:))-1,1),finua_mave(0,:),False,True)
+     arr(0,:) = (/ finua_mave(0,:) /)
+     arr(1,:) = (/ runave_n(finua_mave(0,:), 11, 0, 0) /)
+     arr(2,:) = (/ (ispan(0,dimsizes(finua_mave(0,:))-1,1)*tttt@slope)+tttt@y_intercept /)
+     xyres61@trYMinF = -70.0
+     xyres61@trYMaxF = -20.0 
+     xyres61@tiYAxisString  = "Latitude (degree)"      ; add an axis title
+     xyres61@tiXAxisString  = "Time"      ; add an axis title
+     xyres61@gsnRightString = "trend: "+ decimalPlaces(tttt@slope*dimsizes(finua_mave(0,:)),2,True)+finua_mave@units+" "+nyr(ee)+"yr~S~-1~N~"
+     xyn5(ee) = gsn_csm_xy(wks_pjetins,fspan(syear(ee),eyear(ee)+.91667,dimsizes(finua_mave(0,:))),arr,xyres61)
+     if(.not.isvar("xdum")) then
+        xdum = new(1000,graphic)
+     end if
+     xyres7@trYMinF = min(finua_mave(:,:))
+     xyres7@trYMaxF = max(finua_mave(:,:))
+     xdum(ee) = gsn_csm_xy(wks_pjetins,fspan(syear(ee),eyear(ee)+.91667,dimsizes(finua_mave(0,:))),finua_mave(1:2,:),xyres7)
+     overlay(xyn5(ee),xdum(ee))
+     delete([/tttt,xyres61/])
 
-     tttt = dtrend_msg(ispan(0,dimsizes(amm)-1,1),amm,False,True)
-     arr(0,:) = (/ amm /)
-     arr(1,:) = (/  (ispan(0,dimsizes(amm)-1,1)*tttt@slope)+tttt@y_intercept /)
-     xyres@gsnRightString = "trend: "+decimalPlaces(tttt@slope*dimsizes(amm),2,True)+amm@units+" "+nyr(ee)+"yr~S~-1~N~"
-     xyamm(ee) = gsn_csm_xy(wks_tio,fspan(syear(ee),eyear(ee)+.91667,dimsizes(amm)),arr,xyres)
-     delete([/tttt/])
-
-     tttt = dtrend_msg(ispan(0,dimsizes(atl3)-1,1),atl3,False,True)
-     arr(0,:) = (/ atl3 /)
-     arr(1,:) = (/  (ispan(0,dimsizes(atl3)-1,1)*tttt@slope)+tttt@y_intercept /)
-     xyres@gsnRightString = "trend: "+decimalPlaces(tttt@slope*dimsizes(atl3),2,True)+atl3@units+" "+nyr(ee)+"yr~S~-1~N~"
-     xyatl3(ee) = gsn_csm_xy(wks_tio,fspan(syear(ee),eyear(ee)+.91667,dimsizes(atl3)),arr,xyres)
-     delete([/tttt/])
+     xyres62 = xyres6
+     tttt = avg(finua_tave(0,:))
+     arr(0,:) = (/ finua_tave(0,:) /)
+     arr(1,:) = (/ runave_n(finua_tave(0,:), 11, 0, 0) /)
+     arr(2,:) = (/ tttt/)
+     xyres62@trYMinF = -70.0 
+     xyres62@trYMaxF = -20.0 
+     xyres62@trXMinF = tofloat(min(finua_tave&lon))
+     xyres62@trXMaxF = tofloat(max(finua_tave&lon))
+     xyres62@tiYAxisString  = "Latitude (degree)"      ; add an axis title    
+     xyres62@tiXAxisString  = "Longitude (degree)"      ; add an axis title
+     xyres62@gsnRightString = "mean: "+ decimalPlaces(tttt,2,True)+finua_mave@units
+     xyn6(ee) = gsn_csm_xy(wks_pjetins,finua_tave&lon,arr,xyres62)
+     if(.not.isvar("xdum")) then
+        xdum = new(1000,graphic)
+     end if
+     xyres7@trYMinF = min(finua_tave(:,:))
+     xyres7@trYMaxF = max(finua_tave(:,:))
+     xdum(100+ee) = gsn_csm_xy(wks_pjetins,finua_tave&lon,finua_tave(1:2,:),xyres7)
+     overlay(xyn6(ee),xdum(100+ee))
+     delete([/tttt,xyres62/])
 
      ;*********************************
-     ;plot the oni index (also mark Elnino and Lanino events)
+     ;plot the sam index (also mark positive and negative events) 
      ;*********************************
-     ;ElStr = ind(oni.ge. 2.0)
-     ;ElMod = ind(oni.gt. 1.0 .and. oni.lt. 2.0)
-     ;LaMod = ind(oni.gt.-2.0 .and. oni.lt.-1.0)
-     ;LaStr = ind(oni.le.-2.0)
+     ;ElStr = ind(pjetind.ge. 2.0)
+     ;ElMod = ind(pjetind.gt. 1.0 .and. pjetind.lt. 2.0)
+     ;LaMod = ind(pjetind.gt.-2.0 .and. pjetind.lt.-1.0)
+     ;LaStr = ind(pjetind.le.-2.0)
      ;yyyymm = yyyymm_time(syear(ee),eyear(ee), "integer")
      ;yrfrac = yyyymm_to_yyyyfrac(yyyymm, 0.0)   ; used for graphics
-     ;print("El Nino:   Strong: "+ElStr+"  "+sprintf("%7.2f", yrfrac(ElStr))+"   "+yyyymm(ElStr)+"  "+oni(ElStr))
+     ;print("Polar Jet (+):   Strong: "+ElStr+"  "+sprintf("%7.2f", yrfrac(ElStr))+"   "+yyyymm(ElStr)+"  "+pjetind(ElStr))
      ;print("---")
-     ;print("El Nino: Moderate: "+ElMod+"  "+sprintf("%7.2f", yrfrac(ElMod))+"   "+yyyymm(ElMod)+"  "+oni(ElMod))
+     ;print("Polar Jet (+): Moderate: "+ElMod+"  "+sprintf("%7.2f", yrfrac(ElMod))+"   "+yyyymm(ElMod)+"  "+pjetind(ElMod))
      ;print("---")
-     ;print("La Nina: Moderate: "+LaMod+"  "+sprintf("%7.2f", yrfrac(LaMod))+"   "+yyyymm(LaMod)+"  "+oni(LaMod))
+     ;print("Polar Jet (-): Moderate: "+LaMod+"  "+sprintf("%7.2f", yrfrac(LaMod))+"   "+yyyymm(LaMod)+"  "+pjetind(LaMod))
      ;print("---")
-     ;print("La Nina:   Strong: "+LaStr+"  "+sprintf("%7.2f", yrfrac(LaStr))+"   "+yyyymm(LaStr)+"  "+oni(LaStr))
+     ;print("Polar Jet (-):   Strong: "+LaStr+"  "+sprintf("%7.2f", yrfrac(LaStr))+"   "+yyyymm(LaStr)+"  "+pjetind(LaStr))
      ;print("---")
-     tttt = dtrend_msg(ispan(0,dimsizes(oni)-1,1),oni,False,True)
-     arr(0,:) = (/ oni /)
-     arr(1,:) = (/  (ispan(0,dimsizes(oni)-1,1)*tttt@slope)+tttt@y_intercept /)
-     arr0     = oni 
-     arr1     = oni
-     arr2     = oni 
+     tttt = dtrend_msg(ispan(0,dimsizes(pjetind)-1,1),pjetind,False,True)
+     arr(0,:) = (/ pjetind /)
+     arr(1,:) = (/ runave_n(pjetind, 11, 0, 0) /)
+     arr(2,:) = (/ (ispan(0,dimsizes(pjetind)-1,1)*tttt@slope)+tttt@y_intercept /)
+     arr0     = pjetind 
+     arr1     = pjetind
+     arr2     = pjetind 
      arr0     =  0
      arr1     =  1 
-     arr2     = -1  
-     xyres5@gsnRightString = "trend: "+decimalPlaces(tttt@slope*dimsizes(oni),2,True)+oni@units+" "+nyr(ee)+"yr~S~-1~N~"
-     xyoni(ee) = gsn_csm_xy(wks_tio,fspan(syear(ee),eyear(ee)+.91667,dimsizes(oni)),arr(0,:),xyres5)
+     arr2     = -1
+     xyres5@trYMinF = -3.0 
+     xyres5@trYMaxF =  3.0
+     xyres5@tiYAxisString  = ""          ; add an axis title
+     xyres5@tiXAxisString  = "Time"      ; add an axis title
+     xyres5@gsnRightString = "trend: "+decimalPlaces(tttt@slope*dimsizes(pjetind),2,True)+pjetind@units+" "+nyr(ee)+"yr~S~-1~N~"
+     xyn12(ee) = gsn_csm_xy(wks_pjetins,fspan(syear(ee),eyear(ee)+.91667,dimsizes(pjetind)),arr(0,:),xyres5)
      if(.not.isvar("dum")) then 
         dum = new(1000,graphic)
      end if  
-     dum(ee)     = gsn_add_polyline(wks_tio,xyoni(ee),fspan(syear(ee),eyear(ee)+.91667,dimsizes(oni)),arr0,gsLine) 
-     dum(ee+100) = gsn_add_polyline(wks_tio,xyoni(ee),fspan(syear(ee),eyear(ee)+.91667,dimsizes(oni)),arr1,gsLin0)
-     dum(ee+200) = gsn_add_polyline(wks_tio,xyoni(ee),fspan(syear(ee),eyear(ee)+.91667,dimsizes(oni)),arr2,gsLin1)
-     dum(ee+300) = gsn_add_text(wks_tio,xyoni(ee),"El Nin~H-13V2F35~D~FV-2H3F21~o",syear(ee)+0.2, 2.50, txre0)
-     dum(ee+400) = gsn_add_text(wks_tio,xyoni(ee),"La Nin~H-13V2F35~D~FV-2H3F21~a",syear(ee)+0.2,-2.50, txre1)
+     dum(ee)     = gsn_add_polyline(wks_pjetins,xyn12(ee),fspan(syear(ee),eyear(ee)+.91667,dimsizes(pjetind)),arr0,gsLine) 
+     dum(ee+100) = gsn_add_polyline(wks_pjetins,xyn12(ee),fspan(syear(ee),eyear(ee)+.91667,dimsizes(pjetind)),arr1,gsLin0)
+     dum(ee+200) = gsn_add_polyline(wks_pjetins,xyn12(ee),fspan(syear(ee),eyear(ee)+.91667,dimsizes(pjetind)),arr2,gsLin1)
+     dum(ee+300) = gsn_add_text(wks_pjetins,xyn12(ee),"Polar Jet (+)",syear(ee)+0.2, 2.50, txre0)
+     dum(ee+400) = gsn_add_text(wks_pjetins,xyn12(ee),"Polar Jet (-)",syear(ee)+0.2,-2.50, txre1)
      delete([/xyres5,gsLine,gsLin0,gsLin1,txre0,txre1/])
      delete([/arr,tttt,arr0,arr1,arr2/])
  
      xyres2@gsnLeftString = names(ee)
      if (nyr(ee).ge.20) then
         xyres2@gsnRightString = sprintf("%4.2f", min(sd_run))+" / "+sprintf("%4.2f", avg(sd_run))+" / "+sprintf("%4.2f", max(sd_run))+sd_run@units
-        xyn34_rst(ee) = gsn_csm_xy(wks_n34_rst,fspan(syear(ee),eyear(ee)+.91667,dimsizes(sd_run)),sd_run,xyres2)
+        xypjetins_rst(ee) = gsn_csm_xy(wks_pjetins_rst,fspan(syear(ee),eyear(ee)+.91667,dimsizes(sd_run)),sd_run,xyres2)
      end if
      
      xyres3@gsnRightStringFontHeightF = xyres3@gsnCenterStringFontHeightF
      xyres3@gsnLeftString = syear(ee)+"-"+eyear(ee)
      xyres3@gsnCenterString = names(ee)
      xyres3@gsnRightString = "C"
-     if (max(nino34_mon_sd).gt.xyres3@gsnYRefLine) then
-        xyn34_mst(ee) = gsn_csm_xy(wks_n34_mst,ispan(1,12,1),nino34_mon_sd,xyres3)
+     if (max(pjetins_mon_sd).gt.xyres3@gsnYRefLine) then
+        xypjetins_mst(ee) = gsn_csm_xy(wks_pjetins_mst,ispan(1,12,1),pjetins_mon_sd,xyres3)
      end if
-     title_n34 = nino34@comment_cvdp
-     title_oni = oni@comment_cvdp
-     title_n4  = nino4@comment_cvdp
-     title_n3  = nino3@comment_cvdp
-     title_n12 = nino12@comment_cvdp
+     title_pjetins = pjetins@comment_cvdp
+     title_n6     = pjetins@comment_cvdp 
+     title_n5     = pjetins@comment_cvdp 
+     title_n4     = sam_p65S@comment_cvdp
+     title_n3     = sam_p40S@comment_cvdp
+     title_n12    = jetinsd@comment_cvdp
 
-     title_tna = tna@comment_cvdp
-     title_tsa = tsa@comment_cvdp
-        
-     title_tio  = tio@comment_cvdp
-     title_iod  = iod@comment_cvdp
-     title_socn = socn@comment_cvdp
-     title_amm  = amm@comment_cvdp
-     title_atl3 = atl3@comment_cvdp
-     delete([/nino34,nino3,nino4,nino12,tsa,tna,tio,iod,socn,amm,atl3/])
+     title_tna  = jetins@comment_cvdp
+     title_tsa  = asl_clat@comment_cvdp
+     title_tio  = asl_clon@comment_cvdp
+     title_iod  = asl_cpsl@comment_cvdp
+     title_socn = asl_rmpsl@comment_cvdp
+     title_amm  = asl_rcpsl@comment_cvdp
+
+     delete([/pjetins,sam_p40S,sam_p65S,jetinsd,jetins,asl_clat,asl_clon,asl_cpsl,asl_rmpsl,asl_rcpsl/])
 
      if (spectra_mvf.eq.False) then
         xyres4@gsnCenterString = names(ee)
         xyres4@gsnRightString = syear(ee)+"-"+eyear(ee)
-        xyn34_ac(ee) = gsn_csm_xy(wks_n34_p,ispan(0,48,1),ac34,xyres4)
+        xypjetins_ac(ee) = gsn_csm_xy(wks_pjetins_p,ispan(0,48,1),ac34,xyres4)
         if (ee.ge.1.and.isvar("ac34_obs")) then
            delete([/xyres4@gsnAboveYRefLineColor,xyres4@gsnBelowYRefLineColor/])
            xyres4@xyLineColor = "gray62"
            xyres4@xyCurveDrawOrder = "PreDraw"
            xyres4@gsnCenterString = ""
            xyres4@gsnRightString = ""
-           xyn34_ac_obs(ee) = gsn_csm_xy(wks_n34_p,ispan(0,48,1),ac34_obs,xyres4)
-           overlay(xyn34_ac(ee),xyn34_ac_obs(ee)) 
+           xypjetins_ac_obs(ee) = gsn_csm_xy(wks_pjetins_p,ispan(0,48,1),ac34_obs,xyres4)
+           overlay(xypjetins_ac(ee),xypjetins_ac_obs(ee)) 
            delete(xyres4@xyCurveDrawOrder)
            delete(ac34)
         end if
      end if
-     delete([/xyres,xyres2,xyres3,xyres4,nino34_mon_sd/])
+     delete([/xyres,xyres2,xyres3,xyres4,pjetins_mon_sd/])
 ;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+     yymm        = yyyymm_time(syear(ee), eyear(ee), "integer")
+     yyyyFrac    = yyyymm_to_yyyyfrac(yymm, 0.0)
+
      res = True
      res@vpHeightF = 0.45
      res@vpWidthF = 0.35
@@ -1361,12 +1340,22 @@ begin
 ;     res@tmYLLabels = (/"Jan~S~-2~N~","Jul~S~-2~N~","Jan~S~-1~N~","Jul~S~-1~N~", \
 ;                     "Jan~S~0~N~","Jul~S~0~N~","Jan~S~+1~N~","Jul~S~+1~N~", \
 ;                     "Jan~S~+2~N~","Jul~S~+2~N~","Jan~S~+3~N~","Jul~S~+3~N~","Jan~S~+4~N~"/)
-     res@trYMinF = 24
-     res@trYMaxF = 52  
-     res@tmYLValues = ispan(24,52,4)
-     res@tmYLLabels = (/"Jan~S~0~N~","May~S~0~N~","Sep~S~0~N~","Jan~S~+1~N~", \
-                     "May~S~+1~N~","Sep~S~+1~N~","Jan~S~+2~N~","May~S~+2~N~"/)    
-     res@tmYLMinorValues = ispan(24,52,2)               
+;     res@trYMinF = 24
+;     res@trYMaxF = 52  
+;     res@tmYLValues = ispan(24,52,4)
+;     res@tmYLLabels = (/"Jan~S~0~N~","May~S~0~N~","Sep~S~0~N~","Jan~S~+1~N~", \
+;                     "May~S~+1~N~","Sep~S~+1~N~","Jan~S~+2~N~","May~S~+2~N~"/)    
+;     res@tmYLMinorValues = ispan(24,52,2)               
+
+     ;res@trYMinF         = toint(syear(ee)+"01")
+     ;res@trYMaxF         = toint(eyear(ee)+"12") 
+     ;print(finua&time_mon1(::12))
+     ;exit
+
+     res@tmYLValues      = yyyyFrac(::60)
+     res@tmYLLabels      = yymm(::60) 
+     res@tmYLMinorValues = yyyyFrac(::12)
+
      res@tmYLLabelJust = "CenterCenter"               
      res@tmYLLabelDeltaF = 1.3    ;0.05
      res@cnFillOn = True
@@ -1379,7 +1368,7 @@ begin
      res@cnInfoLabelOn = False
      res@cnLinesOn = True
      res@cnLevelSelectionMode = "ExplicitLevels"
-     res@cnLevels = (/-3,-2.5,-2,-1.5,-1,-.75,-.5,-.25,0,.25,.5,.75,1,1.5,2,2.5,3/)   ;fspan(-2.,2.,17)
+     res@cnLevels = fspan(-70,-20,26) 
      carr = new(dimsizes(res@cnLevels),"string")
      carr = "transparent"
      carr(8) = "gray50"
@@ -1388,8 +1377,8 @@ begin
      res@cnLineLabelsOn = False
      res@tmYLLabelFontHeightF = 0.014
      res@tmXBLabelFontHeightF = 0.014
-     res@gsnMajorLonSpacing = 30.
-     res@gsnMinorLonSpacing = 10.
+     res@gsnMajorLonSpacing = 90.
+     res@gsnMinorLonSpacing = 60.
      res@tiYAxisOn = False
      
      if (wks_type.eq."png") then
@@ -1407,36 +1396,32 @@ begin
      res@gsnCenterString= ""
      res@gsnRightString = ""
 
-     if (isfilepresent2("obs_ts").and.ee.eq.0.and.isvar("finsst_hi")) then      ; for metrics table
-        patcor_hov_hi = new((/nsim,dimsizes(finsst_hi&time),dimsizes(finsst_hi&lon)/),typeof(finsst_hi))
-        patcor_hov_hi!1 = "time"
-        patcor_hov_hi&time = finsst_hi&time
-        patcor_hov_hi!2 = "lon"
-        patcor_hov_hi&lon = finsst_hi&lon
-           
-        patcor_hov_lo = patcor_hov_hi
-           
-        patcor_hov_hi(ee,:,:) = (/ finsst_hi /)
-        patcor_hov_lo(ee,:,:) = (/ finsst_lo /)
+     if (isfilepresent2("obs_ts").and.ee.eq.0.and.isvar("finua")) then      ; for metrics table
+        patcor_hov         = new((/nsim,dimsizes(finua&time),dimsizes(finua&lon)/),typeof(finua))
+        patcor_hov!1       = "time"
+        patcor_hov&time    = finua&time
+        patcor_hov!2       = "lon"
+        patcor_hov&lon     = finua&lon
+        patcor_hov(ee,:,:) = (/ finua /) 
      end if
-     if (isfilepresent2("obs_ts").and.ee.ge.1.and.isvar("patcor_hov_hi").and.isvar("finsst_hi")) then    
-        dimT = dimsizes(finsst_hi&time)
+
+     if (isfilepresent2("obs_ts").and.ee.ge.1.and.isvar("patcor_hov_hi").and.isvar("finua_mave")) then    
+        dimT = dimsizes(finua_mave&time)
         do hh = 0,dimT-1     ; need to loop over each timestep, using linint1 to interpolate to set longitudes. 
-           patcor_hov_hi(ee,hh,:) = (/ totype(linint1(finsst_hi&lon,finsst_hi(hh,:),False,patcor_hov_hi&lon,0),typeof(patcor_hov_hi)) /)
-           patcor_hov_lo(ee,hh,:) = (/ totype(linint1(finsst_lo&lon,finsst_lo(hh,:),False,patcor_hov_lo&lon,0),typeof(patcor_hov_lo)) /)
+           patcor_hov(ee,hh,:) = (/ totype(linint1(finua&lon,finua(hh,:),False,patcor_hov&lon,0),typeof(patcor_hov)) /)
         end do
      end if
 
-     if (isvar("finsst_hi")) then    
-        res@gsnCenterString = names(ee)   ;"El Nin~H-13V2F35~D~FV-2H3F21~o"
-        res@gsnRightString = cntr_hi
-        plot_n34hi(ee) = gsn_csm_hov(wks_n34_tlon_hi,finsst_hi,res)
-     
-        res@gsnRightString = cntr_lo
-        plot_n34lo(ee) = gsn_csm_hov(wks_n34_tlon_lo,finsst_lo,res)
-        delete([/finsst_hi,finsst_lo,finsst_mid/])
+     if (isvar("finua")) then    
+        res@gsnCenterString = names(ee)   ;"Polar Jet(+)"
+        res@gsnRightString  = "" ;"Polar Jet Latitude Position (Degree)"
+        delete(finua&time)
+        finua&time         = yyyyFrac
+        plot_jetlat(ee)     = gsn_csm_hov(wks_jetlat_tlon,finua,res)
+        delete([/finua/])
      end if
-     delete(res)
+     delete([/res,yymm,yyyyFrac/])
+
 ;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
      wres = True
      wres@gsnDraw = False
@@ -1459,7 +1444,7 @@ begin
      end if
      wres@tmYLLabels = wres@tmYLValues
      wres@cnLevelSelectionMode = "ExplicitLevels"
-     wres@cnLevels = ispan(0,70,5)
+     wres@cnLevels = ispan(0,40,5)
      if (COLORMAP.eq.0) then
         wres@cnFillPalette = "precip3_16lev"
      else
@@ -1518,9 +1503,9 @@ begin
         power34&time = fspan(syear(ee),eyear(ee)+.91667,nyr(ee)*12)
         delete(sig34&time)
         sig34&time = power34&time
-        plot_wave34(ee) = gsn_csm_contour(wks_n34_p,power34,wres)
-        plot_wave34(ee) = ShadeCOI(wks_n34_p,plot_wave34(ee),wave34,power34&time,wavecoi)
-        o0 = gsn_csm_contour(wks_n34_p,sig34,wsres)
+        plot_wave34(ee) = gsn_csm_contour(wks_pjetins_p,power34,wres)
+        plot_wave34(ee) = ShadeCOI(wks_pjetins_p,plot_wave34(ee),wave34,power34&time,wavecoi)
+        o0 = gsn_csm_contour(wks_pjetins_p,sig34,wsres)
         opt   = True
         opt@gsnShadeFillType = "pattern"
         opt@gsnShadeHigh     = 17
@@ -1567,7 +1552,7 @@ begin
      pres@tmXTLabelFontHeightF = 0.018
      pres@tmXBLabelFontHeightF = 0.018
      pres@tmYLLabelFontHeightF = 0.018
-     pres@tiYAxisString = "Power (~S~o~N~C~S~2~N~ / cycles mo~S~-1~N~)"              ; yaxis
+     pres@tiYAxisString = "Power (hPa~S~2~N~ / cycles mo~S~-1~N~)"              ; yaxis
      pres@tiXAxisString = "Frequency (cycles mo~S~-1~N~)"
      pres@tiMainString = ""
      pres@txFontHeightF = 0.015
@@ -1604,6 +1589,7 @@ begin
         if (mval.ge.145) then
            pres@trYMaxF = mval+15.
         end if
+        pres@trYMaxF = 100. 
         delete(mval)
      end if
      
@@ -1615,13 +1601,13 @@ begin
      pres@gsnLeftString = "" 
      pres@gsnCenterString = names(ee)
      if (spectra_mvf.eq.False) then
-        pspec(ee) = gsn_csm_xy(wks_n34_p,sdof@frq,splt1,pres) 
+        pspec(ee) = gsn_csm_xy(wks_pjetins_p,sdof@frq,splt1,pres) 
         if (isfilepresent2("obs_ts").and.ee.ge.1.and.spectra_mvf_obs.eq.False) then
            pres@xyLineColors        = (/"gray70","black","black","black"/)
            pres@xyCurveDrawOrder = "PreDraw"
            pres@gsnCenterString = ""
            pres@gsnRightString = ""
-           pspec_obs(ee) = gsn_csm_xy(wks_n34_p,sdof_obs@frq,sdof_obs@spcx,pres)
+           pspec_obs(ee) = gsn_csm_xy(wks_pjetins_p,sdof_obs@frq,sdof_obs@spcx,pres)
            overlay(pspec(ee),pspec_obs(ee)) 
            delete(pres@xyCurveDrawOrder)
         end if
@@ -1635,7 +1621,7 @@ begin
      
      scres = True    ; scres = spatial composite res
      scres@mpProjection = "WinkelTripel"
-     scres@mpGeophysicalLineColor = "gray42"
+     scres@mpGeophysicalLineColor = "black" ;"gray42"
      
      scres@mpPerimOn    = False
      scres@mpGridLatSpacingF =  90            ; change latitude  line spacing
@@ -1654,31 +1640,23 @@ begin
      scres@cnLineLabelsOn = False
      scres@cnFillOn        = True
      scres@cnLinesOn       = False
-;     scres@mpOutlineDrawOrder = "PostDraw"
-;     scres@cnFillMode = "RasterFill"
+;    scres@mpOutlineDrawOrder = "PostDraw"
+;    scres@cnFillMode = "RasterFill"
      scres@mpOutlineDrawOrder = "PostDraw"
      scres@cnFillMode = "AreaFill"   
      scres@lbLabelBarOn    = False
      scres@cnInfoLabelOn = False
      scres@gsnAddCyclic = True
      
-
      scres@gsnLeftStringOrthogonalPosF = -0.05
      scres@gsnLeftStringParallelPosF = .005
      scres@gsnRightStringOrthogonalPosF = -0.05
      scres@gsnRightStringParallelPosF = 0.96
-     if (isvar("cntr_hi")) then
-        scres@gsnRightString = cntr_hi+"/"+cntr_lo  ; list number of El Nino / La Nina events that formed composites
-        delete([/cntr_hi,cntr_lo,cntr_mid/])
-     else
-        scres@gsnRightString = ""
-     end if
+     scres@gsnRightString = ""
      scres@gsnLeftString = ""
      scres@gsnLeftStringFontHeightF = 0.014
      scres@gsnCenterStringFontHeightF = 0.018
      scres@gsnRightStringFontHeightF = 0.014
-
-
 
      scres4 = scres    ; scres4 = ppt composite resources     
      delete(scres4@cnLevels)
@@ -1712,7 +1690,7 @@ begin
      scres3@cnLevelSelectionMode = "ExplicitLevels"
      scres3@cnInfoLabelOn = False
      scres3@tiMainOn = False      
-     new_index = NhlNewDashPattern(wks_n34sc,"$_$_$_$_$_$_$_$_$_")
+     new_index = NhlNewDashPattern(wks_pjetinssc,"$_$_$_$_$_$_$_$_$_")
      scres3@gsnContourNegLineDashPattern  = new_index
      scres3@cnLineDashSegLenF = 0.08
      scres3@gsnDraw = False
@@ -1720,16 +1698,16 @@ begin
      scres3@gsnLeftString = ""
      scres3@gsnRightString = ""
      scres3@gsnCenterString = ""
-     scres3@cnLevels = ispan(-16,16,2)
+     scres3@cnLevels = ispan(-16,16,1)
 
      scres4@gsnLeftString = syear_prect(ee)+"-"+eyear_prect(ee)
      scres4@gsnCenterString = names_prect(ee)     
 
      scres@gsnLeftString = syear(ee)+"-"+eyear(ee) 
-     if (names(ee).eq.names_trefht(ee).and.names(ee).eq.names_psl(ee)) then
+     if (names(ee).eq.names_trefht(ee).and.names(ee).eq.names_ts(ee)) then
         scres@gsnCenterString = names(ee)     
      else
-        scres@gsnCenterString = names(ee)+" / "+names_trefht(ee)+" / "+names_psl(ee)
+        scres@gsnCenterString = names(ee)+" / "+names_trefht(ee)+" / "+names_ts(ee)
      end if
   
      if (wks_type.eq."png") then
@@ -1742,78 +1720,78 @@ begin
         scres4@mpGeophysicalLineThicknessF = 1.  
      end if
 
-     if (taspslreg_plot_flag.eq.0) then
+     if (tassstreg_plot_flag.eq.0) then
         if (isvar("patcor_tas")) then    ; for metrics table
-           patcor_tas(ee,:,:) = (/ totype(linint2(n34sc_tas&lon,n34sc_tas&lat,n34sc_tas(12,:,:),True,patcor_tas&lon,patcor_tas&lat,0),typeof(patcor_tas)) /)
-           patcor_psl(ee,:,:) = (/ totype(linint2(n34sc_psl&lon,n34sc_psl&lat,n34sc_psl(12,:,:),True,patcor_psl&lon,patcor_psl&lat,0),typeof(patcor_psl)) /)
+           patcor_tas(ee,:,:) = (/ totype(linint2(pjetinssc_tas&lon,pjetinssc_tas&lat,pjetinssc_tas(12,:,:),True,patcor_tas&lon,patcor_tas&lat,0),typeof(patcor_tas)) /)
+           patcor_psl(ee,:,:) = (/ totype(linint2(pjetinssc_psl&lon,pjetinssc_psl&lat,pjetinssc_psl(12,:,:),True,patcor_psl&lon,patcor_psl&lat,0),typeof(patcor_psl)) /)
         else
            if (isfilepresent2("obs_trefht")) then
-              patcor_tas = new((/nsim,dimsizes(n34sc_tas&lat),dimsizes(n34sc_tas&lon)/),typeof(n34sc_tas))
+              patcor_tas = new((/nsim,dimsizes(pjetinssc_tas&lat),dimsizes(pjetinssc_tas&lon)/),typeof(pjetinssc_tas))
               patcor_tas!1 = "lat"
-              patcor_tas&lat = n34sc_tas&lat
+              patcor_tas&lat = pjetinssc_tas&lat
               patcor_tas!2 = "lon"
-              patcor_tas&lon = n34sc_tas&lon
-              patcor_psl = new((/nsim,dimsizes(n34sc_psl&lat),dimsizes(n34sc_psl&lon)/),typeof(n34sc_psl))
+              patcor_tas&lon = pjetinssc_tas&lon
+              patcor_psl = new((/nsim,dimsizes(pjetinssc_psl&lat),dimsizes(pjetinssc_psl&lon)/),typeof(pjetinssc_psl))
               patcor_psl!1 = "lat"
-              patcor_psl&lat = n34sc_psl&lat
+              patcor_psl&lat = pjetinssc_psl&lat
               patcor_psl!2 = "lon"
-              patcor_psl&lon = n34sc_psl&lon
-              patcor_tas(ee,:,:) = (/ n34sc_tas(12,:,:) /)
-              patcor_psl(ee,:,:) = (/ n34sc_psl(12,:,:) /)
+              patcor_psl&lon = pjetinssc_psl&lon
+              patcor_tas(ee,:,:) = (/ pjetinssc_tas(12,:,:) /)
+              patcor_psl(ee,:,:) = (/ pjetinssc_psl(12,:,:) /)
            end if
         end if
      
         d = addfile("$NCARG_ROOT/lib/ncarg/data/cdf/landsea.nc","r")     ; mask ocean for TAS array
         basemap = d->LSMASK
-        lsm = landsea_mask(basemap,n34sc_tas&lat,n34sc_tas&lon)
-        n34sc_tas = mask(n34sc_tas,conform(n34sc_tas,lsm,(/1,2/)).eq.0,False)
+        lsm = landsea_mask(basemap,pjetinssc_tas&lat,pjetinssc_tas&lon)
+        pjetinssc_tas = mask(pjetinssc_tas,conform(pjetinssc_tas,lsm,(/1,2/)).eq.0,False)
         delete([/lsm,basemap/])
         delete(d)
      
-        map_n34sc_jja0(ee) = gsn_csm_contour_map(wks_n34sc,n34sc_sst(6,:,:),scres)    ; 6 = JJA 0    
-        o1 = gsn_csm_contour(wks_n34sc,n34sc_tas(6,:,:),scres2)  
-        o2 = gsn_csm_contour(wks_n34sc,n34sc_psl(6,:,:),scres3) 
-        overlay(map_n34sc_jja0(ee),o1)
-        overlay(map_n34sc_jja0(ee),o2)
+        map_pjetinssc_jja0(ee) = gsn_csm_contour_map(wks_pjetinssc,pjetinssc_sst(6,:,:),scres)    ; 6 = JJA 0    
+        o1 = gsn_csm_contour(wks_pjetinssc,pjetinssc_tas(6,:,:),scres2)  
+        o2 = gsn_csm_contour(wks_pjetinssc,pjetinssc_psl(6,:,:),scres3) 
+        overlay(map_pjetinssc_jja0(ee),o1)
+        overlay(map_pjetinssc_jja0(ee),o2)
         delete([/o1,o2/])
         
-        map_n34sc_son0(ee) = gsn_csm_contour_map(wks_n34sc,n34sc_sst(9,:,:),scres)    ; 9 = SON 0      
-        o3 = gsn_csm_contour(wks_n34sc,n34sc_tas(9,:,:),scres2)  
-        o4 = gsn_csm_contour(wks_n34sc,n34sc_psl(9,:,:),scres3) 
-        overlay(map_n34sc_son0(ee),o3)
-        overlay(map_n34sc_son0(ee),o4)
+        map_pjetinssc_son0(ee) = gsn_csm_contour_map(wks_pjetinssc,pjetinssc_sst(9,:,:),scres)    ; 9 = SON 0      
+        o3 = gsn_csm_contour(wks_pjetinssc,pjetinssc_tas(9,:,:),scres2)  
+        o4 = gsn_csm_contour(wks_pjetinssc,pjetinssc_psl(9,:,:),scres3) 
+        overlay(map_pjetinssc_son0(ee),o3)
+        overlay(map_pjetinssc_son0(ee),o4)
         delete([/o3,o4/])
         
         
-        map_n34sc_djf1(ee) = gsn_csm_contour_map(wks_n34sc,n34sc_sst(12,:,:),scres)    ; 12 = DJF+1      
-        o5 = gsn_csm_contour(wks_n34sc,n34sc_tas(12,:,:),scres2)  
-        o6 = gsn_csm_contour(wks_n34sc,n34sc_psl(12,:,:),scres3) 
-        overlay(map_n34sc_djf1(ee),o5)
-        overlay(map_n34sc_djf1(ee),o6)
+        map_pjetinssc_djf1(ee) = gsn_csm_contour_map(wks_pjetinssc,pjetinssc_sst(12,:,:),scres)    ; 12 = DJF+1      
+        o5 = gsn_csm_contour(wks_pjetinssc,pjetinssc_tas(12,:,:),scres2)  
+        o6 = gsn_csm_contour(wks_pjetinssc,pjetinssc_psl(12,:,:),scres3) 
+        overlay(map_pjetinssc_djf1(ee),o5)
+        overlay(map_pjetinssc_djf1(ee),o6)
         delete([/o5,o6/])
         
-        map_n34sc_mam1(ee) = gsn_csm_contour_map(wks_n34sc,n34sc_sst(15,:,:),scres)    ; 15 = MAM+1      
-        o7 = gsn_csm_contour(wks_n34sc,n34sc_tas(15,:,:),scres2)  
-        o8 = gsn_csm_contour(wks_n34sc,n34sc_psl(15,:,:),scres3) 
-        overlay(map_n34sc_mam1(ee),o7)
-        overlay(map_n34sc_mam1(ee),o8)
+        map_pjetinssc_mam1(ee) = gsn_csm_contour_map(wks_pjetinssc,pjetinssc_sst(15,:,:),scres)    ; 15 = MAM+1      
+        o7 = gsn_csm_contour(wks_pjetinssc,pjetinssc_tas(15,:,:),scres2)  
+        o8 = gsn_csm_contour(wks_pjetinssc,pjetinssc_psl(15,:,:),scres3) 
+        overlay(map_pjetinssc_mam1(ee),o7)
+        overlay(map_pjetinssc_mam1(ee),o8)
         delete([/o7,o8/])       
-        delete([/n34sc_sst,n34sc_tas,n34sc_psl/])
+        delete([/pjetinssc_sst,pjetinssc_tas,pjetinssc_psl/])
      end if
      if (pptreg_plot_flag.eq.0) then     
-        map_n34sc_ppt_jja0(ee) = gsn_csm_contour_map(wks_n34sc_ppt,n34sc_ppt(6,:,:),scres4)    ; 6 = JJA 0            
-        map_n34sc_ppt_son0(ee) = gsn_csm_contour_map(wks_n34sc_ppt,n34sc_ppt(9,:,:),scres4)    ; 9 = SON 0              
-        map_n34sc_ppt_djf1(ee) = gsn_csm_contour_map(wks_n34sc_ppt,n34sc_ppt(12,:,:),scres4)    ; 12 = DJF+1              
-        map_n34sc_ppt_mam1(ee) = gsn_csm_contour_map(wks_n34sc_ppt,n34sc_ppt(15,:,:),scres4)    ; 15 = MAM+1      
-        delete([/n34sc_ppt/])
+        map_pjetinssc_ppt_jja0(ee) = gsn_csm_contour_map(wks_pjetinssc_ppt,pjetinssc_ppt(6,:,:),scres4)    ; 6 = JJA 0            
+        map_pjetinssc_ppt_son0(ee) = gsn_csm_contour_map(wks_pjetinssc_ppt,pjetinssc_ppt(9,:,:),scres4)    ; 9 = SON 0              
+        map_pjetinssc_ppt_djf1(ee) = gsn_csm_contour_map(wks_pjetinssc_ppt,pjetinssc_ppt(12,:,:),scres4)    ; 12 = DJF+1              
+        map_pjetinssc_ppt_mam1(ee) = gsn_csm_contour_map(wks_pjetinssc_ppt,pjetinssc_ppt(15,:,:),scres4)    ; 15 = MAM+1      
+        delete([/pjetinssc_ppt/])
      end if
   end do
   
   if (isvar("patcor_tas")) then    ; for pattern correlation table  
      clat_tas = cos(0.01745329*patcor_tas&lat)
      clat_psl = cos(0.01745329*patcor_psl&lat)
-     finpr_tas = "ENSO TAS (DJF+1)  "    ; Must be 18 characters long
-     finpr_psl = "ENSO PSL (DJF+1)  " 
+     finpr_tas = "Polar Jet TAS (DJF+1)  "    ; Must be 18 characters long
+     finpr_psl = "Polar Jet PSL (DJF+1)  " 
      line3   = "                  "    ; Must be 18 characters long
      line4   = line3
      header = (/"","Pattern Correlations/RMS Differences   Observations vs. Model(s)",""/)
@@ -1853,18 +1831,18 @@ begin
      if (dimsizes(tochar(line4)).ge.8190) then   ; system or fortran compiler limit
         print("Metrics table warning: Not creating metrics table as size of comparison results in a invalid ascii row size.")   
      else
-        write_table(getenv("OUTDIR")+"metrics.sst.indices.1.txt","w",[/header/],"%s")
-        write_table(getenv("OUTDIR")+"metrics.sst.indices.1.txt","a",[/line3/],"%s")
-        write_table(getenv("OUTDIR")+"metrics.sst.indices.1.txt","a",[/line4/],"%s")
-        write_table(getenv("OUTDIR")+"metrics.sst.indices.1.txt","a",[/finpr_tas/],"%s")
-        write_table(getenv("OUTDIR")+"metrics.sst.indices.1.txt","a",[/finpr_psl/],"%s")
+        write_table(getenv("OUTDIR")+"metrics.u850.indices.1.txt","w",[/header/],"%s")
+        write_table(getenv("OUTDIR")+"metrics.u850.indices.1.txt","a",[/line3/],"%s")
+        write_table(getenv("OUTDIR")+"metrics.u850.indices.1.txt","a",[/line4/],"%s")
+        write_table(getenv("OUTDIR")+"metrics.u850.indices.1.txt","a",[/finpr_tas/],"%s")
+        write_table(getenv("OUTDIR")+"metrics.u850.indices.1.txt","a",[/finpr_psl/],"%s")
      end if  
      delete([/finpr_tas,finpr_psl,line3,line4,format2,format3,nchar,ntc,clat_tas,clat_psl,patcor_tas,patcor_psl,dimY,ntb,header/])
   end if
 
   if (isvar("patcor_hov_hi")) then           ; for pattern correlation table  
-     finpr_hi = "El Nino Hovmoller "    ; Must be 18 characters long
-     finpr_lo = "La Nina Hovmoller " 
+     finpr_hi = "Polar Jet(+) Hovmoller "    ; Must be 18 characters long
+     finpr_lo = "Polar Jet(-) Hovmoller " 
      line3   = "                  "    ; Must be 18 characters long                                 patcor_hov_hi
      line4   = line3
      header = (/"","Pattern Correlations/RMS Differences   Observations vs. Model(s)",""/)
@@ -1890,25 +1868,25 @@ begin
         format3 = "%4.2f"
         line3 = line3+" "+ntb   
         line4 = line4+" "+ntc 
-        if (all(ismissing(patcor_hov_hi(hh,24:52,:)))) then                ; 24:52 refers to Jan+0->May+2, which is the range shown in the hovmoller plots.
+        if (all(ismissing(patcor_hov_hi(hh,0:28,:)))) then                ; 0:28 refers to Jan+0->May+2, which is the range shown in the hovmoller plots.
            finpr_hi = finpr_hi+sprintf(format2,9.99)+"/"+sprintf(format3,9.99)
         else
-           finpr_hi = finpr_hi+sprintf(format2,(pattern_cor(patcor_hov_hi(0,24:52,:),patcor_hov_hi(hh,24:52,:),1.0,0)))+"/"+sprintf(format3,(wgt_arearmse(patcor_hov_hi(0,24:52,:),patcor_hov_hi(hh,24:52,:),1.0,1.0,0)))
+           finpr_hi = finpr_hi+sprintf(format2,(pattern_cor(patcor_hov_hi(0,0:28,:),patcor_hov_hi(hh,0:28,:),1.0,0)))+"/"+sprintf(format3,(wgt_arearmse(patcor_hov_hi(0,0:28,:),patcor_hov_hi(hh,0:28,:),1.0,1.0,0)))
         end if
-        if (all(ismissing(patcor_hov_lo(hh,24:52,:)))) then
+        if (all(ismissing(patcor_hov_lo(hh,0:28,:)))) then
            finpr_lo = finpr_lo+sprintf(format2,9.99)+"/"+sprintf(format3,9.99)
         else
-           finpr_lo = finpr_lo+sprintf(format2,(pattern_cor(patcor_hov_lo(0,24:52,:),patcor_hov_lo(hh,24:52,:),1.0,0)))+"/"+sprintf(format3,(wgt_arearmse(patcor_hov_lo(0,24:52,:),patcor_hov_lo(hh,24:52,:),1.0,1.0,0)))
+           finpr_lo = finpr_lo+sprintf(format2,(pattern_cor(patcor_hov_lo(0,0:28,:),patcor_hov_lo(hh,0:28,:),1.0,0)))+"/"+sprintf(format3,(wgt_arearmse(patcor_hov_lo(0,0:28,:),patcor_hov_lo(hh,0:28,:),1.0,1.0,0)))
         end if
      end do
      if (dimsizes(tochar(line4)).ge.8190) then   ; system or fortran compiler limit
         print("Metrics table warning: Not creating metrics table as size of comparison results in a invalid ascii row size.")   
      else
-        write_table(getenv("OUTDIR")+"metrics.sst.indices.2.txt","w",[/header/],"%s")
-        write_table(getenv("OUTDIR")+"metrics.sst.indices.2.txt","a",[/line3/],"%s")
-        write_table(getenv("OUTDIR")+"metrics.sst.indices.2.txt","a",[/line4/],"%s")
-        write_table(getenv("OUTDIR")+"metrics.sst.indices.2.txt","a",[/finpr_hi/],"%s")
-        write_table(getenv("OUTDIR")+"metrics.sst.indices.2.txt","a",[/finpr_lo/],"%s")
+        write_table(getenv("OUTDIR")+"metrics.u850.indices.2.txt","w",[/header/],"%s")
+        write_table(getenv("OUTDIR")+"metrics.u850.indices.2.txt","a",[/line3/],"%s")
+        write_table(getenv("OUTDIR")+"metrics.u850.indices.2.txt","a",[/line4/],"%s")
+        write_table(getenv("OUTDIR")+"metrics.u850.indices.2.txt","a",[/finpr_hi/],"%s")
+        write_table(getenv("OUTDIR")+"metrics.u850.indices.2.txt","a",[/finpr_lo/],"%s")
      end if
      delete([/finpr_hi,finpr_lo,line3,line4,format2,format3,nchar,ntc,patcor_hov_hi,patcor_hov_lo,dimY,ntb,header/])  
   end if
@@ -1941,55 +1919,56 @@ begin
   end if 
   lp = (/nrow,ncol/)
 
-  if (isvar("title_n34")) then
-     panres@txString = "Nin~H-13V2F35~D~FV-2H3F21~o3.4 (Monthly, "+title_n34+")"
-     gsn_panel2(wks_n34,xyn34,lp,panres)    
+  if (isvar("title_pjetins")) then
+     panres@txString = "Polar Jet index (Monthly, "+title_pjetins+")"
+     gsn_panel2(wks_pjetins,xypjetins,lp,panres)    
 
-     panres@txString = "Nin~H-13V2F35~D~FV-2H3F21~o4 (Monthly, "+title_n4+")"
-     gsn_panel2(wks_n4,xyn4,lp,panres)  
+     panres@txString = "Polar Jet Pressure at 40S (Monthly, "+title_n3+")"
+     gsn_panel2(wks_pjetins,xyn3,lp,panres)
 
-     panres@txString = "Nin~H-13V2F35~D~FV-2H3F21~o3 (Monthly, "+title_n3+")"
-     gsn_panel2(wks_n3,xyn3,lp,panres)       
+     panres@txString = "Polar Jet Pressure at 65S (Monthly, "+title_n4+")"
+     gsn_panel2(wks_pjetins,xyn4,lp,panres)
 
-     panres@txString = "Nin~H-13V2F35~D~FV-2H3F21~o1+2 (Monthly, "+title_n12+")"
-     gsn_panel2(wks_n12,xyn12,lp,panres)       
+     panres@txString = "Polar Jet Mean Latitude Variation (Monthly, "+title_n5+")"
+     gsn_panel2(wks_pjetins,xyn5,lp,panres)
+
+     panres@txString = "Polar Jet Mean Latitude Variation (Monthly, "+title_n6+")"
+     gsn_panel2(wks_pjetins,xyn6,lp,panres)
+
+     panres@txString = "Normalized Polar Jet index (Monthly, "+title_n12+")"
+     gsn_panel2(wks_pjetins,xyn12,lp,panres)
+
+     panres@txString = "Amundsen Sea Low (ASL) index (Monthly, "+title_tna+")"
+     gsn_panel2(wks_jetins,xytna,lp,panres)  
+
+     panres@txString = "ASL Central Latitude (Monthly, "+title_tsa+")"
+     gsn_panel2(wks_jetins,xytsa,lp,panres)       
+
+     panres@txString = "ASL Central Longitude (Monthly, "+title_tio+")"
+     gsn_panel2(wks_jetins,xytio,lp,panres)       
    
-     panres@txString = "Tropical North Atlantic (Monthly, "+title_tna+")"
-     gsn_panel2(wks_tna,xytna,lp,panres)
+     panres@txString = "ASL Central Pressure (Monthly, "+title_iod+")"
+     gsn_panel2(wks_jetins,xyiod,lp,panres)
   
-     panres@txString = "Tropical South Atlantic (Monthly, "+title_tsa+")"
-     gsn_panel2(wks_tsa,xytsa,lp,panres)
-     
-     panres@txString = "Oceanic Nino Index (ONI) (Monthly, "+title_oni+")"
-     gsn_panel2(wks_tio,xyoni,lp,panres)
+     panres@txString = "ASL Sector Mean Pressure (Monthly, "+title_socn+")"
+     gsn_panel2(wks_jetins,xysocn,lp,panres)
 
-     panres@txString = "Tropical Indian Ocean (Monthly, "+title_tio+")"
-     gsn_panel2(wks_tio,xytio,lp,panres)   
-  
-     panres@txString = "Indian Ocean Dipole (Monthly, "+title_iod+")"
-     gsn_panel2(wks_tio,xyiod,lp,panres)  
+     panres@txString = "ASL Relative Central Pressure (Monthly, "+title_amm+")"
+     gsn_panel2(wks_jetins,xyamm,lp,panres)
 
-     panres@txString = "Southern Ocean (Monthly, "+title_socn+")"
-     gsn_panel2(wks_tio,xysocn,lp,panres) 
-
-     panres@txString = "Atlantic Meridional Mode (Monthly, "+title_iod+")"
-     gsn_panel2(wks_tio,xyiod,lp,panres)  
-
-     panres@txString = "Atlantic Nin~H-13V2F35~D~FV-2H3F21~o3 (Monthly, "+title_socn+")"
-     gsn_panel2(wks_tio,xyatl3,lp,panres) 
   end if
-  delete([/wks_tio/]) 
+  delete([/wks_pjetins,wks_jetins/]) 
 
-  if (all(ismissing(xyn34_rst))) then
+  if (all(ismissing(xypjetins_rst))) then
 ;     print("No valid running standard deviation plots, skipping")
   else
-     panres@txString = "Nin~H-13V2F35~D~FV-2H3F21~o3.4 15yr running standard deviation"
-     gsn_panel2(wks_n34_rst,xyn34_rst,lp,panres) 
-     delete(xyn34_rst)  
+     panres@txString = "Polar Jet index 15yr running standard deviation"
+     gsn_panel2(wks_pjetins_rst,xypjetins_rst,lp,panres) 
+     delete(xypjetins_rst)  
   end if
   panres@gsnPanelYWhiteSpacePercent = 0.5
-  panres@txString = "Nin~H-13V2F35~D~FV-2H3F21~o3.4 standard deviation (Monthly)"
-  gsn_panel2(wks_n34_mst,xyn34_mst,(/nrow,ncol/),panres)   
+  panres@txString = "Polar Jet index standard deviation (Monthly)"
+  gsn_panel2(wks_pjetins_mst,xypjetins_mst,(/nrow,ncol/),panres)   
   
   panres2 = True
   panres2@gsnMaximize = True
@@ -2016,12 +1995,10 @@ begin
   panres2@lbTitleOn = True
   panres2@lbTitlePosition = "Bottom"
   panres2@lbTitleFontHeightF = panres2@lbLabelFontHeightF - 0.002
-  panres2@lbTitleString = "C"
 
-  panres2@txString = "El Nin~H-13V2F35~D~FV-2H3F21~o Composite (3~S~o~N~S:3~S~o~N~N)"
-  gsn_panel2(wks_n34_tlon_hi,plot_n34hi,(/nrow,ncol/),panres2)   
-  panres2@txString = "La Nin~H-13V2F35~D~FV-2H3F21~a Composite (3~S~o~N~S:3~S~o~N~N)"
-  gsn_panel2(wks_n34_tlon_lo,plot_n34lo,(/nrow,ncol/),panres2)   
+  panres2@lbTitleString = "Latitude (degree)"
+  panres2@txString = "Polar Jet Latitude Position (degree)"
+  gsn_panel2(wks_jetlat_tlon,plot_jetlat,(/nrow,ncol/),panres2)   
   delete([/panres2@lbTitleOn,panres2@lbTitlePosition,panres2@lbTitleFontHeightF,panres2@lbTitleString/])
 
   if (nsim.le.4) then
@@ -2037,116 +2014,136 @@ begin
      panres@gsnPanelBottom = 0.05
   end if  
   panres@gsnPanelYWhiteSpacePercent = 3.0
-  panres@txString = "Nin~H-13V2F35~D~FV-2H3F21~o3.4 (Monthly, detrended)"
-  gsn_panel2(wks_n34_p,pspec,(/nrow,ncol/),panres)  
-  panres@txString = "Nin~H-13V2F35~D~FV-2H3F21~o3.4 Autocorrelation (Monthly)"
-  gsn_panel2(wks_n34_p,xyn34_ac,(/nrow,ncol/),panres) 
-  panres2@txString = "Nin~H-13V2F35~D~FV-2H3F21~o3.4 Wavelet (Monthly)"
+  panres@txString = "Polar Jet index (Monthly, detrended)"
+  gsn_panel2(wks_pjetins_p,pspec,(/nrow,ncol/),panres)  
+  panres@txString = "Polar Jet index Autocorrelation (Monthly)"
+  gsn_panel2(wks_pjetins_p,xypjetins_ac,(/nrow,ncol/),panres) 
+  panres2@txString = "Polar Jet index Wavelet (Monthly)"
   panres2@gsnPanelYWhiteSpacePercent = 3.0
   panres2@gsnPanelXWhiteSpacePercent = 4.0
-  gsn_panel2(wks_n34_p,plot_wave34,(/nrow,ncol/),panres2)  
-  delete(wks_n34_p)
+  gsn_panel2(wks_pjetins_p,plot_wave34,(/nrow,ncol/),panres2)  
+  delete(wks_pjetins_p)
 
   delete(panres2@gsnPanelYWhiteSpacePercent)
   panres2@pmLabelBarWidthF = 0.8
   panres2@lbLabelAutoStride = False
   panres2@gsnPanelXWhiteSpacePercent = 8.5
-  if (any(.not.ismissing(map_n34sc_jja0))) then
-     panres2@txString = "Nin~H-13V2F35~D~FV-2H3F21~o3.4 SST,TAS,PSL Spatial Composite (JJA~S~0~N~)"
-     gsn_panel2(wks_n34sc,map_n34sc_jja0,(/nrow,ncol/),panres2)   
+  if (any(.not.ismissing(map_pjetinssc_jja0))) then
+     panres2@lbTitleString = "SST/TAS (C)"
+     panres2@pmLabelBarOrthogonalPosF = -0.05
+     panres2@txString = "Polar Jet SST,TAS,PSL Spatial Composite (JJA~S~0~N~)"
+     gsn_panel2(wks_pjetinssc,map_pjetinssc_jja0,(/nrow,ncol/),panres2)   
   
-     panres2@txString = "Nin~H-13V2F35~D~FV-2H3F21~o3.4 SST,TAS,PSL Spatial Composite (SON~S~0~N~)"
-     gsn_panel2(wks_n34sc,map_n34sc_son0,(/nrow,ncol/),panres2)   
+     panres2@txString = "Polar Jet SST,TAS,PSL Spatial Composite (SON~S~0~N~)"
+     gsn_panel2(wks_pjetinssc,map_pjetinssc_son0,(/nrow,ncol/),panres2)   
   
-     panres2@txString = "Nin~H-13V2F35~D~FV-2H3F21~o3.4 SST,TAS,PSL Spatial Composite (DJF~S~+1~N~)"
-     gsn_panel2(wks_n34sc,map_n34sc_djf1,(/nrow,ncol/),panres2)   
+     panres2@txString = "Polar Jet SST,TAS,PSL Spatial Composite (DJF~S~+1~N~)"
+     gsn_panel2(wks_pjetinssc,map_pjetinssc_djf1,(/nrow,ncol/),panres2)   
   
-     panres2@txString = "Nin~H-13V2F35~D~FV-2H3F21~o3.4 SST,TAS,PSL Spatial Composite (MAM~S~+1~N~)"
-     gsn_panel2(wks_n34sc,map_n34sc_mam1,(/nrow,ncol/),panres2)   
-     delete(wks_n34sc)
+     panres2@txString = "Polar Jet SST,TAS,PSL Spatial Composite (MAM~S~+1~N~)"
+     gsn_panel2(wks_pjetinssc,map_pjetinssc_mam1,(/nrow,ncol/),panres2)   
+     delete(wks_pjetinssc)
      
-     delete([/map_n34sc_djf1,map_n34sc_jja0,map_n34sc_son0,map_n34sc_mam1/])
+     delete([/map_pjetinssc_djf1,map_pjetinssc_jja0,map_pjetinssc_son0,map_pjetinssc_mam1/])
   end if     
-  if (any(.not.ismissing(map_n34sc_ppt_jja0))) then
-     panres2@txString = "Nin~H-13V2F35~D~FV-2H3F21~o3.4 PR Spatial Composite (JJA~S~0~N~)"
-     gsn_panel2(wks_n34sc_ppt,map_n34sc_ppt_jja0,(/nrow,ncol/),panres2)   
+  if (any(.not.ismissing(map_pjetinssc_ppt_jja0))) then
+     panres2@txString = "Polar Jet PR Spatial Composite (JJA~S~0~N~)"
+     gsn_panel2(wks_pjetinssc_ppt,map_pjetinssc_ppt_jja0,(/nrow,ncol/),panres2)   
   
-     panres2@txString = "Nin~H-13V2F35~D~FV-2H3F21~o3.4 PR Spatial Composite (SON~S~0~N~)"
-     gsn_panel2(wks_n34sc_ppt,map_n34sc_ppt_son0,(/nrow,ncol/),panres2)   
+     panres2@txString = "Polar Jet PR Spatial Composite (SON~S~0~N~)"
+     gsn_panel2(wks_pjetinssc_ppt,map_pjetinssc_ppt_son0,(/nrow,ncol/),panres2)   
   
-     panres2@txString = "Nin~H-13V2F35~D~FV-2H3F21~o3.4 PR Spatial Composite (DJF~S~+1~N~)"
-     gsn_panel2(wks_n34sc_ppt,map_n34sc_ppt_djf1,(/nrow,ncol/),panres2)   
+     panres2@txString = "Polar Jet PR Spatial Composite (DJF~S~+1~N~)"
+     gsn_panel2(wks_pjetinssc_ppt,map_pjetinssc_ppt_djf1,(/nrow,ncol/),panres2)   
   
-     panres2@txString = "Nin~H-13V2F35~D~FV-2H3F21~o3.4 PR Spatial Composite (MAM~S~+1~N~)"
-     gsn_panel2(wks_n34sc_ppt,map_n34sc_ppt_mam1,(/nrow,ncol/),panres2)   
-     delete(wks_n34sc_ppt)
+     panres2@txString = "Polar Jet PR Spatial Composite (MAM~S~+1~N~)"
+     gsn_panel2(wks_pjetinssc_ppt,map_pjetinssc_ppt_mam1,(/nrow,ncol/),panres2)   
+     delete(wks_pjetinssc_ppt)
      
-     delete([/map_n34sc_ppt_djf1,map_n34sc_ppt_jja0,map_n34sc_ppt_son0,map_n34sc_ppt_mam1/])
+     delete([/map_pjetinssc_ppt_djf1,map_pjetinssc_ppt_jja0,map_pjetinssc_ppt_son0,map_pjetinssc_ppt_mam1/])
   end if   
 
-  delete([/xyn34,xyn4,xyn3,xyn12,xytna,xytsa,xytio,xyiod,plot_n34hi,plot_n34lo,pspec,pi,rad,wgt,lp/])     
+  delete([/xypjetins,xyn6,xyn5,xyn4,xyn3,xyn12,xytna,xytsa,xytio,xyiod,plot_jetlat,pspec,pi,rad,wgt,lp/])     
 
   OUTDIR = getenv("OUTDIR")
   
   if (wks_type.eq."png") then  
-     if (isfilepresent2(OUTDIR+"nino34.spatialcomp.000001.png")) then
-        system("mv "+OUTDIR+"nino34.spatialcomp.000001.png "+OUTDIR+"nino34.spatialcomp.jja0.png")
-        system("mv "+OUTDIR+"nino34.spatialcomp.000002.png "+OUTDIR+"nino34.spatialcomp.son0.png")
-        system("mv "+OUTDIR+"nino34.spatialcomp.000003.png "+OUTDIR+"nino34.spatialcomp.djf1.png")
-        system("mv "+OUTDIR+"nino34.spatialcomp.000004.png "+OUTDIR+"nino34.spatialcomp.mam1.png")
+     if (isfilepresent2(OUTDIR+"pjetins.spatialcomp.000001.png")) then
+        system("mv "+OUTDIR+"pjetins.spatialcomp.000001.png "+OUTDIR+"pjetins.spatialcomp.jja0.png")
+        system("mv "+OUTDIR+"pjetins.spatialcomp.000002.png "+OUTDIR+"pjetins.spatialcomp.son0.png")
+        system("mv "+OUTDIR+"pjetins.spatialcomp.000003.png "+OUTDIR+"pjetins.spatialcomp.djf1.png")
+        system("mv "+OUTDIR+"pjetins.spatialcomp.000004.png "+OUTDIR+"pjetins.spatialcomp.mam1.png")
      end if
-     if (isfilepresent2(OUTDIR+"nino34.spatialcomp.ppt.000001.png")) then
-        system("mv "+OUTDIR+"nino34.spatialcomp.ppt.000001.png "+OUTDIR+"nino34.spatialcomp.pr.jja0.png")
-        system("mv "+OUTDIR+"nino34.spatialcomp.ppt.000002.png "+OUTDIR+"nino34.spatialcomp.pr.son0.png")
-        system("mv "+OUTDIR+"nino34.spatialcomp.ppt.000003.png "+OUTDIR+"nino34.spatialcomp.pr.djf1.png")
-        system("mv "+OUTDIR+"nino34.spatialcomp.ppt.000004.png "+OUTDIR+"nino34.spatialcomp.pr.mam1.png")
+     if (isfilepresent2(OUTDIR+"pjetins.spatialcomp.ppt.000001.png")) then
+        system("mv "+OUTDIR+"pjetins.spatialcomp.ppt.000001.png "+OUTDIR+"pjetins.spatialcomp.pr.jja0.png")
+        system("mv "+OUTDIR+"pjetins.spatialcomp.ppt.000002.png "+OUTDIR+"pjetins.spatialcomp.pr.son0.png")
+        system("mv "+OUTDIR+"pjetins.spatialcomp.ppt.000003.png "+OUTDIR+"pjetins.spatialcomp.pr.djf1.png")
+        system("mv "+OUTDIR+"pjetins.spatialcomp.ppt.000004.png "+OUTDIR+"pjetins.spatialcomp.pr.mam1.png")
      end if
-     if (isfilepresent2(OUTDIR+"tio.timeseries.000001.png")) then
-        system("mv "+OUTDIR+"tio.timeseries.000001.png "+OUTDIR+"oni.timeseries.png")
-        system("mv "+OUTDIR+"tio.timeseries.000002.png "+OUTDIR+"tio.timeseries.png")
-        system("mv "+OUTDIR+"tio.timeseries.000003.png "+OUTDIR+"iod.timeseries.png")
-        system("mv "+OUTDIR+"tio.timeseries.000004.png "+OUTDIR+"socn.timeseries.png")
-        system("mv "+OUTDIR+"tio.timeseries.000005.png "+OUTDIR+"amm.timeseries.png")
-        system("mv "+OUTDIR+"tio.timeseries.000006.png "+OUTDIR+"atl3.timeseries.png")
+     if (isfilepresent2(OUTDIR+"pjetins.timeseries.000001.png")) then
+        system("mv "+OUTDIR+"pjetins.timeseries.000001.png "+OUTDIR+"pjetins.timeseries.png")
+        system("mv "+OUTDIR+"pjetins.timeseries.000002.png "+OUTDIR+"sam_p40S.timeseries.png")
+        system("mv "+OUTDIR+"pjetins.timeseries.000003.png "+OUTDIR+"sam_p65S.timeseries.png")
+        system("mv "+OUTDIR+"pjetins.timeseries.000004.png "+OUTDIR+"jetlat_mave.timeseries.png")
+        system("mv "+OUTDIR+"pjetins.timeseries.000005.png "+OUTDIR+"jetlat_tave.timeseries.png")
+        system("mv "+OUTDIR+"pjetins.timeseries.000006.png "+OUTDIR+"pjetins_norm.timeseries.png")
      end if
-     if (isfilepresent2(OUTDIR+"nino34.powspec.000001.png")) then
-        system("mv "+OUTDIR+"nino34.powspec.000001.png "+OUTDIR+"nino34.powspec.png")
-        system("mv "+OUTDIR+"nino34.powspec.000002.png "+OUTDIR+"nino34.autocor.png")
-        system("mv "+OUTDIR+"nino34.powspec.000003.png "+OUTDIR+"nino34.wavelet.png")
+     if (isfilepresent2(OUTDIR+"jetins.timeseries.000001.png")) then
+        system("mv "+OUTDIR+"jetins.timeseries.000001.png "+OUTDIR+"jetins.timeseries.png")
+        system("mv "+OUTDIR+"jetins.timeseries.000002.png "+OUTDIR+"asl_clat.timeseries.png")
+        system("mv "+OUTDIR+"jetins.timeseries.000003.png "+OUTDIR+"asl_clon.timeseries.png")
+        system("mv "+OUTDIR+"jetins.timeseries.000004.png "+OUTDIR+"asl_cu850.timeseries.png")
+        system("mv "+OUTDIR+"jetins.timeseries.000005.png "+OUTDIR+"asl_rmu850.timeseries.png")
+        system("mv "+OUTDIR+"jetins.timeseries.000006.png "+OUTDIR+"asl_rcu850.timeseries.png")
+     end if
+     if (isfilepresent2(OUTDIR+"pjetins.powspec.000001.png")) then
+        system("mv "+OUTDIR+"pjetins.powspec.000001.png "+OUTDIR+"pjetins.powspec.png")
+        system("mv "+OUTDIR+"pjetins.powspec.000002.png "+OUTDIR+"pjetins.autocor.png")
+        system("mv "+OUTDIR+"pjetins.powspec.000003.png "+OUTDIR+"pjetins.wavelet.png")
      end if
   else
-     if (isfilepresent2(OUTDIR+"nino34.spatialcomp.ps")) then
-        system("psplit "+OUTDIR+"nino34.spatialcomp.ps "+OUTDIR+"sst_ind")
-        system("mv "+OUTDIR+"sst_ind0001.ps "+OUTDIR+"nino34.spatialcomp.jja0.ps")
-        system("mv "+OUTDIR+"sst_ind0002.ps "+OUTDIR+"nino34.spatialcomp.son0.ps")
-        system("mv "+OUTDIR+"sst_ind0003.ps "+OUTDIR+"nino34.spatialcomp.djf1.ps")
-        system("mv "+OUTDIR+"sst_ind0004.ps "+OUTDIR+"nino34.spatialcomp.mam1.ps")
-        system("rm "+OUTDIR+"nino34.spatialcomp.ps")
+     if (isfilepresent2(OUTDIR+"pjetins.spatialcomp.ps")) then
+        system("psplit "+OUTDIR+"pjetins.spatialcomp.ps "+OUTDIR+"psl_ind")
+        system("mv "+OUTDIR+"psl_ind0001.ps "+OUTDIR+"pjetins.spatialcomp.jja0.ps")
+        system("mv "+OUTDIR+"psl_ind0002.ps "+OUTDIR+"pjetins.spatialcomp.son0.ps")
+        system("mv "+OUTDIR+"psl_ind0003.ps "+OUTDIR+"pjetins.spatialcomp.djf1.ps")
+        system("mv "+OUTDIR+"psl_ind0004.ps "+OUTDIR+"pjetins.spatialcomp.mam1.ps")
+        system("rm "+OUTDIR+"pjetins.spatialcomp.ps")
      end if
-     if (isfilepresent2(OUTDIR+"nino34.spatialcomp.ppt.ps")) then
-        system("psplit "+OUTDIR+"nino34.spatialcomp.ppt.ps "+OUTDIR+"sst_ind")
-        system("mv "+OUTDIR+"sst_ind0001.ps "+OUTDIR+"nino34.spatialcomp.pr.jja0.ps")
-        system("mv "+OUTDIR+"sst_ind0002.ps "+OUTDIR+"nino34.spatialcomp.pr.son0.ps")
-        system("mv "+OUTDIR+"sst_ind0003.ps "+OUTDIR+"nino34.spatialcomp.pr.djf1.ps")
-        system("mv "+OUTDIR+"sst_ind0004.ps "+OUTDIR+"nino34.spatialcomp.pr.mam1.ps")
-        system("rm "+OUTDIR+"nino34.spatialcomp.ppt.ps")
+     if (isfilepresent2(OUTDIR+"pjetins.spatialcomp.ppt.ps")) then
+        system("psplit "+OUTDIR+"pjetins.spatialcomp.ppt.ps "+OUTDIR+"psl_ind")
+        system("mv "+OUTDIR+"psl_ind0001.ps "+OUTDIR+"pjetins.spatialcomp.pr.jja0.ps")
+        system("mv "+OUTDIR+"psl_ind0002.ps "+OUTDIR+"pjetins.spatialcomp.pr.son0.ps")
+        system("mv "+OUTDIR+"psl_ind0003.ps "+OUTDIR+"pjetins.spatialcomp.pr.djf1.ps")
+        system("mv "+OUTDIR+"psl_ind0004.ps "+OUTDIR+"pjetins.spatialcomp.pr.mam1.ps")
+        system("rm "+OUTDIR+"pjetins.spatialcomp.ppt.ps")
      end if
-     if (isfilepresent2(OUTDIR+"tio.timeseries.ps")) then
-        system("psplit "+OUTDIR+"tio.timeseries.ps "+OUTDIR+"sst_ind")
-        system("mv "+OUTDIR+"sst_ind0001.ps "+OUTDIR+"tio.timeseries.ps")
-        system("mv "+OUTDIR+"sst_ind0002.ps "+OUTDIR+"iod.timeseries.ps")
-        system("mv "+OUTDIR+"sst_ind0003.ps "+OUTDIR+"socn.timeseries.ps")
-        system("mv "+OUTDIR+"sst_ind0004.ps "+OUTDIR+"amm.timeseries.ps")
-        system("mv "+OUTDIR+"sst_ind0005.ps "+OUTDIR+"atl3.timeseries.ps")
+     if (isfilepresent2(OUTDIR+"pjetins.timeseries.ps")) then
+        system("psplit "+OUTDIR+"pjetins.timeseries.ps "+OUTDIR+"jetu850_ind")
+        system("mv "+OUTDIR+"jetu850_ind0001.ps "+OUTDIR+"pjetins.timeseries.ps")
+        system("mv "+OUTDIR+"jetu850_ind0002.ps "+OUTDIR+"sam_p40S.timeseries.ps")
+        system("mv "+OUTDIR+"jetu850_ind0003.ps "+OUTDIR+"sam_p65S.timeseries.ps")
+        system("mv "+OUTDIR+"jetu850_ind0004.ps "+OUTDIR+"jetlat_mave.timeseries.ps")
+        system("mv "+OUTDIR+"jetu850_ind0005.ps "+OUTDIR+"jetlat_tave.timeseries.ps")
+        system("mv "+OUTDIR+"jetu850_ind0006.ps "+OUTDIR+"pjetins_norm.timeseries.ps")
      end if
-     if (isfilepresent2(OUTDIR+"nino34.powspec.ps")) then
-        system("psplit "+OUTDIR+"nino34.powspec.ps "+OUTDIR+"n34p")
-        system("mv "+OUTDIR+"n34p0001.ps "+OUTDIR+"nino34.powspec.ps")
-        if (isfilepresent2(OUTDIR+"n34p0002.ps")) then
-           system("mv "+OUTDIR+"n34p0002.ps "+OUTDIR+"nino34.autocor.ps")
-           system("mv "+OUTDIR+"n34p0003.ps "+OUTDIR+"nino34.wavelet.ps")
+     if (isfilepresent2(OUTDIR+"jetins.timeseries.ps")) then
+        system("psplit "+OUTDIR+"jetins.timeseries.ps "+OUTDIR+"jetinsu850_ind")
+        system("mv "+OUTDIR+"jetinsu850_ind0001.ps "+OUTDIR+"jetins.timeseries.ps")
+        system("mv "+OUTDIR+"jetinsu850_ind0002.ps "+OUTDIR+"asl_clat.timeseries.ps")
+        system("mv "+OUTDIR+"jetinsu850_ind0003.ps "+OUTDIR+"asl_clon.timeseries.ps")
+        system("mv "+OUTDIR+"jetinsu850_ind0004.ps "+OUTDIR+"asl_cu850.timeseries.ps")
+        system("mv "+OUTDIR+"jetinsu850_ind0005.ps "+OUTDIR+"asl_rmu850.timeseries.ps")
+        system("mv "+OUTDIR+"jetinsu850_ind0006.ps "+OUTDIR+"asl_rcu850.timeseries.ps")
+     end if
+     if (isfilepresent2(OUTDIR+"pjetins.powspec.ps")) then
+        system("psplit "+OUTDIR+"pjetins.powspec.ps "+OUTDIR+"pjetinsp")
+        system("mv "+OUTDIR+"pjetinsp0001.ps "+OUTDIR+"pjetins.powspec.ps")
+        if (isfilepresent2(OUTDIR+"pjetinsp0002.ps")) then
+           system("mv "+OUTDIR+"pjetinsp0002.ps "+OUTDIR+"pjetins.autocor.ps")
+           system("mv "+OUTDIR+"pjetinsp0003.ps "+OUTDIR+"pjetins.wavelet.ps")
         end if
      end if
   end if
-  print("Finished: sst.indices.ncl")
+  print("Finished: u850.indices.ncl")
 end

@@ -1,4 +1,74 @@
 ;=================================================================================================
+; calculate jet stream statistics 
+; 
+undef("calculate_jet_info")
+function calculate_jet_info(karr:numeric,minlat[1]:numeric,maxlat[1]:numeric,minlon[1]:numeric,maxlon[1]:numeric)
+local karr,kan,minlat,maxlat,minlon,maxlon,krgd,kzon,Opt,m,pcts_s,gg,nmax_ind,wgtfile,dimz,attstring
+begin
+
+  dimz        = dimsizes(karr)
+  finjet      = new((/4,dimz(0)/),typeof(karr),1.e20)
+  finjet!0    = "nid"
+  finjet&nid  = ispan(1,4,1)
+  finjet!1    = "time"
+  finjet&time = karr&time
+
+  kan     = karr(:,{minlat:maxlat},{minlon:maxlon})
+
+ ; ====================================================================
+ ; First step: regrid the data to 0.1x0.1 within 70S and 20S region
+ ;=====================================================================
+  wgtfile = "wgt_regrid_to_0.1deg.nc"
+  system("rm -rvf src_SCRIP.nc  dst_SCRIP.nc *.Log "+ wgtfile)
+
+  Opt                = True
+  Opt@SrcFileName    = "src_SCRIP.nc"
+  Opt@DstFileName    = "dst_SCRIP.nc"
+  Opt@WgtFileName    = "1deg_to_0.1deg.nc"
+  Opt@ForceOverwrite = True
+  Opt@DstGridType    = "0.1x0.1"
+  Opt@DstLLCorner    = (/ minlat,   0.25d/)
+  Opt@DstURCorner    = (/ maxlat, 359.75d/)
+  krgd               = ESMF_regrid(kan,Opt)
+  delete(Opt)
+  system("rm -rvf src_SCRIP.nc  dst_SCRIP.nc *.Log "+ wgtfile)
+
+  m    = addfile("$NCARG_ROOT/lib/ncarg/data/cdf/landsea.nc","r")   ; mask out land (this is redundant for data that is already masked)
+  krgd = mask(krgd,conform(krgd,landsea_mask(m->LSMASK,krgd&lat,krgd&lon),(/1,2/)).ge.1,False)
+  delete(m)
+
+ ; ======================================================================
+ ; Second step: Calculate the zonal mean zonal wind at 850hPa
+ ; between 70S and 20S, and find the lattitude of maximum zonal
+ ; mean zonal wind (which is the jet position), and its corresponding
+ ; magnitude (which is the jet strength)
+ ; ==================================================================
+  kzon = dim_avg_n_Wrap(krgd,2)
+
+  finjet(0,:) = dim_max_n(kzon,1)
+  nmax_ind    = dim_maxind(kzon(lat|:,time|:), 0)
+  if(.not.all(ismissing(nmax_ind)))then
+    do gg = 0,dimsizes(finjet(0,:))-1
+      finjet(1,gg) = tofloat(kzon&lat(nmax_ind(gg)))
+    end do
+  end if
+ ;calculate standardized index
+ finjet(2,:) = dim_standardize(finjet(0,:),0)
+ finjet(3,:) = dim_standardize(finjet(1,:),0)
+
+ do gg = 0,3
+  pcts_s    = avg(finjet(gg,:))+ "," +stddev(finjet(gg,:))
+  attstring = "mean"+(gg)+"_std"+(gg)
+  finjet@$attstring$ = pcts_s
+ end do
+
+ delete([/kan,krgd,kzon,nmax_ind,pcts_s,attstring/])
+
+ return(finjet)
+
+end
+
+;=================================================================================================
 ; create blank array for use when something may be/is wrong.
 ;
 undef("create_empty_array")
@@ -97,6 +167,9 @@ begin
   end if
   if (vn.eq."FLDSC") then
      vname = (/"FLDSC","fldsc"/)
+  end if
+  if (vn.eq."OLR") then
+     vname = (/"OLR","olr","FLUT"/)
   end if
   if (vn.eq."FSNS") then
      vname = (/"FSNS","fsns"/)
@@ -466,10 +539,18 @@ begin
         farr = farr*1.0
         farr@units = "N/m2"
      end if
-     farr@units = "N/m2"
+     farr = farr * 1e2  
+     farr@units = "10~S~-2~N~ N/m2"
   end if
   if (vn.eq."FLDS".or.vn.eq."FLDSC".or.vn.eq."FLNS".or.vn.eq."FLNSC") then
      if (farr@units.eq."W m~S~-2~N~".or.farr@units.eq."W m-2") then 
+        farr = farr*1.0
+        farr@units = "W/m2"
+     end if
+     farr@units = "W/m2"
+  end if
+  if (vn.eq."OLR".or.vn.eq."FLUT".or.vn.eq."FLUTC") then
+     if (farr@units.eq."W m~S~-2~N~".or.farr@units.eq."W m-2") then
         farr = farr*1.0
         farr@units = "W/m2"
      end if

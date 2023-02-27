@@ -120,7 +120,7 @@ begin
   prreg_frame  = 1
   do ee = 0,nsim-1
      sst = data_read_in(paths(ee),"TS",syear(ee),eyear(ee))    ; read in data, orient lats/lons correctly, set time coordinate variable up
-     if (isatt(sst,"is_all_missing").or.nyr(ee).lt.40) then
+     if (isatt(sst,"is_all_missing").or.nyr(ee).lt.30) then
         delete(sst)
         continue
      end if
@@ -713,4 +713,3 @@ begin
   end if
   print("Finished: ipo.ncl")
 end
-    

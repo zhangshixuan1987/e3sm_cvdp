@@ -43,9 +43,11 @@ begin
   rad=(pi/180.)
  
  regvars = (/"psl","sst","trefht","prect","u10","v10","taux","tauy","sh","lh", "eth", \
-             "swcre","fldsc","cldtot","u850","v850","th850","z500","u200","v200"/)
+             "swcre","olr","cldtot","u850","v850","th850","z500","u200","v200"/)
  landmsk = (/    0,    1,       0,      0,    0,    0,     0,     0,   0,   0,     1, \
-                 0,    0,       0,      0,    0,    0,     0,     0,   0 /)
+                   0,      0,       0,     0,     0,      0,     0,     0,   0 /)
+ varfacs = (/3.0,   1.0,     1.0,    1.0,  1.0,  1.0,   2.0,   2.0, 5.0, 10.0,  5.0, \
+                  5.0, 5.0,     5.0,  2.0,    2.0,  1.0,   15.0,   5.0,   2.5/)
  nsvars  = dimsizes(regvars)
 
  do ss = 0, nsvars-1,1
@@ -56,6 +58,7 @@ begin
     vnm   = regvars(ss)
   end if 
   lmsk  = landmsk(ss)
+  vrfac = varfacs(ss)
   nsim_reg = numAsciiRow("namelist_byvar/namelist_"+vnm)
   na_reg   = asciiread("namelist_byvar/namelist_"+vnm,(/nsim_reg/),"string")
 
@@ -240,6 +243,12 @@ begin
      llonw = 190.
      llone = 240.
 
+     ;use a regional mean SSTA to make sign consistent for all simulation if possible
+     llats1 = -5.0
+     llatn1 =  5.0
+     llonw1 =  210.0
+     llone1 =  270.0
+
     ;nino34 = wgt_areaave_Wrap(sst(:,{llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0)
     ;nino34@comment_cvdp = "area average domain ("+llats+":"+llatn+"N, "+llonw+":"+llone+"E)"
     ;nino34@units = sst@units
@@ -261,17 +270,19 @@ begin
         nino34_prob_djf  = vreg_djf(0,:,:)
         nino34_vreg_djf  = (/ rc /) 
         nino34_prob_djf  = (/(1-betainc(df/(df+tval^2),df/2.0,b))*100.0/)
+        nino34_prob_djf  = where(ismissing(nino34_vreg_djf),nino34_vreg_djf@_FillValue,nino34_prob_djf)
+        nino34_vreg_djf@units = vreg_djf@units +" (per std dev)"
         delete([/rc,tval,df,b,vreg_djf/]) 
      end if     
-     
-     if (.not.ismissing(nino34_djf({0},{230}))) then
-        if (nino34_djf({0},{230}).lt.0) then  ; arbitrary attempt to make all plots have the nino34e sign..
+
+     if (.not.all(ismissing(nino34_djf({llats1:llatn1},{llonw1:llone1})))) then
+       if (avg(nino34_djf({llats1:llatn1},{llonw1:llone1})).le.0) then
            nino34_djf = nino34_djf*-1.
            nino34_pc_djf = nino34_pc_djf*-1.
            if (vxreg_plot_flag.eq.0) then
               nino34_vreg_djf = nino34_vreg_djf*-1.
-           end if
-        end if
+           end if 
+       end if 
      end if
      
      rc    = arr_djf(0,:,:) 
@@ -305,18 +316,21 @@ begin
         nino34_prob_mam  = vreg_mam(0,:,:)
         nino34_vreg_mam  = (/ rc /)
         nino34_prob_mam  = (/(1-betainc(df/(df+tval^2),df/2.0,b))*100.0/) 
+        nino34_prob_mam  = where(ismissing(nino34_vreg_mam),nino34_vreg_mam@_FillValue,nino34_prob_mam)
+        nino34_vreg_mam@units = vreg_mam@units +"(per std dev)"
         delete([/rc,tval,df,b,vreg_mam/])
      end if
 
-     if (.not.ismissing(nino34_mam({0},{230}))) then
-        if (nino34_mam({0},{230}).lt.0) then  ; arbitrary attempt to make all plots have the nino34e sign..
+     if (.not.all(ismissing(nino34_mam({llats1:llatn1},{llonw1:llone1})))) then
+       if (avg(nino34_mam({llats1:llatn1},{llonw1:llone1})).le.0) then
            nino34_mam = nino34_mam*-1.
            nino34_pc_mam = nino34_pc_mam*-1.
            if (vxreg_plot_flag.eq.0) then
               nino34_vreg_mam = nino34_vreg_mam*-1.
-           end if
-        end if
+           end if 
+       end if 
      end if
+
      rc    = arr_djf(0,:,:)
      rc    = (/escorc_n(nino34_pc_mam,arr_mam,0,0)/)
      rc    = rc*rc*100.0
@@ -345,17 +359,19 @@ begin
         nino34_prob_jja  = vreg_jja(0,:,:)
         nino34_vreg_jja  = (/ rc /)
         nino34_prob_jja  = (/(1-betainc(df/(df+tval^2),df/2.0,b))*100.0/) 
+        nino34_prob_jja  = where(ismissing(nino34_vreg_jja),nino34_vreg_jja@_FillValue,nino34_prob_jja)
+        nino34_vreg_jja@units = vreg_jja@units +"(per std dev)"
         delete([/rc,tval,df,b,vreg_jja/])
      end if
 
-     if (.not.ismissing(nino34_jja({0},{230}))) then
-        if (nino34_jja({0},{230}).lt.0) then  ; arbitrary attempt to make all plots have the nino34e sign..
+     if (.not.all(ismissing(nino34_jja({llats1:llatn1},{llonw1:llone1})))) then
+       if (avg(nino34_jja({llats1:llatn1},{llonw1:llone1})).le.0) then
            nino34_jja = nino34_jja*-1.
            nino34_pc_jja = nino34_pc_jja*-1.
            if (vxreg_plot_flag.eq.0) then
               nino34_vreg_jja = nino34_vreg_jja*-1.
-           end if
-        end if
+           end if 
+       end if 
      end if
 
      rc    = arr_jja(0,:,:)
@@ -386,18 +402,21 @@ begin
         nino34_prob_son  = vreg_son(0,:,:)
         nino34_vreg_son  = (/ rc /)
         nino34_prob_son  = (/(1-betainc(df/(df+tval^2),df/2.0,b))*100.0/) 
+        nino34_prob_son  = where(ismissing(nino34_vreg_son),nino34_vreg_son@_FillValue,nino34_prob_son)
+        nino34_vreg_son@units = vreg_son@units +"(per std dev)"
         delete([/rc,tval,df,b,vreg_son/])
      end if
 
-     if (.not.ismissing(nino34_son({0},{230}))) then
-        if (nino34_son({0},{230}).lt.0) then  ; arbitrary attempt to make all plots have the nino34e sign..
+     if (.not.all(ismissing(nino34_son({llats1:llatn1},{llonw1:llone1})))) then
+       if (avg(nino34_son({llats1:llatn1},{llonw1:llone1})).le.0) then
            nino34_son = nino34_son*-1.
            nino34_pc_son = nino34_pc_son*-1.
            if (vxreg_plot_flag.eq.0) then
               nino34_vreg_son = nino34_vreg_son*-1.
-           end if
-        end if
+           end if 
+       end if 
      end if
+
      rc    = arr_son(0,:,:)
      rc    = (/escorc_n(nino34_pc_son,arr_son,0,0)/)
      rc    = rc*rc*100.0
@@ -426,18 +445,21 @@ begin
         nino34_prob_ann  = vreg_ann(0,:,:)
         nino34_vreg_ann  = (/ rc /)
         nino34_prob_ann  = (/(1-betainc(df/(df+tval^2),df/2.0,b))*100.0/) 
+        nino34_prob_ann  = where(ismissing(nino34_vreg_ann),nino34_vreg_ann@_FillValue,nino34_prob_ann)
+        nino34_vreg_ann@units = vreg_ann@units +"(per std dev)"
         delete([/rc,tval,df,b,vreg_ann/])
      end if
 
-     if (.not.ismissing(nino34_ann({0},{230}))) then
-        if (nino34_ann({0},{230}).lt.0) then  ; arbitrary attempt to make all plots have the nino34e sign..
+     if (.not.all(ismissing(nino34_ann({llats1:llatn1},{llonw1:llone1})))) then
+       if (avg(nino34_ann({llats1:llatn1},{llonw1:llone1})).le.0) then
            nino34_ann = nino34_ann*-1.
            nino34_pc_ann = nino34_pc_ann*-1.
            if (vxreg_plot_flag.eq.0) then
               nino34_vreg_ann = nino34_vreg_ann*-1.
-           end if
-        end if
+           end if 
+       end if 
      end if
+
      rc    = arr_ann(0,:,:)
      rc    = (/escorc_n(nino34_pc_ann,arr_ann,0,0)/)
      rc    = rc*rc*100.0
@@ -467,18 +489,21 @@ begin
            nino34_prob_mon  = vreg(0,:,:)
            nino34_vreg_mon  = (/ rc /)
            nino34_prob_mon  = (/(1-betainc(df/(df+tval^2),df/2.0,b))*100.0/) 
+           nino34_prob_mon  = where(ismissing(nino34_vreg_mon),nino34_vreg_mon@_FillValue,nino34_prob_mon)
+           nino34_vreg_mon@units = vreg@units +"(per std dev)"
            delete([/rc,tval,df,b,vreg/])
         end if
 
-        if (.not.ismissing(nino34_mon({0},{230}))) then
-           if (nino34_mon({0},{230}).lt.0) then  ; arbitrary attempt to make all plots have the nino34e sign..
+        if (.not.all(ismissing(nino34_mon({llats1:llatn1},{llonw1:llone1})))) then
+          if (avg(nino34_mon({llats1:llatn1},{llonw1:llone1})).le.0) then
               nino34_mon = nino34_mon*-1.
               nino34_pc_mon = nino34_pc_mon*-1.
               if (vxreg_plot_flag.eq.0) then
                  nino34_vreg_mon = nino34_vreg_mon*-1.
               end if
-           end if
+          end if
         end if
+
         rc    = arr(0,:,:)
         rc    = (/escorc_n(nino34_pc_mon,arr,0,0)/)
         rc    = rc*rc*100.0
@@ -533,53 +558,53 @@ begin
               z = addfile(fn,"w")
            end if
 
-           z->nino34_timeseries_djf = set_varAtts(nino34_pc_djf,"ENSO(Nino34) normalized principal component timeseries (DJF)","1","")
-           z->nino34_timeseries_mam = set_varAtts(nino34_pc_mam,"ENSO(Nino34) normalized principal component timeseries (MAM)","1","")
-           z->nino34_timeseries_jja = set_varAtts(nino34_pc_jja,"ENSO(Nino34) normalized principal component timeseries (JJA)","1","")
-           z->nino34_timeseries_son = set_varAtts(nino34_pc_son,"ENSO(Nino34) normalized principal component timeseries (SON)","1","")
-           z->nino34_timeseries_ann = set_varAtts(nino34_pc_ann,"ENSO(Nino34) normalized principal component timeseries (annual)","1","")
+           z->nino34_timeseries_djf = set_varAtts(nino34_pc_djf,"ENSO (Nino34) normalized principal component timeseries (DJF)","1","")
+           z->nino34_timeseries_mam = set_varAtts(nino34_pc_mam,"ENSO (Nino34) normalized principal component timeseries (MAM)","1","")
+           z->nino34_timeseries_jja = set_varAtts(nino34_pc_jja,"ENSO (Nino34) normalized principal component timeseries (JJA)","1","")
+           z->nino34_timeseries_son = set_varAtts(nino34_pc_son,"ENSO (Nino34) normalized principal component timeseries (SON)","1","")
+           z->nino34_timeseries_ann = set_varAtts(nino34_pc_ann,"ENSO (Nino34) normalized principal component timeseries (annual)","1","")
            vout = "nino34_"+vnm+"_regression_djf"
-           vosr = vnm+" regression onto ENSO(Nino34) principal component timeseries (DJF)"
+           vosr = vnm+" regression onto ENSO (Nino34) principal component timeseries (DJF)"
            z->$vout$ = set_varAtts(nino34_vreg_djf,vosr,"","") 
            vout = "nino34_"+vnm+"_regression_mam"
-           vosr = vnm+" regression onto ENSO(Nino34) principal component timeseries (MAM)"
+           vosr = vnm+" regression onto ENSO (Nino34) principal component timeseries (MAM)"
            z->$vout$ = set_varAtts(nino34_vreg_mam,vosr,"","")  
            vout = "nino34_"+vnm+"_regression_jja"
-           vosr = vnm+" regression onto ENSO(Nino34) principal component timeseries (JJA)"
+           vosr = vnm+" regression onto ENSO (Nino34) principal component timeseries (JJA)"
            z->$vout$ = set_varAtts(nino34_vreg_jja,vosr,"","")  
            vout = "nino34_"+vnm+"_regression_son"
-           vosr = vnm+" regression onto ENSO(Nino34) principal component timeseries (SON)"
+           vosr = vnm+" regression onto ENSO (Nino34) principal component timeseries (SON)"
            z->$vout$ = set_varAtts(nino34_vreg_son,vosr,"","")  
            vout = "nino34_"+vnm+"_regression_ann"
-           vosr = vnm+" regression onto ENSO(Nino34) principal component timeseries (annual)"
+           vosr = vnm+" regression onto ENSO (Nino34) principal component timeseries (annual)"
            z->$vout$ = set_varAtts(nino34_vreg_ann,vosr,"","")  
 
            vout = "nino34_"+vnm+"_regprob_djf"
-           vosr = vnm+" ENSO(Nino34) regression t-test probility(DJF)"
+           vosr = vnm+" ENSO (Nino34) regression t-test probility(DJF)"
            z->$vout$ = set_varAtts(nino34_prob_djf,vosr,"","")
            vout = "nino34_"+vnm+"_regprob_mam"
-           vosr = vnm+" ENSO(Nino34) regression t-test probility(MAM)"
+           vosr = vnm+" ENSO (Nino34) regression t-test probility(MAM)"
            z->$vout$ = set_varAtts(nino34_prob_mam,vosr,"","")
            vout = "nino34_"+vnm+"_regprob_jja"
-           vosr = vnm+" ENSO(Nino34) regression t-test probility(JJA)"
+           vosr = vnm+" ENSO (Nino34) regression t-test probility(JJA)"
            z->$vout$ = set_varAtts(nino34_prob_jja,vosr,"","")
            vout = "nino34_"+vnm+"_regprob_son"
-           vosr = vnm+" ENSO(Nino34) regression t-test probility(SON)"
+           vosr = vnm+" ENSO (Nino34) regression t-test probility(SON)"
            z->$vout$ = set_varAtts(nino34_prob_son,vosr,"","")
            vout = "nino34_"+vnm+"_regprob_ann"
-           vosr = vnm+" ENSO(Nino34) regression t-test probility(annual)"
+           vosr = vnm+" ENSO (Nino34) regression t-test probility(annual)"
            z->$vout$ = set_varAtts(nino34_prob_ann,vosr,"","")
 
            if (COMPUTE_MODES_MON.eq."True") then   
 
-              z->nino34_timeseries_mon  = set_varAtts(nino34_pc_mon,"ENSO(Nino34) principal component timeseries (monthly)","","")
+              z->nino34_timeseries_mon  = set_varAtts(nino34_pc_mon,"ENSO (Nino34) principal component timeseries (monthly)","","")
 
               vout = "nino34_"+vnm+"_regression_mon"
-              vosr = vnm+" regression onto ENSO(Nino34) principal component timeseries (monthly)"
+              vosr = vnm+" regression onto ENSO (Nino34) principal component timeseries (monthly)"
               z->$vout$ = set_varAtts(nino34_vreg_mon,vosr,"","")
 
               vout = "nino34_"+vnm+"_regprob_mon"
-              vosr = vnm+" ENSO(Nino34) regression t-test probility(monthly)"
+              vosr = vnm+" ENSO (Nino34) regression t-test probility(monthly)"
               z->$vout$ = set_varAtts(nino34_prob_mon,vosr,"","")
 
            end if
@@ -588,23 +613,6 @@ begin
         end if
      end if     
      delete([/nino34_pc_djf,nino34_pc_jja,nino34_pc_mam,nino34_pc_son,nino34_pc_mon/])
-
-     x1d = ndtooned((/nino34_vreg_djf({:-20},:)/))
-     xm  = dim_median(x1d)
-     sfcfacs = 1.0
-     if(xm.gt.1) then
-       sfcfacs= toint(xm)*1.0
-     else if (xm.gt.1e-1) then
-       sfcfacs = 1.0
-     else if (xm.gt.1e-2) then
-       sfcfacs = 0.1
-     else if (xm.gt.1e-3) then
-       sfcfacs = 0.01
-     end if
-     end if
-     end if
-     end if
-     delete([/xm,x1d/])
 
 ;========================================================================
      res = True
@@ -643,7 +651,7 @@ begin
      res@gsnRightStringFontHeightF = 0.014
 
      res@cnLevels := (/-0.8,-0.6,-0.4,-0.2,-0.1,0,0.1,0.2,0.4,0.6,0.8/)
-     res@cnLevels = res@cnLevels * sfcfacs
+     res@cnLevels = res@cnLevels * vrfac
      res@gsnLeftString = syear(ee)+"-"+eyear(ee)
      res@gsnCenterString = names(ee)
  
@@ -693,6 +701,7 @@ begin
      if (vxreg_plot_flag.eq.0) then
         res@gsnCenterString = names_reg(ee)
         res@gsnRightString = ""
+        lbunitstr = nino34_vreg_djf@units
         reg_nino34_djf(ee) = gsn_csm_contour_map(wks_nino34,nino34_vreg_djf,res)
         reg_nino34_mam(ee) = gsn_csm_contour_map(wks_nino34,nino34_vreg_mam,res)
         reg_nino34_jja(ee) = gsn_csm_contour_map(wks_nino34,nino34_vreg_jja,res)
@@ -744,7 +753,7 @@ begin
      line3   = "                  "    ; Must be 18 characters long
      line4   = line3
      header = (/"","Pattern Correlations   Observations vs. Model(s)",""/)
-     finpr_nino34_djf  = "ENSO(Nino34) (DJF)         "     
+     finpr_nino34_djf  = "ENSO (Nino34) (DJF)         "     
      do hh = 1,nsim-1
         dimY = dimsizes(tochar(names(hh)))
         nchar = dimY
@@ -793,19 +802,26 @@ begin
   panres@gsnPanelYWhiteSpacePercent = 3.0
   panres@pmLabelBarHeightF = 0.05
   panres@pmLabelBarWidthF = 0.55
-  panres@lbTitleOn = False
+  panres@pmLabelBarOrthogonalPosF = -0.03
+  panres@lbTitleOn = True 
   panres@lbBoxLineColor = "gray70"
   if (nsim.le.4) then
      if (nsim.eq.1) then
         panres@txFontHeightF = 0.022
         panres@gsnPanelBottom = 0.50
+        panres@lbLabelFontHeightF = 0.018
+        panres@lbTitleFontHeightF = 0.018
      else
         panres@txFontHeightF = 0.0145
         panres@gsnPanelBottom = 0.50
+        panres@lbLabelFontHeightF = 0.012
+        panres@lbTitleFontHeightF = 0.012
      end if
   else
      panres@txFontHeightF = 0.016
      panres@gsnPanelBottom = 0.05
+     panres@lbLabelFontHeightF = 0.012
+     panres@lbTitleFontHeightF = 0.012
   end if
   ncol = floattointeger(sqrt(nsim))
   nrow = (nsim/ncol)+mod(nsim,ncol) 
@@ -816,23 +832,24 @@ begin
      else
        txt0 = str_upper(vnm)
      end if
-     panres@txString = "ENSO(Nino34) "+txt0+" Regressions (DJF)" 
+     panres@lbTitleString = txt0 + " [" + lbunitstr +"]"  
+     panres@txString = "ENSO (Nino34) Regressions (DJF)" 
      gsn_panel2(wks_nino34,reg_nino34_djf,(/nrow,ncol/),panres)
      delete(reg_nino34_djf)
-     panres@txString = "ENSO(Nino34) "+txt0+" Regressions (MAM)"
+     panres@txString = "ENSO (Nino34) Regressions (MAM)"
      gsn_panel2(wks_nino34,reg_nino34_mam,(/nrow,ncol/),panres)
      delete(reg_nino34_mam)
-     panres@txString = "ENSO(Nino34) "+txt0+" Regressions (JJA)"
+     panres@txString = "ENSO (Nino34) Regressions (JJA)"
      gsn_panel2(wks_nino34,reg_nino34_jja,(/nrow,ncol/),panres)
      delete(reg_nino34_jja)
-     panres@txString = "ENSO(Nino34) "+txt0+" Regressions (SON)"
+     panres@txString = "ENSO (Nino34) Regressions (SON)"
      gsn_panel2(wks_nino34,reg_nino34_son,(/nrow,ncol/),panres)
      delete(reg_nino34_son)
-     panres@txString = "ENSO(Nino34) "+txt0+" Regressions (Annual)"
+     panres@txString = "ENSO (Nino34) Regressions (Annual)"
      gsn_panel2(wks_nino34,reg_nino34_ann,(/nrow,ncol/),panres)
      delete(reg_nino34_ann)
      if (COMPUTE_MODES_MON.eq."True") then    
-        panres@txString = "ENSO(Nino34) "+txt0+" Regressions (Monthly)"
+        panres@txString = "ENSO (Nino34) Regressions (Monthly)"
         gsn_panel2(wks_nino34,reg_nino34_mon,(/nrow,ncol/),panres)
         delete(reg_nino34_mon)
      end if
@@ -868,7 +885,7 @@ begin
 
   end if
 
-  delete([/vnm,lmsk,nsim_reg,names_reg,paths_reg,syear_reg,syear_reg,eyear_reg,nyr_reg,sfcfacs/])
+  delete([/vnm,lmsk,nsim_reg,names_reg,paths_reg,syear_reg,syear_reg,eyear_reg,nyr_reg,vrfac/])
  end do 
     
  print("Finished: sst.nino34_regpatt.ncl")
