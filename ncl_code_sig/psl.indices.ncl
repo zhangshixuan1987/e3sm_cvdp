@@ -112,7 +112,7 @@ begin
   if (COLORMAP.eq.0) then
      gsn_define_colormap(wks_samind,"ncl_default") 
      gsn_define_colormap(wks_aslind,"ncl_default")
-     gsn_merge_colormaps(wks_samlat_tlon,"cmp_flux",(/"gray30","gray50","gray70"/))
+     gsn_define_colormap(wks_samlat_tlon,"MPL_rainbow")
      gsn_define_colormap(wks_samind_p,"cb_9step")
      gsn_define_colormap(wks_samind_rst,"ncl_default")   
      gsn_define_colormap(wks_samind_mst,"ncl_default")   
@@ -122,7 +122,7 @@ begin
   if (COLORMAP.eq.1) then
      gsn_define_colormap(wks_samind,"ncl_default") 
      gsn_define_colormap(wks_aslind,"ncl_default")   
-     gsn_merge_colormaps(wks_samlat_tlon,"MPL_rainbow",(/"gray30","gray50","gray70"/))
+     gsn_define_colormap(wks_samlat_tlon,"MPL_rainbow")
      gsn_define_colormap(wks_samind_p,"cb_9step")
      gsn_define_colormap(wks_samind_rst,"ncl_default")   
      gsn_define_colormap(wks_samind_mst,"ncl_default")   
@@ -205,9 +205,9 @@ begin
         delete(climo)
      end if
 
-     coswgt=cos(rad*pslm&lat)
+     coswgt=cos(rad*psl&lat)
      coswgt!0 = "lat" 
-     coswgt&lat= pslm&lat  
+     coswgt&lat= psl&lat  
 
      llats = -65. ; sam index
      llatn = -40.
@@ -362,20 +362,38 @@ begin
         finpsl_mave         = finpsl(lon|0:2,time|:) 
         finpsl_tave         = finpsl(time|0:2,lon|:) 
 
-        pslr = psl
-        pslr = psl@_FillValue 
         do gg = 30,dimsizes(samind_rn)-31
           mocntr1 = gg - 30  
           mocntr2 = gg + 30
-          pslr(gg,:,:) = escovc(samind_rn(time|mocntr1:mocntr2), psl({lat|:},{lon|:},time|mocntr1:mocntr2)) 
-          vsec = pslr(gg,{-90:-20},:) 
+          pslr = psl(0,:,:)
+          pslr = escovc(samind_rn(time|mocntr1:mocntr2), psl({lat|:},{lon|:},time|mocntr1:mocntr2)) 
+         ;d = addfile("$NCARG_ROOT/lib/ncarg/data/cdf/landsea.nc","r")   ; mask out land
+         ;basemap = d->LSMASK
+         ;lsm  = landsea_mask(basemap,pslr&lat,pslr&lon)
+         ;pslr = mask(pslr,conform(pslr,lsm,(/0,1/)).ge.1,False)
+         ;delete([/lsm,basemap,d/])
+          vsec = pslr({-75:-30},:) 
+         ;SAM latitude is search as location with smallest absolute covariance (Paul Wachter et al., 2020)
           vsec = abs(vsec)
-          ;SAM latitude is search as location with smallest absolute covariance (Paul Wachter et al., 2020)
-          mind = dim_minind(vsec,0)
+          vsec = where(ismissing(vsec),1e8,vsec)
           do hh = 0,dimsizes(vsec(0,:))-1
-            finpsl(gg,hh) =  tofloat(vsec&lat(mind(hh)))
+            imin = local_min_1d(vsec(:,hh),False, 0, 1)
+            if (.not.all(ismissing(imin))) then
+              if(dimsizes(imin).gt.1) then 
+                imin0 = dim_minind(vsec(imin,hh),0)
+                finpsl(gg,hh) = tofloat(vsec&lat(imin(imin0)))
+                delete([/imin0/]) 
+              else
+                finpsl(gg,hh) = tofloat(vsec&lat(imin))
+              end if 
+            else  
+              imin0 = dim_minind(vsec(:,hh),0)
+              finpsl(gg,hh) = tofloat(vsec&lat(imin0))
+              delete([/imin0/])
+            end if 
+            delete([/imin/])
           end do 
-          delete([/vsec,mocntr1,mocntr2,mind/])
+          delete([/vsec,pslr,mocntr1,mocntr2/])
         end do
 
         ; apply a smoothing to reduce noise  
@@ -391,7 +409,6 @@ begin
         finpsl_tave(0,:) = dim_avg_n(finpsl,0)
         finpsl_tave(1,:) = dim_min_n(finpsl,0)
         finpsl_tave(2,:) = dim_max_n(finpsl,0)
-        delete([/pslr/])
         
         if (OUTPUT_DATA.eq."True") then 
            hov_all = (/ finpsl /)  
@@ -434,6 +451,8 @@ begin
      samind_jja&time = ispan(syear(ee),eyear(ee)-1,1)
      samind_jja      = dtrend_msg(ispan(0,dimsizes(samind_jja&time)-1,1),samind_jja,True,False)
      samind_jja      = dim_standardize(samind_jja,0)
+
+     psl = (/ dtrend_msg_n(ispan(0,dimsizes(psl&time)-1,1),psl,False,False,0) /)  
 
      if (any(ismissing((/syear(ee),syear_trefht(ee),syear_ts(ee),eyear(ee),eyear_trefht(ee),eyear_ts(ee)/)))) then
         tassstreg_plot_flag = 1
@@ -1441,8 +1460,8 @@ begin
      res@tmYLLabelJust = "CenterCenter"               
      res@tmYLLabelDeltaF = 1.3    ;0.05
      res@cnFillOn = True
-     res@gsnSpreadColors = True  
-     res@gsnSpreadColorEnd = 19
+    ;res@gsnSpreadColors = True  
+    ;res@gsnSpreadColorEnd = 19
      
      res@lbLabelBarOn = False
   
@@ -1450,7 +1469,7 @@ begin
      res@cnInfoLabelOn = False
      res@cnLinesOn = True
      res@cnLevelSelectionMode = "ExplicitLevels"
-     res@cnLevels = fspan(-70,-20,11) 
+     res@cnLevels = fspan(-60,-40,11) 
      carr = new(dimsizes(res@cnLevels),"string")
      carr = "transparent"
      carr(8) = "gray50"
@@ -1462,17 +1481,19 @@ begin
      res@gsnMajorLonSpacing = 90.
      res@gsnMinorLonSpacing = 60.
      res@tiYAxisOn = False
-     
      if (wks_type.eq."png") then
-        res@cnLineThicknessF = 2.  
-     else
         res@cnLineThicknessF = 1.  
+     else
+        res@cnLineThicknessF = 0.5  
      end if
      res@gsnCenterStringOrthogonalPosF = 0.025
      res@gsnRightStringOrthogonalPosF = res@gsnCenterStringOrthogonalPosF
      res@gsnCenterStringFontHeightF = 0.017
      res@gsnLeftStringFontHeightF = 0.017
      res@gsnRightStringFontHeightF = 0.017
+
+     ;res@cnSmoothingOn = True
+     ;res@cnSmoothingTensionF = -3.0
 
      res@gsnLeftString = ""
      res@gsnCenterString= ""
@@ -2058,25 +2079,31 @@ begin
   panres2@gsnPanelLabelBar = True
   panres2@lbLabelStride = 1
   panres2@pmLabelBarWidthF = 0.4
-  panres2@pmLabelBarHeightF = 0.06
-  panres2@lbLabelFontHeightF = 0.013
+  panres2@pmLabelBarHeightF = 0.04
+  panres@pmLabelBarOrthogonalPosF = -0.03
   panres2@txString = ""   
 
   if (nsim.le.4) then
      if (nsim.eq.1) then
         panres2@txFontHeightF = 0.022
         panres2@gsnPanelBottom = 0.50
+        panres@lbLabelFontHeightF = 0.018
+        panres@lbTitleFontHeightF = 0.018
      else
         panres2@txFontHeightF = 0.0145
         panres2@gsnPanelBottom = 0.50
+        panres2@lbLabelFontHeightF = 0.012
+        panres2@lbTitleFontHeightF = 0.012
      end if
   else
-     panres2@txFontHeightF = 0.016
-     panres2@gsnPanelBottom = 0.05
+     panres2@txFontHeightF      = 0.012
+     panres2@gsnPanelBottom     = 0.05
+     panres2@lbLabelFontHeightF = 0.008
+     panres2@lbTitleFontHeightF = 0.008
   end if
+
   panres2@lbTitleOn = True
   panres2@lbTitlePosition = "Bottom"
-  panres2@lbTitleFontHeightF = panres2@lbLabelFontHeightF - 0.002
 
   panres2@lbTitleString = "Latitude (degree)"
   panres2@txString = "SAM Latitude Position (degree)"

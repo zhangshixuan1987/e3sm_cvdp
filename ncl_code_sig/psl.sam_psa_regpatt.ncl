@@ -91,6 +91,9 @@ begin
      gsn_define_colormap(wks_sam,"MPL_RdBu")  
      gsn_define_colormap(wks_psa1,"MPL_RdBu") 
      gsn_define_colormap(wks_psa2,"MPL_RdBu") 
+     gsn_reverse_colormap(wks_sam)           ; Reverse the color map.
+     gsn_reverse_colormap(wks_psa1)           ; Reverse the color map.
+     gsn_reverse_colormap(wks_psa2)           ; Reverse the color map.
   end if
   if (COLORMAP.eq.1) then
      gsn_define_colormap(wks_sam,"NCV_jaisnd")  
@@ -1156,12 +1159,16 @@ begin
       
      if (vxreg_plot_flag.eq.0) then
         res@gsnCenterString = names_reg(ee)
-        res@gsnRightString = ""
         lbunitstr = sam_vreg_djf@units
+        res@gsnRightString  = sam_djf@pcvar
         reg_sam_djf(ee) = gsn_csm_contour_map_polar(wks_sam,sam_vreg_djf,res)
+        res@gsnRightString  = sam_mam@pcvar
         reg_sam_mam(ee) = gsn_csm_contour_map_polar(wks_sam,sam_vreg_mam,res)
+        res@gsnRightString  = sam_jja@pcvar
         reg_sam_jja(ee) = gsn_csm_contour_map_polar(wks_sam,sam_vreg_jja,res)
+        res@gsnRightString  = sam_son@pcvar
         reg_sam_son(ee) = gsn_csm_contour_map_polar(wks_sam,sam_vreg_son,res)
+        res@gsnRightString  = sam_ann@pcvar
         reg_sam_ann(ee) = gsn_csm_contour_map_polar(wks_sam,sam_vreg_ann,res)     
         delete([/sam_vreg_djf,sam_vreg_mam,sam_vreg_jja,sam_vreg_son,sam_vreg_ann/])
         o_djf = gsn_csm_contour(wks_sam,sam_prob_djf,res2)
@@ -1181,7 +1188,8 @@ begin
         overlay(reg_sam_son(ee),o_son)
         overlay(reg_sam_ann(ee),o_ann)
         delete([/o_djf,o_mam,o_jja,o_son,o_ann/])
-        if (COMPUTE_MODES_MON.eq."True") then                    
+        if (COMPUTE_MODES_MON.eq."True") then   
+           res@gsnRightString  = sam_mon@pcvar
            reg_sam_mon(ee) = gsn_csm_contour_map_polar(wks_sam,sam_vreg_mon,res)
            delete([/sam_vreg_mon/])
            o_mon = gsn_csm_contour(wks_sam,sam_prob_mon,res2)
@@ -1189,11 +1197,16 @@ begin
            overlay(reg_sam_mon(ee),o_mon)
            delete([/o_mon,sam_prob_mon/])
         end if
-     
+ 
+        res@gsnRightString  = psa1_djf@pcvar
         reg_psa1_djf(ee) = gsn_csm_contour_map_polar(wks_psa1,psa1_vreg_djf,res)
+        res@gsnRightString  = psa1_mam@pcvar
         reg_psa1_mam(ee) = gsn_csm_contour_map_polar(wks_psa1,psa1_vreg_mam,res)
+        res@gsnRightString  = psa1_jja@pcvar
         reg_psa1_jja(ee) = gsn_csm_contour_map_polar(wks_psa1,psa1_vreg_jja,res)
+        res@gsnRightString  = psa1_son@pcvar
         reg_psa1_son(ee) = gsn_csm_contour_map_polar(wks_psa1,psa1_vreg_son,res)
+        res@gsnRightString  = psa1_ann@pcvar
         reg_psa1_ann(ee) = gsn_csm_contour_map_polar(wks_psa1,psa1_vreg_ann,res)     
         delete([/psa1_vreg_djf,psa1_vreg_mam,psa1_vreg_jja,psa1_vreg_son,psa1_vreg_ann/])
         o_djf = gsn_csm_contour(wks_psa1,psa1_prob_djf,res2)
@@ -1214,6 +1227,7 @@ begin
         overlay(reg_psa1_ann(ee),o_ann)
         delete([/o_djf,o_mam,o_jja,o_son,o_ann/])
         if (COMPUTE_MODES_MON.eq."True") then
+           res@gsnRightString  = psa1_mon@pcvar
            reg_psa1_mon(ee) = gsn_csm_contour_map_polar(wks_psa1,psa1_vreg_mon,res)
            delete([/psa1_vreg_mon/])
            o_mon = gsn_csm_contour(wks_psa1,psa1_prob_mon,res2)
@@ -1222,10 +1236,15 @@ begin
            delete([/o_mon,psa1_prob_mon/])
         end if
 
+        res@gsnRightString  = psa2_djf@pcvar
         reg_psa2_djf(ee) = gsn_csm_contour_map_polar(wks_psa2,psa2_vreg_djf,res)
+        res@gsnRightString  = psa2_mam@pcvar
         reg_psa2_mam(ee) = gsn_csm_contour_map_polar(wks_psa2,psa2_vreg_mam,res)
+        res@gsnRightString  = psa2_jja@pcvar
         reg_psa2_jja(ee) = gsn_csm_contour_map_polar(wks_psa2,psa2_vreg_jja,res)
+        res@gsnRightString  = psa2_son@pcvar
         reg_psa2_son(ee) = gsn_csm_contour_map_polar(wks_psa2,psa2_vreg_son,res)
+        res@gsnRightString  = psa2_ann@pcvar
         reg_psa2_ann(ee) = gsn_csm_contour_map_polar(wks_psa2,psa2_vreg_ann,res)     
         delete([/psa2_vreg_djf,psa2_vreg_mam,psa2_vreg_jja,psa2_vreg_son,psa2_vreg_ann/])
         o_djf = gsn_csm_contour(wks_psa2,psa2_prob_djf,res2)
@@ -1246,6 +1265,7 @@ begin
         overlay(reg_psa2_ann(ee),o_ann)
         delete([/o_djf,o_mam,o_jja,o_son,o_ann/])
         if (COMPUTE_MODES_MON.eq."True") then
+           res@gsnRightString  = psa2_mon@pcvar
            reg_psa2_mon(ee) = gsn_csm_contour_map_polar(wks_psa2,psa2_vreg_mon,res)
            delete([/psa2_vreg_mon/])
            o_mon = gsn_csm_contour(wks_psa2,psa2_prob_mon,res2)

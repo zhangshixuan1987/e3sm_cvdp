@@ -168,6 +168,11 @@ begin
            delete([/aice_nh_seas,aice_nh_ann/])
         end do
         delete(aice_nh)
+        aice_nh_mean_djf@long_name = "Sea Ice Concentration" 
+        aice_nh_mean_mam@long_name = "Sea Ice Concentration"  
+        aice_nh_mean_jja@long_name = "Sea Ice Concentration"  
+        aice_nh_mean_son@long_name = "Sea Ice Concentration"  
+        aice_nh_mean_ann@long_name = "Sea Ice Concentration"  
         copy_VarMeta(aice_nh_mean_djf,aice_nh_sd_djf)
         copy_VarMeta(aice_nh_mean_mam,aice_nh_sd_mam)
         copy_VarMeta(aice_nh_mean_jja,aice_nh_sd_jja)

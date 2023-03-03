@@ -87,6 +87,7 @@ begin
   
   if (COLORMAP.eq.0) then
      gsn_define_colormap(wks_nao,"MPL_RdBu")  
+     gsn_reverse_colormap(wks_nao)           ; Reverse the color map.
   end if
   if (COLORMAP.eq.1) then
      gsn_define_colormap(wks_nao,"NCV_jaisnd")  

@@ -89,6 +89,8 @@ begin
   if (COLORMAP.eq.0) then
      gsn_define_colormap(wks_pna,"MPL_RdBu")  
      gsn_define_colormap(wks_npo,"MPL_RdBu") 
+     gsn_reverse_colormap(wks_pna)           ; Reverse the color map.
+     gsn_reverse_colormap(wks_npo)           ; Reverse the color map.
   end if
   if (COLORMAP.eq.1) then
      gsn_define_colormap(wks_pna,"NCV_jaisnd")  
@@ -159,6 +161,8 @@ begin
 ;     
 ;     arr = (/ dtrend_msg_n(ispan(0,dimsizes(arr&time)-1,1),arr,True,False,0) /)
 ;---------Regressions coding-------------------------------------------------
+     print(vnm + " " +syear(ee) + " " +syear_reg(ee) + " " + eyear(ee) + " " + eyear_reg(ee))
+
      if (any(ismissing((/syear(ee),syear_reg(ee),eyear(ee),eyear_reg(ee)/)))) then
         vxreg_plot_flag = 1
      else

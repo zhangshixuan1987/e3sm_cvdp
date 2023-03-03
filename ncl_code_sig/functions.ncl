@@ -104,6 +104,19 @@ begin
      blankarr&lev@units = "m"
      blankarr&lev@positive = "down"
   end if
+  if (opttype.eq."time_lev_lon") then
+     blankarr = new((/dimsizes(time),41,360/),"float",1.e20)
+     blankarr!0 = "time"    ; time coordinate variable assigned below
+     blankarr&time = time
+     blankarr!1 = "lev"
+     blankarr&lev =fspan(0,5000,41)
+     blankarr!2 = "lon"
+     blankarr&lat = fspan(0,360,180)
+     blankarr&lat@units = "degrees_east"
+     blankarr&lev@units = "m"
+     blankarr&lev@positive = "down"
+  end if
+
   blankarr@units = ""
   blankarr@is_all_missing = True
   return(blankarr)
@@ -253,6 +266,10 @@ begin
      vname = (/"TH850","th850","T850","t850"/)
   end if
 
+  if (vn.eq."SF") then
+     vname = (/"SF","sf"/)
+  end if
+
   if (ismissing(zpath) ) then
      print("File missing, creating blank array of data. View "+vn+" namelist for details.")
      arr = create_empty_array(yearS,yearE,1,12,"time_lat_lon")
@@ -330,7 +347,32 @@ begin
             arr = pot_temp(p, temp, -1, False)
             delete([/p,temp/])
           end if
-        else
+        else if (vn.eq."SF") then
+          c = addfile(zpath,"r")
+          if (isfilevar(c,"SF")) then  ;
+            arr = c->SF
+          end if
+          arr!0 = "time"
+          arr!1 = "lev"
+          arr!2 = "lat"
+          if (isfilevar(c,"time")) then  ;
+            arr&time = c->time 
+          end if 
+          if (isfilevar(c,"lev")) then  ;
+            arr&lev  = c->lev
+          end if 
+          if (isfilevar(c,"level")) then  ;
+            arr&lev  = c->level
+          end if
+          if (isfilevar(c,"lat")) then  ;
+            arr&lat  = c->lat
+            arr&lat@units = "degrees_north"
+          end if
+          if (isfilevar(c,"latitude")) then  ;
+            arr&lat  = c->latitude
+            arr&lat@units = "degrees_north"
+          end if
+        else 
           c = addfile(zpath,"r")
           do i=0,dimsizes(vname)-1
              if (isfilevar(c,vname(i))) then
@@ -348,6 +390,7 @@ begin
         delete([/cpath,nchar/])
 ;        delete(c)     
      end if
+     end if 
      delete([/cpath0/])
   end if
   
@@ -391,10 +434,16 @@ begin
   end if
   delete(dimz)
   
-  arr!0 = "time"
-  arr!1 = "lat"
-  arr!2 = "lon"
-  
+  if (vn.eq."SF") then
+    arr!0 = "time"
+    arr!1 = "lev"
+    arr!2 = "lat"
+  else 
+    arr!0 = "time"
+    arr!1 = "lat"
+    arr!2 = "lon"
+  end if 
+
 ;  if (isatt(arr,"valid_range")) then    ; check to make sure data is in valid range. Reset to stay within the valid range if needed.
 ;     if (type(arr@valid_range).eq.type(arr)) then                      ; Coding added in v5.0.0 but removed in v5.1.0 due to valid_range attributes not always being correct. 
 ;        arr = where(arr.lt.arr@valid_range(0),arr@valid_range(0),arr)  ; (By convention they should be, and should be the same type as the variable itself.) 
@@ -411,7 +460,11 @@ begin
      print("Requested "+yearS+"-"+yearE+" time span is outside the input file "+zpath+" time span of "+sydata+"-"+eydata+"")
      print("Setting array to all missing")
      delete(arr)
-     arr = create_empty_array(yearS,yearE,smdata,emdata,"time_lat_lon")
+     if (vn.eq."SF") then
+       arr = create_empty_array(yearS,yearE,smdata,emdata,"time_lev_lat")
+     else
+       arr = create_empty_array(yearS,yearE,smdata,emdata,"time_lat_lon")
+     end if 
      sydata = yearS     ; assign these variables based on yearS/yearE provided in namelist. Doesn't matter 
      eydata = yearE     ; as data array is totally missing..  
      smdata = 1
@@ -430,7 +483,11 @@ begin
         print("File = "+zpath)
         print("Read from file name: "+min(time)+"-"+max(time))        
         delete(arr)
-        arr = create_empty_array(yearS,yearE,smdata,emdata,"time_lat_lon")
+        if (vn.eq."SF") then
+          arr = create_empty_array(yearS,yearE,smdata,emdata,"time_lev_lat")
+        else
+          arr = create_empty_array(yearS,yearE,smdata,emdata,"time_lat_lon")
+        end if 
         sydata = yearS     ; assign these variables based on yearS/yearE provided in namelist. Doesn't matter 
         eydata = yearE     ; as data array is totally missing..  
         smdata = 1
@@ -440,15 +497,24 @@ begin
      delete([/time,timeT/])
   end if
   delete([/sydata,smdata,eydata,emdata/])
-    
+ 
 ;  printVarSummary(arr)
 ;  printVarSummary(arr({sy*100+1:ey*100+12},:,:))
-  if (arr&lat(0).ge.0) then
-     farr = arr({yearS*100+1:yearE*100+12},::-1,:)   ; flip the latitudes
-  else
-     farr = arr({yearS*100+1:yearE*100+12},:,:)
-  end if
-;  printVarSummary(farr)
+
+  if (vn.eq."SF") then
+    if (arr&lev(0).le.arr&lev(1)) then
+       farr = arr({yearS*100+1:yearE*100+12},::-1,:)  ; flip the level 
+    else
+       farr = arr({yearS*100+1:yearE*100+12},:,:)
+    end if
+  else 
+    if (arr&lat(0).ge.0) then
+       farr = arr({yearS*100+1:yearE*100+12},::-1,:)   ; flip the latitudes
+    else
+       farr = arr({yearS*100+1:yearE*100+12},:,:)
+    end if
+  end if 
+  ;  printVarSummary(farr)
   delete(arr)     
   
   mocheck = (/(yearS*100+1)-min(farr&time),(yearE*100+12) - max(farr&time)/)
@@ -466,18 +532,35 @@ begin
      farr = create_empty_array(yearS,yearE,1,12,"time_lat_lon")
   end if
   delete(mocheck)
-  
-  if (farr&lon(0).lt.0) then
-     farr = lonFlip(farr)     ; lon flip
-  end if     
-  if (min(farr&lon).lt.0.or.max(farr&lon).gt.360) then
-     print(farr&lon)
-     print("path = "+zpath)
-     print("Fatal: Longitudes not in expected 0-360E range, creating blank array")
-     delete(farr)
-     farr = create_empty_array(yearS,yearE,1,12,"time_lat_lon")
+
+  if (vn.eq."SF") then
+    if (farr&lev(0).gt.1000) then
+      farr&lev = farr&lev /100.0
+      farr&lev@units = "hPa"
+    end if
+  else 
+    if (farr&lon(0).lt.0) then
+       farr = lonFlip(farr)     ; lon flip
+    end if     
+
+    if (min(farr&lon).lt.0.or.max(farr&lon).gt.360) then
+       print(farr&lon)
+       print("path = "+zpath)
+       print("Fatal: Longitudes not in expected 0-360E range, creating blank array")
+       delete(farr)
+       farr = create_empty_array(yearS,yearE,1,12,"time_lat_lon")
+    end if
+  end if 
+ 
+  if (vn.eq."SF") then      ; units check
+     if (farr@units.eq."kg s~S~-1~N~".or.farr@units.eq."kg s-1".or.farr@units.eq."kg s^-1") then
+        farr@units = "kg/s"
+     else
+       print("warning: unit of " + vn + " seems to be incorrect, please check ..." )
+       exit
+     end if
   end if
-  
+ 
   if (vn.eq."TREFHT".or.vn.eq."TS") then      ; units check
      if (farr@units.eq."K".or.farr@units.eq."Kelvin".or.farr@units.eq."deg_k".or.farr@units.eq."deg_K") then   
         if (max(farr).ge.100) then    ; data sets can be anomalies with units of K, so check for range before subtracting
@@ -591,7 +674,7 @@ begin
      end if
      farr@units = "W/m2"
   end if
-  if (vn.eq."SHFLX".or.vn.eq."LHFLX")then 
+  if (vn.eq."SH".or.vn.eq."LH")then 
      if (farr@units.eq."W m~S~-2~N~".or.farr@units.eq."W m-2") then
         farr = farr*1.0
         farr@units = "W/m2"
@@ -871,10 +954,10 @@ function data_read_in_ice(zpath:string,vn:string,yearS:integer,yearE:integer)
 local zpath,vn,cpath0,ta,tfiles,c,arr,farr,yearS,yearE,mocheck,dimC,lev
 begin
   if (vn.eq."aice_nh") then
-     vname = (/"aice_nh","aice","sic","SIC","CN","ice","icec","siconc"/)
+     vname = (/"aice_nh","aice","sic","SIC","CN","ice","icec","siconc","SICONC"/)
   end if
   if (vn.eq."aice_sh") then
-     vname = (/"aice_sh","aice","sic","SIC","CN","ice","icec","siconc"/)
+     vname = (/"aice_sh","aice","sic","SIC","CN","ice","icec","siconc","SICONC"/)
   end if
 
   if (ismissing(zpath) ) then
@@ -913,6 +996,12 @@ begin
                        arr@lat2d = c[0]->TLAT
                     end if
                     delete(dimZ)
+                 end if
+                 if (any(strarr.eq."xgrid")) then      ; NSIDC longitude 2D coordinate
+                    arr@lon2d = c[0]->lon
+                 end if
+                 if (any(strarr.eq."ygrid")) then      ; NSIDC latitude 2D coordinate
+                    arr@lat2d = c[0]->lat
                  end if
                  delete(strarr)
 ;              else
@@ -1021,6 +1110,7 @@ begin
      arr = arrT
      delete(arrT)
   end if
+
   if (.not.isatt(arr,"_FillValue")) then     ; assign _FillValue if one is not present
      if (isatt(arr,"missing_value")) then
         arr@_FillValue = arr@missing_value
@@ -1028,6 +1118,7 @@ begin
         arr@_FillValue = default_fillvalue(typeof(arr)) 
      end if
   end if
+
   arr!0 = "time"
   arr!1 = "j"
   arr!2 = "i"
@@ -1040,6 +1131,21 @@ begin
         delete(tarr)
      end if
 
+     ;convert variable type to float 
+     tarr = arr
+     delete(arr)
+     arr  = tofloat(tarr)
+     copy_VarMeta(tarr,arr) 
+     delete(tarr)
+
+     ;check if the arry longitude is in 0-360 
+     if(min(arr&i).le.0.and.max(arr&i).le.180) then 
+     ;;longitude is from -180 -- 180, flip it 
+       tarr = lonFlip(arr)
+       arr = tarr
+;      printVarSummary(tarr)
+       delete(tarr)
+     end if 
      if (min(arr&i).ge.0.and.max(arr&i).le.360) then
         fctr = 111120   ; how many meters per degree of latitude (approximate)
 	       pi=4.*atan(1.0)
@@ -1144,7 +1250,7 @@ begin
   end if
   delete([/sydata,smdata,eydata,emdata/])
   farr = arr({yearS*100+1:yearE*100+12},:,:)  
-;  printVarSummary(farr)
+ ;printVarSummary(farr)
   delete(arr)     
   
   mocheck = (/(yearS*100+1)-min(farr&time),(yearE*100+12) - max(farr&time)/)

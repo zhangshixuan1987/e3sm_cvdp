@@ -1,6 +1,12 @@
-; Calculates a variety of pressure indices, as well as hovmollers, spectra, 
-; monthly standard deviations, running standard deviations, and spatial
-; composites based on the sam index. 
+; Calculates ; Diagnostics for the Hadley cell (HC) following Nguyen et al. (2013): Nguyen, H., Evans, A., Lucas, C., Smith, I., & Timbal, B. (2013). The Hadley Circulation in Reanalyses: Climatology, Variability, and Change, Journal of Climate, 26(10), 3357-3376. Retrieved Feb 16, 2023, from https://journals.ametsoc.org/view/journals/clim/26/10/jcli-d-12-00224.1.xml
+; Here, The zonal-mean meridional streamfunction derived from the meridional wind fields is chosen to diagnose the HC. Specifically, The monthly zonal-mean meridional streamfunction is computed from monthly-mean data, the diagnostics includes:
+;1. intensity: defined as the vertically averaged maximum value of between 900 and 200 hPa, marking the lower and upper limits of the cell
+;2. extent (or edge) of the HCs:  the zero isoline for stream function on the poleward side of these cells, averaged between 400 and 600 hPa
+;3. the width of the Hadley circulation as the distance between the first latitudes poleward of the cell centers in which the 700-400-hPa average value of c equals zero, which is the width of both cells together. Here, the width of each cell is defined by the difference between these extents and the intersection between the two cells.
+;4. The intersection represents the latitude of zero value of c, averaged between 400 and 600 hPa, near the equator (i.e., when c changes sign as it passes from positive value in the NH cell to negative value in the SH cell), that separates the NH and SH cells.
+;5. the intensity is defined as the vertically averaged maximum value of c between 900 and 200 hPa, marking the lower and upper limits of the cell
+; Author : Shixuan Zhang
+; Date   : Dec 06, 2020
 ;
 ; Variables used: ts, ua, and tas
 ;
@@ -11,7 +17,7 @@ load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/shea_util.ncl"
 load "$CVDP_SCRIPTS/functions.ncl"
 
 begin
-  print("Starting: u850.indices.ncl")
+  print("Starting: zmsf.indices.ncl")
   
   SCALE_TIMESERIES = getenv("SCALE_TIMESERIES")  
   OUTPUT_DATA      = getenv("OUTPUT_DATA")  
@@ -22,8 +28,8 @@ begin
   OUTPUT_TYPE      = getenv("OUTPUT_TYPE") 
   COLORMAP         = getenv("COLORMAP")  
   
-  nsim = numAsciiRow("namelist_byvar/namelist_u850")
-  na = asciiread("namelist_byvar/namelist_u850",(/nsim/),"string")
+  nsim = numAsciiRow("namelist_byvar/namelist_zmsf")
+  na = asciiread("namelist_byvar/namelist_zmsf",(/nsim/),"string")
   names = new(nsim,"string")
   paths = new(nsim,"string")
   syear = new(nsim,"integer",-999)
@@ -112,68 +118,71 @@ begin
      wks_type@wkWidth = 1500*PNG_SCALE
      wks_type@wkHeight = 1500*PNG_SCALE
   end if
-  wks_psjet = gsn_open_wks(wks_type,getenv("OUTDIR")+"psjet.timeseries")  
+  wks_hc = gsn_open_wks(wks_type,getenv("OUTDIR")+"hc.timeseries")  
 
-  wks_psjetlat_tlon = gsn_open_wks(wks_type,getenv("OUTDIR")+"jetlat.hov")
+  wks_hclat_tlon = gsn_open_wks(wks_type,getenv("OUTDIR")+"hcpos.hov")
 
-  wks_psjet_p = gsn_open_wks(wks_type,getenv("OUTDIR")+"psjet.powspec")
+  wks_hc_p = gsn_open_wks(wks_type,getenv("OUTDIR")+"hc.powspec")
   
-  wks_psjet_rst = gsn_open_wks(wks_type,getenv("OUTDIR")+"psjet.runstddev")
+  wks_hc_rst = gsn_open_wks(wks_type,getenv("OUTDIR")+"hc.runstddev")
 
-  wks_psjet_mst = gsn_open_wks(wks_type,getenv("OUTDIR")+"psjet.monstddev")
+  wks_hc_mst = gsn_open_wks(wks_type,getenv("OUTDIR")+"hc.monstddev")
   
-  wks_psjetsc = gsn_open_wks(wks_type,getenv("OUTDIR")+"psjet.spatialcomp")
+  wks_hcsc = gsn_open_wks(wks_type,getenv("OUTDIR")+"hc.spatialcomp")
 
-  wks_psjetsc_ppt = gsn_open_wks(wks_type,getenv("OUTDIR")+"psjet.spatialcomp.ppt")
+  wks_hcsc_ppt = gsn_open_wks(wks_type,getenv("OUTDIR")+"hc.spatialcomp.ppt")
   
   if (COLORMAP.eq.0) then
-     gsn_define_colormap(wks_psjet,"ncl_default") 
-     gsn_merge_colormaps(wks_psjetlat_tlon,"cmp_flux",(/"gray30","gray50","gray70"/))
-     gsn_define_colormap(wks_psjet_p,"cb_9step")
-     gsn_define_colormap(wks_psjet_rst,"ncl_default")   
-     gsn_define_colormap(wks_psjet_mst,"ncl_default")   
-     gsn_define_colormap(wks_psjetsc,"ncl_default")   
-     gsn_define_colormap(wks_psjetsc_ppt,"MPL_BrBG")  
+     gsn_define_colormap(wks_hc,"ncl_default") 
+     gsn_merge_colormaps(wks_hclat_tlon,"cmp_flux",(/"gray30","gray50","gray70"/))
+     gsn_define_colormap(wks_hc_p,"cb_9step")
+     gsn_define_colormap(wks_hc_rst,"ncl_default")   
+     gsn_define_colormap(wks_hc_mst,"ncl_default")   
+     gsn_define_colormap(wks_hcsc,"ncl_default")   
+     gsn_define_colormap(wks_hcsc_ppt,"MPL_BrBG")  
   end if
   if (COLORMAP.eq.1) then
-     gsn_define_colormap(wks_psjet,"ncl_default") 
-     gsn_merge_colormaps(wks_psjetlat_tlon,"MPL_rainbow",(/"gray30","gray50","gray70"/))
-     gsn_define_colormap(wks_psjet_p,"cb_9step")
-     gsn_define_colormap(wks_psjet_rst,"ncl_default")   
-     gsn_define_colormap(wks_psjet_mst,"ncl_default")   
-     gsn_define_colormap(wks_psjetsc,"BlueDarkRed18")   
-     gsn_define_colormap(wks_psjetsc_ppt,"BrownBlue12")    
+     gsn_define_colormap(wks_hc,"ncl_default") 
+     gsn_merge_colormaps(wks_hclat_tlon,"MPL_rainbow",(/"gray30","gray50","gray70"/))
+     gsn_define_colormap(wks_hc_p,"cb_9step")
+     gsn_define_colormap(wks_hc_rst,"ncl_default")   
+     gsn_define_colormap(wks_hc_mst,"ncl_default")   
+     gsn_define_colormap(wks_hcsc,"BlueDarkRed18")   
+     gsn_define_colormap(wks_hcsc_ppt,"BrownBlue12")    
   end if
 
-  xyn1 = new(nsim,"graphic")
-  xyn2 = new(nsim,"graphic")
-  xyn3  = new(nsim,"graphic") 
-  xyn4  = new(nsim,"graphic")  
-  xyn5  = new(nsim,"graphic")
+  xyn0  = new(nsim,"graphic")
+  xyn1  = new(nsim,"graphic")
+  xyn2  = new(nsim,"graphic") 
+  xyn3  = new(nsim,"graphic")  
+  xyn4  = new(nsim,"graphic")
+  xyn5  = new(nsim,"graphic")  
   xyn6  = new(nsim,"graphic")  
-  xyn12 = new(nsim,"graphic")  
-  
-  plot_jetlat = new(nsim,"graphic")  
-  
-  map_psjetsc_jja0 = new(nsim,"graphic")  
-  map_psjetsc_son0 = new(nsim,"graphic")  
-  map_psjetsc_djf1 = new(nsim,"graphic")  
-  map_psjetsc_mam1 = new(nsim,"graphic")  
+  xyn7  = new(nsim,"graphic") 
+  xyn8  = new(nsim,"graphic") 
+  xyn9  = new(nsim,"graphic") 
+  xyn10 = new(nsim,"graphic") 
+  xyn11 = new(nsim,"graphic") 
 
-  map_psjetsc_ppt_jja0 = new(nsim,"graphic")  
-  map_psjetsc_ppt_son0 = new(nsim,"graphic")  
-  map_psjetsc_ppt_djf1 = new(nsim,"graphic")  
-  map_psjetsc_ppt_mam1 = new(nsim,"graphic")  
+  map_hcsc_jja0 = new(nsim,"graphic")  
+  map_hcsc_son0 = new(nsim,"graphic")  
+  map_hcsc_djf1 = new(nsim,"graphic")  
+  map_hcsc_mam1 = new(nsim,"graphic")  
 
-  xypsjet_rst = new(nsim,"graphic")  
-  xypsjet_mst = new(nsim,"graphic")  
-  xypsjet_ac = new(nsim,"graphic") 
+  map_hcsc_ppt_jja0 = new(nsim,"graphic")  
+  map_hcsc_ppt_son0 = new(nsim,"graphic")  
+  map_hcsc_ppt_djf1 = new(nsim,"graphic")  
+  map_hcsc_ppt_mam1 = new(nsim,"graphic")  
+
+  xyhc_rst = new(nsim,"graphic")  
+  xyhc_mst = new(nsim,"graphic")  
+  xyhc_ac = new(nsim,"graphic") 
   plot_wave34 = new(nsim,"graphic")  
 
   pspec = new(nsim,"graphic")
   if (isfilepresent2("obs_ts")) then
      pspec_obs = new(nsim,"graphic")
-     xypsjet_ac_obs = new(nsim,"graphic")
+     xyhc_ac_obs = new(nsim,"graphic")
   end if
 
   wgt = (/1.,2.,1./)   
@@ -182,62 +191,253 @@ begin
   rad=(pi/180.)
 
   do ee = 0,nsim-1
-     ua = data_read_in(paths(ee),"U850",syear(ee),eyear(ee))    ; read in data, orient lats/lons correctly, set time coordinate variable up
-     
-     if (isatt(ua,"is_all_missing")) then
-        delete(ua)
+     zmsf = data_read_in(paths(ee),"SF",syear(ee),eyear(ee))
+     if (isatt(zmsf,"is_all_missing")) then
+        delete(zmsf)
         continue
      end if
- 
-     ;calcualte jet info with raw ua field  
-     llats = -70. ; SH jet region 
-     llatn = -20.
-     llonw = 0.
-     llone = 360.
-     finjet = calculate_jet_info(ua,llats,llatn,llonw,llone)
 
-     if (OPT_CLIMO.eq."Full") then
-        ua = rmMonAnnCycTLL(ua)
-     else
-        check_custom_climo(names(ee),syear(ee),eyear(ee),CLIMO_SYEAR,CLIMO_EYEAR)
-        temp_arr = ua
-        delete(temp_arr&time)
-        temp_arr&time = cd_calendar(ua&time,-1)
-        if (CLIMO_SYEAR.lt.0) then
-           climo = clmMonTLL(temp_arr({(eyear(ee)+CLIMO_SYEAR)*100+1:(eyear(ee)+CLIMO_EYEAR)*100+12},:,:))
-        else
-           climo = clmMonTLL(temp_arr({CLIMO_SYEAR*100+1:CLIMO_EYEAR*100+12},:,:))
-        end if
-        delete(temp_arr)
-        ua   = calcMonAnomTLL(ua,climo)
-        delete(climo)
-     end if
+     scale_factor = 1.e9
+     zmsf         = zmsf / scale_factor
+     zmsf@units   = "10~S~9~N~ " + zmsf@units
+     lbunit       = zmsf@units
+     lat          = zmsf&lat
+     lat!0        = "lat"
+     lat&lat      =  lat 
 
-     coswgt=cos(rad*ua&lat)
-     coswgt!0 = "lat" 
-     coswgt&lat= ua&lat  
+     ;dreive layer thickness for vertical average;
+     plev       = zmsf&lev 
+     plev@units = "hPa"
+     plev!0     = "lev"
+     plev&lev   = plev 
+     dpth = dpres_plevel_Wrap(plev, 1018, 0, 0)
+     
+     delete(zmsf&lev)
+     zmsf&lev = plev 
+     hcvm920  = dim_avg_wgt_n_Wrap(zmsf(:,{900:200},:),dpth({900:200}),1,1) ;average betwee 900-200hPa 
+     hcvm740  = dim_avg_wgt_n_Wrap(zmsf(:,{900:200},:),dpth({900:200}),1,1) ;average betwee 700-400hPa
 
-     psjetins               = finjet(0,:)
-     psjetins@comment_cvdp  = "domain ("+llatn+":"+llats+"S, "+llonw+":"+llone+"E)"
-     psjetins@units         = "m s~S~-1~N~"
-     psjetins@long_name     = "Polar jet (SH) intensity timeseries (monthly)"
+     ;calcualte hadley cell info 
+     coswgt=cos(rad*zmsf&lat)
+     coswgt!0 = "lat"
+     coswgt&lat= zmsf&lat
+   
+     hcin               = zmsf(:,0,0) 
+     hcin@comment_cvdp  = "domain (0-40N)"
+     hcin@units         = zmsf@units 
+     hcin@long_name     = "Hadley cell intensity (NH) (900-200hPa mean) timeseries (monthly)"
 
-     psjetloc               = finjet(1,:)
-     psjetloc@comment_cvdp  = "domain ("+llatn+":"+llats+"S, "+llonw+":"+llone+"E)"
-     psjetloc@units         = "degree south"
-     psjetloc@long_name     = "Polar jet (SH) latitude timeseries (monthly)"
+     hxcin               = hcin
+     hxcin@comment_cvdp  = "domain (0-40N)"
+     hxcin@units         = zmsf@units
+     hxcin@long_name     = "Hadley cell maximum intensity (NH) timeseries (monthly)" 
 
-     psjetind               = finjet(2,:) 
-     psjetind@comment_cvdp  = "domain ("+llats+":"+llatn+"N, "+llonw+":"+llone+"E)"
-     psjetind@units         = "1"
-     psjetind@long_name     = "Polar jet (SH) location index timeseries (monthly)"
+     hmcin               = hcin
+     hmcin@comment_cvdp  = "domain (0-40N)"
+     hmcin@units         = zmsf@units
+     hmcin@long_name     = "Hadley cell mean intensity (NH) timeseries (monthly)"
 
-     psjetisd               = finjet(3,:)  
-     psjetisd@comment_cvdp  = "domain ("+llats+":"+llatn+"N, "+llonw+":"+llone+"E)"
-     psjetisd@units         = "1"
-     psjetisd@long_name     = "Polar jet (SH) intensity index timeseries (monthly)" 
+     hcis               = hcin 
+     hcis@comment_cvdp  = "domain (40S-0)"
+     hcis@units         = zmsf@units 
+     hcis@long_name     = "Hadley cell intensity (SH) (900-200hPa mean) timeseries (monthly)"
 
-     delete([/finjet/])
+     hxcis               = hcin
+     hxcis@comment_cvdp  = "domain (40S-0)"
+     hxcis@units         = zmsf@units
+     hxcis@long_name     = "Hadley cell maximum intensity (SH) timeseries (monthly)"
+
+     hmcis               = hcin
+     hmcis@comment_cvdp  = "domain (40S-0)"
+     hmcis@units         = zmsf@units
+     hmcis@long_name     = "Hadley cell mean intensity (SH) timeseries (monthly)"
+
+     hpin               = hcin 
+     hpin@comment_cvdp  = "domain (0-40N)"
+     hpin@units         = "degree"
+     hpin@long_name     = "Hadley cell latitude (NH) (900-200hPa mean) timeseries (monthly)"
+
+     hxpin               = hcin
+     hxpin@comment_cvdp  = "domain (0-40S)"
+     hxpin@units         = "degree"
+     hxpin@long_name     = "Hadley cell column (900-200hPa) maximum intensity latitude (NH) timeseries (monthly)"
+
+     hmpin               = hcin
+     hmpin@comment_cvdp  = "domain (0-40S)"
+     hmpin@units         = "degree"
+     hmpin@long_name     = "Hadley cell maximum column mean (900-200hPa) intensity latitude (NH) timeseries (monthly)"
+
+     hpis               = hcin
+     hpis@comment_cvdp  = "domain (40S-0)"
+     hpis@units         = "degree"
+     hpis@long_name     = "Hadley cell latitude (SH) (900-200hPa mean) timeseries (monthly)"
+     
+     hxpis               = hcin
+     hxpis@comment_cvdp  = "domain (40S-0)"
+     hxpis@units         = "degree"
+     hxpis@long_name     = "Hadley cell column (900-200hPa) maximum intensity latitude (SH) timeseries (monthly)"
+
+     hmpis               = hcin
+     hmpis@comment_cvdp  = "domain (40S-0)"
+     hmpis@units         = "degree"
+     hmpis@long_name     = "Hadley cell maximum column mean (900-200hPa mean) intensity latitude (SH) timeseries (monthly)"
+
+     hcei               = hcin
+     hcei@comment_cvdp  = "domain (40S-40N)"
+     hcei@units         = "degree"
+     hcei@long_name     = "Hadley cell intersection latitude (zero value of steam function) timeseries (monthly)"
+
+     hcen               = hcin
+     hcen@comment_cvdp  = "domain (0-40N)"
+     hcen@units         = "degree"
+     hcen@long_name     = "Hadley cell poleward extent (NH) (zero value of steam function) timeseries (monthly)"
+
+     hces               = hcin
+     hces@comment_cvdp  = "domain (40S-0)"
+     hces@units         = "degree"
+     hces@long_name     = "Hadley cell poleward extent (NH) (zero value of steam function) timeseries (monthly)"
+
+     hcwn               = hcin
+     hcwn@comment_cvdp  = "domain (0-40N)"
+     hcwn@units         = "degree"
+     hcwn@long_name     = "Hadley cell width (NH) (poleward extent - intersection) timeseries (monthly)"
+
+     hcws               = hcin
+     hcws@comment_cvdp  = "domain (40S-0)"
+     hcws@units         = "degree"
+     hcws@long_name     = "Hadley cell width (SH) (poleward extent - intersection) timeseries (monthly)"
+
+     hcwd               = hcin
+     hcwd@comment_cvdp  = "domain (40S-40S)"
+     hcwd@units         = "degree"
+     hcwd@long_name     = "Hadley cell width (NH poleward extent - SH poleward extent) timeseries (monthly)"
+
+     do kk  = 0, dimsizes(zmsf&time) -1
+
+       ;maximum intensity and location
+       tmp1 = hcvm920(kk,{-5:40})
+       tmp2 = hcvm920(kk,{-40:5}) 
+       lat1 = lat({-5:40})
+       lat2 = lat({-40:5})
+       imax = dim_maxind(tmp1,0)
+       jmax = dim_minind(tmp2,0)
+       hmcin(kk) = (/tmp1(imax)/)
+       hmcis(kk) = (/tmp2(jmax)/)
+       hmpin(kk) = (/tofloat(lat1(imax))/)
+       hmpis(kk) = (/tofloat(lat2(jmax))/)
+       delete([/imax,jmax,tmp1,tmp2,lat1,lat2/])
+
+       ;;;maximum at each level
+       xcin      = zmsf(0,:,0) 
+       xcis      = zmsf(0,:,0)  
+       xpis      = zmsf(0,:,0) 
+       xpin      = zmsf(0,:,0)  
+       do jj  = 0, dimsizes(zmsf&lev) -1
+         tmp1    = zmsf(kk,jj,{-5:40})
+         lat1    = lat({-5:40})
+         ind1    = dim_maxind(tmp1,0)
+         tmp2    = zmsf(kk,jj,{-40:5})
+         lat2    = lat({-40:5})
+         ind2    = dim_minind(tmp2,0)
+         ;;HC intensity and max/min loction
+         xcin(jj) = (/tmp1(ind1)/)
+         xcis(jj) = (/tmp2(ind2)/)
+         xpin(jj) = (/tofloat(lat1(ind1))/)
+         xpis(jj) = (/tofloat(lat2(ind2))/)
+         delete([/tmp1,tmp2,lat1,lat2,ind1,ind2/])
+       end do
+       hcin(kk)   = dim_avg_wgt_n(xcin({900:200}), dpth({900:200}), 1, 0)
+       hcis(kk)   = dim_avg_wgt_n(xcis({900:200}), dpth({900:200}), 1, 0)
+       hpin(kk)   = dim_avg_wgt_n(xpin({900:200}), dpth({900:200}), 1, 0)
+       hpis(kk)   = dim_avg_wgt_n(xpis({900:200}), dpth({900:200}), 1, 0)
+
+       indx1      = dim_maxind(xcin,0)
+       indx2      = dim_minind(xcis,0)
+       hxcin(kk)  = (/xcin(indx1)/)
+       hxcis(kk)  = (/xcis(indx2)/)
+       hxpin(kk)  = (/xpin(indx1)/)
+       hxpis(kk)  = (/xpis(indx2)/)
+       delete([/indx1,indx2,xcin,xcis,xpin,xpis/])
+
+       ;HC intersection and extents
+       tmp1 = hcvm740(kk,{-5:40})
+       tmp2 = hcvm740(kk,{-40:5})
+       lat1 = lat({-5:40})
+       lat2 = lat({-40:5})
+       imax = dim_maxind(tmp1,0)
+       jmax = dim_minind(tmp2,0)
+       latx1 = lat1(imax)
+       latx2 = lat2(jmax)
+       delete([/imax,jmax,tmp1,tmp2,lat1,lat2/])
+
+       ;HC SH extent (edge)
+       lats2    = latx2 - 1.0
+       latt0    = lat({-90:lats2})
+       hctt0    = hcvm740(kk,{-90:lats2})
+       ismax    = dim_maxind(hctt0,0)
+       latxm    = latt0(ismax)
+       xi       = hcvm740(kk,{lats2:latxm})
+       yi       = tofloat(lat({lats2:latxm}))
+       xi       = xi + random_normal(1e-4,1e-4,dimsizes(xi))
+       ist      = dim_pqsort_n(xi,2,0)
+       yi       = yi(ist)
+       hces(kk) = linint1(xi,yi, False, 0.0, 0) ;ftcurv(xi,yi,0.0)
+       delete([/ismax,lats2,latxm,xi,yi,latt0,hctt0,ist/])
+       if(.not.ismissing(hces(kk)).and.abs(hces(kk)).gt.50.0) then
+         hces(kk) = hces@_FillValue
+       end if
+
+       ;HC intersection (zero line closed to equator)
+       lats1    = latx1
+       lats2    = latx2
+       xi       = hcvm740(kk,{lats2:lats1}) 
+       yi       = tofloat(lat({lats2:lats1}))
+       xi       = xi + random_normal(1e-4,1e-4,dimsizes(xi))
+       ist      = dim_pqsort_n(xi,2,0)
+       cc       = count_unique_values(xi)
+       hcei(kk) = linint1(xi,yi, False, 0.0, 0)
+       delete([/lats2,lats1,xi,yi,ist/])
+       if(.not.ismissing(hcei(kk)).and.abs(hcei(kk)).gt.30.0) then
+         hcei(kk) = hcei@_FillValue
+       end if
+
+       ;;HC NH extent (edge)
+       lats1    = latx1 +1.0
+       latt0    = lat({lats1:90})
+       hctt0    = hcvm740(kk,{lats1:90})
+       ismax    = dim_minind(hctt0,0)
+       latxm    = latt0(ismax)
+       xi       = hcvm740(kk,{latxm:lats1})
+       yi       = tofloat(lat({latxm:lats1}))
+       xi       = xi + random_normal(1e-4,1e-4,dimsizes(xi))
+       ist      = dim_pqsort_n(xi,2,0)
+       yi       = yi(ist)
+       hcen(kk) = linint1(xi,yi, False, 0.0, 0) ; ftcurv(xi,yi,0.0)
+       if(.not.ismissing(hcen(kk)).and.hcen(kk).gt.50.0) then
+         hcen(kk) = hcen@_FillValue
+       end if
+       delete([/ismax,lats1,latxm,xi,yi,latt0,hctt0,ist/])
+
+     end do
+
+    ;HC width
+     hcwn = hcen - hcei
+     hcws = hces - hcei
+     hcwd = hcen - hces
+
+     hcind = hcwd
+     hcind = dim_standardize(hcwd,0)
+     hcind = linmsg(hcind, 0)
+     hcind@units        = "1"
+     hcind@long_name    = "Hadley cell width index timeseries (monthly)"
+
+     hcisd = hcei
+     hcisd = dim_standardize(hcei,0)
+     hcisd = linmsg(hcisd, 0)
+     hcisd@units        = "1"
+     hcisd@long_name    = "Hadley cell intersection index timeseries (monthly)" 
+
+     delete([/hcvm740,hcvm920,dpth,plev,coswgt,lat/])
 
 ;---------------------------------------------------------------------------------------------     
      if (OUTPUT_DATA.eq."True") then
@@ -246,7 +446,7 @@ begin
         do gg = 0,dimsizes(bc)-1
            modname = str_sub_str(modname,bc(gg),"_")
         end do
-        fn = getenv("OUTDIR")+modname+".cvdp_data.u850.indices."+syear(ee)+"-"+eyear(ee)+".nc"
+        fn = getenv("OUTDIR")+modname+".cvdp_data.zmsf.indices."+syear(ee)+"-"+eyear(ee)+".nc"
         if (.not.isfilepresent2(fn)) then
            z = addfile(fn,"c")
            z@source = "NCAR Climate Analysis Section's Climate Variability Diagnostics Package v"+getenv("VERSION")
@@ -261,125 +461,47 @@ begin
               end if
            end if
            z@Conventions = "CF-1.6"
-           date = cd_calendar(psjetind&time,-1)
+           date = cd_calendar(zmsf&time,-1)
            date@long_name = "current date (YYYYMM)"
            delete(date@calendar)
            date!0 = "time"
-           date&time = psjetind&time
+           date&time = zmsf&time
            date@units = "1"
            z->date = date
            delete(date)
         else
            z = addfile(fn,"w")
         end if
-        z->psjetind   = set_varAtts(psjetind,"","","")
-        z->psjetisd   = set_varAtts(psjetisd,"","","")
-        z->psjetins   = set_varAtts(psjetins,"","","")
-        z->psjetloc   = set_varAtts(psjetloc,"","","")
+        z->hcind = set_varAtts(hcind,"","","")
+        z->hcisd = set_varAtts(hcisd,"","","")
+        z->hcin  = set_varAtts(hcin,"","","")
+        z->hcis  = set_varAtts(hcis,"","","")
+        z->hxcin = set_varAtts(hxcin,"","","")
+        z->hxcis = set_varAtts(hxcis,"","","")
+        z->hmcin = set_varAtts(hmcin,"","","")
+        z->hmcis = set_varAtts(hmcis,"","","")
+        z->hpin  = set_varAtts(hpin,"","","")
+        z->hpis  = set_varAtts(hpis,"","","")
+        z->hxpin = set_varAtts(hxpin,"","","")
+        z->hxpis = set_varAtts(hxpis,"","","")
+        z->hmpin = set_varAtts(hmpin,"","","")
+        z->hmpis = set_varAtts(hmpis,"","","")
+        z->hcei  = set_varAtts(hcei,"","","")
+        z->hces  = set_varAtts(hces,"","","")
+        z->hcen  = set_varAtts(hcen,"","","")
+        z->hcwn  = set_varAtts(hcwn,"","","")
+        z->hcws  = set_varAtts(hcws,"","","")
+        z->hcwd  = set_varAtts(hcwd,"","","")
         delete([/modname,fn/])
      end if
 
-;---------------------------------------------------------------------------------------------
-     if (nyr(ee).ge.15) then   ; 15+ years needed for this metric
-        finua              = ua(:,0,:)
-        finua              = ua@_FillValue 
-        finua@long_name    = "Polar Jet Latitude Position"
-        finua@units        = "degree"
-        finua_mave         = finua(lon|0:2,time|:) 
-        finua_tave         = finua(time|0:2,lon|:) 
-        finua@comment_cvdp      = "domain ("+llats+":"+llatn+"N, "+llonw+":"+llone+"E)"
-        finua_mave@comment_cvdp = "domain ("+llats+":"+llatn+"N, "+llonw+":"+llone+"E)"
-        finua_tave@comment_cvdp = "domain ("+llats+":"+llatn+"N, "+llonw+":"+llone+"E)"
-
-        do gg = 30,dimsizes(psjetind)-31
-          mocntr1 = gg - 30  
-          mocntr2 = gg + 30
-          uar = ua(0,:,:)
-          uar = escovc(psjetind(time|mocntr1:mocntr2), ua({lat|:},{lon|:},time|mocntr1:mocntr2)) 
-          ;d = addfile("$NCARG_ROOT/lib/ncarg/data/cdf/landsea.nc","r")   ; mask out land
-          ;basemap = d->LSMASK
-          ;lsm  = landsea_mask(basemap,uar&lat,uar&lon)
-          ;uar = mask(uar,conform(uar,lsm,(/0,1/)).ge.1,False)
-          ;delete([/lsm,basemap,d/])
-          vsec = uar({llats:llatn},:) 
-          ;Polar Jet latitude is search as location with smallest absolute covariance (Paul Wachter et al., 2020)
-          vsec = abs(vsec) 
-          vsec = where(ismissing(vsec),1e8,vsec)
-          do hh = 0,dimsizes(vsec(0,:))-1
-            imin = local_min_1d(vsec(:,hh),False, 0, 1)
-            if (.not.all(ismissing(imin))) then
-              if(dimsizes(imin).gt.1) then
-                imin0 = dim_minind(vsec(imin,hh),0)
-                finua(gg,hh) = tofloat(vsec&lat(imin(imin0)))
-                delete([/imin0/]) 
-              else
-                finua(gg,hh) = tofloat(vsec&lat(imin))
-              end if 
-            else  
-              imin0 = dim_minind(vsec(:,hh),0)
-              finua(gg,hh) = tofloat(vsec&lat(imin0))
-              delete([/imin0/])
-            end if
-            delete([/imin/])
-          end do
-          delete([/vsec,mocntr1,mocntr2,uar/])
-        end do
-
-        ; apply a smoothing to reduce noise  
-        finua_sm = smth9(finua, 0.50,  0.25, True)
-        finua_sm = where(abs(finua_sm).ge.89,finua,finua_sm)
-        finua    = (/finua_sm/) 
-        delete([/finua_sm/])
-
-        ;calculate the zonal and time  average and varibility 
-        finua_mave(0,:) = dim_avg_n(finua,1)
-        finua_mave(1,:) = dim_min_n(finua,1)
-        finua_mave(2,:) = dim_max_n(finua,1)
-        finua_tave(0,:) = dim_avg_n(finua,0)
-        finua_tave(1,:) = dim_min_n(finua,0)
-        finua_tave(2,:) = dim_max_n(finua,0)
-        
-        if (OUTPUT_DATA.eq."True") then 
-           hov_all = (/ finua /)  
-           time_mon1 = cd_calendar(ua&time,1) 
-           time_mon1@long_name = "Time"
-           time_mon1@standard_name = "time"
-           time_mon1@calendar = "standard"
-           time_mon1!0 = "time_mon1"
-           time_mon1&time_mon1 = time_mon1
-           hov_all!0 = "time_mon1"
-           hov_all&time_mon1 = time_mon1
-           lon1 = finua&lon
-           lon1@standard_name = "longitude"
-           hov_all!1    = "lon1"
-           hov_all&lon1 = lon1
-           hov_all@_FillValue = finua@_FillValue 
-           delete([/time_mon1,lon1/])
-           hov_mave = (/ finua_mave /)  
-           hov_tave = (/ finua_tave /)
-           hov_mave!0 = "nx"
-           hov_mave!1 = "time_mon1"
-           hov_mave&time_mon1 = hov_all&time_mon1
-           hov_tave!0 = "nx"
-           hov_mave!1 = "lon1"
-           hov_mave&lon1  = hov_all&lon1 
-           hov_all@units  = "degree"
-           hov_mave@units = "degree"
-           hov_tave@units = "degree"
-           z->jetlat_hov_all  = set_varAtts(hov_all, "Polar Jet latitude Hovmoller (time-lon)","","")
-           z->jetlat_hov_mave = set_varAtts(hov_mave,"Polar Jet latitude time series (lon mean)","","")
-           z->jetlat_hov_tave = set_varAtts(hov_tave,"Polar Jet latitude meridional series (time mean)","","")
-           delete([/hov_mave,hov_tave,hov_all/])
-        end if
-     end if     
-
-;- - - - - -psjet spatial composite section- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-     psjetT         = wgt_runave(psjetind,wgt,1)        ; for use in Polar Jet composites / running standard deviations
-     psjet_jja      = psjetT(6:dimsizes(psjetT)-13:12)  ; cannot count last 1yr as spatial composite uses +1yrs data betond JAS..
-     psjet_jja!0    = "time"
-     psjet_jja&time = ispan(syear(ee),eyear(ee)-1,1)
-     psjet_jja      = dtrend_msg(ispan(0,dimsizes(psjet_jja&time)-1,1),psjet_jja,True,False)
-     psjet_jja      = dim_standardize(psjet_jja,0)
+;- - - - - -hc spatial composite section- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+     hcT         = wgt_runave(hcind,wgt,1)        ; for use in composites / running standard deviations
+     hc_ndj      = hcT(11:dimsizes(hcT)-13:12)  ; cannot count last 1yr as spatial composite uses +1yrs data betond JAS..
+     hc_ndj!0    = "time"
+     hc_ndj&time = ispan(syear(ee),eyear(ee)-1,1)
+     hc_ndj      = dtrend_msg(ispan(0,dimsizes(hc_ndj&time)-1,1),hc_ndj,True,False)
+     hc_ndj      = dim_standardize(hc_ndj,0)
 
      if (any(ismissing((/syear(ee),syear_trefht(ee),syear_psl(ee),syear_ts(ee),eyear(ee),eyear_trefht(ee),eyear_psl(ee),eyear_ts(ee)/)))) then
         tassstreg_plot_flag = 1
@@ -494,17 +616,17 @@ begin
        
           hicntr = 0
           locntr = 0
-          hiyr = new(dimsizes(psjet_jja&time),integer)
+          hiyr = new(dimsizes(hc_ndj&time),integer)
           loyr = hiyr
 
-          do hh = 0,dimsizes(psjet_jja)-1
-             if (.not.ismissing(psjet_jja(hh))) then
-                if (psjet_jja(hh).ge.1.0) then
-                   hiyr(hicntr) = psjet_jja&time(hh)
+          do hh = 0,dimsizes(hc_ndj)-1
+             if (.not.ismissing(hc_ndj(hh))) then
+                if (hc_ndj(hh).ge.1.0) then
+                   hiyr(hicntr) = hc_ndj&time(hh)
                    hicntr = hicntr+1
                 end if
-                if (psjet_jja(hh).le.-1.0) then
-                   loyr(locntr) = psjet_jja&time(hh)
+                if (hc_ndj(hh).le.-1.0) then
+                   loyr(locntr) = hc_ndj&time(hh)
                    locntr = locntr+1
                 end if
              end if
@@ -556,7 +678,7 @@ begin
           sc_psl_lo = sc_psl_lo@_FillValue
           
           if (dimsizes(highyr).le.1) then
-             print("For "+names(ee)+", 1 or less (normalized) psjet value greater than one standard deviation found, setting psjet spatial composites to missing")  ; sc_*_hi arrays left to _FillValue
+             print("For "+names(ee)+", 1 or less (normalized) hc value greater than one standard deviation found, setting hc spatial composites to missing")  ; sc_*_hi arrays left to _FillValue
           else           
              do gg = 0,23
                 tt = gg/12.
@@ -568,7 +690,7 @@ begin
           end if
           delete(highyr)
           if (dimsizes(lowyr).le.1) then
-             print("For "+names(ee)+", 1 or less (normalized) psjet value less than -1 standard deviation found, setting psjet spatial composites to missing")   ; sc_*_lo arrays left to _FillValue
+             print("For "+names(ee)+", 1 or less (normalized) hc value less than -1 standard deviation found, setting hc spatial composites to missing")   ; sc_*_lo arrays left to _FillValue
           else           
              do gg = 0,23
                 tt = gg/12.
@@ -580,31 +702,31 @@ begin
           end if
           delete(lowyr)
           
-          psjetsc_psl = sc_psl_hi
-          psjetsc_psl = (/ sc_psl_hi - sc_psl_lo /)
-          psjetsc_sst = sc_sst_hi
-          psjetsc_sst = (/ sc_sst_hi - sc_sst_lo /)
-          psjetsc_tas = sc_tas_hi
-          psjetsc_tas = (/ sc_tas_hi - sc_tas_lo /)
+          hcsc_psl = sc_psl_hi
+          hcsc_psl = (/ sc_psl_hi - sc_psl_lo /)
+          hcsc_sst = sc_sst_hi
+          hcsc_sst = (/ sc_sst_hi - sc_sst_lo /)
+          hcsc_tas = sc_tas_hi
+          hcsc_tas = (/ sc_tas_hi - sc_tas_lo /)
           delete([/sc_psl_hi,sc_psl_lo,sc_sst_hi,sc_sst_lo,sc_tas_hi,sc_tas_lo/])
-          delete(ua&time)
-          ua&time = TIME    
+          delete(zmsf&time)
+          zmsf&time = TIME    
           delete(TIME)       
                      
           if (OUTPUT_DATA.eq."True") then
-             psjetsc_psl&lat@standard_name = "latitude"
-             psjetsc_psl&lon@standard_name = "longitude"
-             z->psjet_spacomp_psl_jja0 = set_varAtts(psjetsc_psl(6,:,:),"psjet psl spatial composite (JJA+0)","","")
-             z->psjet_spacomp_psl_son0 = set_varAtts(psjetsc_psl(9,:,:),"psjet psl spatial composite (SON+0)","","")
-             z->psjet_spacomp_psl_djf1 = set_varAtts(psjetsc_psl(12,:,:),"psjet psl spatial composite (DJF+1)","","")
-             z->psjet_spacomp_psl_mam1 = set_varAtts(psjetsc_psl(15,:,:),"psjet psl spatial composite (MAM+1)","","")
+             hcsc_psl&lat@standard_name = "latitude"
+             hcsc_psl&lon@standard_name = "longitude"
+             z->hc_spacomp_psl_jja0 = set_varAtts(hcsc_psl(6,:,:),"hc psl spatial composite (JJA+0)","","")
+             z->hc_spacomp_psl_son0 = set_varAtts(hcsc_psl(9,:,:),"hc psl spatial composite (SON+0)","","")
+             z->hc_spacomp_psl_djf1 = set_varAtts(hcsc_psl(12,:,:),"hc psl spatial composite (DJF+1)","","")
+             z->hc_spacomp_psl_mam1 = set_varAtts(hcsc_psl(15,:,:),"hc psl spatial composite (MAM+1)","","")
 
              modname = str_sub_str(names_trefht(ee)," ","_")
              bc = (/"/","'","(",")"/)
              do gg = 0,dimsizes(bc)-1
                 modname = str_sub_str(modname,bc(gg),"_")
              end do
-             fn = getenv("OUTDIR")+modname+".cvdp_data.u850.u850.indices.tas."+syear_trefht(ee)+"-"+eyear_trefht(ee)+".nc"
+             fn = getenv("OUTDIR")+modname+".cvdp_data.zmsf.zmsf.indices.tas."+syear_trefht(ee)+"-"+eyear_trefht(ee)+".nc"
              if (.not.isfilepresent2(fn)) then
                 z_tas = addfile(fn,"c")
                 z_tas@source = "NCAR Climate Analysis Section's Climate Variability Diagnostics Package v"+getenv("VERSION")
@@ -621,10 +743,10 @@ begin
              else
                 z_tas = addfile(fn,"w")
              end if
-             z_tas->psjet_spacomp_tas_jja0 = set_varAtts(psjetsc_tas(6,:,:),"psjet tas spatial composite (JJA+0)","","")   
-             z_tas->psjet_spacomp_tas_son0 = set_varAtts(psjetsc_tas(9,:,:),"psjet tas spatial composite (SON+0)","","") 
-             z_tas->psjet_spacomp_tas_djf1 = set_varAtts(psjetsc_tas(12,:,:),"psjet tas spatial composite (DJF+1)","","") 
-             z_tas->psjet_spacomp_tas_mam1 = set_varAtts(psjetsc_tas(15,:,:),"psjet tas spatial composite (MAM+1)","","") 
+             z_tas->hc_spacomp_tas_jja0 = set_varAtts(hcsc_tas(6,:,:),"hc tas spatial composite (JJA+0)","","")   
+             z_tas->hc_spacomp_tas_son0 = set_varAtts(hcsc_tas(9,:,:),"hc tas spatial composite (SON+0)","","") 
+             z_tas->hc_spacomp_tas_djf1 = set_varAtts(hcsc_tas(12,:,:),"hc tas spatial composite (DJF+1)","","") 
+             z_tas->hc_spacomp_tas_mam1 = set_varAtts(hcsc_tas(15,:,:),"hc tas spatial composite (MAM+1)","","") 
              delete(z_tas)
              delete(modname)
              
@@ -633,7 +755,7 @@ begin
              do gg = 0,dimsizes(bc)-1
                 modname = str_sub_str(modname,bc(gg),"_")
              end do
-             fn = getenv("OUTDIR")+modname+".cvdp_data.u850.indices.sst."+syear_trefht(ee)+"-"+eyear_trefht(ee)+".nc"
+             fn = getenv("OUTDIR")+modname+".cvdp_data.zmsf.indices.sst."+syear_trefht(ee)+"-"+eyear_trefht(ee)+".nc"
              if (.not.isfilepresent2(fn)) then
                 z_sst = addfile(fn,"c")
                 z_sst@source = "NCAR Climate Analysis Section's Climate Variability Diagnostics Package v"+getenv("VERSION")
@@ -651,10 +773,10 @@ begin
              else
                 z_sst = addfile(fn,"w")
              end if
-             z_sst->psjet_spacomp_sst_jja0 = set_varAtts(psjetsc_sst(6,:,:),"psjet sst spatial composite (JJA+0)","","")   
-             z_sst->psjet_spacomp_sst_son0 = set_varAtts(psjetsc_sst(9,:,:),"psjet sst spatial composite (SON+0)","","")   
-             z_sst->psjet_spacomp_sst_djf1 = set_varAtts(psjetsc_sst(12,:,:),"psjet sst spatial composite (DJF+1)","","")   
-             z_sst->psjet_spacomp_sst_mam1 = set_varAtts(psjetsc_sst(15,:,:),"psjet sst spatial composite (MAM+1)","","")   
+             z_sst->hc_spacomp_sst_jja0 = set_varAtts(hcsc_sst(6,:,:),"hc sst spatial composite (JJA+0)","","")   
+             z_sst->hc_spacomp_sst_son0 = set_varAtts(hcsc_sst(9,:,:),"hc sst spatial composite (SON+0)","","")   
+             z_sst->hc_spacomp_sst_djf1 = set_varAtts(hcsc_sst(12,:,:),"hc sst spatial composite (DJF+1)","","")   
+             z_sst->hc_spacomp_sst_mam1 = set_varAtts(hcsc_sst(15,:,:),"hc sst spatial composite (MAM+1)","","")   
              delete(z_sst)
              delete(modname)
           end if
@@ -672,7 +794,7 @@ begin
      if (isvar("psl")) then
         delete(psl)
      end if
-;-------------psjet composite (precipitation)-----------------------------------------------------
+;-------------hc composite (precipitation)-----------------------------------------------------
      if (any(ismissing((/syear(ee),syear_prect(ee),eyear(ee),eyear_prect(ee)/)))) then
         pptreg_plot_flag = 1
      else
@@ -708,7 +830,7 @@ begin
          ;  d = addfile("$NCARG_ROOT/lib/ncarg/data/cdf/landsea.nc","r")     ; mask ocean for TAS array
          ;  basemap = d->LSMASK                                              ; This is now done right before plotting.
          ;  lsm = landsea_mask(basemap,tas&lat,tas&lon)                      ; so that the entire TAS array is used
-         ;  tas = mask(tas,conform(tas,lsm,(/1,2/)).eq.0,False)              ; in the psjet pattern correlations
+         ;  tas = mask(tas,conform(tas,lsm,(/1,2/)).eq.0,False)              ; in the hc pattern correlations
          ;  delete([/lsm,basemap/])                                          ; (Even if the land portion of TAS is the
          ;  delete(d)                                                        ; only portion plotted as SST shown over oceans.)
 
@@ -733,17 +855,17 @@ begin
         
            hicntr = 0
            locntr = 0
-           hiyr = new(dimsizes(psjet_jja&time),integer)
+           hiyr = new(dimsizes(hc_ndj&time),integer)
            loyr = hiyr
 
-           do hh = 0,dimsizes(psjet_jja)-1
-              if (.not.ismissing(psjet_jja(hh))) then
-                 if (psjet_jja(hh).ge.1) then
-                    hiyr(hicntr) = psjet_jja&time(hh)
+           do hh = 0,dimsizes(hc_ndj)-1
+              if (.not.ismissing(hc_ndj(hh))) then
+                 if (hc_ndj(hh).ge.1) then
+                    hiyr(hicntr) = hc_ndj&time(hh)
                     hicntr = hicntr+1
                  end if
-                 if (psjet_jja(hh).le.-1) then
-                    loyr(locntr) = psjet_jja&time(hh)
+                 if (hc_ndj(hh).le.-1) then
+                    loyr(locntr) = hc_ndj&time(hh)
                     locntr = locntr+1
                  end if
               end if
@@ -776,7 +898,7 @@ begin
            sc_ppt_lo = sc_ppt_lo@_FillValue
            
            if (dimsizes(highyr).le.1) then
-              print("For "+names(ee)+", 1 or less (normalized) psjet value greater than one standard deviation found, setting psjet spatial composites to missing")  ; sc_*_hi arrays left to _FillValue
+              print("For "+names(ee)+", 1 or less (normalized) hc value greater than one standard deviation found, setting hc spatial composites to missing")  ; sc_*_hi arrays left to _FillValue
            else           
               do gg = 0,23
                  tt = gg/12.
@@ -786,7 +908,7 @@ begin
            end if
            delete(highyr)
            if (dimsizes(lowyr).le.1) then
-              print("For "+names(ee)+", 1 or less (normalized) psjet value less than -1 standard deviation found, setting psjet spatial composites to missing")   ; sc_*_lo arrays left to _FillValue
+              print("For "+names(ee)+", 1 or less (normalized) hc value less than -1 standard deviation found, setting hc spatial composites to missing")   ; sc_*_lo arrays left to _FillValue
            else           
               do gg = 0,23
                  tt = gg/12.
@@ -796,8 +918,8 @@ begin
            end if
            delete(lowyr)
            
-           psjetsc_ppt = sc_ppt_hi
-           psjetsc_ppt = (/ sc_ppt_hi - sc_ppt_lo /)
+           hcsc_ppt = sc_ppt_hi
+           hcsc_ppt = (/ sc_ppt_hi - sc_ppt_lo /)
            delete([/sc_ppt_hi,sc_ppt_lo/])     
                       
            if (OUTPUT_DATA.eq."True") then
@@ -806,7 +928,7 @@ begin
               do gg = 0,dimsizes(bc)-1
                  modname = str_sub_str(modname,bc(gg),"_")
               end do
-              fn = getenv("OUTDIR")+modname+".cvdp_data.u850.indices.ppt."+syear_trefht(ee)+"-"+eyear_trefht(ee)+".nc"
+              fn = getenv("OUTDIR")+modname+".cvdp_data.zmsf.indices.ppt."+syear_trefht(ee)+"-"+eyear_trefht(ee)+".nc"
               if (.not.isfilepresent2(fn)) then
                  z_ppt = addfile(fn,"c")
                  z_ppt@source = "NCAR Climate Analysis Section's Climate Variability Diagnostics Package v"+getenv("VERSION")
@@ -824,10 +946,10 @@ begin
               else
                  z_ppt = addfile(fn,"w")
               end if
-              z_ppt->psjet_spacomp_pr_jja0 = set_varAtts(psjetsc_ppt(6,:,:),"psjet pr spatial composite (JJA+0)","","")      
-              z_ppt->psjet_spacomp_pr_son0 = set_varAtts(psjetsc_ppt(9,:,:),"psjet pr spatial composite (SON+0)","","")
-              z_ppt->psjet_spacomp_pr_djf1 = set_varAtts(psjetsc_ppt(12,:,:),"psjet pr spatial composite (DJF+1)","","")
-              z_ppt->psjet_spacomp_pr_mam1 = set_varAtts(psjetsc_ppt(15,:,:),"psjet pr spatial composite (MAM+1)","","")
+              z_ppt->hc_spacomp_pr_jja0 = set_varAtts(hcsc_ppt(6,:,:),"hc pr spatial composite (JJA+0)","","")      
+              z_ppt->hc_spacomp_pr_son0 = set_varAtts(hcsc_ppt(9,:,:),"hc pr spatial composite (SON+0)","","")
+              z_ppt->hc_spacomp_pr_djf1 = set_varAtts(hcsc_ppt(12,:,:),"hc pr spatial composite (DJF+1)","","")
+              z_ppt->hc_spacomp_pr_mam1 = set_varAtts(hcsc_ppt(15,:,:),"hc pr spatial composite (MAM+1)","","")
               delete(z_ppt)
               delete(modname)
            end if
@@ -839,49 +961,49 @@ begin
      if (isvar("ppt")) then
         delete(ppt)
      end if
-     delete([/ua,psjet_jja/])
+     delete([/zmsf,hc_ndj/])
 ;-----------------------------------------------------------------------------------------     
-     if (nyr(ee).ge.20) then    ; need a minimum number of years to compute running psjet standard deviations
-        psjetT = dtrend_msg(ispan(0,dimsizes(psjetT)-1,1),psjetT,True,False)
-        psjetT!0 = "time"
-        psjetT&time = psjetind&time
-        sd_run = psjetT
+     if (nyr(ee).ge.20) then    ; need a minimum number of years to compute running hc standard deviations
+        hcT = dtrend_msg(ispan(0,dimsizes(hcT)-1,1),hcT,True,False)
+        hcT!0 = "time"
+        hcT&time = hcind&time
+        sd_run = hcT
         sd_run = sd_run@_FillValue
-        sd_run@units = psjetind@units
-        sd_run@long_name = "psjetind 15yr running standard deviation"
-        do gg = 90,dimsizes(psjetT)-90
-           sd_run(gg) = (/ dim_stddev(psjetT(gg-90:gg+89)) /)
+        sd_run@units = hcind@units
+        sd_run@long_name = "hcind 15yr running standard deviation"
+        do gg = 90,dimsizes(hcT)-90
+           sd_run(gg) = (/ dim_stddev(hcT(gg-90:gg+89)) /)
         end do
         if (OUTPUT_DATA.eq."True") then
-           z->psjet_runstddev = set_varAtts(sd_run,"","","")
+           z->hc_runstddev = set_varAtts(sd_run,"","","")
         end if
      end if
-     delete(psjetT)
+     delete(hcT)
 ;-----------------------------------------------------------------------------------------
-     iopt = 0                ; psjet power spectra
+     iopt = 0                ; hc power spectra
      jave = (7*nyr(ee))/100
      val1 = .95
      val2 = .99
      pct = 0.1 
-     spectra_mvf = False        ; missing value flag for psjet
-     if (any(ismissing(psjetind))) then     ; check for missing data                                                            
-        print("Missing data detected for "+names(ee)+", not creating spectra in u850.indices.ncl") 
+     spectra_mvf = False        ; missing value flag for hc
+     if (any(ismissing(hcind))) then     ; check for missing data                                                            
+        print("Missing data detected for "+names(ee)+", not creating spectra in zmsf.indices.ncl") 
         spectra_mvf = True
         if (isfilepresent2("obs_ts").and.ee.eq.0) then
            spectra_mvf_obs = True
         end if
      else
         if (isfilepresent2("obs_ts").and.ee.eq.0) then
-           spectra_mvf_obs = False   ; missing value flag for obs psjet
+           spectra_mvf_obs = False   ; missing value flag for obs hc
         end if
-        psjet_dt = dtrend_msg(ispan(0,dimsizes(psjetind)-1,1),psjetind,True,False) 
+        hc_dt = dtrend_msg(ispan(0,dimsizes(hcind)-1,1),hcind,True,False) 
     
-        sdof = specx_anal(psjet_dt,iopt,jave,pct)
+        sdof = specx_anal(hc_dt,iopt,jave,pct)
         mval = sum(1/(1.+((sdof@xlag1)^2)-((2*sdof@xlag1)*cos(6.28318*sdof@frq))))
         if (mval.eq.0) then ; check for cyclic data that results in sum of Markov elements = 0.
            spectra_mvf = True
            if (isfilepresent2("obs_ts").and.ee.eq.0) then
-              spectra_mvf_obs = True   ; missing value flag for obs psjet
+              spectra_mvf_obs = True   ; missing value flag for obs hc
            end if
         else
            splt1 = specx_ci(sdof,val1,val2)
@@ -897,22 +1019,22 @@ begin
               splt1@units_info = "df refers to frequency interval"
               splt1@units = "hPa^2/df"
               splt1@comment_cvdp = "(0,:)=spectrum,(1,:)=Markov red noise spectrum, (2,:)="+val1+"% confidence bound for Markhov, (3,:)="+val2+"% confidence bound for Markhov"
-              z->psjet_spectra = set_varAtts(splt1,"psjet power spectra","","")
+              z->hc_spectra = set_varAtts(splt1,"hc power spectra","","")
            end if
            if (isfilepresent2("obs_ts").and.ee.eq.0) then
               sdof_obs = sdof
            end if
         end if
-        delete([/psjet_dt,iopt,jave,pct,mval/])
+        delete([/hc_dt,iopt,jave,pct,mval/])
      end if
 ;------------------------------------------------------------------------------------------
-     psjet_dt = dtrend_msg(ispan(0,dimsizes(psjetind&time)-1,1),psjetind,True,False)
-     psjet_mon_sd = new(12,typeof(psjetind))
+     hc_dt = dtrend_msg(ispan(0,dimsizes(hcind&time)-1,1),hcind,True,False)
+     hc_mon_sd = new(12,typeof(hcind))
      
      do hh = 0,11
-        psjet_mon_sd(hh) = (/ dim_stddev(psjet_dt(hh::12)) /)
+        hc_mon_sd(hh) = (/ dim_stddev(hc_dt(hh::12)) /)
      end do
-     psjet_mon_sd@units = "C"
+     hc_mon_sd@units = "C"
      if (OUTPUT_DATA.eq."True") then
         time_mon2 = ispan(0,11,1)
         time_mon2@units = "months since 0000-01-01 00:00:00"
@@ -921,16 +1043,16 @@ begin
         time_mon2@calendar = "standard"
         time_mon2!0 = "time_mon2"
         time_mon2&time_mon2 = time_mon2
-        psjet_mon_sd!0 = "time_mon2"
-        psjet_mon_sd&time_mon2 = time_mon2
-        z->psjet_monthly_stddev = set_varAtts(psjet_mon_sd,"psjet monthly standard deviation","","")
+        hc_mon_sd!0 = "time_mon2"
+        hc_mon_sd&time_mon2 = time_mon2
+        z->hc_monthly_stddev = set_varAtts(hc_mon_sd,"hc monthly standard deviation","","")
         delete(time_mon2)
      end if
 ;------------------------------------------------------------------------------------------
-;    psjet wavelet analysis, autocorrelation
+;    hc wavelet analysis, autocorrelation
 
      if (spectra_mvf.eq.False) then
-        N       = dimsizes(psjetind)       
+        N       = dimsizes(hcind)       
         mother  = 0
         param   = 6.0
         dt      = 1./12.            
@@ -942,7 +1064,7 @@ begin
         noise   = 1 
         siglvl  = .05
         isigtest= 0
-        wave34 = wavelet(psjetind,mother,dt,param,s0,dj,jtot,npad,noise,isigtest,siglvl,nadof)
+        wave34 = wavelet(hcind,mother,dt,param,s0,dj,jtot,npad,noise,isigtest,siglvl,nadof)
 
         power34            = onedtond(wave34@power,(/jtot,N/))
         power34!0          = "period"                    
@@ -950,8 +1072,8 @@ begin
         power34&period@long_name = "wavelet period"
         power34&period@units = "1"
         power34!1          = "time"                     
-        power34&time       = psjetind&time
-        power34@units      = psjetind@units+"^2"
+        power34&time       = hcind&time
+        power34@units      = hcind@units+"^2"
 
         sig34              = power34                       
         sig34              = power34/conform (power34,wave34@signif,0)
@@ -959,7 +1081,7 @@ begin
         sig34@units        = ""
         delete([/N,mother,param,dt,s0,dj,jtot,npad,nadof,noise,siglvl,isigtest/])
 
-        ac34 = esacr(psjet_dt,48)
+        ac34 = esacr(hc_dt,48)
         time_mon3 = ispan(0,48,1)
         time_mon3@units = "months since 0000-01-01 00:00:00"
         time_mon3@long_name = "Time"
@@ -971,15 +1093,15 @@ begin
         ac34&time_mon3 = time_mon3
         ac34@units = "1"
         if (OUTPUT_DATA.eq."True") then
-           z->psjet_wavelet_power = set_varAtts(power34,"psjet wavelet power","","")
-           z->psjet_wavelet_significance = set_varAtts(sig34,"psjet wavelet significance","","")
-           z->psjet_autocorrelation = set_varAtts(ac34,"psjet autocorrelation","","")
+           z->hc_wavelet_power = set_varAtts(power34,"hc wavelet power","","")
+           z->hc_wavelet_significance = set_varAtts(sig34,"hc wavelet significance","","")
+           z->hc_autocorrelation = set_varAtts(ac34,"hc autocorrelation","","")
         end if
         if (isfilepresent2("obs_ts").and.ee.eq.0) then
            ac34_obs = ac34
         end if
      end if
-     delete(psjet_dt)    
+     delete(hc_dt)    
      if (isvar("z")) then
         delete(z)
      end if
@@ -1049,7 +1171,7 @@ begin
      xyres2@gsnYRefLine = (/.3,.6,0.9,1.2,1.5,1.8/)
      xyres2@gsnYRefLineColor = "gray85"
      
-     xyres3 = xyres            ; resource list for monthly psjet standard deviations
+     xyres3 = xyres            ; resource list for monthly hc standard deviations
      xyres3@trXMinF = 0.5
      xyres3@trXMaxF = 12.5
      xyres3@vpWidthF = 0.65
@@ -1070,7 +1192,7 @@ begin
      xyres3@tmXBLabels = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
      xyres3@tmXTOn = False
      
-     xyres4 = xyres      ; resource list for psjet autocorrelations
+     xyres4 = xyres      ; resource list for hc autocorrelations
      xyres4@trXMinF = 0.0
      xyres4@trXMaxF = 48.0
      xyres4@trYMinF = -1.05
@@ -1150,253 +1272,172 @@ begin
      xyres5@gsnLeftString = names(ee)
      xyres6@gsnLeftString = names(ee)
 
-     arr = new((/3,dimsizes(psjetind)/),typeof(psjetind))
+     arr = new((/3,dimsizes(hcwd)/),typeof(hcwd))
    
-     tttt = dtrend_msg(ispan(0,dimsizes(psjetind)-1,1),psjetind,False,True)
-     arr(0,:) = (/ psjetind /)
-     arr(1,:) = (/ runave_n(psjetind, 11, 0, 0) /)
-     arr(2,:) = (/ (ispan(0,dimsizes(psjetind)-1,1)*tttt@slope)+tttt@y_intercept /)
-     xyres6@tiYAxisString  = ""      ; add an axis title
+     tttt = dtrend_msg(ispan(0,dimsizes(hcwd)-1,1),hcwd,False,True)
+     arr(0,:) = (/ hcwd /)
+     arr(1,:) = (/ runave_n(hcwd, 3, 0, 0) /)
+     arr(2,:) = (/ (ispan(0,dimsizes(hcwd)-1,1)*tttt@slope)+tttt@y_intercept /)
+     xyres6@tiYAxisString  = "Latitude (degree)"      ; add an axis title
      xyres6@tiXAxisString  = "Time"      ; add an axis title
-     xyres6@gsnRightString = "trend: "+ decimalPlaces(tttt@slope*dimsizes(psjetind),2,True)+psjetind@units+" "+nyr(ee)+"yr~S~-1~N~"
-     xyn1(ee) = gsn_csm_xy(wks_psjet,fspan(syear(ee),eyear(ee)+.91667,dimsizes(psjetind)),arr,xyres6) 
+     xyres6@gsnRightString = "trend: "+ decimalPlaces(tttt@slope*dimsizes(hcwd),2,True)+hcwd@units+" "+nyr(ee)+"yr~S~-1~N~"
+     xyn0(ee) = gsn_csm_xy(wks_hc,fspan(syear(ee),eyear(ee)+.91667,dimsizes(hcwd)),arr,xyres6) 
      delete(tttt)
  
-     tttt = dtrend_msg(ispan(0,dimsizes(psjetisd)-1,1),psjetisd,False,True)
-     arr(0,:) = (/ psjetisd /)
-     arr(1,:) = (/ runave_n(psjetisd, 11, 0, 0) /)
-     arr(2,:) = (/ (ispan(0,dimsizes(psjetisd)-1,1)*tttt@slope)+tttt@y_intercept /)
-     xyres6@tiYAxisString  = ""      ; add an axis title
+     tttt = dtrend_msg(ispan(0,dimsizes(hcei)-1,1),hcei,False,True)
+     arr(0,:) = (/ hcei /)
+     arr(1,:) = (/ runave_n(hcei, 3, 0, 0) /)
+     arr(2,:) = (/ (ispan(0,dimsizes(hcei)-1,1)*tttt@slope)+tttt@y_intercept /)
+     xyres6@tiYAxisString  = "Latitude (degree)"      ; add an axis title
      xyres6@tiXAxisString  = "Time"      ; add an axis title
-     xyres6@gsnRightString = "trend: "+ decimalPlaces(tttt@slope*dimsizes(psjetisd),2,True)+psjetisd@units+" "+nyr(ee)+"yr~S~-1~N~"
-     xyn2(ee) = gsn_csm_xy(wks_psjet,fspan(syear(ee),eyear(ee)+.91667,dimsizes(psjetisd)),arr,xyres6)
+     xyres6@gsnRightString = "trend: "+ decimalPlaces(tttt@slope*dimsizes(hcei),2,True)+hcei@units+" "+nyr(ee)+"yr~S~-1~N~" 
+     xyn1(ee) = gsn_csm_xy(wks_hc,fspan(syear(ee),eyear(ee)+.91667,dimsizes(hcei)),arr,xyres6)
      delete(tttt)
 
-     tttt = dtrend_msg(ispan(0,dimsizes(psjetloc)-1,1),psjetloc,False,True)
-     arr(0,:) = (/ psjetloc /)
-     arr(1,:) = (/ runave_n(psjetloc, 11, 0, 0) /)
-     arr(2,:) = (/ (ispan(0,dimsizes(psjetloc)-1,1)*tttt@slope)+tttt@y_intercept /)
-     xyres6@tiYAxisString  = psjetloc@units      ; add an axis title
+     tttt = dtrend_msg(ispan(0,dimsizes(hcwn)-1,1),hcwn,False,True)
+     arr(0,:) = (/ hcwn /)
+     arr(1,:) = (/ runave_n(hcwn, 3, 0, 0) /)
+     arr(2,:) = (/ (ispan(0,dimsizes(hcwn)-1,1)*tttt@slope)+tttt@y_intercept /)
+     xyres6@tiYAxisString  = "Latitude (degree)"       ; add an axis title
      xyres6@tiXAxisString  = "Time"      ; add an axis title
-     xyres6@gsnRightString = "trend: "+ decimalPlaces(tttt@slope*dimsizes(psjetloc),2,True)+psjetloc@units+" "+nyr(ee)+"yr~S~-1~N~"
-     xyn3(ee) = gsn_csm_xy(wks_psjet,fspan(syear(ee),eyear(ee)+.91667,dimsizes(psjetloc)),arr,xyres6) 
+     xyres6@gsnRightString = "trend: "+ decimalPlaces(tttt@slope*dimsizes(hcwn),2,True)+hcwn@units+" "+nyr(ee)+"yr~S~-1~N~"
+     xyn2(ee) = gsn_csm_xy(wks_hc,fspan(syear(ee),eyear(ee)+.91667,dimsizes(hcwn)),arr,xyres6)
+     delete(tttt)
+
+     tttt = dtrend_msg(ispan(0,dimsizes(hcws)-1,1),hcws,False,True)
+     arr(0,:) = (/ hcws /)
+     arr(1,:) = (/ runave_n(hcws, 3, 0, 0) /)
+     arr(2,:) = (/ (ispan(0,dimsizes(hcws)-1,1)*tttt@slope)+tttt@y_intercept /)
+     xyres6@tiYAxisString  = "Latitude (degree)"       ; add an axis title
+     xyres6@tiXAxisString  = "Time"      ; add an axis title
+     xyres6@gsnRightString = "trend: "+ decimalPlaces(tttt@slope*dimsizes(hcws),2,True)+hcws@units+" "+nyr(ee)+"yr~S~-1~N~"
+     xyn3(ee) = gsn_csm_xy(wks_hc,fspan(syear(ee),eyear(ee)+.91667,dimsizes(hcws)),arr,xyres6) 
      delete(tttt)
      
-     tttt = dtrend_msg(ispan(0,dimsizes(psjetins)-1,1),psjetins,False,True)
-     arr(0,:) = (/ psjetins /)
-     arr(1,:) = (/ runave_n(psjetins, 11, 0, 0) /)
-     arr(2,:) = (/ (ispan(0,dimsizes(psjetins)-1,1)*tttt@slope)+tttt@y_intercept /)
-     xyres6@tiYAxisString  = psjetins@units      ; add an axis title
-     xyres6@tiXAxisString  = "Time"      ; add an axis title
-     xyres6@gsnRightString = "trend: "+ decimalPlaces(tttt@slope*dimsizes(psjetins),2,True)+psjetins@units+" "+nyr(ee)+"yr~S~-1~N~"
-     xyn4(ee) = gsn_csm_xy(wks_psjet,fspan(syear(ee),eyear(ee)+.91667,dimsizes(psjetins)),arr,xyres6)
+     tttt = dtrend_msg(ispan(0,dimsizes(hcin)-1,1),hcin,False,True)
+     arr(0,:) = (/ hcin /)
+     arr(1,:) = (/ runave_n(hcin, 3, 0, 0) /)
+     arr(2,:) = (/ (ispan(0,dimsizes(hcin)-1,1)*tttt@slope)+tttt@y_intercept /)
+     xyres6@tiYAxisString  = hcin@units      ; add an axis title
+     xyres6@tiXAxisString  = "Time"          ; add an axis title
+     xyres6@gsnRightString = "trend: "+ decimalPlaces(tttt@slope*dimsizes(hcin),2,True)+hcin@units+" "+nyr(ee)+"yr~S~-1~N~"
+     xyn4(ee) = gsn_csm_xy(wks_hc,fspan(syear(ee),eyear(ee)+.91667,dimsizes(hcin)),arr,xyres6)
      delete(tttt)
 
-     xyres61 = xyres6
-     tttt = dtrend_msg(ispan(0,dimsizes(finua_mave(0,:))-1,1),finua_mave(0,:),False,True)
-     arr(0,:) = (/ finua_mave(0,:) /)
-     arr(1,:) = (/ runave_n(finua_mave(0,:), 11, 0, 0) /)
-     arr(2,:) = (/ (ispan(0,dimsizes(finua_mave(0,:))-1,1)*tttt@slope)+tttt@y_intercept /)
-     xyres61@trYMinF = -70.0
-     xyres61@trYMaxF = -20.0 
-     xyres61@tiYAxisString  = "Latitude (degree)"      ; add an axis title
-     xyres61@tiXAxisString  = "Time"      ; add an axis title
-     xyres61@gsnRightString = "trend: "+ decimalPlaces(tttt@slope*dimsizes(finua_mave(0,:)),2,True)+finua_mave@units+" "+nyr(ee)+"yr~S~-1~N~"
-     xyn5(ee) = gsn_csm_xy(wks_psjet,fspan(syear(ee),eyear(ee)+.91667,dimsizes(finua_mave(0,:))),arr,xyres61)
-     if(.not.isvar("xdum")) then
-        xdum = new(1000,graphic)
-     end if
-     xyres7@trYMinF = min(finua_mave(:,:))
-     xyres7@trYMaxF = max(finua_mave(:,:))
-     xdum(ee) = gsn_csm_xy(wks_psjet,fspan(syear(ee),eyear(ee)+.91667,dimsizes(finua_mave(0,:))),finua_mave(1:2,:),xyres7)
-     overlay(xyn5(ee),xdum(ee))
-     delete([/tttt,xyres61/])
+     tttt = dtrend_msg(ispan(0,dimsizes(hcis)-1,1),hcis,False,True)
+     arr(0,:) = (/ hcis /)
+     arr(1,:) = (/ runave_n(hcis, 3, 0, 0) /)
+     arr(2,:) = (/ (ispan(0,dimsizes(hcis)-1,1)*tttt@slope)+tttt@y_intercept /)
+     xyres6@tiYAxisString  = hcis@units      ; add an axis title
+     xyres6@tiXAxisString  = "Time"          ; add an axis title
+     xyres6@gsnRightString = "trend: "+ decimalPlaces(tttt@slope*dimsizes(hcis),2,True)+hcis@units+" "+nyr(ee)+"yr~S~-1~N~" 
+     xyn5(ee) = gsn_csm_xy(wks_hc,fspan(syear(ee),eyear(ee)+.91667,dimsizes(hcis)),arr,xyres6)
+     delete(tttt)  
 
-     xyres62 = xyres6
-     tttt = avg(finua_tave(0,:))
-     arr(0,:) = (/ finua_tave(0,:) /)
-     arr(1,:) = (/ runave_n(finua_tave(0,:), 11, 0, 0) /)
-     arr(2,:) = (/ tttt/)
-     xyres62@trYMinF = -70.0 
-     xyres62@trYMaxF = -20.0 
-     xyres62@trXMinF = tofloat(min(finua_tave&lon))
-     xyres62@trXMaxF = tofloat(max(finua_tave&lon))
-     xyres62@tiYAxisString  = "Latitude (degree)"      ; add an axis title    
-     xyres62@tiXAxisString  = "Longitude (degree)"      ; add an axis title
-     xyres62@gsnRightString = "mean: "+ decimalPlaces(tttt,2,True)+finua_mave@units
-     xyn6(ee) = gsn_csm_xy(wks_psjet,finua_tave&lon,arr,xyres62)
-     if(.not.isvar("xdum")) then
-        xdum = new(1000,graphic)
-     end if
-     xyres7@trYMinF = min(finua_tave(:,:))
-     xyres7@trYMaxF = max(finua_tave(:,:))
-     xdum(100+ee) = gsn_csm_xy(wks_psjet,finua_tave&lon,finua_tave(1:2,:),xyres7)
-     overlay(xyn6(ee),xdum(100+ee))
-     delete([/tttt,xyres62/])
+     tttt = dtrend_msg(ispan(0,dimsizes(hcen)-1,1),hcen,False,True)
+     arr(0,:) = (/ hcen /)
+     arr(1,:) = (/ runave_n(hcen, 3, 0, 0) /)
+     arr(2,:) = (/ (ispan(0,dimsizes(hcen)-1,1)*tttt@slope)+tttt@y_intercept /)
+     xyres6@tiYAxisString  = "Latitude (degree)"      ; add an axis title
+     xyres6@tiXAxisString  = "Time"          ; add an axis title
+     xyres6@gsnRightString = "trend: "+ decimalPlaces(tttt@slope*dimsizes(hcen),2,True)+hcen@units+" "+nyr(ee)+"yr~S~-1~N~" 
+     xyn6(ee) = gsn_csm_xy(wks_hc,fspan(syear(ee),eyear(ee)+.91667,dimsizes(hcen)),arr,xyres6)
+     delete(tttt)  
 
-     ;*********************************
-     ;plot the sam index (also mark positive and negative events) 
-     ;*********************************
-     ;ElStr = ind(psjetind.ge. 2.0)
-     ;ElMod = ind(psjetind.gt. 1.0 .and. psjetind.lt. 2.0)
-     ;LaMod = ind(psjetind.gt.-2.0 .and. psjetind.lt.-1.0)
-     ;LaStr = ind(psjetind.le.-2.0)
-     ;yyyymm = yyyymm_time(syear(ee),eyear(ee), "integer")
-     ;yrfrac = yyyymm_to_yyyyfrac(yyyymm, 0.0)   ; used for graphics
-     ;print("Polar Jet (+):   Strong: "+ElStr+"  "+sprintf("%7.2f", yrfrac(ElStr))+"   "+yyyymm(ElStr)+"  "+psjetind(ElStr))
-     ;print("---")
-     ;print("Polar Jet (+): Moderate: "+ElMod+"  "+sprintf("%7.2f", yrfrac(ElMod))+"   "+yyyymm(ElMod)+"  "+psjetind(ElMod))
-     ;print("---")
-     ;print("Polar Jet (-): Moderate: "+LaMod+"  "+sprintf("%7.2f", yrfrac(LaMod))+"   "+yyyymm(LaMod)+"  "+psjetind(LaMod))
-     ;print("---")
-     ;print("Polar Jet (-):   Strong: "+LaStr+"  "+sprintf("%7.2f", yrfrac(LaStr))+"   "+yyyymm(LaStr)+"  "+psjetind(LaStr))
-     ;print("---")
-     tttt = dtrend_msg(ispan(0,dimsizes(psjetind)-1,1),psjetind,False,True)
-     arr(0,:) = (/ psjetind /)
-     arr(1,:) = (/ runave_n(psjetind, 11, 0, 0) /)
-     arr(2,:) = (/ (ispan(0,dimsizes(psjetind)-1,1)*tttt@slope)+tttt@y_intercept /)
-     arr0     = psjetind 
-     arr1     = psjetind
-     arr2     = psjetind 
-     arr0     =  0
-     arr1     =  1 
-     arr2     = -1
-     xyres5@trYMinF = -3.0 
-     xyres5@trYMaxF =  3.0
-     xyres5@tiYAxisString  = ""          ; add an axis title
-     xyres5@tiXAxisString  = "Time"      ; add an axis title
-     xyres5@gsnRightString = "trend: "+decimalPlaces(tttt@slope*dimsizes(psjetind),2,True)+psjetind@units+" "+nyr(ee)+"yr~S~-1~N~"
-     xyn12(ee) = gsn_csm_xy(wks_psjet,fspan(syear(ee),eyear(ee)+.91667,dimsizes(psjetind)),arr(0,:),xyres5)
-     if(.not.isvar("dum")) then 
-        dum = new(1000,graphic)
-     end if  
-     dum(ee)     = gsn_add_polyline(wks_psjet,xyn12(ee),fspan(syear(ee),eyear(ee)+.91667,dimsizes(psjetind)),arr0,gsLine) 
-     dum(ee+100) = gsn_add_polyline(wks_psjet,xyn12(ee),fspan(syear(ee),eyear(ee)+.91667,dimsizes(psjetind)),arr1,gsLin0)
-     dum(ee+200) = gsn_add_polyline(wks_psjet,xyn12(ee),fspan(syear(ee),eyear(ee)+.91667,dimsizes(psjetind)),arr2,gsLin1)
-     dum(ee+300) = gsn_add_text(wks_psjet,xyn12(ee),"Polar Jet (+)",syear(ee)+0.2, 2.50, txre0)
-     dum(ee+400) = gsn_add_text(wks_psjet,xyn12(ee),"Polar Jet (-)",syear(ee)+0.2,-2.50, txre1)
-     delete([/xyres5,gsLine,gsLin0,gsLin1,txre0,txre1/])
-     delete([/arr,tttt,arr0,arr1,arr2/])
+     tttt = dtrend_msg(ispan(0,dimsizes(hces)-1,1),hces,False,True)
+     arr(0,:) = (/ hces /)
+     arr(1,:) = (/ runave_n(hces, 3, 0, 0) /)
+     arr(2,:) = (/ (ispan(0,dimsizes(hces)-1,1)*tttt@slope)+tttt@y_intercept /)
+     xyres6@tiYAxisString  = "Latitude (degree)"      ; add an axis title
+     xyres6@tiXAxisString  = "Time"          ; add an axis title
+     xyres6@gsnRightString = "trend: "+ decimalPlaces(tttt@slope*dimsizes(hces),2,True)+hces@units+" "+nyr(ee)+"yr~S~-1~N~"
+     xyn7(ee) = gsn_csm_xy(wks_hc,fspan(syear(ee),eyear(ee)+.91667,dimsizes(hces)),arr,xyres6)
+     delete(tttt)
+
+     tttt = dtrend_msg(ispan(0,dimsizes(hmcin)-1,1),hmcin,False,True)
+     arr(0,:) = (/ hmcin /)
+     arr(1,:) = (/ runave_n(hmcin, 3, 0, 0) /)
+     arr(2,:) = (/ (ispan(0,dimsizes(hmcin)-1,1)*tttt@slope)+tttt@y_intercept /)
+     xyres6@tiYAxisString  = hmcin@units      ; add an axis title
+     xyres6@tiXAxisString  = "Time"          ; add an axis title
+     xyres6@gsnRightString = "trend: "+ decimalPlaces(tttt@slope*dimsizes(hmcin),2,True)+hmcin@units+" "+nyr(ee)+"yr~S~-1~N~"
+     xyn8(ee) = gsn_csm_xy(wks_hc,fspan(syear(ee),eyear(ee)+.91667,dimsizes(hmcin)),arr,xyres6)
+     delete(tttt)
+
+     tttt = dtrend_msg(ispan(0,dimsizes(hmcis)-1,1),hmcis,False,True)
+     arr(0,:) = (/ hmcis /)
+     arr(1,:) = (/ runave_n(hmcis, 3, 0, 0) /)
+     arr(2,:) = (/ (ispan(0,dimsizes(hmcis)-1,1)*tttt@slope)+tttt@y_intercept /)
+     xyres6@tiYAxisString  = hmcis@units      ; add an axis title
+     xyres6@tiXAxisString  = "Time"          ; add an axis title
+     xyres6@gsnRightString = "trend: "+ decimalPlaces(tttt@slope*dimsizes(hmcis),2,True)+hmcis@units+" "+nyr(ee)+"yr~S~-1~N~"
+     xyn9(ee) = gsn_csm_xy(wks_hc,fspan(syear(ee),eyear(ee)+.91667,dimsizes(hmcis)),arr,xyres6)
+     delete(tttt)
+
+     tttt = dtrend_msg(ispan(0,dimsizes(hxcin)-1,1),hxcin,False,True)
+     arr(0,:) = (/ hxcin /)
+     arr(1,:) = (/ runave_n(hxcin, 3, 0, 0) /)
+     arr(2,:) = (/ (ispan(0,dimsizes(hxcin)-1,1)*tttt@slope)+tttt@y_intercept /)
+     xyres6@tiYAxisString  = hxcin@units      ; add an axis title
+     xyres6@tiXAxisString  = "Time"          ; add an axis title
+     xyres6@gsnRightString = "trend: "+ decimalPlaces(tttt@slope*dimsizes(hxcin),2,True)+hxcin@units+" "+nyr(ee)+"yr~S~-1~N~"
+     xyn10(ee) = gsn_csm_xy(wks_hc,fspan(syear(ee),eyear(ee)+.91667,dimsizes(hxcin)),arr,xyres6)
+     delete(tttt)
+     
+     tttt = dtrend_msg(ispan(0,dimsizes(hxcis)-1,1),hxcis,False,True)
+     arr(0,:) = (/ hxcis /)
+     arr(1,:) = (/ runave_n(hxcis, 3, 0, 0) /)
+     arr(2,:) = (/ (ispan(0,dimsizes(hxcis)-1,1)*tttt@slope)+tttt@y_intercept /)
+     xyres6@tiYAxisString  = hxcis@units      ; add an axis title
+     xyres6@tiXAxisString  = "Time"          ; add an axis title
+     xyres6@gsnRightString = "trend: "+ decimalPlaces(tttt@slope*dimsizes(hxcis),2,True)+hxcis@units+" "+nyr(ee)+"yr~S~-1~N~"
+     xyn11(ee) = gsn_csm_xy(wks_hc,fspan(syear(ee),eyear(ee)+.91667,dimsizes(hxcis)),arr,xyres6)
+     delete([/xyres6,arr,tttt/])
  
      xyres2@gsnLeftString = names(ee)
      if (nyr(ee).ge.20) then
         xyres2@gsnRightString = sprintf("%4.2f", min(sd_run))+" / "+sprintf("%4.2f", avg(sd_run))+" / "+sprintf("%4.2f", max(sd_run))+sd_run@units
-        xypsjet_rst(ee) = gsn_csm_xy(wks_psjet_rst,fspan(syear(ee),eyear(ee)+.91667,dimsizes(sd_run)),sd_run,xyres2)
+        xyhc_rst(ee) = gsn_csm_xy(wks_hc_rst,fspan(syear(ee),eyear(ee)+.91667,dimsizes(sd_run)),sd_run,xyres2)
      end if
      
      xyres3@gsnRightStringFontHeightF = xyres3@gsnCenterStringFontHeightF
      xyres3@gsnLeftString = syear(ee)+"-"+eyear(ee)
      xyres3@gsnCenterString = names(ee)
      xyres3@gsnRightString = "C"
-     if (max(psjet_mon_sd).gt.xyres3@gsnYRefLine) then
-        xypsjet_mst(ee) = gsn_csm_xy(wks_psjet_mst,ispan(1,12,1),psjet_mon_sd,xyres3)
+     if (max(hc_mon_sd).gt.xyres3@gsnYRefLine) then
+        xyhc_mst(ee) = gsn_csm_xy(wks_hc_mst,ispan(1,12,1),hc_mon_sd,xyres3)
      end if
-     title_n1  = psjetind@comment_cvdp
-     title_n2  = psjetisd@comment_cvdp 
-     title_n3  = psjetloc@comment_cvdp 
-     title_n4  = psjetins@comment_cvdp
-     title_n5  = finua_mave@comment_cvdp
-     title_n6  = finua_tave@comment_cvdp
-     title_n12 = psjetind@comment_cvdp
-
-     delete([/psjetind,finua_mave,finua_tave,psjetisd,psjetins,psjetloc/])
+     title_n0  = hcwd@comment_cvdp
+     title_n1  = hcei@comment_cvdp 
+     title_n2  = hcwn@comment_cvdp 
+     title_n3  = hcws@comment_cvdp
+     title_n4  = hcen@comment_cvdp
+     title_n5  = hces@comment_cvdp
+     title_n6  = hcin@comment_cvdp
+     title_n7  = hcis@comment_cvdp
+     title_n8  = hmcin@comment_cvdp
+     title_n9  = hmcis@comment_cvdp
+     title_n10 = hxcin@comment_cvdp
+     title_n11 = hxcis@comment_cvdp
+     delete([/hcwd,hcei,hcwn,hcws,hcen,hces,hcin,hcis,hmcin,hmcis,hxcin,hxcis,hpin,hpis,hmpin,hmpis,hcind,hcisd/])
 
      if (spectra_mvf.eq.False) then
         xyres4@gsnCenterString = names(ee)
         xyres4@gsnRightString = syear(ee)+"-"+eyear(ee)
-        xypsjet_ac(ee) = gsn_csm_xy(wks_psjet_p,ispan(0,48,1),ac34,xyres4)
+        xyhc_ac(ee) = gsn_csm_xy(wks_hc_p,ispan(0,48,1),ac34,xyres4)
         if (ee.ge.1.and.isvar("ac34_obs")) then
            delete([/xyres4@gsnAboveYRefLineColor,xyres4@gsnBelowYRefLineColor/])
            xyres4@xyLineColor = "gray62"
            xyres4@xyCurveDrawOrder = "PreDraw"
            xyres4@gsnCenterString = ""
            xyres4@gsnRightString = ""
-           xypsjet_ac_obs(ee) = gsn_csm_xy(wks_psjet_p,ispan(0,48,1),ac34_obs,xyres4)
-           overlay(xypsjet_ac(ee),xypsjet_ac_obs(ee)) 
+           xyhc_ac_obs(ee) = gsn_csm_xy(wks_hc_p,ispan(0,48,1),ac34_obs,xyres4)
+           overlay(xyhc_ac(ee),xyhc_ac_obs(ee)) 
            delete(xyres4@xyCurveDrawOrder)
            delete(ac34)
         end if
      end if
-     delete([/xyres,xyres2,xyres3,xyres4,psjet_mon_sd/])
-;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-     yymm        = yyyymm_time(syear(ee), eyear(ee), "integer")
-     yyyyFrac    = yyyymm_to_yyyyfrac(yymm, 0.0)
-
-     res = True
-     res@vpHeightF = 0.45
-     res@vpWidthF = 0.35
-     res@gsnFrame = False
-     res@gsnDraw = False 
-  
-     res@tmYLMode        = "Explicit"
-     res@tmYLValues      = yyyyFrac(::60)
-     res@tmYLLabels      = yymm(::60) 
-     res@tmYLMinorValues = yyyyFrac(::12)
-
-     res@tmYLLabelJust = "CenterCenter"               
-     res@tmYLLabelDeltaF = 1.3    ;0.05
-     res@cnFillOn = True
-     res@gsnSpreadColors = True  
-     res@gsnSpreadColorEnd = 19
-     
-     res@lbLabelBarOn = False
-  
-     res@tiMainOn = False
-     res@cnInfoLabelOn = False
-     res@cnLinesOn = True
-     res@cnLevelSelectionMode = "ExplicitLevels"
-     res@cnLevels = fspan(-70,-20,26) 
-     carr = new(dimsizes(res@cnLevels),"string")
-     carr = "transparent"
-     carr(8) = "gray50"
-     res@cnMonoLineColor = False
-     res@cnLineColors = carr
-     res@cnLineLabelsOn = False
-     res@tmYLLabelFontHeightF = 0.014
-     res@tmXBLabelFontHeightF = 0.014
-     res@gsnMajorLonSpacing = 90.
-     res@gsnMinorLonSpacing = 60.
-     res@tiYAxisOn = False
-     if (wks_type.eq."png") then
-        res@cnLineThicknessF = 1.
-     else
-        res@cnLineThicknessF = 0.5
-     end if     
-     res@gsnCenterStringOrthogonalPosF = 0.025
-     res@gsnRightStringOrthogonalPosF = res@gsnCenterStringOrthogonalPosF
-     res@gsnCenterStringFontHeightF = 0.017
-     res@gsnLeftStringFontHeightF = 0.017
-     res@gsnRightStringFontHeightF = 0.017
-
-     res@gsnLeftString = ""
-     res@gsnCenterString= ""
-     res@gsnRightString = ""
-
-     if (isfilepresent2("obs_ts").and.ee.eq.0.and.isvar("finua")) then      ; for metrics table
-        patcor_hov         = new((/nsim,dimsizes(finua&time),dimsizes(finua&lon)/),typeof(finua))
-        patcor_hov!1       = "time"
-        patcor_hov&time    = finua&time
-        patcor_hov!2       = "lon"
-        patcor_hov&lon     = finua&lon
-        patcor_hov(ee,:,:) = (/ finua /) 
-     end if
-
-     if (isfilepresent2("obs_ts").and.ee.ge.1.and.isvar("patcor_hov_hi").and.isvar("finua_mave")) then    
-        dimT = dimsizes(finua_mave&time)
-        do hh = 0,dimT-1     ; need to loop over each timestep, using linint1 to interpolate to set longitudes. 
-           patcor_hov(ee,hh,:) = (/ totype(linint1(finua&lon,finua(hh,:),False,patcor_hov&lon,0),typeof(patcor_hov)) /)
-        end do
-     end if
-
-     if (isvar("finua")) then    
-        res@gsnCenterString = names(ee)   ;"Polar Jet(+)"
-        res@gsnRightString  = "" ;"Polar Jet Latitude Position (Degree)"
-        delete(finua&time)
-        finua&time         = yyyyFrac
-        plot_jetlat(ee)     = gsn_csm_hov(wks_psjetlat_tlon,finua,res)
-        delete([/finua/])
-     end if
-     delete([/res,yymm,yyyyFrac/])
+     delete([/xyres,xyres2,xyres3,xyres4,hc_mon_sd/])
 
 ;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
      wres = True
@@ -1479,9 +1520,9 @@ begin
         power34&time = fspan(syear(ee),eyear(ee)+.91667,nyr(ee)*12)
         delete(sig34&time)
         sig34&time = power34&time
-        plot_wave34(ee) = gsn_csm_contour(wks_psjet_p,power34,wres)
-        plot_wave34(ee) = ShadeCOI(wks_psjet_p,plot_wave34(ee),wave34,power34&time,wavecoi)
-        o0 = gsn_csm_contour(wks_psjet_p,sig34,wsres)
+        plot_wave34(ee) = gsn_csm_contour(wks_hc_p,power34,wres)
+        plot_wave34(ee) = ShadeCOI(wks_hc_p,plot_wave34(ee),wave34,power34&time,wavecoi)
+        o0 = gsn_csm_contour(wks_hc_p,sig34,wsres)
         opt   = True
         opt@gsnShadeFillType = "pattern"
         opt@gsnShadeHigh     = 17
@@ -1577,13 +1618,13 @@ begin
      pres@gsnLeftString = "" 
      pres@gsnCenterString = names(ee)
      if (spectra_mvf.eq.False) then
-        pspec(ee) = gsn_csm_xy(wks_psjet_p,sdof@frq,splt1,pres) 
+        pspec(ee) = gsn_csm_xy(wks_hc_p,sdof@frq,splt1,pres) 
         if (isfilepresent2("obs_ts").and.ee.ge.1.and.spectra_mvf_obs.eq.False) then
            pres@xyLineColors        = (/"gray70","black","black","black"/)
            pres@xyCurveDrawOrder = "PreDraw"
            pres@gsnCenterString = ""
            pres@gsnRightString = ""
-           pspec_obs(ee) = gsn_csm_xy(wks_psjet_p,sdof_obs@frq,sdof_obs@spcx,pres)
+           pspec_obs(ee) = gsn_csm_xy(wks_hc_p,sdof_obs@frq,sdof_obs@spcx,pres)
            overlay(pspec(ee),pspec_obs(ee)) 
            delete(pres@xyCurveDrawOrder)
         end if
@@ -1666,7 +1707,7 @@ begin
      scres3@cnLevelSelectionMode = "ExplicitLevels"
      scres3@cnInfoLabelOn = False
      scres3@tiMainOn = False      
-     new_index = NhlNewDashPattern(wks_psjetsc,"$_$_$_$_$_$_$_$_$_")
+     new_index = NhlNewDashPattern(wks_hcsc,"$_$_$_$_$_$_$_$_$_")
      scres3@gsnContourNegLineDashPattern  = new_index
      scres3@cnLineDashSegLenF = 0.08
      scres3@gsnDraw = False
@@ -1698,76 +1739,76 @@ begin
 
      if (tassstreg_plot_flag.eq.0) then
         if (isvar("patcor_tas")) then    ; for metrics table
-           patcor_tas(ee,:,:) = (/ totype(linint2(psjetsc_tas&lon,psjetsc_tas&lat,psjetsc_tas(12,:,:),True,patcor_tas&lon,patcor_tas&lat,0),typeof(patcor_tas)) /)
-           patcor_psl(ee,:,:) = (/ totype(linint2(psjetsc_psl&lon,psjetsc_psl&lat,psjetsc_psl(12,:,:),True,patcor_psl&lon,patcor_psl&lat,0),typeof(patcor_psl)) /)
+           patcor_tas(ee,:,:) = (/ totype(linint2(hcsc_tas&lon,hcsc_tas&lat,hcsc_tas(12,:,:),True,patcor_tas&lon,patcor_tas&lat,0),typeof(patcor_tas)) /)
+           patcor_psl(ee,:,:) = (/ totype(linint2(hcsc_psl&lon,hcsc_psl&lat,hcsc_psl(12,:,:),True,patcor_psl&lon,patcor_psl&lat,0),typeof(patcor_psl)) /)
         else
            if (isfilepresent2("obs_trefht")) then
-              patcor_tas = new((/nsim,dimsizes(psjetsc_tas&lat),dimsizes(psjetsc_tas&lon)/),typeof(psjetsc_tas))
+              patcor_tas = new((/nsim,dimsizes(hcsc_tas&lat),dimsizes(hcsc_tas&lon)/),typeof(hcsc_tas))
               patcor_tas!1 = "lat"
-              patcor_tas&lat = psjetsc_tas&lat
+              patcor_tas&lat = hcsc_tas&lat
               patcor_tas!2 = "lon"
-              patcor_tas&lon = psjetsc_tas&lon
-              patcor_psl = new((/nsim,dimsizes(psjetsc_psl&lat),dimsizes(psjetsc_psl&lon)/),typeof(psjetsc_psl))
+              patcor_tas&lon = hcsc_tas&lon
+              patcor_psl = new((/nsim,dimsizes(hcsc_psl&lat),dimsizes(hcsc_psl&lon)/),typeof(hcsc_psl))
               patcor_psl!1 = "lat"
-              patcor_psl&lat = psjetsc_psl&lat
+              patcor_psl&lat = hcsc_psl&lat
               patcor_psl!2 = "lon"
-              patcor_psl&lon = psjetsc_psl&lon
-              patcor_tas(ee,:,:) = (/ psjetsc_tas(12,:,:) /)
-              patcor_psl(ee,:,:) = (/ psjetsc_psl(12,:,:) /)
+              patcor_psl&lon = hcsc_psl&lon
+              patcor_tas(ee,:,:) = (/ hcsc_tas(12,:,:) /)
+              patcor_psl(ee,:,:) = (/ hcsc_psl(12,:,:) /)
            end if
         end if
      
         d = addfile("$NCARG_ROOT/lib/ncarg/data/cdf/landsea.nc","r")     ; mask ocean for TAS array
         basemap = d->LSMASK
-        lsm = landsea_mask(basemap,psjetsc_tas&lat,psjetsc_tas&lon)
-        psjetsc_tas = mask(psjetsc_tas,conform(psjetsc_tas,lsm,(/1,2/)).eq.0,False)
+        lsm = landsea_mask(basemap,hcsc_tas&lat,hcsc_tas&lon)
+        hcsc_tas = mask(hcsc_tas,conform(hcsc_tas,lsm,(/1,2/)).eq.0,False)
         delete([/lsm,basemap/])
         delete(d)
      
-        map_psjetsc_jja0(ee) = gsn_csm_contour_map(wks_psjetsc,psjetsc_sst(6,:,:),scres)    ; 6 = JJA 0    
-        o1 = gsn_csm_contour(wks_psjetsc,psjetsc_tas(6,:,:),scres2)  
-        o2 = gsn_csm_contour(wks_psjetsc,psjetsc_psl(6,:,:),scres3) 
-        overlay(map_psjetsc_jja0(ee),o1)
-        overlay(map_psjetsc_jja0(ee),o2)
+        map_hcsc_jja0(ee) = gsn_csm_contour_map(wks_hcsc,hcsc_sst(6,:,:),scres)    ; 6 = JJA 0    
+        o1 = gsn_csm_contour(wks_hcsc,hcsc_tas(6,:,:),scres2)  
+        o2 = gsn_csm_contour(wks_hcsc,hcsc_psl(6,:,:),scres3) 
+        overlay(map_hcsc_jja0(ee),o1)
+        overlay(map_hcsc_jja0(ee),o2)
         delete([/o1,o2/])
         
-        map_psjetsc_son0(ee) = gsn_csm_contour_map(wks_psjetsc,psjetsc_sst(9,:,:),scres)    ; 9 = SON 0      
-        o3 = gsn_csm_contour(wks_psjetsc,psjetsc_tas(9,:,:),scres2)  
-        o4 = gsn_csm_contour(wks_psjetsc,psjetsc_psl(9,:,:),scres3) 
-        overlay(map_psjetsc_son0(ee),o3)
-        overlay(map_psjetsc_son0(ee),o4)
+        map_hcsc_son0(ee) = gsn_csm_contour_map(wks_hcsc,hcsc_sst(9,:,:),scres)    ; 9 = SON 0      
+        o3 = gsn_csm_contour(wks_hcsc,hcsc_tas(9,:,:),scres2)  
+        o4 = gsn_csm_contour(wks_hcsc,hcsc_psl(9,:,:),scres3) 
+        overlay(map_hcsc_son0(ee),o3)
+        overlay(map_hcsc_son0(ee),o4)
         delete([/o3,o4/])
         
         
-        map_psjetsc_djf1(ee) = gsn_csm_contour_map(wks_psjetsc,psjetsc_sst(12,:,:),scres)    ; 12 = DJF+1      
-        o5 = gsn_csm_contour(wks_psjetsc,psjetsc_tas(12,:,:),scres2)  
-        o6 = gsn_csm_contour(wks_psjetsc,psjetsc_psl(12,:,:),scres3) 
-        overlay(map_psjetsc_djf1(ee),o5)
-        overlay(map_psjetsc_djf1(ee),o6)
+        map_hcsc_djf1(ee) = gsn_csm_contour_map(wks_hcsc,hcsc_sst(12,:,:),scres)    ; 12 = DJF+1      
+        o5 = gsn_csm_contour(wks_hcsc,hcsc_tas(12,:,:),scres2)  
+        o6 = gsn_csm_contour(wks_hcsc,hcsc_psl(12,:,:),scres3) 
+        overlay(map_hcsc_djf1(ee),o5)
+        overlay(map_hcsc_djf1(ee),o6)
         delete([/o5,o6/])
         
-        map_psjetsc_mam1(ee) = gsn_csm_contour_map(wks_psjetsc,psjetsc_sst(15,:,:),scres)    ; 15 = MAM+1      
-        o7 = gsn_csm_contour(wks_psjetsc,psjetsc_tas(15,:,:),scres2)  
-        o8 = gsn_csm_contour(wks_psjetsc,psjetsc_psl(15,:,:),scres3) 
-        overlay(map_psjetsc_mam1(ee),o7)
-        overlay(map_psjetsc_mam1(ee),o8)
+        map_hcsc_mam1(ee) = gsn_csm_contour_map(wks_hcsc,hcsc_sst(15,:,:),scres)    ; 15 = MAM+1      
+        o7 = gsn_csm_contour(wks_hcsc,hcsc_tas(15,:,:),scres2)  
+        o8 = gsn_csm_contour(wks_hcsc,hcsc_psl(15,:,:),scres3) 
+        overlay(map_hcsc_mam1(ee),o7)
+        overlay(map_hcsc_mam1(ee),o8)
         delete([/o7,o8/])       
-        delete([/psjetsc_sst,psjetsc_tas,psjetsc_psl/])
+        delete([/hcsc_sst,hcsc_tas,hcsc_psl/])
      end if
      if (pptreg_plot_flag.eq.0) then     
-        map_psjetsc_ppt_jja0(ee) = gsn_csm_contour_map(wks_psjetsc_ppt,psjetsc_ppt(6,:,:),scres4)    ; 6 = JJA 0            
-        map_psjetsc_ppt_son0(ee) = gsn_csm_contour_map(wks_psjetsc_ppt,psjetsc_ppt(9,:,:),scres4)    ; 9 = SON 0              
-        map_psjetsc_ppt_djf1(ee) = gsn_csm_contour_map(wks_psjetsc_ppt,psjetsc_ppt(12,:,:),scres4)    ; 12 = DJF+1              
-        map_psjetsc_ppt_mam1(ee) = gsn_csm_contour_map(wks_psjetsc_ppt,psjetsc_ppt(15,:,:),scres4)    ; 15 = MAM+1      
-        delete([/psjetsc_ppt/])
+        map_hcsc_ppt_jja0(ee) = gsn_csm_contour_map(wks_hcsc_ppt,hcsc_ppt(6,:,:),scres4)    ; 6 = JJA 0            
+        map_hcsc_ppt_son0(ee) = gsn_csm_contour_map(wks_hcsc_ppt,hcsc_ppt(9,:,:),scres4)    ; 9 = SON 0              
+        map_hcsc_ppt_djf1(ee) = gsn_csm_contour_map(wks_hcsc_ppt,hcsc_ppt(12,:,:),scres4)    ; 12 = DJF+1              
+        map_hcsc_ppt_mam1(ee) = gsn_csm_contour_map(wks_hcsc_ppt,hcsc_ppt(15,:,:),scres4)    ; 15 = MAM+1      
+        delete([/hcsc_ppt/])
      end if
   end do
   
   if (isvar("patcor_tas")) then    ; for pattern correlation table  
      clat_tas  = cos(0.01745329*patcor_tas&lat)
      clat_psl  = cos(0.01745329*patcor_psl&lat)
-     finpr_tas = "Polar Jet TAS (DJF+1)  "    ; Must be 18 characters long
-     finpr_psl = "Polar Jet PSL (DJF+1)  " 
+     finpr_tas = "Hadley cell TAS (DJF+1)  "    ; Must be 18 characters long
+     finpr_psl = "Hadley cell PSL (DJF+1)  " 
      line3   = "                  "    ; Must be 18 characters long
      line4   = line3
      header = (/"","Pattern Correlations/RMS Differences   Observations vs. Model(s)",""/)
@@ -1807,66 +1848,15 @@ begin
      if (dimsizes(tochar(line4)).ge.8190) then   ; system or fortran compiler limit
         print("Metrics table warning: Not creating metrics table as size of comparison results in a invalid ascii row size.")   
      else
-        write_table(getenv("OUTDIR")+"metrics.u850.indices.1.txt","w",[/header/],"%s")
-        write_table(getenv("OUTDIR")+"metrics.u850.indices.1.txt","a",[/line3/],"%s")
-        write_table(getenv("OUTDIR")+"metrics.u850.indices.1.txt","a",[/line4/],"%s")
-        write_table(getenv("OUTDIR")+"metrics.u850.indices.1.txt","a",[/finpr_tas/],"%s")
-        write_table(getenv("OUTDIR")+"metrics.u850.indices.1.txt","a",[/finpr_psl/],"%s")
+        write_table(getenv("OUTDIR")+"metrics.zmsf.indices.1.txt","w",[/header/],"%s")
+        write_table(getenv("OUTDIR")+"metrics.zmsf.indices.1.txt","a",[/line3/],"%s")
+        write_table(getenv("OUTDIR")+"metrics.zmsf.indices.1.txt","a",[/line4/],"%s")
+        write_table(getenv("OUTDIR")+"metrics.zmsf.indices.1.txt","a",[/finpr_tas/],"%s")
+        write_table(getenv("OUTDIR")+"metrics.zmsf.indices.1.txt","a",[/finpr_psl/],"%s")
      end if  
      delete([/finpr_tas,finpr_psl,line3,line4,format2,format3,nchar,ntc,clat_tas,clat_psl,patcor_tas,patcor_psl,dimY,ntb,header/])
   end if
 
-  if (isvar("patcor_hov_hi")) then           ; for pattern correlation table  
-     finpr_hi = "Polar Jet(+) Hovmoller "    ; Must be 18 characters long
-     finpr_lo = "Polar Jet(-) Hovmoller " 
-     line3   = "                  "    ; Must be 18 characters long                                 patcor_hov_hi
-     line4   = line3
-     header = (/"","Pattern Correlations/RMS Differences   Observations vs. Model(s)",""/)
-     do hh = 1,nsim-1
-        dimY = dimsizes(tochar(names(hh)))
-        nchar = dimY
-        nchar = where(nchar.le.10,10,nchar)
-        if (dimY.lt.10) then
-           ntb = ""
-           do ii = 0,10-dimY-1
-              ntb = ntb+" "
-           end do
-           ntb = ntb+names(hh)
-        else
-           ntb = names(hh)
-        end if
-        
-        ntc = ""
-        do ii = 0,nchar-1
-           ntc = ntc+"-"
-        end do
-        format2 = "%"+(nchar-5+1)+".2f"
-        format3 = "%4.2f"
-        line3 = line3+" "+ntb   
-        line4 = line4+" "+ntc 
-        if (all(ismissing(patcor_hov_hi(hh,0:28,:)))) then                ; 0:28 refers to Jan+0->May+2, which is the range shown in the hovmoller plots.
-           finpr_hi = finpr_hi+sprintf(format2,9.99)+"/"+sprintf(format3,9.99)
-        else
-           finpr_hi = finpr_hi+sprintf(format2,(pattern_cor(patcor_hov_hi(0,0:28,:),patcor_hov_hi(hh,0:28,:),1.0,0)))+"/"+sprintf(format3,(wgt_arearmse(patcor_hov_hi(0,0:28,:),patcor_hov_hi(hh,0:28,:),1.0,1.0,0)))
-        end if
-        if (all(ismissing(patcor_hov_lo(hh,0:28,:)))) then
-           finpr_lo = finpr_lo+sprintf(format2,9.99)+"/"+sprintf(format3,9.99)
-        else
-           finpr_lo = finpr_lo+sprintf(format2,(pattern_cor(patcor_hov_lo(0,0:28,:),patcor_hov_lo(hh,0:28,:),1.0,0)))+"/"+sprintf(format3,(wgt_arearmse(patcor_hov_lo(0,0:28,:),patcor_hov_lo(hh,0:28,:),1.0,1.0,0)))
-        end if
-     end do
-     if (dimsizes(tochar(line4)).ge.8190) then   ; system or fortran compiler limit
-        print("Metrics table warning: Not creating metrics table as size of comparison results in a invalid ascii row size.")   
-     else
-        write_table(getenv("OUTDIR")+"metrics.u850.indices.2.txt","w",[/header/],"%s")
-        write_table(getenv("OUTDIR")+"metrics.u850.indices.2.txt","a",[/line3/],"%s")
-        write_table(getenv("OUTDIR")+"metrics.u850.indices.2.txt","a",[/line4/],"%s")
-        write_table(getenv("OUTDIR")+"metrics.u850.indices.2.txt","a",[/finpr_hi/],"%s")
-        write_table(getenv("OUTDIR")+"metrics.u850.indices.2.txt","a",[/finpr_lo/],"%s")
-     end if
-     delete([/finpr_hi,finpr_lo,line3,line4,format2,format3,nchar,ntc,patcor_hov_hi,patcor_hov_lo,dimY,ntb,header/])  
-  end if
-  
   ncol = floattointeger(sqrt(nsim))
   nrow = (nsim/ncol)+mod(nsim,ncol) 
   
@@ -1895,41 +1885,56 @@ begin
   end if 
   lp = (/nrow,ncol/)
 
-  if (isvar("title_psjetind")) then
-     panres@txString = "Polar jet (SH) location index (Monthly, "+title_n1+")"
-     gsn_panel2(wks_psjet,xyn1,lp,panres)    
+  if (isvar("title_n0")) then
+     panres@txString = "Hadley cell width (Monthly, "+title_n0+")"
+     gsn_panel2(wks_hc,xyn0,lp,panres)    
 
-     panres@txString = "Polar jet (SH) intensity index (Monthly, "+title_n2+")"
-     gsn_panel2(wks_psjet,xyn2,lp,panres)
+     panres@txString = "Hadley cell intersection (Monthly, "+title_n1+")"
+     gsn_panel2(wks_hc,xyn1,lp,panres)
 
-     panres@txString = "Polar jet (SH) latitude location (Monthly, "+title_n3+")"
-     gsn_panel2(wks_psjet,xyn3,lp,panres)
+     panres@txString = "Hadley cell width (NH branch) (Monthly, "+title_n2+")"
+     gsn_panel2(wks_hc,xyn2,lp,panres)
 
-     panres@txString = "Polar jet (SH) intensity (Monthly, "+title_n4+")"
-     gsn_panel2(wks_psjet,xyn4,lp,panres)
+     panres@txString = "Hadley cell width (SH branch) (Monthly, "+title_n3+")"
+     gsn_panel2(wks_hc,xyn3,lp,panres)
 
-     panres@txString = "Polar jet (SH) mean latitude variation (Monthly, "+title_n5+")"
-     gsn_panel2(wks_psjet,xyn5,lp,panres)
+     panres@txString = "Hadley cell intensity (NH branch) (Monthly, "+title_n4+")"
+     gsn_panel2(wks_hc,xyn4,lp,panres)
 
-     panres@txString = "Polar jet (SH) latitude variation (Monthly, "+title_n6+")"
-     gsn_panel2(wks_psjet,xyn6,lp,panres)
+     panres@txString = "Hadley cell intensity (SH branch) (Monthly, "+title_n5+")"
+     gsn_panel2(wks_hc,xyn5,lp,panres)
 
-     panres@txString = "Polar jet (SH) index (norm.) (Monthly, "+title_n12+")"
-     gsn_panel2(wks_psjet,xyn12,lp,panres)
+     panres@txString = "Hadley cell poleward extent (NH branch) (Monthly, "+title_n6+")"
+     gsn_panel2(wks_hc,xyn6,lp,panres)
+
+     panres@txString = "Hadley cell poleward extent (SH branch) (Monthly, "+title_n7+")"
+     gsn_panel2(wks_hc,xyn7,lp,panres)
+
+     panres@txString = "Hadley cell mean intensity (900-200hPa, NH branch) (Monthly, "+title_n8+")"
+     gsn_panel2(wks_hc,xyn8,lp,panres)
+
+     panres@txString = "Hadley cell mean intensity (900-200hPa, SH branch) (Monthly, "+title_n9+")"
+     gsn_panel2(wks_hc,xyn9,lp,panres)
+
+     panres@txString = "Hadley cell max. intensity (900-200hPa, NH branch) (Monthly, "+title_n10+")"
+     gsn_panel2(wks_hc,xyn10,lp,panres)
+     
+     panres@txString = "Hadley cell max. intensity (900-200hPa, SH branch) (Monthly, "+title_n11+")"
+     gsn_panel2(wks_hc,xyn11,lp,panres)
 
   end if
-  delete([/wks_psjet,wks_psjet/]) 
+  delete([/wks_hc/]) 
 
-  if (all(ismissing(xypsjet_rst))) then
+  if (all(ismissing(xyhc_rst))) then
 ;     print("No valid running standard deviation plots, skipping")
   else
-     panres@txString = "Polar Jet index 15yr running standard deviation"
-     gsn_panel2(wks_psjet_rst,xypsjet_rst,lp,panres) 
-     delete(xypsjet_rst)  
+     panres@txString = "Hadley Cell index 15yr running standard deviation"
+     gsn_panel2(wks_hc_rst,xyhc_rst,lp,panres) 
+     delete(xyhc_rst)  
   end if
   panres@gsnPanelYWhiteSpacePercent = 0.5
-  panres@txString = "Polar Jet index standard deviation (Monthly)"
-  gsn_panel2(wks_psjet_mst,xypsjet_mst,(/nrow,ncol/),panres)   
+  panres@txString = "Hadley Cell index standard deviation (Monthly)"
+  gsn_panel2(wks_hc_mst,xyhc_mst,(/nrow,ncol/),panres)   
   
   panres2 = True
   panres2@gsnMaximize = True
@@ -1937,30 +1942,9 @@ begin
   panres2@gsnPanelLabelBar = True
   panres2@lbLabelStride = 1
   panres2@pmLabelBarWidthF = 0.4
-  panres2@pmLabelBarHeightF = 0.06
-  panres2@lbLabelFontHeightF = 0.013
+  panres2@pmLabelBarHeightF = 0.04
+  panres@pmLabelBarOrthogonalPosF = -0.03
   panres2@txString = ""   
-
-  if (nsim.le.4) then
-     if (nsim.eq.1) then
-        panres2@txFontHeightF = 0.022
-        panres2@gsnPanelBottom = 0.50
-     else
-        panres2@txFontHeightF = 0.0145
-        panres2@gsnPanelBottom = 0.50
-     end if
-  else
-     panres2@txFontHeightF = 0.016
-     panres2@gsnPanelBottom = 0.05
-  end if
-  panres2@lbTitleOn = True
-  panres2@lbTitlePosition = "Bottom"
-  panres2@lbTitleFontHeightF = panres2@lbLabelFontHeightF - 0.002
-
-  panres2@lbTitleString = "Latitude (degree)"
-  panres2@txString = "Polar Jet Latitude Position (degree)"
-  gsn_panel2(wks_psjetlat_tlon,plot_jetlat,(/nrow,ncol/),panres2)   
-  delete([/panres2@lbTitleOn,panres2@lbTitlePosition,panres2@lbTitleFontHeightF,panres2@lbTitleString/])
 
   if (nsim.le.4) then
      if (nsim.eq.1) then
@@ -1975,121 +1959,131 @@ begin
      panres@gsnPanelBottom = 0.05
   end if  
   panres@gsnPanelYWhiteSpacePercent = 3.0
-  panres@txString = "Polar Jet index (Monthly, detrended)"
-  gsn_panel2(wks_psjet_p,pspec,(/nrow,ncol/),panres)  
-  panres@txString = "Polar Jet index Autocorrelation (Monthly)"
-  gsn_panel2(wks_psjet_p,xypsjet_ac,(/nrow,ncol/),panres) 
-  panres2@txString = "Polar Jet index Wavelet (Monthly)"
+  panres@txString = "Hadley cell width index (Monthly, detrended)"
+  gsn_panel2(wks_hc_p,pspec,(/nrow,ncol/),panres)  
+  panres@txString = "Hadley cell width index Autocorrelation (Monthly)"
+  gsn_panel2(wks_hc_p,xyhc_ac,(/nrow,ncol/),panres) 
+  panres2@txString = "Hadley cell width Wavelet (Monthly)"
   panres2@gsnPanelYWhiteSpacePercent = 3.0
   panres2@gsnPanelXWhiteSpacePercent = 4.0
-  gsn_panel2(wks_psjet_p,plot_wave34,(/nrow,ncol/),panres2)  
-  delete(wks_psjet_p)
+  gsn_panel2(wks_hc_p,plot_wave34,(/nrow,ncol/),panres2)  
+  delete(wks_hc_p)
 
   delete(panres2@gsnPanelYWhiteSpacePercent)
   panres2@pmLabelBarWidthF = 0.8
   panres2@lbLabelAutoStride = False
   panres2@gsnPanelXWhiteSpacePercent = 8.5
-  if (any(.not.ismissing(map_psjetsc_jja0))) then
+  if (any(.not.ismissing(map_hcsc_jja0))) then
      panres2@lbTitleString = "SST/TAS (C)"
      panres2@pmLabelBarOrthogonalPosF = -0.05
-     panres2@txString = "Polar Jet SST,TAS,PSL Spatial Composite (JJA~S~0~N~)"
-     gsn_panel2(wks_psjetsc,map_psjetsc_jja0,(/nrow,ncol/),panres2)   
+     panres2@txString = "Hadley Cell SST,TAS,PSL Spatial Composite (JJA~S~0~N~)"
+     gsn_panel2(wks_hcsc,map_hcsc_jja0,(/nrow,ncol/),panres2)   
   
-     panres2@txString = "Polar Jet SST,TAS,PSL Spatial Composite (SON~S~0~N~)"
-     gsn_panel2(wks_psjetsc,map_psjetsc_son0,(/nrow,ncol/),panres2)   
+     panres2@txString = "Hadley Cell SST,TAS,PSL Spatial Composite (SON~S~0~N~)"
+     gsn_panel2(wks_hcsc,map_hcsc_son0,(/nrow,ncol/),panres2)   
   
-     panres2@txString = "Polar Jet SST,TAS,PSL Spatial Composite (DJF~S~+1~N~)"
-     gsn_panel2(wks_psjetsc,map_psjetsc_djf1,(/nrow,ncol/),panres2)   
+     panres2@txString = "Hadley Cell SST,TAS,PSL Spatial Composite (DJF~S~+1~N~)"
+     gsn_panel2(wks_hcsc,map_hcsc_djf1,(/nrow,ncol/),panres2)   
   
-     panres2@txString = "Polar Jet SST,TAS,PSL Spatial Composite (MAM~S~+1~N~)"
-     gsn_panel2(wks_psjetsc,map_psjetsc_mam1,(/nrow,ncol/),panres2)   
-     delete(wks_psjetsc)
+     panres2@txString = "Hadley Cell SST,TAS,PSL Spatial Composite (MAM~S~+1~N~)"
+     gsn_panel2(wks_hcsc,map_hcsc_mam1,(/nrow,ncol/),panres2)   
+     delete(wks_hcsc)
      
-     delete([/map_psjetsc_djf1,map_psjetsc_jja0,map_psjetsc_son0,map_psjetsc_mam1/])
+     delete([/map_hcsc_djf1,map_hcsc_jja0,map_hcsc_son0,map_hcsc_mam1/])
   end if     
-  if (any(.not.ismissing(map_psjetsc_ppt_jja0))) then
-     panres2@txString = "Polar Jet PR Spatial Composite (JJA~S~0~N~)"
-     gsn_panel2(wks_psjetsc_ppt,map_psjetsc_ppt_jja0,(/nrow,ncol/),panres2)   
+  if (any(.not.ismissing(map_hcsc_ppt_jja0))) then
+     panres2@txString = "Hadley Cell PR Spatial Composite (JJA~S~0~N~)"
+     gsn_panel2(wks_hcsc_ppt,map_hcsc_ppt_jja0,(/nrow,ncol/),panres2)   
   
-     panres2@txString = "Polar Jet PR Spatial Composite (SON~S~0~N~)"
-     gsn_panel2(wks_psjetsc_ppt,map_psjetsc_ppt_son0,(/nrow,ncol/),panres2)   
+     panres2@txString = "Hadley Cell PR Spatial Composite (SON~S~0~N~)"
+     gsn_panel2(wks_hcsc_ppt,map_hcsc_ppt_son0,(/nrow,ncol/),panres2)   
   
-     panres2@txString = "Polar Jet PR Spatial Composite (DJF~S~+1~N~)"
-     gsn_panel2(wks_psjetsc_ppt,map_psjetsc_ppt_djf1,(/nrow,ncol/),panres2)   
+     panres2@txString = "Hadley Cell PR Spatial Composite (DJF~S~+1~N~)"
+     gsn_panel2(wks_hcsc_ppt,map_hcsc_ppt_djf1,(/nrow,ncol/),panres2)   
   
-     panres2@txString = "Polar Jet PR Spatial Composite (MAM~S~+1~N~)"
-     gsn_panel2(wks_psjetsc_ppt,map_psjetsc_ppt_mam1,(/nrow,ncol/),panres2)   
-     delete(wks_psjetsc_ppt)
+     panres2@txString = "Hadley Cell PR Spatial Composite (MAM~S~+1~N~)"
+     gsn_panel2(wks_hcsc_ppt,map_hcsc_ppt_mam1,(/nrow,ncol/),panres2)   
+     delete(wks_hcsc_ppt)
      
-     delete([/map_psjetsc_ppt_djf1,map_psjetsc_ppt_jja0,map_psjetsc_ppt_son0,map_psjetsc_ppt_mam1/])
+     delete([/map_hcsc_ppt_djf1,map_hcsc_ppt_jja0,map_hcsc_ppt_son0,map_hcsc_ppt_mam1/])
   end if   
 
-  delete([/xypsjet,xyn6,xyn5,xyn4,xyn3,xyn12,plot_jetlat,pspec,pi,rad,wgt,lp/])     
+  delete([/xyn0,xyn1,xyn2,xyn3,xyn4,xyn5,xyn6,xyn7,xyn8,xyn9,xyn10,xyn11,pspec,pi,rad,wgt,lp/])     
 
   OUTDIR = getenv("OUTDIR")
   
   if (wks_type.eq."png") then  
-     if (isfilepresent2(OUTDIR+"psjet.spatialcomp.000001.png")) then
-        system("mv "+OUTDIR+"psjet.spatialcomp.000001.png "+OUTDIR+"psjet.spatialcomp.jja0.png")
-        system("mv "+OUTDIR+"psjet.spatialcomp.000002.png "+OUTDIR+"psjet.spatialcomp.son0.png")
-        system("mv "+OUTDIR+"psjet.spatialcomp.000003.png "+OUTDIR+"psjet.spatialcomp.djf1.png")
-        system("mv "+OUTDIR+"psjet.spatialcomp.000004.png "+OUTDIR+"psjet.spatialcomp.mam1.png")
+     if (isfilepresent2(OUTDIR+"hc.spatialcomp.000001.png")) then
+        system("mv "+OUTDIR+"hc.spatialcomp.000001.png "+OUTDIR+"hc.spatialcomp.jja0.png")
+        system("mv "+OUTDIR+"hc.spatialcomp.000002.png "+OUTDIR+"hc.spatialcomp.son0.png")
+        system("mv "+OUTDIR+"hc.spatialcomp.000003.png "+OUTDIR+"hc.spatialcomp.djf1.png")
+        system("mv "+OUTDIR+"hc.spatialcomp.000004.png "+OUTDIR+"hc.spatialcomp.mam1.png")
      end if
-     if (isfilepresent2(OUTDIR+"psjet.spatialcomp.ppt.000001.png")) then
-        system("mv "+OUTDIR+"psjet.spatialcomp.ppt.000001.png "+OUTDIR+"psjet.spatialcomp.pr.jja0.png")
-        system("mv "+OUTDIR+"psjet.spatialcomp.ppt.000002.png "+OUTDIR+"psjet.spatialcomp.pr.son0.png")
-        system("mv "+OUTDIR+"psjet.spatialcomp.ppt.000003.png "+OUTDIR+"psjet.spatialcomp.pr.djf1.png")
-        system("mv "+OUTDIR+"psjet.spatialcomp.ppt.000004.png "+OUTDIR+"psjet.spatialcomp.pr.mam1.png")
+     if (isfilepresent2(OUTDIR+"hc.spatialcomp.ppt.000001.png")) then
+        system("mv "+OUTDIR+"hc.spatialcomp.ppt.000001.png "+OUTDIR+"hc.spatialcomp.pr.jja0.png")
+        system("mv "+OUTDIR+"hc.spatialcomp.ppt.000002.png "+OUTDIR+"hc.spatialcomp.pr.son0.png")
+        system("mv "+OUTDIR+"hc.spatialcomp.ppt.000003.png "+OUTDIR+"hc.spatialcomp.pr.djf1.png")
+        system("mv "+OUTDIR+"hc.spatialcomp.ppt.000004.png "+OUTDIR+"hc.spatialcomp.pr.mam1.png")
      end if
-     if (isfilepresent2(OUTDIR+"psjet.timeseries.000001.png")) then
-        system("mv "+OUTDIR+"psjet.timeseries.000001.png "+OUTDIR+"psjetind.timeseries.png")
-        system("mv "+OUTDIR+"psjet.timeseries.000002.png "+OUTDIR+"psjetisd.timeseries.png")
-        system("mv "+OUTDIR+"psjet.timeseries.000003.png "+OUTDIR+"psjetloc.timeseries.png")
-        system("mv "+OUTDIR+"psjet.timeseries.000004.png "+OUTDIR+"psjetins.timeseries.png")
-        system("mv "+OUTDIR+"psjet.timeseries.000005.png "+OUTDIR+"jetlat_mave.timeseries.png")
-        system("mv "+OUTDIR+"psjet.timeseries.000006.png "+OUTDIR+"jetlat_tave.timeseries.png")
-        system("mv "+OUTDIR+"psjet.timeseries.000007.png "+OUTDIR+"psjet_norm.timeseries.png")
+     if (isfilepresent2(OUTDIR+"hc.timeseries.000001.png")) then
+        system("mv "+OUTDIR+"hc.timeseries.000001.png "+OUTDIR+"hcwd.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries.000002.png "+OUTDIR+"hcei.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries.000003.png "+OUTDIR+"hcwn.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries.000004.png "+OUTDIR+"hcws.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries.000005.png "+OUTDIR+"hcin.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries.000006.png "+OUTDIR+"hcis.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries.000007.png "+OUTDIR+"hcen.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries.000008.png "+OUTDIR+"hces.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries.000009.png "+OUTDIR+"hmcin.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries.000010.png "+OUTDIR+"hmcis.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries.000011.png "+OUTDIR+"hxcin.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries.000012.png "+OUTDIR+"hxcis.timeseries.png")
      end if
-     if (isfilepresent2(OUTDIR+"psjet.powspec.000001.png")) then
-        system("mv "+OUTDIR+"psjet.powspec.000001.png "+OUTDIR+"psjet.powspec.png")
-        system("mv "+OUTDIR+"psjet.powspec.000002.png "+OUTDIR+"psjet.autocor.png")
-        system("mv "+OUTDIR+"psjet.powspec.000003.png "+OUTDIR+"psjet.wavelet.png")
+     if (isfilepresent2(OUTDIR+"hc.powspec.000001.png")) then
+        system("mv "+OUTDIR+"hc.powspec.000001.png "+OUTDIR+"hc.powspec.png")
+        system("mv "+OUTDIR+"hc.powspec.000002.png "+OUTDIR+"hc.autocor.png")
+        system("mv "+OUTDIR+"hc.powspec.000003.png "+OUTDIR+"hc.wavelet.png")
      end if
   else
-     if (isfilepresent2(OUTDIR+"psjet.spatialcomp.ps")) then
-        system("psplit "+OUTDIR+"psjet.spatialcomp.ps "+OUTDIR+"ua_ind")
-        system("mv "+OUTDIR+"ua_ind0001.ps "+OUTDIR+"psjet.spatialcomp.jja0.ps")
-        system("mv "+OUTDIR+"ua_ind0002.ps "+OUTDIR+"psjet.spatialcomp.son0.ps")
-        system("mv "+OUTDIR+"ua_ind0003.ps "+OUTDIR+"psjet.spatialcomp.djf1.ps")
-        system("mv "+OUTDIR+"ua_ind0004.ps "+OUTDIR+"psjet.spatialcomp.mam1.ps")
-        system("rm "+OUTDIR+"psjet.spatialcomp.ps")
+     if (isfilepresent2(OUTDIR+"hc.spatialcomp.ps")) then
+        system("psplit "+OUTDIR+"hc.spatialcomp.ps "+OUTDIR+"ua_ind")
+        system("mv "+OUTDIR+"ua_ind0001.ps "+OUTDIR+"hc.spatialcomp.jja0.ps")
+        system("mv "+OUTDIR+"ua_ind0002.ps "+OUTDIR+"hc.spatialcomp.son0.ps")
+        system("mv "+OUTDIR+"ua_ind0003.ps "+OUTDIR+"hc.spatialcomp.djf1.ps")
+        system("mv "+OUTDIR+"ua_ind0004.ps "+OUTDIR+"hc.spatialcomp.mam1.ps")
+        system("rm "+OUTDIR+"hc.spatialcomp.ps")
      end if
-     if (isfilepresent2(OUTDIR+"psjet.spatialcomp.ppt.ps")) then
-        system("psplit "+OUTDIR+"psjet.spatialcomp.ppt.ps "+OUTDIR+"ua_ind")
-        system("mv "+OUTDIR+"ua_ind0001.ps "+OUTDIR+"psjet.spatialcomp.pr.jja0.ps")
-        system("mv "+OUTDIR+"ua_ind0002.ps "+OUTDIR+"psjet.spatialcomp.pr.son0.ps")
-        system("mv "+OUTDIR+"ua_ind0003.ps "+OUTDIR+"psjet.spatialcomp.pr.djf1.ps")
-        system("mv "+OUTDIR+"ua_ind0004.ps "+OUTDIR+"psjet.spatialcomp.pr.mam1.ps")
-        system("rm "+OUTDIR+"psjet.spatialcomp.ppt.ps")
+     if (isfilepresent2(OUTDIR+"hc.spatialcomp.ppt.ps")) then
+        system("psplit "+OUTDIR+"hc.spatialcomp.ppt.ps "+OUTDIR+"ua_ind")
+        system("mv "+OUTDIR+"ua_ind0001.ps "+OUTDIR+"hc.spatialcomp.pr.jja0.ps")
+        system("mv "+OUTDIR+"ua_ind0002.ps "+OUTDIR+"hc.spatialcomp.pr.son0.ps")
+        system("mv "+OUTDIR+"ua_ind0003.ps "+OUTDIR+"hc.spatialcomp.pr.djf1.ps")
+        system("mv "+OUTDIR+"ua_ind0004.ps "+OUTDIR+"hc.spatialcomp.pr.mam1.ps")
+        system("rm "+OUTDIR+"hc.spatialcomp.ppt.ps")
      end if
-     if (isfilepresent2(OUTDIR+"psjet.timeseries.ps")) then
-        system("psplit "+OUTDIR+"psjet.timeseries.ps "+OUTDIR+"jetu850_ind")
-        system("mv "+OUTDIR+"jetu850_ind0001.ps "+OUTDIR+"psjetind.timeseries.ps")
-        system("mv "+OUTDIR+"jetu850_ind0002.ps "+OUTDIR+"psjetisd.timeseries.ps")
-        system("mv "+OUTDIR+"jetu850_ind0003.ps "+OUTDIR+"psjetloc.timeseries.ps")
-        system("mv "+OUTDIR+"jetu850_ind0004.ps "+OUTDIR+"psjetins.timeseries.ps")
-        system("mv "+OUTDIR+"jetu850_ind0005.ps "+OUTDIR+"jetlat_mave.timeseries.ps")
-        system("mv "+OUTDIR+"jetu850_ind0006.ps "+OUTDIR+"jetlat_tave.timeseries.ps")
-        system("mv "+OUTDIR+"jetu850_ind0007.ps "+OUTDIR+"psjet_norm.timeseries.ps")
+     if (isfilepresent2(OUTDIR+"hc.timeseries.ps")) then
+        system("psplit "+OUTDIR+"hc.timeseries.ps "+OUTDIR+"hczmsf_ind")
+        system("mv "+OUTDIR+"hczmsf_ind0001.ps "+OUTDIR+"hcwd.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0002.ps "+OUTDIR+"hcei.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0003.ps "+OUTDIR+"hcwn.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0004.ps "+OUTDIR+"hcws.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0005.ps "+OUTDIR+"hcin.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0006.ps "+OUTDIR+"hcis.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0007.ps "+OUTDIR+"hcen.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0008.ps "+OUTDIR+"hces.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0009.ps "+OUTDIR+"hmcin.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0010.ps "+OUTDIR+"hmcis.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0011.ps "+OUTDIR+"hxcin.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0012.ps "+OUTDIR+"hxcis.timeseries.ps")
      end if
-     if (isfilepresent2(OUTDIR+"psjet.powspec.ps")) then
-        system("psplit "+OUTDIR+"psjet.powspec.ps "+OUTDIR+"psjetp")
-        system("mv "+OUTDIR+"psjetp0001.ps "+OUTDIR+"psjet.powspec.ps")
-        if (isfilepresent2(OUTDIR+"psjetp0002.ps")) then
-           system("mv "+OUTDIR+"psjetp0002.ps "+OUTDIR+"psjet.autocor.ps")
-           system("mv "+OUTDIR+"psjetp0003.ps "+OUTDIR+"psjet.wavelet.ps")
+     if (isfilepresent2(OUTDIR+"hc.powspec.ps")) then
+        system("psplit "+OUTDIR+"hc.powspec.ps "+OUTDIR+"hcp")
+        system("mv "+OUTDIR+"hcp0001.ps "+OUTDIR+"hc.powspec.ps")
+        if (isfilepresent2(OUTDIR+"hcp0002.ps")) then
+           system("mv "+OUTDIR+"hcp0002.ps "+OUTDIR+"hc.autocor.ps")
+           system("mv "+OUTDIR+"hcp0003.ps "+OUTDIR+"hc.wavelet.ps")
         end if
      end if
   end if
-  print("Finished: u850.indices.ncl")
+  print("Finished: zmsf.indices.ncl")
 end

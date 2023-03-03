@@ -87,6 +87,7 @@ begin
   
   if (COLORMAP.eq.0) then
      gsn_define_colormap(wks_nino34,"MPL_RdBu")  
+     gsn_reverse_colormap(wks_nino34)           ; Reverse the color map.
   end if
   if (COLORMAP.eq.1) then
      gsn_define_colormap(wks_nino34,"NCV_jaisnd")  
@@ -289,13 +290,8 @@ begin
      rc    = (/escorc_n(nino34_pc_djf,arr_djf,0,0)/)
      rc    = rc*rc*100.0
      pcvar = wgt_areaave_Wrap(rc({llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0)
-     sig_pcv = eofunc_north2(pcvar,dimsizes(nino34_pc_djf),False)
-     if (sig_pcv(0)) then    ; if True then significant
-        nino34_djf@pcvar = tofloat(sprintf("%4.1f", pcvar))+"%*"
-     else
-        nino34_djf@pcvar = tofloat(sprintf("%4.1f", pcvar))+"%"
-     end if
-     delete([/sig_pcv,pcvar,rc/])    
+     nino34_djf@pcvar = tofloat(sprintf("%4.1f", pcvar))+"%"
+     delete([/pcvar,rc/])    
      nino34_pc_djf!0 = "TIME"
      nino34_pc_djf&TIME = ispan(syear(ee),eyear(ee),1)
      nino34_pc_djf&TIME@units = "YYYY"
@@ -335,13 +331,8 @@ begin
      rc    = (/escorc_n(nino34_pc_mam,arr_mam,0,0)/)
      rc    = rc*rc*100.0
      pcvar = wgt_areaave_Wrap(rc({llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0)
-     sig_pcv = eofunc_north2(pcvar,dimsizes(nino34_pc_mam),False)
-     if (sig_pcv(0)) then    ; if True then significant
-        nino34_mam@pcvar = tofloat(sprintf("%4.1f", pcvar))+"%*"
-     else
-        nino34_mam@pcvar = tofloat(sprintf("%4.1f", pcvar))+"%"
-     end if
-     delete([/sig_pcv,pcvar,rc/])
+     nino34_mam@pcvar = tofloat(sprintf("%4.1f", pcvar))+"%"
+     delete([/pcvar,rc/])
      copy_VarCoords(nino34_pc_djf,nino34_pc_mam) 
      delete([/pcts/])
      
@@ -378,13 +369,8 @@ begin
      rc    = (/escorc_n(nino34_pc_jja,arr_jja,0,0)/)
      rc    = rc*rc*100.0
      pcvar = wgt_areaave_Wrap(rc({llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0)
-     sig_pcv = eofunc_north2(pcvar,dimsizes(nino34_pc_jja),False)
-     if (sig_pcv(0)) then    ; if True then significant
-        nino34_jja@pcvar = tofloat(sprintf("%4.1f", pcvar))+"%*"
-     else
-        nino34_jja@pcvar = tofloat(sprintf("%4.1f", pcvar))+"%"
-     end if
-     delete([/sig_pcv,pcvar,rc/])
+     nino34_jja@pcvar = tofloat(sprintf("%4.1f", pcvar))+"%"
+     delete([/pcvar,rc/])
      copy_VarCoords(nino34_pc_djf,nino34_pc_jja) 
      delete([/pcts/])
  
@@ -421,13 +407,8 @@ begin
      rc    = (/escorc_n(nino34_pc_son,arr_son,0,0)/)
      rc    = rc*rc*100.0
      pcvar = wgt_areaave_Wrap(rc({llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0)
-     sig_pcv = eofunc_north2(pcvar,dimsizes(nino34_pc_son),False)
-     if (sig_pcv(0)) then    ; if True then significant
-        nino34_son@pcvar = tofloat(sprintf("%4.1f", pcvar))+"%*"
-     else
-        nino34_son@pcvar = tofloat(sprintf("%4.1f", pcvar))+"%"
-     end if
-     delete([/sig_pcv,pcvar,rc/])
+     nino34_son@pcvar = tofloat(sprintf("%4.1f", pcvar))+"%"
+     delete([/pcvar,rc/])
      copy_VarCoords(nino34_pc_djf,nino34_pc_son) 
      delete([/pcts/])
 
@@ -464,13 +445,8 @@ begin
      rc    = (/escorc_n(nino34_pc_ann,arr_ann,0,0)/)
      rc    = rc*rc*100.0
      pcvar = wgt_areaave_Wrap(rc({llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0)
-     sig_pcv = eofunc_north2(pcvar,dimsizes(nino34_pc_ann),False)
-     if (sig_pcv(0)) then    ; if True then significant
-        nino34_ann@pcvar = tofloat(sprintf("%4.1f", pcvar))+"%*"
-     else
-        nino34_ann@pcvar = tofloat(sprintf("%4.1f", pcvar))+"%"
-     end if
-     delete([/sig_pcv,pcvar,rc/])
+     nino34_ann@pcvar = tofloat(sprintf("%4.1f", pcvar))+"%"
+     delete([/pcvar,rc/])
      copy_VarCoords(nino34_pc_djf,nino34_pc_ann) 
      delete([/pcts/])
      
@@ -508,13 +484,8 @@ begin
         rc    = (/escorc_n(nino34_pc_mon,arr,0,0)/)
         rc    = rc*rc*100.0
         pcvar = wgt_areaave_Wrap(rc({llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0)
-        sig_pcv = eofunc_north2(pcvar,dimsizes(nino34_pc_djf),False)
-        if (sig_pcv(0)) then    ; if True then significant
-           nino34_mon@pcvar = tofloat(sprintf("%4.1f", pcvar))+"%*"
-        else
-           nino34_mon@pcvar = tofloat(sprintf("%4.1f", pcvar))+"%"
-        end if
-        delete([/sig_pcv,pcvar,rc/])
+        nino34_mon@pcvar = tofloat(sprintf("%4.1f", pcvar))+"%"
+        delete([/pcvar,rc/])
         nino34_pc_mon!0 = "time"
         nino34_pc_mon&time = arr&time   
         delete([/pcts,arr/])
@@ -702,10 +673,15 @@ begin
         res@gsnCenterString = names_reg(ee)
         res@gsnRightString = ""
         lbunitstr = nino34_vreg_djf@units
+        res@gsnRightString = nino34_djf@pcvar
         reg_nino34_djf(ee) = gsn_csm_contour_map(wks_nino34,nino34_vreg_djf,res)
+        res@gsnRightString = nino34_mam@pcvar
         reg_nino34_mam(ee) = gsn_csm_contour_map(wks_nino34,nino34_vreg_mam,res)
+        res@gsnRightString = nino34_jja@pcvar
         reg_nino34_jja(ee) = gsn_csm_contour_map(wks_nino34,nino34_vreg_jja,res)
+        res@gsnRightString = nino34_son@pcvar
         reg_nino34_son(ee) = gsn_csm_contour_map(wks_nino34,nino34_vreg_son,res)
+        res@gsnRightString = nino34_ann@pcvar
         reg_nino34_ann(ee) = gsn_csm_contour_map(wks_nino34,nino34_vreg_ann,res)     
         delete([/nino34_vreg_djf,nino34_vreg_mam,nino34_vreg_jja,nino34_vreg_son,nino34_vreg_ann/])
         o_djf = gsn_csm_contour(wks_nino34,nino34_prob_djf,res2)
@@ -725,7 +701,8 @@ begin
         overlay(reg_nino34_son(ee),o_son)
         overlay(reg_nino34_ann(ee),o_ann)
         delete([/o_djf,o_mam,o_jja,o_son,o_ann/])
-        if (COMPUTE_MODES_MON.eq."True") then                    
+        if (COMPUTE_MODES_MON.eq."True") then 
+           res@gsnRightString = nino34_mon@pcvar                   
            reg_nino34_mon(ee) = gsn_csm_contour_map(wks_nino34,nino34_vreg_mon,res)
            delete([/nino34_vreg_mon/])
            o_mon = gsn_csm_contour(wks_nino34,nino34_prob_mon,res2)

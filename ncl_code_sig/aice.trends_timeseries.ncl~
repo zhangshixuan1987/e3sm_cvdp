@@ -141,7 +141,7 @@ begin
   time_mon2!0 = "time_mon2"
   time_mon2&time_mon2 = time_mon2
 
-  do ee = 0,nsim-1
+  do ee = nsim-2,nsim-1
      aice_nh_flag = 0
      aice_nh = data_read_in_ice(paths(ee),"aice_nh",syear(ee),eyear(ee))    ; read in data, orient lats/lons correctly, set time coordinate variable up
      if (isatt(aice_nh,"is_all_missing")) then
@@ -526,6 +526,8 @@ begin
         z->sic_nh_trends_ann = set_varAtts(nh_trends_ann,"Northern Hemisphere sic trends (annual)","","")
         z->sic_nh_trends_mon = set_varAtts(nh_trends_mon,"Northern Hemisphere sic trends (monthly)","","")
 
+    print(names(ee))
+        
         if (isvar("aice_nh_sum_djf")) then
            nh_sum_climo = (/ aice_nh_sum_climo /)
            copy_VarAtts(aice_nh_sum_djf,nh_sum_climo)
@@ -641,6 +643,10 @@ begin
         z->sic_sh_trends_son = set_varAtts(sh_trends_seas(3,:,:),"Southern Hemisphere sic trends (SON)","","")
         z->sic_sh_trends_ann = set_varAtts(sh_trends_ann,"Southern Hemisphere sic trends (annual)","","")
         z->sic_sh_trends_mon = set_varAtts(sh_trends_mon,"Southern Hemisphere sic trends (monthly)","","")
+
+           print(names(ee))
+           printMinMax(sh_sum_climo,False)
+           exit
         
         if (isvar("aice_sh_sum_djf")) then
            sh_sum_climo = (/ aice_sh_sum_climo /)
@@ -689,6 +695,9 @@ begin
               delete(sh_sum_mon@area)
               delete(sh_sum_mon_anom@area)
            end if
+
+           print(names(ee))
+           printMinMax(sh_sum_djf, False)
 
            z->sic_sh_extent_djf = set_varAtts(sh_sum_djf,"Southern Hemisphere sic extent timeseries (DJF)","","")
            z->sic_sh_extent_mam = set_varAtts(sh_sum_mam,"Southern Hemisphere sic extent timeseries (MAM)","","")
