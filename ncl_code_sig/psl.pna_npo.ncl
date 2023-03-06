@@ -108,9 +108,9 @@ begin
   wks_npi_ts = gsn_open_wks(wks_type,getenv("OUTDIR")+"npi.timeseries.ndjfm")
   
   if (COLORMAP.eq.0) then
-     gsn_define_colormap(wks_pna,"ncl_default")   
+     gsn_define_colormap(wks_pna,"cmp_b2r")   
      gsn_define_colormap(wks_pna_ts,"ncl_default")
-     gsn_define_colormap(wks_npo,"ncl_default")   
+     gsn_define_colormap(wks_npo,"cmp_b2r")   
      gsn_define_colormap(wks_npo_ts,"ncl_default")
      gsn_define_colormap(wks_npi_ts,"ncl_default")
      gsn_define_colormap(wks_pna_pr,"MPL_BrBG")  
@@ -482,8 +482,8 @@ begin
         delete(pr_djf)
      end if  
 
-     if (.not.ismissing(pna_djf({50},{185}))) then
-        if (pna_djf({50},{185}).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
+     if (.not.all(ismissing(pna_djf({47:52},{182:187})))) then
+        if (avg(pna_djf({47:52},{182:187})).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
            pna_djf = pna_djf*-1.
            pna_pc_djf = pna_pc_djf*-1.
            if (sstreg_plot_flag.eq.0) then
@@ -497,8 +497,8 @@ begin
            end if
         end if
      end if
-     if (.not.ismissing(npo_djf({65},{185}))) then
-        if (npo_djf({65},{185}).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
+     if (.not.all(ismissing(npo_djf({62:67},{182:187})))) then
+        if (avg(npo_djf({62:67},{182:187})).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
            npo_djf = npo_djf*-1.
            npo_pc_djf = npo_pc_djf*-1.
            if (sstreg_plot_flag.eq.0) then
@@ -558,8 +558,8 @@ begin
         delete(pr_mam)
      end if  
 
-     if (.not.ismissing(pna_mam({50},{185}))) then
-        if (pna_mam({50},{185}).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
+     if (.not.all(ismissing(pna_mam({47:52},{182:187})))) then
+        if (avg(pna_mam({47:52},{182:187})).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
            pna_mam = pna_mam*-1.
            pna_pc_mam = pna_pc_mam*-1.
            if (sstreg_plot_flag.eq.0) then
@@ -573,8 +573,8 @@ begin
            end if
         end if
      end if
-     if (.not.ismissing(npo_mam({65},{185}))) then
-        if (npo_mam({65},{185}).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
+     if (.not.all(ismissing(npo_mam({62:67},{182:187})))) then
+        if (avg(npo_mam({62:67},{182:187})).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
            npo_mam = npo_mam*-1.
            npo_pc_mam = npo_pc_mam*-1.
            if (sstreg_plot_flag.eq.0) then
@@ -634,8 +634,8 @@ begin
         delete(pr_jja)
      end if  
 
-     if (.not.ismissing(pna_jja({50},{185}))) then
-        if (pna_jja({50},{185}).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
+     if (.not.all(ismissing(pna_jja({47:52},{182:187})))) then
+        if (avg(pna_jja({47:52},{182:187})).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
            pna_jja = pna_jja*-1.
            pna_pc_jja = pna_pc_jja*-1.
            if (sstreg_plot_flag.eq.0) then
@@ -649,8 +649,8 @@ begin
            end if
         end if
      end if
-     if (.not.ismissing(npo_jja({65},{185}))) then
-        if (npo_jja({65},{185}).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
+     if (.not.all(ismissing(npo_jja({62:67},{182:187})))) then
+        if (avg(npo_jja({62:67},{182:187})).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
            npo_jja = npo_jja*-1.
            npo_pc_jja = npo_pc_jja*-1.
            if (sstreg_plot_flag.eq.0) then
@@ -710,8 +710,8 @@ begin
         delete(pr_son)
      end if  
 
-     if (.not.ismissing(pna_son({50},{185}))) then
-        if (pna_son({50},{185}).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
+     if (.not.all(ismissing(pna_son({47:52},{182:187})))) then
+        if (avg(pna_son({47:52},{182:187})).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
            pna_son = pna_son*-1.
            pna_pc_son = pna_pc_son*-1.
            if (sstreg_plot_flag.eq.0) then
@@ -725,8 +725,8 @@ begin
            end if
         end if
      end if
-     if (.not.ismissing(npo_son({65},{185}))) then
-        if (npo_son({65},{185}).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
+     if (.not.all(ismissing(npo_son({62:67},{182:187})))) then
+        if (avg(npo_son({62:67},{182:187})).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
            npo_son = npo_son*-1.
            npo_pc_son = npo_pc_son*-1.
            if (sstreg_plot_flag.eq.0) then
@@ -786,8 +786,8 @@ begin
         delete(pr_ann)
      end if  
 
-     if (.not.ismissing(pna_ann({50},{185}))) then
-        if (pna_ann({50},{185}).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
+     if (.not.all(ismissing(pna_ann({47:52},{182:187})))) then
+        if (avg(pna_ann({47:52},{182:187})).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
            pna_ann = pna_ann*-1.
            pna_pc_ann = pna_pc_ann*-1.
            if (sstreg_plot_flag.eq.0) then
@@ -801,8 +801,8 @@ begin
            end if
         end if
      end if
-     if (.not.ismissing(npo_ann({65},{185}))) then
-        if (npo_ann({65},{185}).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
+     if (.not.all(ismissing(npo_ann({62:67},{182:187})))) then
+        if (avg(npo_ann({62:67},{182:187})).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
            npo_ann = npo_ann*-1.
            npo_pc_ann = npo_pc_ann*-1.
            if (sstreg_plot_flag.eq.0) then
@@ -862,8 +862,8 @@ begin
            npo_pr_mon = (/ regCoef(npo_pc_mon,pr(lat|:,lon|:,time|:)) /)
            delete(pr)
         end if 
-        if (.not.ismissing(pna_mon({50},{185}))) then
-           if (pna_mon({50},{185}).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
+        if (.not.all(ismissing(pna_mon({47:52},{182:187})))) then
+           if (avg(pna_mon({47:52},{182:187})).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
               pna_mon = pna_mon*-1.
               pna_pc_mon = pna_pc_mon*-1.
               if (sstreg_plot_flag.eq.0) then
@@ -877,8 +877,8 @@ begin
               end if
            end if
         end if
-        if (.not.ismissing(npo_mon({65},{185}))) then
-           if (npo_mon({65},{185}).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
+        if (.not.all(ismissing(npo_mon({62:67},{182:187})))) then
+           if (avg(npo_mon({62:67},{182:187})).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
               npo_mon = npo_mon*-1.
               npo_pc_mon = npo_pc_mon*-1.
               if (sstreg_plot_flag.eq.0) then

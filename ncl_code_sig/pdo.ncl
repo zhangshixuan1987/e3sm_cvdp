@@ -83,7 +83,7 @@ begin
   wks3 = gsn_open_wks(wks_type,getenv("OUTDIR")+"pdo.timeseries")  
 
   if (COLORMAP.eq."0") then
-     gsn_define_colormap(wks,"ncl_default")   
+     gsn_define_colormap(wks,"cmp_b2r")   
      gsn_define_colormap(wks2,"cb_9step")
      gsn_define_colormap(wks3,"ncl_default")
      gsn_define_colormap(wks4,"MPL_BrBG")  

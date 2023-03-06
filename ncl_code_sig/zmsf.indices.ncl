@@ -46,7 +46,7 @@ begin
   nyr = eyear-syear+1
   nyr_max = max(nyr)
 
-;----------- jet spatial composite coding-------------
+;----------- hc spatial composite coding-------------
   nsim_psl = numAsciiRow("namelist_byvar/namelist_psl")
   na_psl = asciiread("namelist_byvar/namelist_psl",(/nsim/),"string")
   names_psl = new(nsim_psl,"string")
@@ -118,7 +118,14 @@ begin
      wks_type@wkWidth = 1500*PNG_SCALE
      wks_type@wkHeight = 1500*PNG_SCALE
   end if
-  wks_hc = gsn_open_wks(wks_type,getenv("OUTDIR")+"hc.timeseries")  
+  wks_hc_mon = gsn_open_wks(wks_type,getenv("OUTDIR")+"hc.timeseries_mon")  
+  wks_hc_djf = gsn_open_wks(wks_type,getenv("OUTDIR")+"hc.timeseries_djf")
+  wks_hc_mam = gsn_open_wks(wks_type,getenv("OUTDIR")+"hc.timeseries_mam")
+  wks_hc_jja = gsn_open_wks(wks_type,getenv("OUTDIR")+"hc.timeseries_jja")
+  wks_hc_son = gsn_open_wks(wks_type,getenv("OUTDIR")+"hc.timeseries_son")
+  wks_hc_ann = gsn_open_wks(wks_type,getenv("OUTDIR")+"hc.timeseries_ann")
+  
+  wks_hc_ts  = gsn_open_wks(wks_type,getenv("OUTDIR")+"hc_ts.timeseries")
 
   wks_hclat_tlon = gsn_open_wks(wks_type,getenv("OUTDIR")+"hcpos.hov")
 
@@ -133,17 +140,27 @@ begin
   wks_hcsc_ppt = gsn_open_wks(wks_type,getenv("OUTDIR")+"hc.spatialcomp.ppt")
   
   if (COLORMAP.eq.0) then
-     gsn_define_colormap(wks_hc,"ncl_default") 
-     gsn_merge_colormaps(wks_hclat_tlon,"cmp_flux",(/"gray30","gray50","gray70"/))
+     gsn_define_colormap(wks_hc_mon,"ncl_default") 
+     gsn_define_colormap(wks_hc_djf,"ncl_default")
+     gsn_define_colormap(wks_hc_mam,"ncl_default")
+     gsn_define_colormap(wks_hc_jja,"ncl_default")
+     gsn_define_colormap(wks_hc_son,"ncl_default")
+     gsn_define_colormap(wks_hc_ann,"ncl_default")
+     gsn_define_colormap(wks_hclat_tlon,"MPL_terrain") 
      gsn_define_colormap(wks_hc_p,"cb_9step")
      gsn_define_colormap(wks_hc_rst,"ncl_default")   
      gsn_define_colormap(wks_hc_mst,"ncl_default")   
-     gsn_define_colormap(wks_hcsc,"ncl_default")   
+     gsn_define_colormap(wks_hcsc,"cmocean_balance")   
      gsn_define_colormap(wks_hcsc_ppt,"MPL_BrBG")  
   end if
   if (COLORMAP.eq.1) then
-     gsn_define_colormap(wks_hc,"ncl_default") 
-     gsn_merge_colormaps(wks_hclat_tlon,"MPL_rainbow",(/"gray30","gray50","gray70"/))
+     gsn_define_colormap(wks_hc_mon,"ncl_default")
+     gsn_define_colormap(wks_hc_djf,"ncl_default")
+     gsn_define_colormap(wks_hc_mam,"ncl_default")
+     gsn_define_colormap(wks_hc_jja,"ncl_default")
+     gsn_define_colormap(wks_hc_son,"ncl_default")
+     gsn_define_colormap(wks_hc_ann,"ncl_default")
+     gsn_define_colormap(wks_hclat_tlon,"MPL_terrain")
      gsn_define_colormap(wks_hc_p,"cb_9step")
      gsn_define_colormap(wks_hc_rst,"ncl_default")   
      gsn_define_colormap(wks_hc_mst,"ncl_default")   
@@ -151,18 +168,13 @@ begin
      gsn_define_colormap(wks_hcsc_ppt,"BrownBlue12")    
   end if
 
-  xyn0  = new(nsim,"graphic")
-  xyn1  = new(nsim,"graphic")
-  xyn2  = new(nsim,"graphic") 
-  xyn3  = new(nsim,"graphic")  
-  xyn4  = new(nsim,"graphic")
-  xyn5  = new(nsim,"graphic")  
-  xyn6  = new(nsim,"graphic")  
-  xyn7  = new(nsim,"graphic") 
-  xyn8  = new(nsim,"graphic") 
-  xyn9  = new(nsim,"graphic") 
-  xyn10 = new(nsim,"graphic") 
-  xyn11 = new(nsim,"graphic") 
+  xyn0  = new((/500,nsim/),"graphic")
+  xyn1  = new((/500,nsim/),"graphic")
+  xyn2  = new((/500,nsim/),"graphic")
+  xyn3  = new((/500,nsim/),"graphic")
+  xyn4  = new((/500,nsim/),"graphic")
+  xyn5  = new((/500,nsim/),"graphic")
+  xyn6  = new((/nsim/),"graphic")
 
   map_hcsc_jja0 = new(nsim,"graphic")  
   map_hcsc_son0 = new(nsim,"graphic")  
@@ -199,7 +211,7 @@ begin
 
      scale_factor = 1.e9
      zmsf         = zmsf / scale_factor
-     zmsf@units   = "10~S~9~N~ " + zmsf@units
+     zmsf@units   = "x10~S~9~N~ " + zmsf@units
      lbunit       = zmsf@units
      lat          = zmsf&lat
      lat!0        = "lat"
@@ -215,102 +227,31 @@ begin
      delete(zmsf&lev)
      zmsf&lev = plev 
      hcvm920  = dim_avg_wgt_n_Wrap(zmsf(:,{900:200},:),dpth({900:200}),1,1) ;average betwee 900-200hPa 
-     hcvm740  = dim_avg_wgt_n_Wrap(zmsf(:,{900:200},:),dpth({900:200}),1,1) ;average betwee 700-400hPa
+     hcvm740  = dim_avg_wgt_n_Wrap(zmsf(:,{700:400},:),dpth({700:400}),1,1) ;average betwee 700-400hPa
 
      ;calcualte hadley cell info 
      coswgt=cos(rad*zmsf&lat)
      coswgt!0 = "lat"
      coswgt&lat= zmsf&lat
    
-     hcin               = zmsf(:,0,0) 
-     hcin@comment_cvdp  = "domain (0-40N)"
-     hcin@units         = zmsf@units 
-     hcin@long_name     = "Hadley cell intensity (NH) (900-200hPa mean) timeseries (monthly)"
-
-     hxcin               = hcin
-     hxcin@comment_cvdp  = "domain (0-40N)"
-     hxcin@units         = zmsf@units
-     hxcin@long_name     = "Hadley cell maximum intensity (NH) timeseries (monthly)" 
-
-     hmcin               = hcin
-     hmcin@comment_cvdp  = "domain (0-40N)"
-     hmcin@units         = zmsf@units
-     hmcin@long_name     = "Hadley cell mean intensity (NH) timeseries (monthly)"
-
-     hcis               = hcin 
-     hcis@comment_cvdp  = "domain (40S-0)"
-     hcis@units         = zmsf@units 
-     hcis@long_name     = "Hadley cell intensity (SH) (900-200hPa mean) timeseries (monthly)"
-
-     hxcis               = hcin
-     hxcis@comment_cvdp  = "domain (40S-0)"
-     hxcis@units         = zmsf@units
-     hxcis@long_name     = "Hadley cell maximum intensity (SH) timeseries (monthly)"
-
-     hmcis               = hcin
-     hmcis@comment_cvdp  = "domain (40S-0)"
-     hmcis@units         = zmsf@units
-     hmcis@long_name     = "Hadley cell mean intensity (SH) timeseries (monthly)"
-
-     hpin               = hcin 
-     hpin@comment_cvdp  = "domain (0-40N)"
-     hpin@units         = "degree"
-     hpin@long_name     = "Hadley cell latitude (NH) (900-200hPa mean) timeseries (monthly)"
-
-     hxpin               = hcin
-     hxpin@comment_cvdp  = "domain (0-40S)"
-     hxpin@units         = "degree"
-     hxpin@long_name     = "Hadley cell column (900-200hPa) maximum intensity latitude (NH) timeseries (monthly)"
-
-     hmpin               = hcin
-     hmpin@comment_cvdp  = "domain (0-40S)"
-     hmpin@units         = "degree"
-     hmpin@long_name     = "Hadley cell maximum column mean (900-200hPa) intensity latitude (NH) timeseries (monthly)"
-
-     hpis               = hcin
-     hpis@comment_cvdp  = "domain (40S-0)"
-     hpis@units         = "degree"
-     hpis@long_name     = "Hadley cell latitude (SH) (900-200hPa mean) timeseries (monthly)"
-     
-     hxpis               = hcin
-     hxpis@comment_cvdp  = "domain (40S-0)"
-     hxpis@units         = "degree"
-     hxpis@long_name     = "Hadley cell column (900-200hPa) maximum intensity latitude (SH) timeseries (monthly)"
-
-     hmpis               = hcin
-     hmpis@comment_cvdp  = "domain (40S-0)"
-     hmpis@units         = "degree"
-     hmpis@long_name     = "Hadley cell maximum column mean (900-200hPa mean) intensity latitude (SH) timeseries (monthly)"
-
-     hcei               = hcin
-     hcei@comment_cvdp  = "domain (40S-40N)"
-     hcei@units         = "degree"
-     hcei@long_name     = "Hadley cell intersection latitude (zero value of steam function) timeseries (monthly)"
-
-     hcen               = hcin
-     hcen@comment_cvdp  = "domain (0-40N)"
-     hcen@units         = "degree"
-     hcen@long_name     = "Hadley cell poleward extent (NH) (zero value of steam function) timeseries (monthly)"
-
-     hces               = hcin
-     hces@comment_cvdp  = "domain (40S-0)"
-     hces@units         = "degree"
-     hces@long_name     = "Hadley cell poleward extent (NH) (zero value of steam function) timeseries (monthly)"
-
-     hcwn               = hcin
-     hcwn@comment_cvdp  = "domain (0-40N)"
-     hcwn@units         = "degree"
-     hcwn@long_name     = "Hadley cell width (NH) (poleward extent - intersection) timeseries (monthly)"
-
-     hcws               = hcin
-     hcws@comment_cvdp  = "domain (40S-0)"
-     hcws@units         = "degree"
-     hcws@long_name     = "Hadley cell width (SH) (poleward extent - intersection) timeseries (monthly)"
-
-     hcwd               = hcin
-     hcwd@comment_cvdp  = "domain (40S-40S)"
-     hcwd@units         = "degree"
-     hcwd@long_name     = "Hadley cell width (NH poleward extent - SH poleward extent) timeseries (monthly)"
+     hcin_mon    = zmsf(:,0,0) 
+     hxcin_mon   = hcin_mon
+     hmcin_mon   = hcin_mon
+     hcis_mon    = hcin_mon 
+     hxcis_mon   = hcin_mon
+     hmcis_mon   = hcin_mon
+     hpin_mon    = hcin_mon 
+     hxpin_mon   = hcin_mon
+     hmpin_mon   = hcin_mon
+     hpis_mon    = hcin_mon
+     hxpis_mon   = hcin_mon
+     hmpis_mon   = hcin_mon
+     hcei_mon    = hcin_mon
+     hcen_mon    = hcin_mon
+     hces_mon    = hcin_mon
+     hcwn_mon    = hcin_mon
+     hcws_mon    = hcin_mon
+     hcwd_mon    = hcin_mon
 
      do kk  = 0, dimsizes(zmsf&time) -1
 
@@ -321,10 +262,10 @@ begin
        lat2 = lat({-40:5})
        imax = dim_maxind(tmp1,0)
        jmax = dim_minind(tmp2,0)
-       hmcin(kk) = (/tmp1(imax)/)
-       hmcis(kk) = (/tmp2(jmax)/)
-       hmpin(kk) = (/tofloat(lat1(imax))/)
-       hmpis(kk) = (/tofloat(lat2(jmax))/)
+       hmcin_mon(kk) = (/tmp1(imax)/)
+       hmcis_mon(kk) = (/tmp2(jmax)/)
+       hmpin_mon(kk) = (/tofloat(lat1(imax))/)
+       hmpis_mon(kk) = (/tofloat(lat2(jmax))/)
        delete([/imax,jmax,tmp1,tmp2,lat1,lat2/])
 
        ;;;maximum at each level
@@ -346,17 +287,17 @@ begin
          xpis(jj) = (/tofloat(lat2(ind2))/)
          delete([/tmp1,tmp2,lat1,lat2,ind1,ind2/])
        end do
-       hcin(kk)   = dim_avg_wgt_n(xcin({900:200}), dpth({900:200}), 1, 0)
-       hcis(kk)   = dim_avg_wgt_n(xcis({900:200}), dpth({900:200}), 1, 0)
-       hpin(kk)   = dim_avg_wgt_n(xpin({900:200}), dpth({900:200}), 1, 0)
-       hpis(kk)   = dim_avg_wgt_n(xpis({900:200}), dpth({900:200}), 1, 0)
+       hcin_mon(kk)   = dim_avg_wgt_n(xcin({900:200}), dpth({900:200}), 1, 0)
+       hcis_mon(kk)   = dim_avg_wgt_n(xcis({900:200}), dpth({900:200}), 1, 0)
+       hpin_mon(kk)   = dim_avg_wgt_n(xpin({900:200}), dpth({900:200}), 1, 0)
+       hpis_mon(kk)   = dim_avg_wgt_n(xpis({900:200}), dpth({900:200}), 1, 0)
 
        indx1      = dim_maxind(xcin,0)
        indx2      = dim_minind(xcis,0)
-       hxcin(kk)  = (/xcin(indx1)/)
-       hxcis(kk)  = (/xcis(indx2)/)
-       hxpin(kk)  = (/xpin(indx1)/)
-       hxpis(kk)  = (/xpis(indx2)/)
+       hxcin_mon(kk)  = (/xcin(indx1)/)
+       hxcis_mon(kk)  = (/xcis(indx2)/)
+       hxpin_mon(kk)  = (/xpin(indx1)/)
+       hxpis_mon(kk)  = (/xpis(indx2)/)
        delete([/indx1,indx2,xcin,xcis,xpin,xpis/])
 
        ;HC intersection and extents
@@ -381,10 +322,10 @@ begin
        xi       = xi + random_normal(1e-4,1e-4,dimsizes(xi))
        ist      = dim_pqsort_n(xi,2,0)
        yi       = yi(ist)
-       hces(kk) = linint1(xi,yi, False, 0.0, 0) ;ftcurv(xi,yi,0.0)
+       hces_mon(kk) = linint1(xi,yi, False, 0.0, 0) ;ftcurv(xi,yi,0.0)
        delete([/ismax,lats2,latxm,xi,yi,latt0,hctt0,ist/])
-       if(.not.ismissing(hces(kk)).and.abs(hces(kk)).gt.50.0) then
-         hces(kk) = hces@_FillValue
+       if(.not.ismissing(hces_mon(kk)).and.abs(hces_mon(kk)).gt.50.0) then
+         hces_mon(kk) = hces_mon@_FillValue
        end if
 
        ;HC intersection (zero line closed to equator)
@@ -395,13 +336,13 @@ begin
        xi       = xi + random_normal(1e-4,1e-4,dimsizes(xi))
        ist      = dim_pqsort_n(xi,2,0)
        cc       = count_unique_values(xi)
-       hcei(kk) = linint1(xi,yi, False, 0.0, 0)
+       hcei_mon(kk) = linint1(xi,yi, False, 0.0, 0)
        delete([/lats2,lats1,xi,yi,ist/])
-       if(.not.ismissing(hcei(kk)).and.abs(hcei(kk)).gt.30.0) then
-         hcei(kk) = hcei@_FillValue
+       if(.not.ismissing(hcei_mon(kk)).and.abs(hcei_mon(kk)).gt.30.0) then
+         hcei_mon(kk) = hcei_mon@_FillValue
        end if
 
-       ;;HC NH extent (edge)
+       ;HC NH extent (edge)
        lats1    = latx1 +1.0
        latt0    = lat({lats1:90})
        hctt0    = hcvm740(kk,{lats1:90})
@@ -412,32 +353,138 @@ begin
        xi       = xi + random_normal(1e-4,1e-4,dimsizes(xi))
        ist      = dim_pqsort_n(xi,2,0)
        yi       = yi(ist)
-       hcen(kk) = linint1(xi,yi, False, 0.0, 0) ; ftcurv(xi,yi,0.0)
-       if(.not.ismissing(hcen(kk)).and.hcen(kk).gt.50.0) then
-         hcen(kk) = hcen@_FillValue
+       hcen_mon(kk) = linint1(xi,yi, False, 0.0, 0) ; ftcurv(xi,yi,0.0)
+       if(.not.ismissing(hcen_mon(kk)).and.hcen_mon(kk).gt.50.0) then
+         hcen_mon(kk) = hcen_mon@_FillValue
        end if
        delete([/ismax,lats1,latxm,xi,yi,latt0,hctt0,ist/])
 
      end do
 
     ;HC width
-     hcwn = hcen - hcei
-     hcws = hces - hcei
-     hcwd = hcen - hces
-
-     hcind = hcwd
-     hcind = dim_standardize(hcwd,0)
-     hcind = linmsg(hcind, 0)
-     hcind@units        = "1"
-     hcind@long_name    = "Hadley cell width index timeseries (monthly)"
-
-     hcisd = hcei
-     hcisd = dim_standardize(hcei,0)
-     hcisd = linmsg(hcisd, 0)
-     hcisd@units        = "1"
-     hcisd@long_name    = "Hadley cell intersection index timeseries (monthly)" 
+     hcwn_mon = hcen_mon - hcei_mon
+     hcws_mon = hces_mon - hcei_mon
+     hcwd_mon = hcen_mon - hces_mon
 
      delete([/hcvm740,hcvm920,dpth,plev,coswgt,lat/])
+;---------------------------------------------------------------------------------------------
+     ;create temporay array for plotting section
+     seas  = (/"mon","djf","mam","jja","son","ann"/)
+     iname = (/"hcin","hxcin","hmcin","hcis","hxcis","hmcis",\
+               "hpin","hxpin","hmpin","hpis","hxpis","hmpis",\
+               "hcei","hcen", "hces", "hcwn","hcws", "hcwd"/)
+     hcnam_mon        = new((/dimsizes(iname)/),string)
+     hcind_mon        = new((/dimsizes(hcin_mon),dimsizes(iname)/),typeof(hcin_mon))
+     hcind_mon!0      = "time"
+     hcind_mon!1      = "x"
+     hcind_mon&x      = ispan(0,dimsizes(iname)-1,1)
+     hcind_mon&time   = hcin_mon&time
+     hcind_mon@unit1  = hcin_mon@units
+     hcind_mon@unit2  = "Latitude (degree)"
+     do ff = 0,dimsizes(iname)-1
+       if(iname(ff).eq."hcin") then
+         hcind_mon(:,ff)  = (/hcin_mon/)
+         hcnam_mon(ff)    = "Hadley cell intensity (NH)"
+       end if
+       if(iname(ff).eq."hxcin") then
+         hcind_mon(:,ff)  = (/hxcin_mon/)
+         hcnam_mon(ff)    = "Hadley cell max intensity (NH)"
+       end if
+       if(iname(ff).eq."hmcin") then
+         hcind_mon(:,ff)  = (/hmcin_mon/)
+         hcnam_mon(ff)    = "Hadley cell mean. intensity (NH)"
+       end if
+       if(iname(ff).eq."hcis") then
+         hcind_mon(:,ff)  = (/hcis_mon/)
+         hcnam_mon(ff)    = "Hadley cell intensity (SH)"
+       end if
+       if(iname(ff).eq."hxcis") then
+         hcind_mon(:,ff)  = (/hxcis_mon/)
+         hcnam_mon(ff)    = "Hadley cell max intensity (SH)"
+       end if
+       if(iname(ff).eq."hmcis") then
+         hcind_mon(:,ff)  = (/hmcis_mon/)
+         hcnam_mon(ff)    = "Hadley cell mean intensity (SH)"
+       end if
+       if(iname(ff).eq."hpin") then
+         hcind_mon(:,ff)  = (/hpin_mon/)
+         hcnam_mon(ff)    = "Hadley cell ins. latitude (NH)"
+       end if
+       if(iname(ff).eq."hxpin") then
+         hcind_mon(:,ff)  = (/hxpin_mon/)
+         hcnam_mon(ff)    = "Hadley cell max ins. latitude (NH)"
+       end if
+       if(iname(ff).eq."hmpin") then
+         hcind_mon(:,ff)  = (/hmpin_mon/)
+         hcnam_mon(ff)    = "Hadley cell mean ins. latitude (NH)"
+       end if
+       if(iname(ff).eq."hpis") then
+         hcind_mon(:,ff)  = (/hpis_mon/)
+         hcnam_mon(ff)    = "Hadley cell ins. latitude (SH)"
+       end if
+       if(iname(ff).eq."hxpis") then
+         hcind_mon(:,ff)  = (/hxpis_mon/)
+         hcnam_mon(ff)    = "Hadley cell max ins. latitude (SH)"
+       end if
+       if(iname(ff).eq."hmpis") then
+         hcind_mon(:,ff)  = (/hmpis_mon/)
+         hcnam_mon(ff)    = "Hadley cell mean ins. latitude (SH)"
+       end if
+       if(iname(ff).eq."hcei") then
+         hcind_mon(:,ff)  = (/hcei_mon/)
+         hcnam_mon(ff)    = "Hadley cell intersection"
+       end if
+       if(iname(ff).eq."hcen") then
+         hcind_mon(:,ff)  = (/hcen_mon/)
+         hcnam_mon(ff)    = "Hadley cell NH branch edge"
+       end if
+       if(iname(ff).eq."hces") then
+         hcind_mon(:,ff)  = (/hces_mon/)
+         hcnam_mon(ff)    = "Hadley cell SH branch edge"
+       end if
+       if(iname(ff).eq."hcwn") then
+         hcind_mon(:,ff)  = (/hcwn_mon/)
+         hcnam_mon(ff)    = "Hadley cell NH branch width"
+       end if
+       if(iname(ff).eq."hcws") then
+         hcind_mon(:,ff)  = (/hcws_mon/)
+         hcnam_mon(ff)    = "Hadley cell SH branch width"
+       end if
+       if(iname(ff).eq."hcwd") then
+         hcind_mon(:,ff)  = (/hcwd_mon/)
+         hcnam_mon(ff)    = "Hadley cell width"
+       end if
+     end do
+
+     ;use the linear temporal interpolation to fill missing values 
+     print ("linear interpolation is used to fill " + num(ismissing(hcind_mon)) + " values")
+     hcind_mon = linmsg_n(hcind_mon,-1,0) 
+    ;print (num(ismissing(hcind_mon)))
+     hcwd_mon  = (/hcind_mon(:,dimsizes(iname)-1)/)
+
+     hcind_ra_seas      = runave_n_Wrap(hcind_mon,3,0,0)
+     hcind_ra_seas(0,:) = (/dim_avg_n(hcind_mon(:1,:),0)/)
+     hcind_ra_seas(dimsizes(hcin_mon)-1,:) = (/ dim_avg_n(hcind_mon(dimsizes(hcin_mon)-2:,:),0) /)
+     hcind_ra_ann    = runave_n_Wrap(hcind_mon,12,0,0)
+     hcind_djf       = (/hcind_ra_seas(0::12,:)/)
+     hcind_mam       = (/hcind_ra_seas(3::12,:)/)
+     hcind_jja       = (/hcind_ra_seas(6::12,:)/)
+     hcind_son       = (/hcind_ra_seas(9::12,:)/)
+     hcind_ann       = (/hcind_ra_ann(5::12,:)/) 
+
+     hcind_djf!0    = "TIME"
+     hcind_djf&TIME = ispan(syear(ee),eyear(ee),1)
+     hcind_djf&TIME@units = "YYYY"
+     hcind_djf&TIME@long_name = "time"
+     copy_VarMeta(hcind_djf,hcind_mam)
+     copy_VarMeta(hcind_djf,hcind_jja)
+     copy_VarMeta(hcind_djf,hcind_son)
+     copy_VarMeta(hcind_djf,hcind_ann)
+
+     delete([/hcind_ra_seas,hcind_ra_ann/])
+     delete([/hcin_mon,hxcin_mon,hmcin_mon,hcis_mon,hxcis_mon,hmcin_mon,hcis_mon,hxcis_mon,hmcis_mon/])
+     delete([/hpin_mon,hxpin_mon,hmpin_mon,hpis_mon,hxpis_mon,hmpis_mon,hcei_mon,hcei_mon,hcen_mon,hces_mon/])
+     delete([/hcwn_mon,hcws_mon/])
 
 ;---------------------------------------------------------------------------------------------     
      if (OUTPUT_DATA.eq."True") then
@@ -472,36 +519,74 @@ begin
         else
            z = addfile(fn,"w")
         end if
-        z->hcind = set_varAtts(hcind,"","","")
-        z->hcisd = set_varAtts(hcisd,"","","")
-        z->hcin  = set_varAtts(hcin,"","","")
-        z->hcis  = set_varAtts(hcis,"","","")
-        z->hxcin = set_varAtts(hxcin,"","","")
-        z->hxcis = set_varAtts(hxcis,"","","")
-        z->hmcin = set_varAtts(hmcin,"","","")
-        z->hmcis = set_varAtts(hmcis,"","","")
-        z->hpin  = set_varAtts(hpin,"","","")
-        z->hpis  = set_varAtts(hpis,"","","")
-        z->hxpin = set_varAtts(hxpin,"","","")
-        z->hxpis = set_varAtts(hxpis,"","","")
-        z->hmpin = set_varAtts(hmpin,"","","")
-        z->hmpis = set_varAtts(hmpis,"","","")
-        z->hcei  = set_varAtts(hcei,"","","")
-        z->hces  = set_varAtts(hces,"","","")
-        z->hcen  = set_varAtts(hcen,"","","")
-        z->hcwn  = set_varAtts(hcwn,"","","")
-        z->hcws  = set_varAtts(hcws,"","","")
-        z->hcwd  = set_varAtts(hcwd,"","","")
+          
+        do ff = 0,dimsizes(seas)-1
+          do hh = 0,dimsizes(iname)-1
+            sea  = str_upper(seas(ff))
+            if(seas(ff).eq."mon") then 
+              vout = hcind_mon(:,hh)
+              sea  = "monthly"
+            else if (seas(ff).eq."djf") then 
+              vout = hcind_djf(:,hh)
+            else if (seas(ff).eq."mam") then
+              vout = hcind_mam(:,hh)
+            else if (seas(ff).eq."jja") then
+              vout = hcind_jja(:,hh)
+            else if (seas(ff).eq."son") then
+              vout = hcind_son(:,hh)
+            else if (seas(ff).eq."ann") then
+              vout = hcind_ann(:,hh)
+            else 
+              print("season does not exist") 
+            end if  
+            end if 
+            end if
+            end if
+            end if
+            end if
+            vout@comment_cvdp = "domain(40S-40N)"
+            if(isStrSubset(iname(hh),"ci").or.isStrSubset(iname(hh),"pi")) then 
+               vout@units  = zmsf@units 
+            else
+               vout@units  = "Latitude (degree)"
+            end if 
+            vout@long_name = hcnam_mon(hh) + " timeseries (" +sea+")"
+            vonm = iname(hh)+"_" + seas(ff)
+            z->$vonm$  = set_varAtts(vout,"","","")
+            delete([/vonm,vout,sea/])
+          end do 
+        end do 
         delete([/modname,fn/])
      end if
 
 ;- - - - - -hc spatial composite section- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-     hcT         = wgt_runave(hcind,wgt,1)        ; for use in composites / running standard deviations
+     hcT         = wgt_runave(hcwd_mon,wgt,1)   ; for use in composites / running standard deviations
      hc_ndj      = hcT(11:dimsizes(hcT)-13:12)  ; cannot count last 1yr as spatial composite uses +1yrs data betond JAS..
+     hc_ndj      = dim_standardize(hc_ndj,0)
      hc_ndj!0    = "time"
      hc_ndj&time = ispan(syear(ee),eyear(ee)-1,1)
      hc_ndj      = dtrend_msg(ispan(0,dimsizes(hc_ndj&time)-1,1),hc_ndj,True,False)
      hc_ndj      = dim_standardize(hc_ndj,0)
+
+     cntr_hi         = 0
+     cntr_lo         = 0
+     cntr_mid        = 0
+     cntr_lo@_FillValue = default_fillvalue(typeof(cntr_lo))
+     cntr_mid@_FillValue = default_fillvalue(typeof(cntr_mid))
+     cntr_hi@_FillValue = default_fillvalue(typeof(cntr_hi))
+     do gg = 0,dimsizes(hc_ndj)-1   
+        if (.not.ismissing(hc_ndj(gg))) then    ; note that finsst_* indices 24:52 (Jan+0 -> May +2) are all that is shown in the hovmoller plots
+           if (hc_ndj(gg).ge.1.0) then
+              cntr_hi = cntr_hi+1
+           end if 
+           if (hc_ndj(gg).ge.-0.5.and.hc_ndj(gg).le.0.5) then
+              cntr_mid = cntr_mid+1
+           end if 
+           if (hc_ndj(gg).le.-1.0) then
+              cntr_lo = cntr_lo+1
+           end if 
+        end if 
+     end do 
 
      if (any(ismissing((/syear(ee),syear_trefht(ee),syear_psl(ee),syear_ts(ee),eyear(ee),eyear_trefht(ee),eyear_psl(ee),eyear_ts(ee)/)))) then
         tassstreg_plot_flag = 1
@@ -966,11 +1051,11 @@ begin
      if (nyr(ee).ge.20) then    ; need a minimum number of years to compute running hc standard deviations
         hcT = dtrend_msg(ispan(0,dimsizes(hcT)-1,1),hcT,True,False)
         hcT!0 = "time"
-        hcT&time = hcind&time
+        hcT&time = hcwd_mon&time
         sd_run = hcT
         sd_run = sd_run@_FillValue
-        sd_run@units = hcind@units
-        sd_run@long_name = "hcind 15yr running standard deviation"
+        sd_run@units = hcwd_mon@units
+        sd_run@long_name = "hcwd_mon 15yr running standard deviation"
         do gg = 90,dimsizes(hcT)-90
            sd_run(gg) = (/ dim_stddev(hcT(gg-90:gg+89)) /)
         end do
@@ -981,29 +1066,29 @@ begin
      delete(hcT)
 ;-----------------------------------------------------------------------------------------
      iopt = 0                ; hc power spectra
-     jave = (7*nyr(ee))/100
+     jave = max((/3,(7*nyr(ee))/100/))
      val1 = .95
      val2 = .99
      pct = 0.1 
-     spectra_mvf = False        ; missing value flag for hc
-     if (any(ismissing(hcind))) then     ; check for missing data                                                            
-        print("Missing data detected for "+names(ee)+", not creating spectra in zmsf.indices.ncl") 
+     hcwd_mon_nm = dim_standardize(hcwd_mon,0)
+     spectra_mvf = False ; missing value flag for hc
+     if (any(ismissing(hcwd_mon_nm))) then     ; check for missing data
+        print("Missing data detected for "+names(ee)+", not creating spectra in zmsf.indices.ncl")
         spectra_mvf = True
         if (isfilepresent2("obs_ts").and.ee.eq.0) then
            spectra_mvf_obs = True
         end if
-     else
+     else 
         if (isfilepresent2("obs_ts").and.ee.eq.0) then
-           spectra_mvf_obs = False   ; missing value flag for obs hc
+           spectra_mvf_obs = False   ; missing value flag for obs nino3.4
         end if
-        hc_dt = dtrend_msg(ispan(0,dimsizes(hcind)-1,1),hcind,True,False) 
-    
-        sdof = specx_anal(hc_dt,iopt,jave,pct)
+        hcwd_mon_dt = dtrend_msg(ispan(0,dimsizes(hcwd_mon_nm)-1,1),hcwd_mon_nm,True,False)
+        sdof = specx_anal(hcwd_mon_dt,iopt,jave,pct)
         mval = sum(1/(1.+((sdof@xlag1)^2)-((2*sdof@xlag1)*cos(6.28318*sdof@frq))))
         if (mval.eq.0) then ; check for cyclic data that results in sum of Markov elements = 0.
            spectra_mvf = True
            if (isfilepresent2("obs_ts").and.ee.eq.0) then
-              spectra_mvf_obs = True   ; missing value flag for obs hc
+              spectra_mvf_obs = True   ; missing value flag for obs nino3.4
            end if
         else
            splt1 = specx_ci(sdof,val1,val2)
@@ -1017,24 +1102,25 @@ begin
               splt1&frequency@long_name = "power spectra frequency"
               splt1&frequency@units = "1"
               splt1@units_info = "df refers to frequency interval"
-              splt1@units = "hPa^2/df"
+              splt1@units = "degree^2/df"
               splt1@comment_cvdp = "(0,:)=spectrum,(1,:)=Markov red noise spectrum, (2,:)="+val1+"% confidence bound for Markhov, (3,:)="+val2+"% confidence bound for Markhov"
-              z->hc_spectra = set_varAtts(splt1,"hc power spectra","","")
+              z->hcwd_mon_spectra = set_varAtts(splt1,"nino3.4 power spectra","","")
            end if
            if (isfilepresent2("obs_ts").and.ee.eq.0) then
               sdof_obs = sdof
            end if
         end if
-        delete([/hc_dt,iopt,jave,pct,mval/])
+        delete([/hcwd_mon_nm,hcwd_mon_dt,iopt,jave,pct,mval/])
      end if
+
 ;------------------------------------------------------------------------------------------
-     hc_dt = dtrend_msg(ispan(0,dimsizes(hcind&time)-1,1),hcind,True,False)
-     hc_mon_sd = new(12,typeof(hcind))
+     hc_dt = dtrend_msg(ispan(0,dimsizes(hcwd_mon&time)-1,1),hcwd_mon,True,False)
+     hc_mon_sd = new(12,typeof(hcwd_mon))
      
      do hh = 0,11
         hc_mon_sd(hh) = (/ dim_stddev(hc_dt(hh::12)) /)
      end do
-     hc_mon_sd@units = "C"
+     hc_mon_sd@units = "Latitude (degree)"
      if (OUTPUT_DATA.eq."True") then
         time_mon2 = ispan(0,11,1)
         time_mon2@units = "months since 0000-01-01 00:00:00"
@@ -1052,7 +1138,7 @@ begin
 ;    hc wavelet analysis, autocorrelation
 
      if (spectra_mvf.eq.False) then
-        N       = dimsizes(hcind)       
+        N       = dimsizes(hcwd_mon) 
         mother  = 0
         param   = 6.0
         dt      = 1./12.            
@@ -1064,7 +1150,7 @@ begin
         noise   = 1 
         siglvl  = .05
         isigtest= 0
-        wave34 = wavelet(hcind,mother,dt,param,s0,dj,jtot,npad,noise,isigtest,siglvl,nadof)
+        wave34 = wavelet(hcwd_mon,mother,dt,param,s0,dj,jtot,npad,noise,isigtest,siglvl,nadof)
 
         power34            = onedtond(wave34@power,(/jtot,N/))
         power34!0          = "period"                    
@@ -1072,8 +1158,8 @@ begin
         power34&period@long_name = "wavelet period"
         power34&period@units = "1"
         power34!1          = "time"                     
-        power34&time       = hcind&time
-        power34@units      = hcind@units+"^2"
+        power34&time       = hcwd_mon&time
+        power34@units      = hcwd_mon@units+"^2"
 
         sig34              = power34                       
         sig34              = power34/conform (power34,wave34@signif,0)
@@ -1160,8 +1246,8 @@ begin
      xyres2@gsnXYBarChart = False
 
      xyres2@xyLineColor = "royalblue"
-     xyres2@trYMinF = 0.15    ; hard wire YMinF and YMaxF for running stddev plots
-     xyres2@trYMaxF = 1.95       
+     xyres2@trYMinF = 2.15    ; hard wire YMinF and YMaxF for running stddev plots
+     xyres2@trYMaxF = 6.95       
      if (wks_type.eq."png") then
         xyres2@xyLineThicknessF = 3.5
      else
@@ -1172,12 +1258,12 @@ begin
      xyres2@gsnYRefLineColor = "gray85"
      
      xyres3 = xyres            ; resource list for monthly hc standard deviations
-     xyres3@trXMinF = 0.5
-     xyres3@trXMaxF = 12.5
-     xyres3@vpWidthF = 0.65
+     xyres3@trXMinF   = 0.5
+     xyres3@trXMaxF   = 12.5
+     xyres3@vpWidthF  = 0.65
      xyres3@vpHeightF = 0.35
-     xyres3@trYMinF = 0.2
-     xyres3@trYMaxF = 2.0
+     xyres3@trYMinF = 0.0
+     xyres3@trYMaxF = 8.0
      xyres3@gsnAboveYRefLineColor = "gray50"
      xyres3@xyLineColor = "black"
      if (wks_type.eq."png") then
@@ -1195,7 +1281,7 @@ begin
      xyres4 = xyres      ; resource list for hc autocorrelations
      xyres4@trXMinF = 0.0
      xyres4@trXMaxF = 48.0
-     xyres4@trYMinF = -1.05
+     xyres4@trYMinF = -0.55
      xyres4@trYMaxF = 1.05
      xyres4@vpHeightF = 0.3
      xyres4@vpWidthF = 0.3
@@ -1208,9 +1294,9 @@ begin
      xyres4@gsnAboveYRefLineColor = "firebrick2"
      xyres4@gsnBelowYRefLineColor = "dodgerblue3"
      xyres4@tmYLMode = "Explicit"
-     xyres4@tmYLValues = (/-1,0,1/)
-     xyres4@tmYLLabels = (/"-1","0","1"/)
-     xyres4@tmYLMinorValues = fspan(-1,1,9)
+     xyres4@tmYLValues = (/-0.5,0,0.5,1/)
+     xyres4@tmYLLabels = (/"-0.5","0","0.5","1"/)
+     xyres4@tmYLMinorValues = fspan(-0.5,1,9)
      xyres4@tmXBMode = "Explicit"
      xyres4@tmXBValues = (/0,12,24,36,48/)
      xyres4@tmXBLabels = (/"0","12","24","36","48"/)
@@ -1272,128 +1358,101 @@ begin
      xyres5@gsnLeftString = names(ee)
      xyres6@gsnLeftString = names(ee)
 
-     arr = new((/3,dimsizes(hcwd)/),typeof(hcwd))
-   
-     tttt = dtrend_msg(ispan(0,dimsizes(hcwd)-1,1),hcwd,False,True)
-     arr(0,:) = (/ hcwd /)
-     arr(1,:) = (/ runave_n(hcwd, 3, 0, 0) /)
-     arr(2,:) = (/ (ispan(0,dimsizes(hcwd)-1,1)*tttt@slope)+tttt@y_intercept /)
-     xyres6@tiYAxisString  = "Latitude (degree)"      ; add an axis title
-     xyres6@tiXAxisString  = "Time"      ; add an axis title
-     xyres6@gsnRightString = "trend: "+ decimalPlaces(tttt@slope*dimsizes(hcwd),2,True)+hcwd@units+" "+nyr(ee)+"yr~S~-1~N~"
-     xyn0(ee) = gsn_csm_xy(wks_hc,fspan(syear(ee),eyear(ee)+.91667,dimsizes(hcwd)),arr,xyres6) 
-     delete(tttt)
+     do hh = 0,dimsizes(iname)-1,1
+      do ff = 0,dimsizes(seas)-1,1
+       if (seas(ff).eq."mon") then 
+          temp = hcind_mon(:,hh)
+       else if (seas(ff).eq."djf") then 
+          temp = hcind_djf(:,hh)
+       else if (seas(ff).eq."mam") then
+          temp = hcind_mam(:,hh)
+       else if (seas(ff).eq."jja") then
+          temp = hcind_jja(:,hh)
+       else if (seas(ff).eq."son") then
+          temp = hcind_son(:,hh)
+       else if (seas(ff).eq."ann") then
+          temp = hcind_ann(:,hh)
+       else 
+         print ("decleared wrong season...")
+       end if 
+       end if
+       end if
+       end if
+       end if
+       end if
+       temp@comment_cvdp = "domain(40S-40N)"
+       if(isStrSubset(iname(hh),"ci")) then
+          temp@units  = hcind_mon@unit1  
+       else
+          temp@units  = hcind_mon@unit2 
+       end if
+       temp@long_name = hcnam_mon(hh) + " timeseries (" +str_upper(seas(ff))+")"
+       arr = new((/3,dimsizes(temp)/),typeof(temp))
+       tttt = dtrend_msg(ispan(0,dimsizes(temp)-1,1),temp,False,True)
+       arr(0,:) = (/ temp /)
+       arr(1,:) = (/ runave_n(temp, 3, 0, 0) /)
+       arr(2,:) = (/ (ispan(0,dimsizes(temp)-1,1)*tttt@slope)+tttt@y_intercept /)
+       xyres6@tiYAxisString  = temp@units 
+       xyres6@tiXAxisString  = ""      ; add an axis title
+       xyres6@gsnRightString = "trend: "+ decimalPlaces(tttt@slope*dimsizes(temp),2,True)+" "+temp@units+" "+nyr(ee)+"yr~S~-1~N~"
+       if (seas(ff).eq."mon") then
+          xyn0(hh,ee) = gsn_csm_xy(wks_hc_mon,fspan(syear(ee),eyear(ee)+.91667,dimsizes(temp)),arr,xyres6)
+       else if (seas(ff).eq."djf") then
+          xyn1(hh,ee) = gsn_csm_xy(wks_hc_djf,fspan(syear(ee),eyear(ee)+.91667,dimsizes(temp)),arr,xyres6)
+       else if (seas(ff).eq."mam") then
+          xyn2(hh,ee) = gsn_csm_xy(wks_hc_mam,fspan(syear(ee),eyear(ee)+.91667,dimsizes(temp)),arr,xyres6)
+       else if (seas(ff).eq."jja") then
+          xyn3(hh,ee) = gsn_csm_xy(wks_hc_jja,fspan(syear(ee),eyear(ee)+.91667,dimsizes(temp)),arr,xyres6)
+       else if (seas(ff).eq."son") then
+          xyn4(hh,ee) = gsn_csm_xy(wks_hc_son,fspan(syear(ee),eyear(ee)+.91667,dimsizes(temp)),arr,xyres6)
+       else if (seas(ff).eq."ann") then
+          xyn5(hh,ee) = gsn_csm_xy(wks_hc_ann,fspan(syear(ee),eyear(ee)+.91667,dimsizes(temp)),arr,xyres6)
+       else
+         print ("decleared wrong season...")
+       end if
+       end if
+       end if
+       end if
+       end if
+       end if
+       delete([/arr,tttt/])
+       delete(temp)
+     end do 
+     end do 
+     delete([/xyres6/])
  
-     tttt = dtrend_msg(ispan(0,dimsizes(hcei)-1,1),hcei,False,True)
-     arr(0,:) = (/ hcei /)
-     arr(1,:) = (/ runave_n(hcei, 3, 0, 0) /)
-     arr(2,:) = (/ (ispan(0,dimsizes(hcei)-1,1)*tttt@slope)+tttt@y_intercept /)
-     xyres6@tiYAxisString  = "Latitude (degree)"      ; add an axis title
-     xyres6@tiXAxisString  = "Time"      ; add an axis title
-     xyres6@gsnRightString = "trend: "+ decimalPlaces(tttt@slope*dimsizes(hcei),2,True)+hcei@units+" "+nyr(ee)+"yr~S~-1~N~" 
-     xyn1(ee) = gsn_csm_xy(wks_hc,fspan(syear(ee),eyear(ee)+.91667,dimsizes(hcei)),arr,xyres6)
-     delete(tttt)
+     ;*********************************
+     ;plot the Hadley cell width normalized index (also mark positive and negative events)
+     ;*********************************
+     arr = new((/3,dimsizes(hcwd_mon)/),typeof(hcwd_mon))
+     hcwd_nm = dim_standardize(hcwd_mon,0) 
+     tttt = dtrend_msg(ispan(0,dimsizes(hcwd_nm)-1,1),hcwd_nm,False,True)
+     arr(0,:) = (/ hcwd_nm /)
+     arr(1,:) = (/ runave_n(hcwd_nm, 3, 0, 0) /)
+     arr(2,:) = (/ (ispan(0,dimsizes(hcwd_nm)-1,1)*tttt@slope)+tttt@y_intercept /)
+     arr0     = hcwd_nm
+     arr1     = hcwd_nm
+     arr2     = hcwd_nm
+     arr0     =  0
+     arr1     =  1
+     arr2     = -1
+     xyres5@trYMinF = -4.0
+     xyres5@trYMaxF =  4.0
+     xyres5@tiYAxisString  = "Hadley Cell Width (norm.)" ; add an axis title
+     xyres5@tiXAxisString  = ""      ; add an axis title
+     xyres5@gsnRightString = "trend: "+decimalPlaces(tttt@slope*dimsizes(hcwd_nm),2,True)+hcwd_nm@units+" "+nyr(ee)+"yr~S~-1~N~"
+     xyn6(ee) = gsn_csm_xy(wks_hc_ts,fspan(syear(ee),eyear(ee)+.91667,dimsizes(hcwd_nm)),arr(0,:),xyres5)
+     if(.not.isvar("dum")) then
+        dum = new(1000,graphic)
+     end if
+     dum(ee)     = gsn_add_polyline(wks_hc_ts,xyn6(ee),fspan(syear(ee),eyear(ee)+.91667,dimsizes(hcwd_nm)),arr0,gsLine)
+     dum(ee+100) = gsn_add_polyline(wks_hc_ts,xyn6(ee),fspan(syear(ee),eyear(ee)+.91667,dimsizes(hcwd_nm)),arr1,gsLin0)
+     dum(ee+200) = gsn_add_polyline(wks_hc_ts,xyn6(ee),fspan(syear(ee),eyear(ee)+.91667,dimsizes(hcwd_nm)),arr2,gsLin1)
+     dum(ee+300) = gsn_add_text(wks_hc_ts,xyn6(ee),"Jet (+) " + num(hcwd_nm.ge.1),syear(ee)+0.2, 2.50, txre0)
+     dum(ee+400) = gsn_add_text(wks_hc_ts,xyn6(ee),"Jet (-) " + num(hcwd_nm.le.-1),syear(ee)+0.2,-2.50, txre1)
+     delete([/xyres5,gsLine,gsLin0,gsLin1,txre0,txre1/])
+     delete([/arr,tttt,arr0,arr1,arr2,hcwd_nm/])
 
-     tttt = dtrend_msg(ispan(0,dimsizes(hcwn)-1,1),hcwn,False,True)
-     arr(0,:) = (/ hcwn /)
-     arr(1,:) = (/ runave_n(hcwn, 3, 0, 0) /)
-     arr(2,:) = (/ (ispan(0,dimsizes(hcwn)-1,1)*tttt@slope)+tttt@y_intercept /)
-     xyres6@tiYAxisString  = "Latitude (degree)"       ; add an axis title
-     xyres6@tiXAxisString  = "Time"      ; add an axis title
-     xyres6@gsnRightString = "trend: "+ decimalPlaces(tttt@slope*dimsizes(hcwn),2,True)+hcwn@units+" "+nyr(ee)+"yr~S~-1~N~"
-     xyn2(ee) = gsn_csm_xy(wks_hc,fspan(syear(ee),eyear(ee)+.91667,dimsizes(hcwn)),arr,xyres6)
-     delete(tttt)
-
-     tttt = dtrend_msg(ispan(0,dimsizes(hcws)-1,1),hcws,False,True)
-     arr(0,:) = (/ hcws /)
-     arr(1,:) = (/ runave_n(hcws, 3, 0, 0) /)
-     arr(2,:) = (/ (ispan(0,dimsizes(hcws)-1,1)*tttt@slope)+tttt@y_intercept /)
-     xyres6@tiYAxisString  = "Latitude (degree)"       ; add an axis title
-     xyres6@tiXAxisString  = "Time"      ; add an axis title
-     xyres6@gsnRightString = "trend: "+ decimalPlaces(tttt@slope*dimsizes(hcws),2,True)+hcws@units+" "+nyr(ee)+"yr~S~-1~N~"
-     xyn3(ee) = gsn_csm_xy(wks_hc,fspan(syear(ee),eyear(ee)+.91667,dimsizes(hcws)),arr,xyres6) 
-     delete(tttt)
-     
-     tttt = dtrend_msg(ispan(0,dimsizes(hcin)-1,1),hcin,False,True)
-     arr(0,:) = (/ hcin /)
-     arr(1,:) = (/ runave_n(hcin, 3, 0, 0) /)
-     arr(2,:) = (/ (ispan(0,dimsizes(hcin)-1,1)*tttt@slope)+tttt@y_intercept /)
-     xyres6@tiYAxisString  = hcin@units      ; add an axis title
-     xyres6@tiXAxisString  = "Time"          ; add an axis title
-     xyres6@gsnRightString = "trend: "+ decimalPlaces(tttt@slope*dimsizes(hcin),2,True)+hcin@units+" "+nyr(ee)+"yr~S~-1~N~"
-     xyn4(ee) = gsn_csm_xy(wks_hc,fspan(syear(ee),eyear(ee)+.91667,dimsizes(hcin)),arr,xyres6)
-     delete(tttt)
-
-     tttt = dtrend_msg(ispan(0,dimsizes(hcis)-1,1),hcis,False,True)
-     arr(0,:) = (/ hcis /)
-     arr(1,:) = (/ runave_n(hcis, 3, 0, 0) /)
-     arr(2,:) = (/ (ispan(0,dimsizes(hcis)-1,1)*tttt@slope)+tttt@y_intercept /)
-     xyres6@tiYAxisString  = hcis@units      ; add an axis title
-     xyres6@tiXAxisString  = "Time"          ; add an axis title
-     xyres6@gsnRightString = "trend: "+ decimalPlaces(tttt@slope*dimsizes(hcis),2,True)+hcis@units+" "+nyr(ee)+"yr~S~-1~N~" 
-     xyn5(ee) = gsn_csm_xy(wks_hc,fspan(syear(ee),eyear(ee)+.91667,dimsizes(hcis)),arr,xyres6)
-     delete(tttt)  
-
-     tttt = dtrend_msg(ispan(0,dimsizes(hcen)-1,1),hcen,False,True)
-     arr(0,:) = (/ hcen /)
-     arr(1,:) = (/ runave_n(hcen, 3, 0, 0) /)
-     arr(2,:) = (/ (ispan(0,dimsizes(hcen)-1,1)*tttt@slope)+tttt@y_intercept /)
-     xyres6@tiYAxisString  = "Latitude (degree)"      ; add an axis title
-     xyres6@tiXAxisString  = "Time"          ; add an axis title
-     xyres6@gsnRightString = "trend: "+ decimalPlaces(tttt@slope*dimsizes(hcen),2,True)+hcen@units+" "+nyr(ee)+"yr~S~-1~N~" 
-     xyn6(ee) = gsn_csm_xy(wks_hc,fspan(syear(ee),eyear(ee)+.91667,dimsizes(hcen)),arr,xyres6)
-     delete(tttt)  
-
-     tttt = dtrend_msg(ispan(0,dimsizes(hces)-1,1),hces,False,True)
-     arr(0,:) = (/ hces /)
-     arr(1,:) = (/ runave_n(hces, 3, 0, 0) /)
-     arr(2,:) = (/ (ispan(0,dimsizes(hces)-1,1)*tttt@slope)+tttt@y_intercept /)
-     xyres6@tiYAxisString  = "Latitude (degree)"      ; add an axis title
-     xyres6@tiXAxisString  = "Time"          ; add an axis title
-     xyres6@gsnRightString = "trend: "+ decimalPlaces(tttt@slope*dimsizes(hces),2,True)+hces@units+" "+nyr(ee)+"yr~S~-1~N~"
-     xyn7(ee) = gsn_csm_xy(wks_hc,fspan(syear(ee),eyear(ee)+.91667,dimsizes(hces)),arr,xyres6)
-     delete(tttt)
-
-     tttt = dtrend_msg(ispan(0,dimsizes(hmcin)-1,1),hmcin,False,True)
-     arr(0,:) = (/ hmcin /)
-     arr(1,:) = (/ runave_n(hmcin, 3, 0, 0) /)
-     arr(2,:) = (/ (ispan(0,dimsizes(hmcin)-1,1)*tttt@slope)+tttt@y_intercept /)
-     xyres6@tiYAxisString  = hmcin@units      ; add an axis title
-     xyres6@tiXAxisString  = "Time"          ; add an axis title
-     xyres6@gsnRightString = "trend: "+ decimalPlaces(tttt@slope*dimsizes(hmcin),2,True)+hmcin@units+" "+nyr(ee)+"yr~S~-1~N~"
-     xyn8(ee) = gsn_csm_xy(wks_hc,fspan(syear(ee),eyear(ee)+.91667,dimsizes(hmcin)),arr,xyres6)
-     delete(tttt)
-
-     tttt = dtrend_msg(ispan(0,dimsizes(hmcis)-1,1),hmcis,False,True)
-     arr(0,:) = (/ hmcis /)
-     arr(1,:) = (/ runave_n(hmcis, 3, 0, 0) /)
-     arr(2,:) = (/ (ispan(0,dimsizes(hmcis)-1,1)*tttt@slope)+tttt@y_intercept /)
-     xyres6@tiYAxisString  = hmcis@units      ; add an axis title
-     xyres6@tiXAxisString  = "Time"          ; add an axis title
-     xyres6@gsnRightString = "trend: "+ decimalPlaces(tttt@slope*dimsizes(hmcis),2,True)+hmcis@units+" "+nyr(ee)+"yr~S~-1~N~"
-     xyn9(ee) = gsn_csm_xy(wks_hc,fspan(syear(ee),eyear(ee)+.91667,dimsizes(hmcis)),arr,xyres6)
-     delete(tttt)
-
-     tttt = dtrend_msg(ispan(0,dimsizes(hxcin)-1,1),hxcin,False,True)
-     arr(0,:) = (/ hxcin /)
-     arr(1,:) = (/ runave_n(hxcin, 3, 0, 0) /)
-     arr(2,:) = (/ (ispan(0,dimsizes(hxcin)-1,1)*tttt@slope)+tttt@y_intercept /)
-     xyres6@tiYAxisString  = hxcin@units      ; add an axis title
-     xyres6@tiXAxisString  = "Time"          ; add an axis title
-     xyres6@gsnRightString = "trend: "+ decimalPlaces(tttt@slope*dimsizes(hxcin),2,True)+hxcin@units+" "+nyr(ee)+"yr~S~-1~N~"
-     xyn10(ee) = gsn_csm_xy(wks_hc,fspan(syear(ee),eyear(ee)+.91667,dimsizes(hxcin)),arr,xyres6)
-     delete(tttt)
-     
-     tttt = dtrend_msg(ispan(0,dimsizes(hxcis)-1,1),hxcis,False,True)
-     arr(0,:) = (/ hxcis /)
-     arr(1,:) = (/ runave_n(hxcis, 3, 0, 0) /)
-     arr(2,:) = (/ (ispan(0,dimsizes(hxcis)-1,1)*tttt@slope)+tttt@y_intercept /)
-     xyres6@tiYAxisString  = hxcis@units      ; add an axis title
-     xyres6@tiXAxisString  = "Time"          ; add an axis title
-     xyres6@gsnRightString = "trend: "+ decimalPlaces(tttt@slope*dimsizes(hxcis),2,True)+hxcis@units+" "+nyr(ee)+"yr~S~-1~N~"
-     xyn11(ee) = gsn_csm_xy(wks_hc,fspan(syear(ee),eyear(ee)+.91667,dimsizes(hxcis)),arr,xyres6)
-     delete([/xyres6,arr,tttt/])
- 
      xyres2@gsnLeftString = names(ee)
      if (nyr(ee).ge.20) then
         xyres2@gsnRightString = sprintf("%4.2f", min(sd_run))+" / "+sprintf("%4.2f", avg(sd_run))+" / "+sprintf("%4.2f", max(sd_run))+sd_run@units
@@ -1403,23 +1462,16 @@ begin
      xyres3@gsnRightStringFontHeightF = xyres3@gsnCenterStringFontHeightF
      xyres3@gsnLeftString = syear(ee)+"-"+eyear(ee)
      xyres3@gsnCenterString = names(ee)
-     xyres3@gsnRightString = "C"
+     xyres3@gsnRightString = "degree"
+
      if (max(hc_mon_sd).gt.xyres3@gsnYRefLine) then
         xyhc_mst(ee) = gsn_csm_xy(wks_hc_mst,ispan(1,12,1),hc_mon_sd,xyres3)
      end if
-     title_n0  = hcwd@comment_cvdp
-     title_n1  = hcei@comment_cvdp 
-     title_n2  = hcwn@comment_cvdp 
-     title_n3  = hcws@comment_cvdp
-     title_n4  = hcen@comment_cvdp
-     title_n5  = hces@comment_cvdp
-     title_n6  = hcin@comment_cvdp
-     title_n7  = hcis@comment_cvdp
-     title_n8  = hmcin@comment_cvdp
-     title_n9  = hmcis@comment_cvdp
-     title_n10 = hxcin@comment_cvdp
-     title_n11 = hxcis@comment_cvdp
-     delete([/hcwd,hcei,hcwn,hcws,hcen,hces,hcin,hcis,hmcin,hmcis,hxcin,hxcis,hpin,hpis,hmpin,hmpis,hcind,hcisd/])
+
+     title_n0  = "domain (40S-40N)"
+     title_n1  = "domain (40S-40N)"
+
+     delete([/hcwd_mon,hcind_mon,hcind_djf,hcind_mam,hcind_jja,hcind_son,hcind_ann/])
 
      if (spectra_mvf.eq.False) then
         xyres4@gsnCenterString = names(ee)
@@ -1450,18 +1502,18 @@ begin
      wres@cnLineLabelsOn = False
      wres@cnInfoLabelOn = False
      wres@trYReverse = True
-     wres@trYMinF = 1.0
+     wres@trYMinF = 0.1
      wres@trYMaxF = (nyr(ee)/2) - (nyr(ee)*0.05)
      wres@tmYLOn = True
      wres@tmYLMode = "Explicit"
      if (nyr(ee).lt.200) then
-        wres@tmYLValues = (/1,2,3,5,10,20,50,100,150/)
+        wres@tmYLValues = (/0.1,0.2,0.5,1,2,5,10,20,50,100,150/)
      else
         wres@tmYLValues = (/1,5,10,50,100,200,500,1000,2000,5000,10000/)
      end if
      wres@tmYLLabels = wres@tmYLValues
      wres@cnLevelSelectionMode = "ExplicitLevels"
-     wres@cnLevels = ispan(0,40,5)
+     wres@cnLevels = ispan(0,60,5)
      if (COLORMAP.eq.0) then
         wres@cnFillPalette = "precip3_16lev"
      else
@@ -1512,7 +1564,6 @@ begin
      wavecoi@gsFillIndex = 3
      wavecoi@gsFillScaleF = .65
 
-
      if (spectra_mvf.eq.False) then
         wres@gsnLeftString = ""
         wres@gsnCenterString = names(ee)
@@ -1532,12 +1583,16 @@ begin
      end if
      delete([/wres,wsres,wavecoi/])
 ;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-     pres = True
-     pres@vpXF = 0.07
-     pres@trYMinF = 0.
-     pres@trXMinF = 0.0
-;     pres@trYMaxF = 82.
-     pres@trXMaxF = 0.0832
+     pres               = True
+     pres@vpWidthF      = 0.7
+     pres@vpHeightF     = 0.5
+     pres@vpXF          = 0.07
+     pres@trYMinF       = 0.1
+;    pres@trYMaxF       = 82.
+     pres@trYLog        = True
+     pres@trXLog        = True
+     pres@trXMinF       = 0.01 
+     pres@trXMaxF       = 0.3  ;maxx ;0.0832
      pres@tiYAxisString = "Power"              ; yaxis
      pres@xyLineColor   =  "black"         
      pres@gsnFrame      = False
@@ -1562,22 +1617,25 @@ begin
      pres@tmXUseBottom = False
      pres@tmXTMode   = "Explicit"  
      pres@tmXBMode   = "Explicit"            
-     pres@tmXTValues = (/".00167",".00833",".01667",".02778",".0416",".0556",".0832"/)
-     pres@tmXTLabels = (/"50","10","5","3","2","1.5","1"/)           
-     pres@tmXBValues = (/".0",".01",".02",".03",".042",".056",".083"/)
-     pres@tmXBLabels =     pres@tmXBValues
-     pres@tmXTLabelFontHeightF = 0.018
-     pres@tmXBLabelFontHeightF = 0.018
-     pres@tmYLLabelFontHeightF = 0.018
-     pres@tiYAxisString = "Power (hPa~S~2~N~ / cycles mo~S~-1~N~)"              ; yaxis
+     pres@tmXTLabels = (/50, 40, 30, 25, 20, 15, 10, 8, 5, 3, 2, 1, 0.5, 0.2, 0.1/)
+                      ;(/    "50",    "10",     "5",     "3",    "2",  "1.5",    "1"/)
+     pres@tmXTValues = 1.0 / (12.0*pres@tmXTLabels)
+                      ;(/".00167",".00833",".01667",".02778",".0416",".0556",".0832"/)
+     pres@tmXBValues = (/.01,   .02,  .03, .05,  .08,  0.12, 0.2, 0.3, 0.4, 0.5/) 
+                      ;(/    ".0",   ".01",   ".02",   ".03", ".042", ".056", ".083"/)
+     pres@tmXBLabels = pres@tmXBValues
+     pres@tmXTLabelFontHeightF = 0.020
+     pres@tmXBLabelFontHeightF = 0.020
+     pres@tmYLLabelFontHeightF = 0.020
+     pres@tiYAxisString = "Power (1/(cycles mo~S~-1~N~)"              ; yaxis
      pres@tiXAxisString = "Frequency (cycles mo~S~-1~N~)"
-     pres@tiMainString = ""
+     pres@tiMainString  = ""
      pres@txFontHeightF = 0.015
      pres@xyLineLabelFontHeightF = 0.022
      pres@tiXAxisFontHeightF = 0.025
      pres@tiYAxisFontHeightF = 0.025
      pres@tiMainFontHeightF = 0.03
-     pres@gsnRightStringOrthogonalPosF = -0.115
+     pres@gsnRightStringOrthogonalPosF = -0.135
      
      if (spectra_mvf.eq.False) then
         if (isfilepresent2("obs_ts").and.ee.ge.1.and.spectra_mvf_obs.eq.False) then
@@ -1590,33 +1648,38 @@ begin
            mval = max(splt1(0,:))
         end if
         if (mval.lt.70) then
-           pres@trYMaxF = 75.
-           pres@tmYLMode = "Explicit"
-           pres@tmYLValues = (/0,25,50,75/)
-           pres@tmYLLabels = pres@tmYLValues
-           pres@tmYLMinorValues = ispan(5,70,5)
+           pres@trYMaxF         = 75.
+           pres@tmYLMode        = "Explicit"
+           pres@tmYLValues      = 10^fspan(-4,4,9) ;(/0,50,100,150/)
+           pres@tmYLLabels      = 10^fspan(-4,4,9) ;pres@tmYLValues
+           pres@tmYLMinorValues = 10^(/-3,-2.5,-2,-1.5,-1,-0.5,0,0.5,1,1.5,2/) ;ispan(10,140,10)
         end if
         if (mval.ge.70.and.mval.lt.145) then
-           pres@trYMaxF = 150.
-           pres@tmYLMode = "Explicit"
-           pres@tmYLValues = (/0,50,100,150/)
-           pres@tmYLLabels = pres@tmYLValues
-           pres@tmYLMinorValues = ispan(10,140,10)
+           pres@trYMaxF         = 150.
+           pres@trYMinF         = 0.05
+           pres@tmYLMode        = "Explicit"
+           pres@tmYLValues      = 10^fspan(-4,4,9) ;(/0,50,100,150/)
+           pres@tmYLLabels      = 10^fspan(-4,4,9) ;pres@tmYLValues
+           pres@tmYLMinorValues = 10^(/-3,-2.5,-2,-1.5,-1,-0.5,0,0.5,1,1.5,2/) ;ispan(10,140,10)
         end if
         if (mval.ge.145) then
-           pres@trYMaxF = mval+15.
+           pres@trYMaxF         = mval+15.
+           pres@trYMinF         = 0.05
+           pres@tmYLMode        = "Explicit"
+           pres@tmYLValues      = 10^fspan(-4,4,9) ;(/0,50,100,150/)
+           pres@tmYLLabels      = 10^fspan(-4,4,9) ;pres@tmYLValues
+           pres@tmYLMinorValues = 10^(/-3,-2.5,-2,-1.5,-1,-0.5,0,0.5,1,1.5,2/) ;ispan(10,140,10)
         end if
-        pres@trYMaxF = 100. 
         delete(mval)
      end if
      
      pres@tiMainOn = False
      pres@gsnCenterString = "Period (years)"
-     pres@gsnCenterStringFontHeightF =    pres@tiYAxisFontHeightF
-     pres@gsnRightStringFontHeightF =    pres@tiYAxisFontHeightF - 0.005
-     pres@gsnRightString = syear(ee)+"-"+eyear(ee)+"  "
-     pres@gsnLeftString = "" 
-     pres@gsnCenterString = names(ee)
+     pres@gsnCenterStringFontHeightF = pres@tiYAxisFontHeightF + 0.005
+     pres@gsnRightStringFontHeightF  = pres@tiYAxisFontHeightF - 0.005
+     pres@gsnRightString             = syear(ee)+"-"+eyear(ee)+"  "
+     pres@gsnLeftString              = "" 
+     pres@gsnCenterString            = names(ee)
      if (spectra_mvf.eq.False) then
         pspec(ee) = gsn_csm_xy(wks_hc_p,sdof@frq,splt1,pres) 
         if (isfilepresent2("obs_ts").and.ee.ge.1.and.spectra_mvf_obs.eq.False) then
@@ -1669,7 +1732,12 @@ begin
      scres@gsnLeftStringParallelPosF = .005
      scres@gsnRightStringOrthogonalPosF = -0.05
      scres@gsnRightStringParallelPosF = 0.96
-     scres@gsnRightString = ""
+     if (isvar("cntr_hi")) then
+        scres@gsnRightString = cntr_hi+"/"+cntr_lo  ; list number of El Nino / La Nina events that formed composites
+        delete([/cntr_hi,cntr_lo,cntr_mid/])
+     else
+        scres@gsnRightString = ""
+     end if
      scres@gsnLeftString = ""
      scres@gsnLeftStringFontHeightF = 0.014
      scres@gsnCenterStringFontHeightF = 0.018
@@ -1678,7 +1746,7 @@ begin
      scres4 = scres    ; scres4 = ppt composite resources     
      delete(scres4@cnLevels)
      if (COLORMAP.eq.0) then
-        scres4@cnLevels = (/-10,-8,-6,-4,-3,-2,-1,-.5,-.25,0,.25,.5,1,2,3,4,6,8,10/)     
+        scres4@cnLevels = (/-7,-6,-5,-4,-3,-2,-1,-.5,-.25,0,.25,.5,1,2,3,4,5,6,7/)
      else
         scres4@cnLevels = (/-5,-3,-2,-1,-.5,0,.5,1,2,3,5/)     
      end if
@@ -1886,56 +1954,57 @@ begin
   lp = (/nrow,ncol/)
 
   if (isvar("title_n0")) then
-     panres@txString = "Hadley cell width (Monthly, "+title_n0+")"
-     gsn_panel2(wks_hc,xyn0,lp,panres)    
+     do ff = 0,dimsizes(seas)-1
+      do gg = 0,dimsizes(iname)-1
+       ii = hh * dimsizes(seas) + ff
+       if(seas(ff).eq."mon") then 
+         panres@txString = hcnam_mon(gg) + " [Monthly, "+title_n0+"]"
+       else
+         panres@txString = hcnam_mon(gg) + " ["+str_upper(seas(ff))+", "+title_n0+"]"
+       end if 
+       if (seas(ff).eq."mon") then
+          gsn_panel2(wks_hc_mon,xyn0(gg,:),lp,panres)
+       else if (seas(ff).eq."djf") then
+          gsn_panel2(wks_hc_djf,xyn1(gg,:),lp,panres)
+       else if (seas(ff).eq."mam") then
+          gsn_panel2(wks_hc_mam,xyn2(gg,:),lp,panres)
+       else if (seas(ff).eq."jja") then
+          gsn_panel2(wks_hc_jja,xyn3(gg,:),lp,panres)
+       else if (seas(ff).eq."son") then
+          gsn_panel2(wks_hc_son,xyn4(gg,:),lp,panres)
+       else if (seas(ff).eq."ann") then
+          gsn_panel2(wks_hc_ann,xyn5(gg,:),lp,panres)
+       else
+         print ("decleared wrong season...")
+       end if
+       end if
+       end if
+       end if
+       end if
+       end if
+      end do 
+    end do 
 
-     panres@txString = "Hadley cell intersection (Monthly, "+title_n1+")"
-     gsn_panel2(wks_hc,xyn1,lp,panres)
-
-     panres@txString = "Hadley cell width (NH branch) (Monthly, "+title_n2+")"
-     gsn_panel2(wks_hc,xyn2,lp,panres)
-
-     panres@txString = "Hadley cell width (SH branch) (Monthly, "+title_n3+")"
-     gsn_panel2(wks_hc,xyn3,lp,panres)
-
-     panres@txString = "Hadley cell intensity (NH branch) (Monthly, "+title_n4+")"
-     gsn_panel2(wks_hc,xyn4,lp,panres)
-
-     panres@txString = "Hadley cell intensity (SH branch) (Monthly, "+title_n5+")"
-     gsn_panel2(wks_hc,xyn5,lp,panres)
-
-     panres@txString = "Hadley cell poleward extent (NH branch) (Monthly, "+title_n6+")"
-     gsn_panel2(wks_hc,xyn6,lp,panres)
-
-     panres@txString = "Hadley cell poleward extent (SH branch) (Monthly, "+title_n7+")"
-     gsn_panel2(wks_hc,xyn7,lp,panres)
-
-     panres@txString = "Hadley cell mean intensity (900-200hPa, NH branch) (Monthly, "+title_n8+")"
-     gsn_panel2(wks_hc,xyn8,lp,panres)
-
-     panres@txString = "Hadley cell mean intensity (900-200hPa, SH branch) (Monthly, "+title_n9+")"
-     gsn_panel2(wks_hc,xyn9,lp,panres)
-
-     panres@txString = "Hadley cell max. intensity (900-200hPa, NH branch) (Monthly, "+title_n10+")"
-     gsn_panel2(wks_hc,xyn10,lp,panres)
-     
-     panres@txString = "Hadley cell max. intensity (900-200hPa, SH branch) (Monthly, "+title_n11+")"
-     gsn_panel2(wks_hc,xyn11,lp,panres)
+    panres@txString = "Hadley Cell Width (norm.) (Monthly, "+title_n1+")"
+    gsn_panel2(wks_hc_ts,xyn6,lp,panres)
 
   end if
-  delete([/wks_hc/]) 
+
+
+  delete([/wks_hc_mon,wks_hc_ts,wks_hc_djf,wks_hc_mam,wks_hc_jja,wks_hc_son,wks_hc_ann/]) 
 
   if (all(ismissing(xyhc_rst))) then
 ;     print("No valid running standard deviation plots, skipping")
   else
-     panres@txString = "Hadley Cell index 15yr running standard deviation"
+     panres@txString = "Hadley cell width 15yr running standard deviation"
      gsn_panel2(wks_hc_rst,xyhc_rst,lp,panres) 
      delete(xyhc_rst)  
   end if
-  panres@gsnPanelYWhiteSpacePercent = 0.5
-  panres@txString = "Hadley Cell index standard deviation (Monthly)"
-  gsn_panel2(wks_hc_mst,xyhc_mst,(/nrow,ncol/),panres)   
-  
+  panresx = panres
+  panresx@gsnPanelYWhiteSpacePercent = 0.5
+  panresx@txString = "Hadley cell width standard deviation (Monthly)"
+  gsn_panel2(wks_hc_mst,xyhc_mst,(/nrow,ncol/),panresx)
+    
   panres2 = True
   panres2@gsnMaximize = True
   panres2@gsnPaperOrientation = "portrait"
@@ -1943,7 +2012,7 @@ begin
   panres2@lbLabelStride = 1
   panres2@pmLabelBarWidthF = 0.4
   panres2@pmLabelBarHeightF = 0.04
-  panres@pmLabelBarOrthogonalPosF = -0.03
+  panres2@pmLabelBarOrthogonalPosF = -0.02
   panres2@txString = ""   
 
   if (nsim.le.4) then
@@ -1959,11 +2028,11 @@ begin
      panres@gsnPanelBottom = 0.05
   end if  
   panres@gsnPanelYWhiteSpacePercent = 3.0
-  panres@txString = "Hadley cell width index (Monthly, detrended)"
+  panres@txString = "Hadley Cell Width Index (Monthly, detrended)"
   gsn_panel2(wks_hc_p,pspec,(/nrow,ncol/),panres)  
-  panres@txString = "Hadley cell width index Autocorrelation (Monthly)"
+  panres@txString = "Hadley Cell Width Autocorrelation (Monthly)"
   gsn_panel2(wks_hc_p,xyhc_ac,(/nrow,ncol/),panres) 
-  panres2@txString = "Hadley cell width Wavelet (Monthly)"
+  panres2@txString = "Hadley Cell Width Wavelet (Monthly)"
   panres2@gsnPanelYWhiteSpacePercent = 3.0
   panres2@gsnPanelXWhiteSpacePercent = 4.0
   gsn_panel2(wks_hc_p,plot_wave34,(/nrow,ncol/),panres2)  
@@ -1973,42 +2042,55 @@ begin
   panres2@pmLabelBarWidthF = 0.8
   panres2@lbLabelAutoStride = False
   panres2@gsnPanelXWhiteSpacePercent = 8.5
+  if (nsim.le.4) then
+     if (nsim.eq.1) then
+        panres2@lbLabelFontHeightF = 0.018
+        panres2@lbTitleFontHeightF = 0.018
+     else
+        panres2@lbLabelFontHeightF = 0.012
+        panres2@lbTitleFontHeightF = 0.012
+     end if
+  else
+     panres2@lbLabelFontHeightF = 0.012
+     panres2@lbTitleFontHeightF = 0.012
+  end if
   if (any(.not.ismissing(map_hcsc_jja0))) then
      panres2@lbTitleString = "SST/TAS (C)"
-     panres2@pmLabelBarOrthogonalPosF = -0.05
-     panres2@txString = "Hadley Cell SST,TAS,PSL Spatial Composite (JJA~S~0~N~)"
+     panres2@pmLabelBarOrthogonalPosF = -0.02
+     panres2@txString = "Hadley Cell Width SST,TAS,PSL Spatial Composite (JJA~S~0~N~)"
      gsn_panel2(wks_hcsc,map_hcsc_jja0,(/nrow,ncol/),panres2)   
   
-     panres2@txString = "Hadley Cell SST,TAS,PSL Spatial Composite (SON~S~0~N~)"
+     panres2@txString = "Hadley Cell Width SST,TAS,PSL Spatial Composite (SON~S~0~N~)"
      gsn_panel2(wks_hcsc,map_hcsc_son0,(/nrow,ncol/),panres2)   
   
-     panres2@txString = "Hadley Cell SST,TAS,PSL Spatial Composite (DJF~S~+1~N~)"
+     panres2@txString = "Hadley Cell Width SST,TAS,PSL Spatial Composite (DJF~S~+1~N~)"
      gsn_panel2(wks_hcsc,map_hcsc_djf1,(/nrow,ncol/),panres2)   
   
-     panres2@txString = "Hadley Cell SST,TAS,PSL Spatial Composite (MAM~S~+1~N~)"
+     panres2@txString = "Hadley Cell Width SST,TAS,PSL Spatial Composite (MAM~S~+1~N~)"
      gsn_panel2(wks_hcsc,map_hcsc_mam1,(/nrow,ncol/),panres2)   
      delete(wks_hcsc)
      
      delete([/map_hcsc_djf1,map_hcsc_jja0,map_hcsc_son0,map_hcsc_mam1/])
   end if     
   if (any(.not.ismissing(map_hcsc_ppt_jja0))) then
-     panres2@txString = "Hadley Cell PR Spatial Composite (JJA~S~0~N~)"
+     panres2@lbTitleString = "PR (mm/day)"
+     panres2@txString = "Hadley Cell Width PR Spatial Composite (JJA~S~0~N~)"
      gsn_panel2(wks_hcsc_ppt,map_hcsc_ppt_jja0,(/nrow,ncol/),panres2)   
   
-     panres2@txString = "Hadley Cell PR Spatial Composite (SON~S~0~N~)"
+     panres2@txString = "Hadley Cell Width PR Spatial Composite (SON~S~0~N~)"
      gsn_panel2(wks_hcsc_ppt,map_hcsc_ppt_son0,(/nrow,ncol/),panres2)   
   
-     panres2@txString = "Hadley Cell PR Spatial Composite (DJF~S~+1~N~)"
+     panres2@txString = "Hadley Cell Width PR Spatial Composite (DJF~S~+1~N~)"
      gsn_panel2(wks_hcsc_ppt,map_hcsc_ppt_djf1,(/nrow,ncol/),panres2)   
   
-     panres2@txString = "Hadley Cell PR Spatial Composite (MAM~S~+1~N~)"
+     panres2@txString = "Hadley Cell Width PR Spatial Composite (MAM~S~+1~N~)"
      gsn_panel2(wks_hcsc_ppt,map_hcsc_ppt_mam1,(/nrow,ncol/),panres2)   
      delete(wks_hcsc_ppt)
      
      delete([/map_hcsc_ppt_djf1,map_hcsc_ppt_jja0,map_hcsc_ppt_son0,map_hcsc_ppt_mam1/])
   end if   
 
-  delete([/xyn0,xyn1,xyn2,xyn3,xyn4,xyn5,xyn6,xyn7,xyn8,xyn9,xyn10,xyn11,pspec,pi,rad,wgt,lp/])     
+  delete([/xyn0,xyn1,xyn2,xyn3,xyn4,xyn5,pspec,pi,rad,wgt,lp/])     
 
   OUTDIR = getenv("OUTDIR")
   
@@ -2025,20 +2107,129 @@ begin
         system("mv "+OUTDIR+"hc.spatialcomp.ppt.000003.png "+OUTDIR+"hc.spatialcomp.pr.djf1.png")
         system("mv "+OUTDIR+"hc.spatialcomp.ppt.000004.png "+OUTDIR+"hc.spatialcomp.pr.mam1.png")
      end if
-     if (isfilepresent2(OUTDIR+"hc.timeseries.000001.png")) then
-        system("mv "+OUTDIR+"hc.timeseries.000001.png "+OUTDIR+"hcwd.timeseries.png")
-        system("mv "+OUTDIR+"hc.timeseries.000002.png "+OUTDIR+"hcei.timeseries.png")
-        system("mv "+OUTDIR+"hc.timeseries.000003.png "+OUTDIR+"hcwn.timeseries.png")
-        system("mv "+OUTDIR+"hc.timeseries.000004.png "+OUTDIR+"hcws.timeseries.png")
-        system("mv "+OUTDIR+"hc.timeseries.000005.png "+OUTDIR+"hcin.timeseries.png")
-        system("mv "+OUTDIR+"hc.timeseries.000006.png "+OUTDIR+"hcis.timeseries.png")
-        system("mv "+OUTDIR+"hc.timeseries.000007.png "+OUTDIR+"hcen.timeseries.png")
-        system("mv "+OUTDIR+"hc.timeseries.000008.png "+OUTDIR+"hces.timeseries.png")
-        system("mv "+OUTDIR+"hc.timeseries.000009.png "+OUTDIR+"hmcin.timeseries.png")
-        system("mv "+OUTDIR+"hc.timeseries.000010.png "+OUTDIR+"hmcis.timeseries.png")
-        system("mv "+OUTDIR+"hc.timeseries.000011.png "+OUTDIR+"hxcin.timeseries.png")
-        system("mv "+OUTDIR+"hc.timeseries.000012.png "+OUTDIR+"hxcis.timeseries.png")
+     if (isfilepresent2(OUTDIR+"hc.timeseries_mon.000001.png")) then
+        system("mv "+OUTDIR+"hc.timeseries_mon.000001.png "+OUTDIR+"hcin_mon.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_mon.000002.png "+OUTDIR+"hxcin_mon.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_mon.000003.png "+OUTDIR+"hmcin_mon.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_mon.000004.png "+OUTDIR+"hcis_mon.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_mon.000005.png "+OUTDIR+"hxcis_mon.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_mon.000006.png "+OUTDIR+"hmcis_mon.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_mon.000007.png "+OUTDIR+"hpin_mon.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_mon.000008.png "+OUTDIR+"hxpin_mon.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_mon.000009.png "+OUTDIR+"hmpin_mon.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_mon.000010.png "+OUTDIR+"hpis_mon.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_mon.000011.png "+OUTDIR+"hxpis_mon.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_mon.000012.png "+OUTDIR+"hmpis_mon.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_mon.000013.png "+OUTDIR+"hcei_mon.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_mon.000014.png "+OUTDIR+"hcen_mon.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_mon.000015.png "+OUTDIR+"hces_mon.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_mon.000016.png "+OUTDIR+"hcwn_mon.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_mon.000017.png "+OUTDIR+"hcws_mon.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_mon.000018.png "+OUTDIR+"hcwd_mon.timeseries.png")
      end if
+     if (isfilepresent2(OUTDIR+"hc.timeseries_djf.000001.png")) then
+        system("mv "+OUTDIR+"hc.timeseries_djf.000001.png "+OUTDIR+"hcin_djf.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_djf.000002.png "+OUTDIR+"hxcin_djf.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_djf.000003.png "+OUTDIR+"hmcin_djf.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_djf.000004.png "+OUTDIR+"hcis_djf.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_djf.000005.png "+OUTDIR+"hxcis_djf.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_djf.000006.png "+OUTDIR+"hmcis_djf.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_djf.000007.png "+OUTDIR+"hpin_djf.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_djf.000008.png "+OUTDIR+"hxpin_djf.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_djf.000009.png "+OUTDIR+"hmpin_djf.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_djf.000010.png "+OUTDIR+"hpis_djf.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_djf.000011.png "+OUTDIR+"hxpis_djf.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_djf.000012.png "+OUTDIR+"hmpis_djf.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_djf.000013.png "+OUTDIR+"hcei_djf.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_djf.000014.png "+OUTDIR+"hcen_djf.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_djf.000015.png "+OUTDIR+"hces_djf.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_djf.000016.png "+OUTDIR+"hcwn_djf.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_djf.000017.png "+OUTDIR+"hcws_djf.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_djf.000018.png "+OUTDIR+"hcwd_djf.timeseries.png")
+     end if
+     if (isfilepresent2(OUTDIR+"hc.timeseries_mam.000001.png")) then
+        system("mv "+OUTDIR+"hc.timeseries_mam.000001.png "+OUTDIR+"hcin_mam.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_mam.000002.png "+OUTDIR+"hxcin_mam.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_mam.000003.png "+OUTDIR+"hmcin_mam.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_mam.000004.png "+OUTDIR+"hcis_mam.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_mam.000005.png "+OUTDIR+"hxcis_mam.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_mam.000006.png "+OUTDIR+"hmcis_mam.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_mam.000007.png "+OUTDIR+"hpin_mam.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_mam.000008.png "+OUTDIR+"hxpin_mam.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_mam.000009.png "+OUTDIR+"hmpin_mam.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_mam.000010.png "+OUTDIR+"hpis_mam.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_mam.000011.png "+OUTDIR+"hxpis_mam.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_mam.000012.png "+OUTDIR+"hmpis_mam.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_mam.000013.png "+OUTDIR+"hcei_mam.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_mam.000014.png "+OUTDIR+"hcen_mam.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_mam.000015.png "+OUTDIR+"hces_mam.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_mam.000016.png "+OUTDIR+"hcwn_mam.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_mam.000017.png "+OUTDIR+"hcws_mam.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_mam.000018.png "+OUTDIR+"hcwd_mam.timeseries.png")
+     end if
+     if (isfilepresent2(OUTDIR+"hc.timeseries_jja.000001.png")) then
+        system("mv "+OUTDIR+"hc.timeseries_jja.000001.png "+OUTDIR+"hcin_jja.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_jja.000002.png "+OUTDIR+"hxcin_jja.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_jja.000003.png "+OUTDIR+"hmcin_jja.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_jja.000004.png "+OUTDIR+"hcis_jja.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_jja.000005.png "+OUTDIR+"hxcis_jja.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_jja.000006.png "+OUTDIR+"hmcis_jja.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_jja.000007.png "+OUTDIR+"hpin_jja.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_jja.000008.png "+OUTDIR+"hxpin_jja.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_jja.000009.png "+OUTDIR+"hmpin_jja.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_jja.000010.png "+OUTDIR+"hpis_jja.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_jja.000011.png "+OUTDIR+"hxpis_jja.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_jja.000012.png "+OUTDIR+"hmpis_jja.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_jja.000013.png "+OUTDIR+"hcei_jja.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_jja.000014.png "+OUTDIR+"hcen_jja.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_jja.000015.png "+OUTDIR+"hces_jja.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_jja.000016.png "+OUTDIR+"hcwn_jja.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_jja.000017.png "+OUTDIR+"hcws_jja.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_jja.000018.png "+OUTDIR+"hcwd_jja.timeseries.png")
+     end if
+     if (isfilepresent2(OUTDIR+"hc.timeseries_son.000001.png")) then
+        system("mv "+OUTDIR+"hc.timeseries_son.000001.png "+OUTDIR+"hcin_son.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_son.000002.png "+OUTDIR+"hxcin_son.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_son.000003.png "+OUTDIR+"hmcin_son.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_son.000004.png "+OUTDIR+"hcis_son.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_son.000005.png "+OUTDIR+"hxcis_son.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_son.000006.png "+OUTDIR+"hmcis_son.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_son.000007.png "+OUTDIR+"hpin_son.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_son.000008.png "+OUTDIR+"hxpin_son.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_son.000009.png "+OUTDIR+"hmpin_son.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_son.000010.png "+OUTDIR+"hpis_son.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_son.000011.png "+OUTDIR+"hxpis_son.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_son.000012.png "+OUTDIR+"hmpis_son.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_son.000013.png "+OUTDIR+"hcei_son.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_son.000014.png "+OUTDIR+"hcen_son.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_son.000015.png "+OUTDIR+"hces_son.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_son.000016.png "+OUTDIR+"hcwn_son.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_son.000017.png "+OUTDIR+"hcws_son.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_son.000018.png "+OUTDIR+"hcwd_son.timeseries.png")
+     end if
+     if (isfilepresent2(OUTDIR+"hc.timeseries_ann.000001.png")) then
+        system("mv "+OUTDIR+"hc.timeseries_ann.000001.png "+OUTDIR+"hcin_ann.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_ann.000002.png "+OUTDIR+"hxcin_ann.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_ann.000003.png "+OUTDIR+"hmcin_ann.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_ann.000004.png "+OUTDIR+"hcis_ann.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_ann.000005.png "+OUTDIR+"hxcis_ann.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_ann.000006.png "+OUTDIR+"hmcis_ann.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_ann.000007.png "+OUTDIR+"hpin_ann.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_ann.000008.png "+OUTDIR+"hxpin_ann.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_ann.000009.png "+OUTDIR+"hmpin_ann.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_ann.000010.png "+OUTDIR+"hpis_ann.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_ann.000011.png "+OUTDIR+"hxpis_ann.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_ann.000012.png "+OUTDIR+"hmpis_ann.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_ann.000013.png "+OUTDIR+"hcei_ann.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_ann.000014.png "+OUTDIR+"hcen_ann.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_ann.000015.png "+OUTDIR+"hces_ann.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_ann.000016.png "+OUTDIR+"hcwn_ann.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_ann.000017.png "+OUTDIR+"hcws_ann.timeseries.png")
+        system("mv "+OUTDIR+"hc.timeseries_ann.000018.png "+OUTDIR+"hcwd_ann.timeseries.png")
+     end if
+     if (isfilepresent2(OUTDIR+"hc_ts.timeseries.png")) then 
+        system("mv "+OUTDIR+"hc_ts.timeseries.png "+OUTDIR+"hcwd_norm.timeseries.png")
+     end if 
      if (isfilepresent2(OUTDIR+"hc.powspec.000001.png")) then
         system("mv "+OUTDIR+"hc.powspec.000001.png "+OUTDIR+"hc.powspec.png")
         system("mv "+OUTDIR+"hc.powspec.000002.png "+OUTDIR+"hc.autocor.png")
@@ -2061,20 +2252,134 @@ begin
         system("mv "+OUTDIR+"ua_ind0004.ps "+OUTDIR+"hc.spatialcomp.pr.mam1.ps")
         system("rm "+OUTDIR+"hc.spatialcomp.ppt.ps")
      end if
-     if (isfilepresent2(OUTDIR+"hc.timeseries.ps")) then
-        system("psplit "+OUTDIR+"hc.timeseries.ps "+OUTDIR+"hczmsf_ind")
-        system("mv "+OUTDIR+"hczmsf_ind0001.ps "+OUTDIR+"hcwd.timeseries.ps")
-        system("mv "+OUTDIR+"hczmsf_ind0002.ps "+OUTDIR+"hcei.timeseries.ps")
-        system("mv "+OUTDIR+"hczmsf_ind0003.ps "+OUTDIR+"hcwn.timeseries.ps")
-        system("mv "+OUTDIR+"hczmsf_ind0004.ps "+OUTDIR+"hcws.timeseries.ps")
-        system("mv "+OUTDIR+"hczmsf_ind0005.ps "+OUTDIR+"hcin.timeseries.ps")
-        system("mv "+OUTDIR+"hczmsf_ind0006.ps "+OUTDIR+"hcis.timeseries.ps")
-        system("mv "+OUTDIR+"hczmsf_ind0007.ps "+OUTDIR+"hcen.timeseries.ps")
-        system("mv "+OUTDIR+"hczmsf_ind0008.ps "+OUTDIR+"hces.timeseries.ps")
-        system("mv "+OUTDIR+"hczmsf_ind0009.ps "+OUTDIR+"hmcin.timeseries.ps")
-        system("mv "+OUTDIR+"hczmsf_ind0010.ps "+OUTDIR+"hmcis.timeseries.ps")
-        system("mv "+OUTDIR+"hczmsf_ind0011.ps "+OUTDIR+"hxcin.timeseries.ps")
-        system("mv "+OUTDIR+"hczmsf_ind0012.ps "+OUTDIR+"hxcis.timeseries.ps")
+     if (isfilepresent2(OUTDIR+"hc.timeseries_mon.ps")) then
+        system("psplit "+OUTDIR+"hc.timeseries_mon.ps "+OUTDIR+"hczmsf_ind")
+        system("mv "+OUTDIR+"hczmsf_ind0001.ps "+OUTDIR+"hcin_mon.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0002.ps "+OUTDIR+"hxcin_mon.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0003.ps "+OUTDIR+"hmcin_mon.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0004.ps "+OUTDIR+"hcis_mon.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0005.ps "+OUTDIR+"hxcis_mon.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0006.ps "+OUTDIR+"hmcis_mon.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0007.ps "+OUTDIR+"hpin_mon.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0008.ps "+OUTDIR+"hxpin_mon.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0009.ps "+OUTDIR+"hmpin_mon.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0010.ps "+OUTDIR+"hpis_mon.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0011.ps "+OUTDIR+"hxpis_mon.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0012.ps "+OUTDIR+"hmpis_mon.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0013.ps "+OUTDIR+"hcei_mon.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0014.ps "+OUTDIR+"hcen_mon.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0015.ps "+OUTDIR+"hces_mon.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0016.ps "+OUTDIR+"hcwn_mon.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0017.ps "+OUTDIR+"hcws_mon.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0018.ps "+OUTDIR+"hcwd_mon.timeseries.ps")
+     end if
+     if (isfilepresent2(OUTDIR+"hc.timeseries_djf.ps")) then
+        system("psplit "+OUTDIR+"hc.timeseries_djf.ps "+OUTDIR+"hczmsf_ind")
+        system("mv "+OUTDIR+"hczmsf_ind0001.ps "+OUTDIR+"hcin_djf.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0002.ps "+OUTDIR+"hxcin_djf.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0003.ps "+OUTDIR+"hmcin_djf.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0004.ps "+OUTDIR+"hcis_djf.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0005.ps "+OUTDIR+"hxcis_djf.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0006.ps "+OUTDIR+"hmcis_djf.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0007.ps "+OUTDIR+"hpin_djf.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0008.ps "+OUTDIR+"hxpin_djf.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0009.ps "+OUTDIR+"hmpin_djf.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0010.ps "+OUTDIR+"hpis_djf.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0011.ps "+OUTDIR+"hxpis_djf.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0012.ps "+OUTDIR+"hmpis_djf.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0013.ps "+OUTDIR+"hcei_djf.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0014.ps "+OUTDIR+"hcen_djf.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0015.ps "+OUTDIR+"hces_djf.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0016.ps "+OUTDIR+"hcwn_djf.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0017.ps "+OUTDIR+"hcws_djf.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0018.ps "+OUTDIR+"hcwd_djf.timeseries.ps")
+     end if
+     if (isfilepresent2(OUTDIR+"hc.timeseries_mam.ps")) then
+        system("psplit "+OUTDIR+"hc.timeseries_mam.ps "+OUTDIR+"hczmsf_ind")
+        system("mv "+OUTDIR+"hczmsf_ind0001.ps "+OUTDIR+"hcin_mam.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0002.ps "+OUTDIR+"hxcin_mam.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0003.ps "+OUTDIR+"hmcin_mam.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0004.ps "+OUTDIR+"hcis_mam.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0005.ps "+OUTDIR+"hxcis_mam.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0006.ps "+OUTDIR+"hmcis_mam.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0007.ps "+OUTDIR+"hpin_mam.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0008.ps "+OUTDIR+"hxpin_mam.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0009.ps "+OUTDIR+"hmpin_mam.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0010.ps "+OUTDIR+"hpis_mam.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0011.ps "+OUTDIR+"hxpis_mam.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0012.ps "+OUTDIR+"hmpis_mam.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0013.ps "+OUTDIR+"hcei_mam.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0014.ps "+OUTDIR+"hcen_mam.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0015.ps "+OUTDIR+"hces_mam.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0016.ps "+OUTDIR+"hcwn_mam.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0017.ps "+OUTDIR+"hcws_mam.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0018.ps "+OUTDIR+"hcwd_mam.timeseries.ps")
+     end if
+     if (isfilepresent2(OUTDIR+"hc.timeseries_jja.ps")) then
+        system("psplit "+OUTDIR+"hc.timeseries_jja.ps "+OUTDIR+"hczmsf_ind")
+        system("mv "+OUTDIR+"hczmsf_ind0001.ps "+OUTDIR+"hcin_jja.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0002.ps "+OUTDIR+"hxcin_jja.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0003.ps "+OUTDIR+"hmcin_jja.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0004.ps "+OUTDIR+"hcis_jja.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0005.ps "+OUTDIR+"hxcis_jja.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0006.ps "+OUTDIR+"hmcis_jja.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0007.ps "+OUTDIR+"hpin_jja.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0008.ps "+OUTDIR+"hxpin_jja.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0009.ps "+OUTDIR+"hmpin_jja.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0010.ps "+OUTDIR+"hpis_jja.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0011.ps "+OUTDIR+"hxpis_jja.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0012.ps "+OUTDIR+"hmpis_jja.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0013.ps "+OUTDIR+"hcei_jja.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0014.ps "+OUTDIR+"hcen_jja.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0015.ps "+OUTDIR+"hces_jja.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0016.ps "+OUTDIR+"hcwn_jja.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0017.ps "+OUTDIR+"hcws_jja.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0018.ps "+OUTDIR+"hcwd_jja.timeseries.ps")
+     end if
+     if (isfilepresent2(OUTDIR+"hc.timeseries_son.ps")) then
+        system("psplit "+OUTDIR+"hc.timeseries_son.ps "+OUTDIR+"hczmsf_ind")
+        system("mv "+OUTDIR+"hczmsf_ind0001.ps "+OUTDIR+"hcin_son.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0002.ps "+OUTDIR+"hxcin_son.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0003.ps "+OUTDIR+"hmcin_son.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0004.ps "+OUTDIR+"hcis_son.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0005.ps "+OUTDIR+"hxcis_son.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0006.ps "+OUTDIR+"hmcis_son.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0007.ps "+OUTDIR+"hpin_son.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0008.ps "+OUTDIR+"hxpin_son.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0009.ps "+OUTDIR+"hmpin_son.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0010.ps "+OUTDIR+"hpis_son.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0011.ps "+OUTDIR+"hxpis_son.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0012.ps "+OUTDIR+"hmpis_son.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0013.ps "+OUTDIR+"hcei_son.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0014.ps "+OUTDIR+"hcen_son.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0015.ps "+OUTDIR+"hces_son.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0016.ps "+OUTDIR+"hcwn_son.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0017.ps "+OUTDIR+"hcws_son.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0018.ps "+OUTDIR+"hcwd_son.timeseries.ps")
+     end if
+     if (isfilepresent2(OUTDIR+"hc.timeseries_ann.ps")) then
+        system("psplit "+OUTDIR+"hc.timeseries_ann.ps "+OUTDIR+"hczmsf_ind")
+        system("mv "+OUTDIR+"hczmsf_ind0001.ps "+OUTDIR+"hcin_ann.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0002.ps "+OUTDIR+"hxcin_ann.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0003.ps "+OUTDIR+"hmcin_ann.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0004.ps "+OUTDIR+"hcis_ann.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0005.ps "+OUTDIR+"hxcis_ann.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0006.ps "+OUTDIR+"hmcis_ann.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0007.ps "+OUTDIR+"hpin_ann.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0008.ps "+OUTDIR+"hxpin_ann.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0009.ps "+OUTDIR+"hmpin_ann.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0010.ps "+OUTDIR+"hpis_ann.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0011.ps "+OUTDIR+"hxpis_ann.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0012.ps "+OUTDIR+"hmpis_ann.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0013.ps "+OUTDIR+"hcei_ann.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0014.ps "+OUTDIR+"hcen_ann.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0015.ps "+OUTDIR+"hces_ann.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0016.ps "+OUTDIR+"hcwn_ann.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0017.ps "+OUTDIR+"hcws_ann.timeseries.ps")
+        system("mv "+OUTDIR+"hczmsf_ind0018.ps "+OUTDIR+"hcwd_ann.timeseries.ps")
+     end if
+     if (isfilepresent2(OUTDIR+"hc_ts.timeseries.ps")) then
+        system("mv "+OUTDIR+"hc_ts.timeseries.ps "+OUTDIR+"hcwd_norm.timeseries.ps")
      end if
      if (isfilepresent2(OUTDIR+"hc.powspec.ps")) then
         system("psplit "+OUTDIR+"hc.powspec.ps "+OUTDIR+"hcp")

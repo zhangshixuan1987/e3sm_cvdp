@@ -62,12 +62,12 @@ begin
   wks_rt_mon = gsn_open_wks(wks_type,getenv("OUTDIR")+"tas.runtrend.mon")
 
   if (COLORMAP.eq.0) then
-     gsn_define_colormap(wks_trends_djf,"ncl_default")   
-     gsn_define_colormap(wks_trends_mam,"ncl_default")  
-     gsn_define_colormap(wks_trends_jja,"ncl_default") 
-     gsn_define_colormap(wks_trends_son,"ncl_default") 
-     gsn_define_colormap(wks_trends_ann,"ncl_default") 
-     gsn_define_colormap(wks_trends_mon,"ncl_default") 
+     gsn_define_colormap(wks_trends_djf,"BlueYellowRed")   
+     gsn_define_colormap(wks_trends_mam,"BlueYellowRed")  
+     gsn_define_colormap(wks_trends_jja,"BlueYellowRed") 
+     gsn_define_colormap(wks_trends_son,"BlueYellowRed") 
+     gsn_define_colormap(wks_trends_ann,"BlueYellowRed") 
+     gsn_define_colormap(wks_trends_mon,"BlueYellowRed") 
      gsn_define_colormap(wks_aa_djf,"ncl_default")   
      gsn_define_colormap(wks_aa_mam,"ncl_default")  
      gsn_define_colormap(wks_aa_jja,"ncl_default") 
@@ -293,7 +293,7 @@ begin
   
      res@cnLevelSelectionMode = "ExplicitLevels"
      if (COLORMAP.eq.0) then
-        res@cnLevels = (/-8,-6,-5,-4,-3,-2,-1,-0.5,-0.25,0,0.25,0.5,1,2,3,4,5,6,8/)
+        res@cnLevels = (/-6,-5,-4,-3,-2,-1,-0.5,-0.25,0,0.25,0.5,1,2,3,4,5,6/)
      end if
      if (COLORMAP.eq.1) then
         res@cnLevels = (/-6,-4,-3,-2,-1,-0.5,-0.25,0,0.25,0.5,1,2,3,4,6/)

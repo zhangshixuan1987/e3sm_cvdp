@@ -59,11 +59,11 @@ begin
      gsn_define_colormap(wks_stddev_jja,"precip3_16lev") 
      gsn_define_colormap(wks_stddev_son,"precip3_16lev")  
      gsn_define_colormap(wks_stddev_ann,"precip3_16lev")
-     gsn_define_colormap(wks_mean_djf,"ncl_default") 
-     gsn_define_colormap(wks_mean_mam,"ncl_default")  
-     gsn_define_colormap(wks_mean_jja,"ncl_default") 
-     gsn_define_colormap(wks_mean_son,"ncl_default")  
-     gsn_define_colormap(wks_mean_ann,"ncl_default")
+     gsn_define_colormap(wks_mean_djf,"NCV_jaisnd") 
+     gsn_define_colormap(wks_mean_mam,"NCV_jaisnd")  
+     gsn_define_colormap(wks_mean_jja,"NCV_jaisnd") 
+     gsn_define_colormap(wks_mean_son,"NCV_jaisnd")  
+     gsn_define_colormap(wks_mean_ann,"NCV_jaisnd")
   end if
   if (COLORMAP.eq.1) then
      gsn_define_colormap(wks_stddev_djf,"cb_rainbow") 

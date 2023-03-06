@@ -42,7 +42,7 @@ begin
   pi=4.*atan(1.0)
   rad=(pi/180.)
  
- regvars = (/"psl","sst","trefht","prect","u10","v10","taux","tauy","sh","lh", "eth", \
+ regvars = (/"psl","sst","trefht","prect","u10","v10","taux","tauy","shflx","lhflx", "eth", \
              "swcre","olr","cldtot","u850","v850","th850","z500","u200","v200"/)
  landmsk = (/    0,    1,       0,      0,    0,    0,     0,     0,   0,   0,     1, \
                    0,      0,       0,     0,     0,      0,     0,     0,   0 /)
@@ -86,7 +86,7 @@ begin
   wks_nam  = gsn_open_wks(wks_type,getenv("OUTDIR")+"nam.vxreg")
   
   if (COLORMAP.eq.0) then
-     gsn_define_colormap(wks_nam,"MPL_RdBu")  
+     gsn_define_colormap(wks_nam,"cmp_b2r")  
      gsn_reverse_colormap(wks_nam)           ; Reverse the color map.
   end if
   if (COLORMAP.eq.1) then
@@ -264,8 +264,8 @@ begin
         delete([/rc,tval,df,b,vreg_djf/])
      end if     
      
-     if (.not.ismissing(nam_djf({85},{5}))) then
-        if (nam_djf({85},{5}).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
+     if (.not.all(ismissing(nam_djf({82:87},{2:7})))) then
+        if (avg(nam_djf({82:87},{2:7})).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
            nam_djf = nam_djf*-1.
            nam_pc_djf = nam_pc_djf*-1.
            if (vxreg_plot_flag.eq.0) then
@@ -306,8 +306,8 @@ begin
         delete([/rc,tval,df,b,vreg_mam/])
      end if
 
-     if (.not.ismissing(nam_mam({85},{5}))) then
-        if (nam_mam({85},{5}).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
+     if (.not.all(ismissing(nam_mam({82:87},{2:7})))) then
+        if (avg(nam_mam({82:87},{2:7})).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
            nam_mam = nam_mam*-1.
            nam_pc_mam = nam_pc_mam*-1.
            if (vxreg_plot_flag.eq.0) then
@@ -345,8 +345,8 @@ begin
         delete([/rc,tval,df,b,vreg_jja/])
      end if
 
-     if (.not.ismissing(nam_jja({85},{5}))) then
-        if (nam_jja({85},{5}).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
+     if (.not.all(ismissing(nam_jja({82:87},{2:7})))) then
+        if (avg(nam_jja({82:87},{2:7})).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
            nam_jja = nam_jja*-1.
            nam_pc_jja = nam_pc_jja*-1.
            if (vxreg_plot_flag.eq.0) then
@@ -384,8 +384,8 @@ begin
         delete([/rc,tval,df,b,vreg_son/])
      end if
 
-     if (.not.ismissing(nam_son({85},{5}))) then
-        if (nam_son({85},{5}).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
+     if (.not.all(ismissing(nam_son({82:87},{2:7})))) then
+        if (avg(nam_son({82:87},{2:7})).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
            nam_son = nam_son*-1.
            nam_pc_son = nam_pc_son*-1.
            if (vxreg_plot_flag.eq.0) then
@@ -423,8 +423,8 @@ begin
         delete([/rc,tval,df,b,vreg_ann/])
      end if
 
-     if (.not.ismissing(nam_ann({85},{5}))) then
-        if (nam_ann({85},{5}).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
+     if (.not.all(ismissing(nam_ann({82:87},{2:7})))) then
+        if (avg(nam_ann({82:87},{2:7})).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
            nam_ann = nam_ann*-1.
            nam_pc_ann = nam_pc_ann*-1.
            if (vxreg_plot_flag.eq.0) then
@@ -463,8 +463,8 @@ begin
            delete([/rc,tval,df,b,vreg/])
         end if
 
-        if (.not.ismissing(nam_mon({85},{5}))) then
-           if (nam_mon({85},{5}).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
+        if (.not.all(ismissing(nam_mon({82:87},{2:7})))) then
+           if (avg(nam_mon({82:87},{2:7})).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
               nam_mon = nam_mon*-1.
               nam_pc_mon = nam_pc_mon*-1.
               if (vxreg_plot_flag.eq.0) then
@@ -639,22 +639,34 @@ begin
      opt@gsnShadeFillDotSizeF  = 0.002
     
      if (isfilepresent2("obs_psl").and.ee.eq.0) then    ; for pattern correlation table. Save entire lat/lon array
-        patcor_nam_djf = new((/nsim,dimsizes(nam_djf&lat),dimsizes(nam_djf&lon)/),typeof(nam_djf))
-        patcor_nam_djf!1 = "lat"
-        patcor_nam_djf&lat = nam_djf&lat
-        patcor_nam_djf!2 = "lon"
-        patcor_nam_djf&lon = nam_djf&lon
-        patcor_nam_jja = patcor_nam_djf
-        patcor_nam_ann = patcor_nam_djf
-        patcor_nam_djf(ee,:,:) = (/ nam_djf /)
-        patcor_nam_jja(ee,:,:) = (/ nam_jja /)
-        patcor_nam_ann(ee,:,:) = (/ nam_ann /)
+        patcor_vreg_nam_djf = new((/nsim,dimsizes(nam_djf&lat),dimsizes(nam_djf&lon)/),typeof(nam_djf))
+        patcor_vreg_nam_djf!1 = "lat"
+        patcor_vreg_nam_djf&lat = nam_djf&lat
+        patcor_vreg_nam_djf!2 = "lon"
+        patcor_vreg_nam_djf&lon = nam_djf&lon
+        patcor_vreg_nam_mam = patcor_vreg_nam_djf
+        patcor_vreg_nam_jja = patcor_vreg_nam_djf
+        patcor_vreg_nam_son = patcor_vreg_nam_djf
+        patcor_vreg_nam_ann = patcor_vreg_nam_djf
+        patcor_vreg_nam_djf(ee,:,:) = (/ nam_vreg_djf /)
+        patcor_vreg_nam_mam(ee,:,:) = (/ nam_vreg_mam /)
+        patcor_vreg_nam_jja(ee,:,:) = (/ nam_vreg_jja /)
+        patcor_vreg_nam_son(ee,:,:) = (/ nam_vreg_son /)
+        patcor_vreg_nam_ann(ee,:,:) = (/ nam_vreg_ann /)
+        if (COMPUTE_MODES_MON.eq."True") then
+          patcor_vreg_nam_mon = patcor_vreg_nam_djf
+          patcor_vreg_nam_mon(ee,:,:) = (/ nam_vreg_mon /)
+        end if 
      end if
-     if (isfilepresent2("obs_psl").and.ee.ge.1.and.isvar("patcor_nam_djf")) then       
-        patcor_nam_djf(ee,:,:) = (/ totype(linint2(nam_djf&lon,nam_djf&lat,nam_djf,True,patcor_nam_djf&lon,patcor_nam_djf&lat,0),typeof(patcor_nam_djf)) /)
-        patcor_nam_jja(ee,:,:) = (/ totype(linint2(nam_jja&lon,nam_jja&lat,nam_jja,True,patcor_nam_jja&lon,patcor_nam_jja&lat,0),typeof(patcor_nam_jja)) /)
-        patcor_nam_ann(ee,:,:) = (/ totype(linint2(nam_ann&lon,nam_ann&lat,nam_ann,True,patcor_nam_ann&lon,patcor_nam_ann&lat,0),typeof(patcor_nam_ann)) /)
-        
+     if (isfilepresent2("obs_psl").and.ee.ge.1.and.isvar("patcor_vreg_nam_djf")) then       
+        patcor_vreg_nam_djf(ee,:,:) = (/ totype(linint2(nam_vreg_djf&lon,nam_vreg_djf&lat,nam_vreg_djf,True,patcor_vreg_nam_djf&lon,patcor_vreg_nam_djf&lat,0),typeof(patcor_vreg_nam_djf)) /)
+        patcor_vreg_nam_mam(ee,:,:) = (/ totype(linint2(nam_vreg_mam&lon,nam_vreg_mam&lat,nam_vreg_mam,True,patcor_vreg_nam_mam&lon,patcor_vreg_nam_mam&lat,0),typeof(patcor_vreg_nam_mam)) /)
+        patcor_vreg_nam_jja(ee,:,:) = (/ totype(linint2(nam_vreg_jja&lon,nam_vreg_jja&lat,nam_vreg_jja,True,patcor_vreg_nam_jja&lon,patcor_vreg_nam_jja&lat,0),typeof(patcor_vreg_nam_jja)) /)
+        patcor_vreg_nam_son(ee,:,:) = (/ totype(linint2(nam_vreg_son&lon,nam_vreg_son&lat,nam_vreg_son,True,patcor_vreg_nam_son&lon,patcor_vreg_nam_son&lat,0),typeof(patcor_vreg_nam_son)) /)
+        patcor_vreg_nam_ann(ee,:,:) = (/ totype(linint2(nam_vreg_ann&lon,nam_vreg_ann&lat,nam_vreg_ann,True,patcor_vreg_nam_ann&lon,patcor_vreg_nam_ann&lat,0),typeof(patcor_vreg_nam_ann)) /)
+        if (COMPUTE_MODES_MON.eq."True") then
+          patcor_vreg_nam_mon(ee,:,:) = (/ totype(linint2(nam_vreg_mon&lon,nam_vreg_mon&lat,nam_vreg_mon,True,patcor_vreg_nam_mon&lon,patcor_vreg_nam_mon&lat,0),typeof(patcor_vreg_nam_mon)) /)
+        end if
      end if
       
      if (vxreg_plot_flag.eq.0) then
@@ -705,52 +717,90 @@ begin
      delete(clim_eyear)
   end if
   
-  if (isvar("patcor_nam_djf")) then    ; for pattern correlation table  
-     clat = cos(0.01745329*patcor_nam_djf&lat)
-     clat!0 = "lat"
-     clat&lat = patcor_nam_djf&lat
-     line3   = "                  "    ; Must be 18 characters long
-     line4   = line3
-     header = (/"","Pattern Correlations   Observations vs. Model(s)",""/)
-     finpr_nam_djf  = "NAM (DJF)         "     
-     do hh = 1,nsim-1
-        dimY = dimsizes(tochar(names(hh)))
-        nchar = dimY
-        nchar = where(nchar.le.10,10,nchar)
-        if (dimY.lt.10) then
-           ntb = ""
-           do ii = 0,10-dimY-1
-              ntb = ntb+" "
-           end do
-           ntb = ntb+names(hh)
-        else
-           ntb = names(hh)
-        end if
-        
-        ntc = ""
-        do ii = 0,nchar-1
-           ntc = ntc+"-"
-        end do
-        format2 = "%"+(nchar-5+1)+".2f"
-        format3 = "%4.2f"
-        line3 = line3+" "+ntb   
-        line4 = line4+" "+ntc 
-        if (all(ismissing(patcor_nam_djf(hh,{:-20},:)))) then
-           finpr_nam_djf = finpr_nam_djf+sprintf(format2,9.99)+"/"+sprintf(format3,9.99)
-        else
-           finpr_nam_djf = finpr_nam_djf+sprintf(format2,(pattern_cor(patcor_nam_djf(0,{:-20},:),patcor_nam_djf(hh,{:-20},:),clat({:-20}),0)))+"/"+sprintf(format3,(wgt_arearmse(patcor_nam_djf(0,{:-20},:),patcor_nam_djf(hh,{:-20},:),clat({:-20}),1.0,0)))
-        end if        
-     end do
-;     
+  if (isvar("patcor_vreg_nam_djf")) then    ; for pattern correlation table  
+    mods = (/"nam"/)
+    if (COMPUTE_MODES_MON.eq."True") then
+      seas = (/"djf","mam","jja","son","ann","mon"/)
+    else
+      seas = (/"djf","mam","jja","son","ann"/)
+    end if
+    do kk = 0,dimsizes(seas)-1
+     do ll = 0,dimsizes(mods)-1
+      vreg_nam  = "patcor_vreg_"+mods(ll)+"_"+seas(kk)
+      if(vreg_nam.eq."patcor_vreg_nam_djf") then
+        patcor_vreg = patcor_vreg_nam_djf
+      end if
+      if(vreg_nam.eq."patcor_vreg_nam_mam") then
+        patcor_vreg = patcor_vreg_nam_mam
+      end if
+      if(vreg_nam.eq."patcor_vreg_nam_jja") then
+        patcor_vreg = patcor_vreg_nam_jja
+      end if
+      if(vreg_nam.eq."patcor_vreg_nam_son") then
+        patcor_vreg = patcor_vreg_nam_son
+      end if
+      if(vreg_nam.eq."patcor_vreg_nam_ann") then
+        patcor_vreg = patcor_vreg_nam_ann
+      end if
+      if(vreg_nam.eq."patcor_vreg_nam_mon") then
+        patcor_vreg = patcor_vreg_nam_mon
+      end if
+      clat = cos(0.01745329*patcor_vreg&lat)
+      clat!0 = "lat"
+      clat&lat = patcor_vreg&lat
+      line3  = "                  "    ; Must be 18 characters long
+      line4  = line3
+      header = (/"","Pattern Correlations   Observations vs. Model(s)",""/)
+      finpr  = str_upper(mods(ll))+" ("+str_upper(seas(kk))+")         "
+      do hh = 1,nsim-1
+         dimY = dimsizes(tochar(names(hh)))
+         nchar = dimY
+         nchar = where(nchar.le.10,10,nchar)
+         if (dimY.lt.10) then
+            ntb = ""
+            do ii = 0,10-dimY-1
+               ntb = ntb+" "
+            end do
+            ntb = ntb+names(hh)
+         else
+            ntb = names(hh)
+         end if
+
+         ntc = ""
+         do ii = 0,nchar-1
+            ntc = ntc+"-"
+         end do
+         format2 = "%"+(nchar-5+1)+".2f"
+         format3 = "%4.2f"
+         line3 = line3+" "+ntb
+         line4 = line4+" "+ntc
+         if (all(ismissing(patcor_vreg_nam_djf(hh,{20:},:)))) then
+            finpr = finpr+sprintf(format2,9.99)+"/"+sprintf(format3,9.99)
+         else
+            finpr = finpr+sprintf(format2,(pattern_cor(patcor_vreg(0,{20:},:),patcor_vreg(hh,{20:},:),clat({20:}),0)))+"/"+sprintf(format3,(wgt_arearmse(patcor_vreg(0,{20:},:),patcor_vreg(hh,{20:},:),clat({20:}),1.0,0)))
+         end if
+      end do
+;
      if (dimsizes(tochar(line4)).ge.8190) then   ; system or fortran compiler limit
-        print("Metrics table warning: Not creating metrics table as size of comparison results in a invalid ascii row size.")   
-     else           
-        write_table(getenv("OUTDIR")+"metrics.psl.nam_"+vnm+"_regpatt.txt","w",[/header/],"%s")
-        write_table(getenv("OUTDIR")+"metrics.psl.nam_"+vnm+"_regpatt.txt","a",[/line3/],"%s")
-        write_table(getenv("OUTDIR")+"metrics.psl.nam_"+vnm+"_regpatt.txt","a",[/line4/],"%s")  
-        write_table(getenv("OUTDIR")+"metrics.psl.nam_"+vnm+"_regpatt.txt","a",[/finpr_nam_djf/],"%s")
+        print("Metrics table warning: Not creating metrics table as size of comparison results in a invalid ascii row size.")
+     else
+        if(kk.eq.0.and.ll.eq.0) then
+          write_table(getenv("OUTDIR")+"metrics.psl.nam_"+vnm+"_regpatt.txt","w",[/header/],"%s")
+          write_table(getenv("OUTDIR")+"metrics.psl.nam_"+vnm+"_regpatt.txt","a",[/line3/],"%s")
+          write_table(getenv("OUTDIR")+"metrics.psl.nam_"+vnm+"_regpatt.txt","a",[/line4/],"%s")
+          write_table(getenv("OUTDIR")+"metrics.psl.nam_"+vnm+"_regpatt.txt","a",[/finpr/],"%s")
+        else
+          write_table(getenv("OUTDIR")+"metrics.psl.nam_"+vnm+"_regpatt.txt","a",[/finpr/],"%s")
+        end if
      end if
-     delete([/line3,line4,format2,format3,nchar,ntc,clat,patcor_nam_djf,patcor_nam_jja,patcor_nam_ann,dimY,ntb,header/])
+     delete([/line3,line4,format2,format3,nchar,ntc,clat,dimY,ntb,header/])
+     end do
+    end do
+    delete([/mods,seas/])
+    delete([/patcor_vreg_nam_djf,patcor_vreg_nam_mam,patcor_vreg_nam_jja,patcor_vreg_nam_son,patcor_vreg_nam_ann/])
+    if (COMPUTE_MODES_MON.eq."True") then
+      delete([/patcor_vreg_nam_mon/])
+    end if
   end if 
 
   panres = True

@@ -190,10 +190,10 @@ begin
   if (vn.eq."FSNSC") then
      vname = (/"FSNSC","fsnsc"/)
   end if
-  if (vn.eq."SH") then
+  if (vn.eq."SHFLX") then
      vname = (/"SHFLX","shflx"/)
   end if
-  if (vn.eq."LH") then
+  if (vn.eq."LHFLX") then
      vname = (/"LHFLX","lhflx"/)
   end if
   if (vn.eq."SWCRE") then
@@ -263,9 +263,8 @@ begin
      vname = (/"S10","s10"/)
   end if
   if (vn.eq."TH850") then
-     vname = (/"TH850","th850","T850","t850"/)
+     vname = (/"TH850","th850"/)
   end if
-
   if (vn.eq."SF") then
      vname = (/"SF","sf"/)
   end if
@@ -332,26 +331,63 @@ begin
         eydata = stringtointeger(charactertostring(cpathE(ncharE-10:ncharE-7)))
         emdata = stringtointeger(charactertostring(cpathE(ncharE-6:ncharE-5)))      
         delete([/cpathS,cpathE,ncharS,ncharE,nfil/])
-;        delete(c)
-     else
-        if (vn.eq."TH850") then
-          c = addfile(zpath,"r")
-          if (isfilevar(c,"TH850")) then  ;
-            arr = c->TH850
-          end if
+;       delete(c)
+     else if (vn.eq."TH850") then
+        c = addfile(zpath,"r")
+        do i=0,dimsizes(vname)-1
+           if (isfilevar(c,vname(i))) then
+              arr = c->$vname(i)$
+              break
+           end if
+        end do
+        if(isvar("arr")) then 
+          cpath  = stringtochar(zpath)
+          print(cpath)
+          nchar  = dimsizes(cpath)
+          sydata = stringtointeger(charactertostring(cpath(nchar-17:nchar-14)))
+          smdata = stringtointeger(charactertostring(cpath(nchar-13:nchar-12)))
+          eydata = stringtointeger(charactertostring(cpath(nchar-10:nchar-7)))
+          emdata = stringtointeger(charactertostring(cpath(nchar-6:nchar-5)))
+          delete([/cpath,nchar/])
+        else 
+          ;use T@850hPa to calculate th850
           if (isfilevar(c,"T850")) then
-            temp = c->T850
+             temp = c->T850
+          else if (isfilevar(c,"t850")) then
+             temp = c->t850
+          end if 
+          end if 
+          if(.not.isvar("temp")) then 
+            arr = create_empty_array(yearS,yearE,1,12,"time_lat_lon")
+            sydata = yearS     ; assign these variables based on yearS/yearE provided in namelist. Doesn't matter
+            eydata = yearE     ; as data array is totally missing..
+            smdata = 1
+            emdata = 12
+          else 
             p = temp
             p = 85000.0
             p@units = "Pa"
             arr = pot_temp(p, temp, -1, False)
             delete([/p,temp/])
+            cpath  = stringtochar(zpath)
+;           print(cpath)
+            nchar  = dimsizes(cpath)
+            sydata = stringtointeger(charactertostring(cpath(nchar-17:nchar-14)))
+            smdata = stringtointeger(charactertostring(cpath(nchar-13:nchar-12)))
+            eydata = stringtointeger(charactertostring(cpath(nchar-10:nchar-7)))
+            emdata = stringtointeger(charactertostring(cpath(nchar-6:nchar-5)))
+            delete([/cpath,nchar/])
+          end if 
+        end if 
+     else if (vn.eq."SF") then
+       c = addfile(zpath,"r")
+       do i=0,dimsizes(vname)-1
+          if (isfilevar(c,vname(i))) then
+             arr = c->$vname(i)$
+             break
           end if
-        else if (vn.eq."SF") then
-          c = addfile(zpath,"r")
-          if (isfilevar(c,"SF")) then  ;
-            arr = c->SF
-          end if
+       end do
+       if (isvar("arr")) then 
           arr!0 = "time"
           arr!1 = "lev"
           arr!2 = "lat"
@@ -372,26 +408,43 @@ begin
             arr&lat  = c->latitude
             arr&lat@units = "degrees_north"
           end if
+          cpath  = stringtochar(zpath)
+;         print(cpath)
+          nchar  = dimsizes(cpath)
+          sydata = stringtointeger(charactertostring(cpath(nchar-17:nchar-14)))
+          smdata = stringtointeger(charactertostring(cpath(nchar-13:nchar-12)))
+          eydata = stringtointeger(charactertostring(cpath(nchar-10:nchar-7)))
+          emdata = stringtointeger(charactertostring(cpath(nchar-6:nchar-5)))
+          delete([/cpath,nchar/])
+;         delete(c)
         else 
-          c = addfile(zpath,"r")
-          do i=0,dimsizes(vname)-1
-             if (isfilevar(c,vname(i))) then
-                arr = c->$vname(i)$
-                break
-             end if
-          end do
+          arr = create_empty_array(yearS,yearE,1,12,"time_lev_lat")
+          sydata = yearS     ; assign these variables based on yearS/yearE provided in namelist. Doesn't matter
+          eydata = yearE     ; as data array is totally missing..
+          smdata = 1
+          emdata = 12
         end if 
-        cpath = stringtochar(zpath)     
-        nchar = dimsizes(cpath)
-        sydata = stringtointeger(charactertostring(cpath(nchar-17:nchar-14)))
-        smdata = stringtointeger(charactertostring(cpath(nchar-13:nchar-12)))
-        eydata = stringtointeger(charactertostring(cpath(nchar-10:nchar-7)))
-        emdata = stringtointeger(charactertostring(cpath(nchar-6:nchar-5))) 
-        delete([/cpath,nchar/])
-;        delete(c)     
+     else 
+       c = addfile(zpath,"r")
+       do i=0,dimsizes(vname)-1
+          if (isfilevar(c,vname(i))) then
+             arr = c->$vname(i)$
+             break
+          end if
+       end do
+       cpath  = stringtochar(zpath)     
+;      print(cpath)
+       nchar  = dimsizes(cpath)
+       sydata = stringtointeger(charactertostring(cpath(nchar-17:nchar-14)))
+       smdata = stringtointeger(charactertostring(cpath(nchar-13:nchar-12)))
+       eydata = stringtointeger(charactertostring(cpath(nchar-10:nchar-7)))
+       emdata = stringtointeger(charactertostring(cpath(nchar-6:nchar-5))) 
+       delete([/cpath,nchar/])
+;      delete(c)     
      end if
      end if 
-     delete([/cpath0/])
+     end if
+    delete([/cpath0/])
   end if
   
   if (isvar("arr").eq.False) then
@@ -674,7 +727,7 @@ begin
      end if
      farr@units = "W/m2"
   end if
-  if (vn.eq."SH".or.vn.eq."LH")then 
+  if (vn.eq."SHFLX".or.vn.eq."LHFLX")then 
      if (farr@units.eq."W m~S~-2~N~".or.farr@units.eq."W m-2") then
         farr = farr*1.0
         farr@units = "W/m2"

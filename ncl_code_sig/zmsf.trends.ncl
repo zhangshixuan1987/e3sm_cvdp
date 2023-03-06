@@ -50,12 +50,12 @@ begin
   wks_trends_mon = gsn_open_wks(wks_type,getenv("OUTDIR")+"zmsf.trends.mon")
  
   if (COLORMAP.eq.0) then
-     gsn_define_colormap(wks_trends_djf,"NCV_jaisnd") 
-     gsn_define_colormap(wks_trends_mam,"NCV_jaisnd")  
-     gsn_define_colormap(wks_trends_jja,"NCV_jaisnd") 
-     gsn_define_colormap(wks_trends_son,"NCV_jaisnd")  
-     gsn_define_colormap(wks_trends_ann,"NCV_jaisnd")
-     gsn_define_colormap(wks_trends_mon,"NCV_jaisnd")
+     gsn_define_colormap(wks_trends_djf,"temp_19lev") 
+     gsn_define_colormap(wks_trends_mam,"temp_19lev")  
+     gsn_define_colormap(wks_trends_jja,"temp_19lev") 
+     gsn_define_colormap(wks_trends_son,"temp_19lev")  
+     gsn_define_colormap(wks_trends_ann,"temp_19lev")
+     gsn_define_colormap(wks_trends_mon,"temp_19lev")
   end if
   if (COLORMAP.eq.1) then
      gsn_define_colormap(wks_trends_djf,"BlueDarkRed18") 

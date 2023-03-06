@@ -128,7 +128,7 @@ begin
      gsn_define_colormap(wks_n34_p,"cb_9step")
      gsn_define_colormap(wks_n34_rst,"ncl_default")   
      gsn_define_colormap(wks_n34_mst,"ncl_default")   
-     gsn_define_colormap(wks_n34sc,"ncl_default")   
+     gsn_define_colormap(wks_n34sc,"cmocean_balance")   
      gsn_define_colormap(wks_n34sc_ppt,"MPL_BrBG")  
   end if
   if (COLORMAP.eq.1) then
@@ -911,7 +911,7 @@ begin
      delete(nino34T)
 ;-----------------------------------------------------------------------------------------
      iopt = 0                ; nino3.4 power spectra
-     jave = (7*nyr(ee))/100
+     jave = max((/5,(7*nyr(ee))/100/))
      val1 = .95
      val2 = .99
      pct = 0.1 
@@ -1077,8 +1077,6 @@ begin
      xyres@gsnCenterStringOrthogonalPosF = xyres@gsnLeftStringOrthogonalPosF
      xyres@gsnRightStringOrthogonalPosF = xyres@gsnLeftStringOrthogonalPosF
 
-     xyres5 = xyres 
-
      xyres@gsnYRefLine      = 0.0
      xyres@gsnYRefLineColor = "gray42"
      
@@ -1158,7 +1156,10 @@ begin
      xyres4@gsnRightStringParallelPosF = 0.96
      xyres4@gsnCenterStringOrthogonalPosF = 0.025
 
-     xyres5@gsnYRefLine            = (/-0.5,0,0.5/) ; create a reference line   
+     xyres5 = xyres
+     xyres5@trYMinF = -4
+     xyres5@trYMaxF =  4
+     xyres5@gsnYRefLine           := (/-0.5,0,0.5/) ; create a reference line   
      xyres5@gsnBelowYRefLineColor  = (/ "blue", "transparent", "transparent"/)
      xyres5@gsnAboveYRefLineColor  = (/ "transparent", "transparent", "red"/)
      xyres5@gsnYRefLineColors      = (/ "blue", "transparent", "red"/)
@@ -1297,8 +1298,8 @@ begin
      dum(ee)     = gsn_add_polyline(wks_tio,xyoni(ee),fspan(syear(ee),eyear(ee)+.91667,dimsizes(oni)),arr0,gsLine) 
      dum(ee+100) = gsn_add_polyline(wks_tio,xyoni(ee),fspan(syear(ee),eyear(ee)+.91667,dimsizes(oni)),arr1,gsLin0)
      dum(ee+200) = gsn_add_polyline(wks_tio,xyoni(ee),fspan(syear(ee),eyear(ee)+.91667,dimsizes(oni)),arr2,gsLin1)
-     dum(ee+300) = gsn_add_text(wks_tio,xyoni(ee),"El Nin~H-13V2F35~D~FV-2H3F21~o",syear(ee)+0.2, 2.50, txre0)
-     dum(ee+400) = gsn_add_text(wks_tio,xyoni(ee),"La Nin~H-13V2F35~D~FV-2H3F21~a",syear(ee)+0.2,-2.50, txre1)
+     dum(ee+300) = gsn_add_text(wks_tio,xyoni(ee),"El Nin~H-13V2F35~D~FV-2H3F21~o " + num(oni.ge.0.75),syear(ee)+0.2, 2.50, txre0)
+     dum(ee+400) = gsn_add_text(wks_tio,xyoni(ee),"La Nin~H-13V2F35~D~FV-2H3F21~a " + num(oni.le.-0.75),syear(ee)+0.2,-2.50, txre1)
      delete([/xyres5,gsLine,gsLin0,gsLin1,txre0,txre1/])
      delete([/arr,tttt,arr0,arr1,arr2/])
  
@@ -1448,18 +1449,18 @@ begin
      wres@cnLineLabelsOn = False
      wres@cnInfoLabelOn = False
      wres@trYReverse = True
-     wres@trYMinF = 1.0
+     wres@trYMinF = 0.1
      wres@trYMaxF = (nyr(ee)/2) - (nyr(ee)*0.05)
      wres@tmYLOn = True
      wres@tmYLMode = "Explicit"
      if (nyr(ee).lt.200) then
-        wres@tmYLValues = (/1,2,3,5,10,20,50,100,150/)
+        wres@tmYLValues = (/0.1,0.2,0.5,1,2,5,10,20,50,100,150/)
      else
         wres@tmYLValues = (/1,5,10,50,100,200,500,1000,2000,5000,10000/)
      end if
      wres@tmYLLabels = wres@tmYLValues
      wres@cnLevelSelectionMode = "ExplicitLevels"
-     wres@cnLevels = ispan(0,70,5)
+     wres@cnLevels = ispan(0,50,5)
      if (COLORMAP.eq.0) then
         wres@cnFillPalette = "precip3_16lev"
      else
@@ -1530,14 +1531,18 @@ begin
      end if
      delete([/wres,wsres,wavecoi/])
 ;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-     pres = True
-     pres@vpXF = 0.07
-     pres@trYMinF = 0.
-     pres@trXMinF = 0.0
-;     pres@trYMaxF = 82.
-     pres@trXMaxF = 0.0832
+     pres               = True
+     pres@vpWidthF      = 0.7
+     pres@vpHeightF     = 0.5
+     pres@vpXF          = 0.07
+     pres@trYMinF       = 0.1
+;    pres@trYMaxF       = 82.
+     pres@trYLog        = True
+     pres@trXLog        = True
+     pres@trXMinF       = 0.01
+     pres@trXMaxF       = 0.3  ;maxx ;0.0832
      pres@tiYAxisString = "Power"              ; yaxis
-     pres@xyLineColor   =  "black"         
+     pres@xyLineColor   =  "black"
      pres@gsnFrame      = False
      pres@gsnDraw       = False
   
@@ -1559,14 +1564,17 @@ begin
      pres@tmXTLabelsOn = True
      pres@tmXUseBottom = False
      pres@tmXTMode   = "Explicit"  
-     pres@tmXBMode   = "Explicit"            
-     pres@tmXTValues = (/".00167",".00833",".01667",".02778",".0416",".0556",".0832"/)
-     pres@tmXTLabels = (/"50","10","5","3","2","1.5","1"/)           
-     pres@tmXBValues = (/".0",".01",".02",".03",".042",".056",".083"/)
-     pres@tmXBLabels =     pres@tmXBValues
-     pres@tmXTLabelFontHeightF = 0.018
-     pres@tmXBLabelFontHeightF = 0.018
-     pres@tmYLLabelFontHeightF = 0.018
+     pres@tmXBMode   = "Explicit"     
+     pres@tmXTLabels = (/50, 40, 30, 25, 20, 15, 10, 8, 5, 3, 2, 1, 0.5, 0.2, 0.1/)
+                      ;(/    "50",    "10",     "5",     "3",    "2",  "1.5",    "1"/)
+     pres@tmXTValues = 1.0 / (12.0*pres@tmXTLabels)
+                      ;(/".00167",".00833",".01667",".02778",".0416",".0556",".0832"/)
+     pres@tmXBValues = (/.01,   .02,  .03, .05,  .08,  0.12, 0.2, 0.3, 0.4, 0.5/)
+                      ;(/    ".0",   ".01",   ".02",   ".03", ".042", ".056", ".083"/)
+     pres@tmXBLabels = pres@tmXBValues
+     pres@tmXTLabelFontHeightF = 0.020
+     pres@tmXBLabelFontHeightF = 0.020
+     pres@tmYLLabelFontHeightF = 0.020
      pres@tiYAxisString = "Power (~S~o~N~C~S~2~N~ / cycles mo~S~-1~N~)"              ; yaxis
      pres@tiXAxisString = "Frequency (cycles mo~S~-1~N~)"
      pres@tiMainString = ""
@@ -1575,7 +1583,7 @@ begin
      pres@tiXAxisFontHeightF = 0.025
      pres@tiYAxisFontHeightF = 0.025
      pres@tiMainFontHeightF = 0.03
-     pres@gsnRightStringOrthogonalPosF = -0.115
+     pres@gsnRightStringOrthogonalPosF = -0.135
      
      if (spectra_mvf.eq.False) then
         if (isfilepresent2("obs_ts").and.ee.ge.1.and.spectra_mvf_obs.eq.False) then
@@ -1588,28 +1596,34 @@ begin
            mval = max(splt1(0,:))
         end if
         if (mval.lt.70) then
-           pres@trYMaxF = 75.
-           pres@tmYLMode = "Explicit"
-           pres@tmYLValues = (/0,25,50,75/)
-           pres@tmYLLabels = pres@tmYLValues
-           pres@tmYLMinorValues = ispan(5,70,5)
+           pres@trYMaxF         = 75.
+           pres@tmYLMode        = "Explicit"
+           pres@tmYLValues      = 10^fspan(-4,4,9) ;(/0,50,100,150/)
+           pres@tmYLLabels      = 10^fspan(-4,4,9) ;pres@tmYLValues
+           pres@tmYLMinorValues = 10^(/-3,-2.5,-2,-1.5,-1,-0.5,0,0.5,1,1.5,2/) ;ispan(10,140,10)
         end if
         if (mval.ge.70.and.mval.lt.145) then
-           pres@trYMaxF = 150.
-           pres@tmYLMode = "Explicit"
-           pres@tmYLValues = (/0,50,100,150/)
-           pres@tmYLLabels = pres@tmYLValues
-           pres@tmYLMinorValues = ispan(10,140,10)
+           pres@trYMaxF         = 150.
+           pres@trYMinF         = 0.05
+           pres@tmYLMode        = "Explicit"
+           pres@tmYLValues      = 10^fspan(-4,4,9) ;(/0,50,100,150/)
+           pres@tmYLLabels      = 10^fspan(-4,4,9) ;pres@tmYLValues
+           pres@tmYLMinorValues = 10^(/-3,-2.5,-2,-1.5,-1,-0.5,0,0.5,1,1.5,2/) ;ispan(10,140,10)
         end if
         if (mval.ge.145) then
-           pres@trYMaxF = mval+15.
+           pres@trYMaxF         = mval+15.
+           pres@trYMinF         = 0.05
+           pres@tmYLMode        = "Explicit"
+           pres@tmYLValues      = 10^fspan(-4,4,9) ;(/0,50,100,150/)
+           pres@tmYLLabels      = 10^fspan(-4,4,9) ;pres@tmYLValues
+           pres@tmYLMinorValues = 10^(/-3,-2.5,-2,-1.5,-1,-0.5,0,0.5,1,1.5,2/) ;ispan(10,140,10)
         end if
         delete(mval)
      end if
      
      pres@tiMainOn = False
      pres@gsnCenterString = "Period (years)"
-     pres@gsnCenterStringFontHeightF =    pres@tiYAxisFontHeightF
+     pres@gsnCenterStringFontHeightF =   pres@tiYAxisFontHeightF + 0.005
      pres@gsnRightStringFontHeightF =    pres@tiYAxisFontHeightF - 0.005
      pres@gsnRightString = syear(ee)+"-"+eyear(ee)+"  "
      pres@gsnLeftString = "" 
@@ -1678,12 +1692,10 @@ begin
      scres@gsnCenterStringFontHeightF = 0.018
      scres@gsnRightStringFontHeightF = 0.014
 
-
-
      scres4 = scres    ; scres4 = ppt composite resources     
      delete(scres4@cnLevels)
      if (COLORMAP.eq.0) then
-        scres4@cnLevels = (/-10,-8,-6,-4,-3,-2,-1,-.5,-.25,0,.25,.5,1,2,3,4,6,8,10/)     
+        scres4@cnLevels = (/-7,-6,-5,-4,-3,-2,-1,-.5,-.25,0,.25,.5,1,2,3,4,5,6,7/)
      else
         scres4@cnLevels = (/-5,-3,-2,-1,-.5,0,.5,1,2,3,5/)     
      end if
@@ -1720,7 +1732,7 @@ begin
      scres3@gsnLeftString = ""
      scres3@gsnRightString = ""
      scres3@gsnCenterString = ""
-     scres3@cnLevels = ispan(-16,16,2)
+     scres3@cnLevels = ispan(-16,16,1)
 
      scres4@gsnLeftString = syear_prect(ee)+"-"+eyear_prect(ee)
      scres4@gsnCenterString = names_prect(ee)     
@@ -2047,11 +2059,26 @@ begin
   gsn_panel2(wks_n34_p,plot_wave34,(/nrow,ncol/),panres2)  
   delete(wks_n34_p)
 
+  if (nsim.le.4) then
+     if (nsim.eq.1) then
+        panres2@lbLabelFontHeightF = 0.018
+        panres2@lbTitleFontHeightF = 0.018
+     else
+        panres2@lbLabelFontHeightF = 0.012
+        panres2@lbTitleFontHeightF = 0.012
+     end if
+  else
+     panres2@lbLabelFontHeightF = 0.012
+     panres2@lbTitleFontHeightF = 0.012
+  end if
+
   delete(panres2@gsnPanelYWhiteSpacePercent)
   panres2@pmLabelBarWidthF = 0.8
   panres2@lbLabelAutoStride = False
   panres2@gsnPanelXWhiteSpacePercent = 8.5
   if (any(.not.ismissing(map_n34sc_jja0))) then
+     panres2@lbTitleString = "SST/TAS (C)"
+     panres2@pmLabelBarOrthogonalPosF = -0.02
      panres2@txString = "Nin~H-13V2F35~D~FV-2H3F21~o3.4 SST,TAS,PSL Spatial Composite (JJA~S~0~N~)"
      gsn_panel2(wks_n34sc,map_n34sc_jja0,(/nrow,ncol/),panres2)   
   
@@ -2068,6 +2095,8 @@ begin
      delete([/map_n34sc_djf1,map_n34sc_jja0,map_n34sc_son0,map_n34sc_mam1/])
   end if     
   if (any(.not.ismissing(map_n34sc_ppt_jja0))) then
+     panres2@lbTitleString = "PR (mm/day)"
+     panres2@pmLabelBarOrthogonalPosF = -0.02
      panres2@txString = "Nin~H-13V2F35~D~FV-2H3F21~o3.4 PR Spatial Composite (JJA~S~0~N~)"
      gsn_panel2(wks_n34sc_ppt,map_n34sc_ppt_jja0,(/nrow,ncol/),panres2)   
   

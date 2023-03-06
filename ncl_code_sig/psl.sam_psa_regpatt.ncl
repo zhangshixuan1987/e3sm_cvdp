@@ -42,7 +42,7 @@ begin
   pi=4.*atan(1.0)
   rad=(pi/180.)
  
- regvars = (/"psl","sst","trefht","prect","u10","v10","taux","tauy","sh","lh", "eth", \
+ regvars = (/"psl","sst","trefht","prect","u10","v10","taux","tauy","shflx","lhflx", "eth", \
              "swcre","olr","cldtot","u850","v850","th850","z500","u200","v200"/)
  landmsk = (/    0,    1,       0,      0,    0,    0,     0,     0,   0,   0,     1, \
                    0,      0,       0,     0,     0,      0,     0,     0,   0 /)
@@ -88,9 +88,9 @@ begin
   wks_psa2 = gsn_open_wks(wks_type,getenv("OUTDIR")+"psa2.vxreg")
   
   if (COLORMAP.eq.0) then
-     gsn_define_colormap(wks_sam,"MPL_RdBu")  
-     gsn_define_colormap(wks_psa1,"MPL_RdBu") 
-     gsn_define_colormap(wks_psa2,"MPL_RdBu") 
+     gsn_define_colormap(wks_sam,"cmp_b2r")  
+     gsn_define_colormap(wks_psa1,"cmp_b2r") 
+     gsn_define_colormap(wks_psa2,"cmp_b2r") 
      gsn_reverse_colormap(wks_sam)           ; Reverse the color map.
      gsn_reverse_colormap(wks_psa1)           ; Reverse the color map.
      gsn_reverse_colormap(wks_psa2)           ; Reverse the color map.
@@ -316,8 +316,8 @@ begin
         delete([/rc,tval,df,b,vreg_djf/]) 
      end if     
      
-     if (.not.ismissing(sam_djf({-85},{5}))) then
-        if (sam_djf({-85},{5}).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
+     if (.not.all(ismissing(sam_djf({-87:-82},{2:7})))) then
+        if (avg(sam_djf({-87:-82},{2:7})).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
            sam_djf = sam_djf*-1.
            sam_pc_djf = sam_pc_djf*-1.
            if (vxreg_plot_flag.eq.0) then
@@ -325,8 +325,8 @@ begin
            end if
         end if
      end if
-     if (.not.ismissing(psa1_djf({-62},{210}))) then
-        if (psa1_djf({-62},{210}).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
+     if (.not.all(ismissing(psa1_djf({-65:-60},{207:212})))) then
+        if (avg(psa1_djf({-65:-60},{207:212})).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
            psa1_djf = psa1_djf*-1.
            psa1_pc_djf = psa1_pc_djf*-1.
            if (vxreg_plot_flag.eq.0) then
@@ -334,8 +334,8 @@ begin
            end if
         end if
      end if
-     if (.not.ismissing(psa2_djf({-60},{280}))) then
-        if (psa2_djf({-60},{280}).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
+     if (.not.all(ismissing(psa2_djf({-62:-57},{277:282})))) then
+        if (avg(psa2_djf({-62:-57},{277:282})).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
            psa2_djf = psa2_djf*-1.
            psa2_pc_djf = psa2_pc_djf*-1.
            if (vxreg_plot_flag.eq.0) then
@@ -419,8 +419,8 @@ begin
         delete([/rc,tval,df,b,vreg_mam/])
      end if
 
-     if (.not.ismissing(sam_mam({-85},{5}))) then
-        if (sam_mam({-85},{5}).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
+     if (.not.all(ismissing(sam_mam({-87:-82},{2:7})))) then
+        if (avg(sam_mam({-87:-82},{2:7})).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
            sam_mam = sam_mam*-1.
            sam_pc_mam = sam_pc_mam*-1.
            if (vxreg_plot_flag.eq.0) then
@@ -428,8 +428,8 @@ begin
            end if
         end if
      end if
-     if (.not.ismissing(psa1_mam({-62},{210}))) then
-        if (psa1_mam({-62},{210}).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
+     if (.not.all(ismissing(psa1_mam({-65:-60},{207:212})))) then
+        if (avg(psa1_mam({-65:-60},{207:212})).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
            psa1_mam = psa1_mam*-1.
            psa1_pc_mam = psa1_pc_mam*-1.
            if (vxreg_plot_flag.eq.0) then
@@ -437,8 +437,8 @@ begin
            end if
         end if
      end if
-     if (.not.ismissing(psa2_mam({-60},{280}))) then
-        if (psa2_mam({-60},{280}).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
+     if (.not.all(ismissing(psa2_mam({-62:-57},{277:282})))) then
+        if (avg(psa2_mam({-62:-57},{277:282})).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
            psa2_mam = psa2_mam*-1.
            psa2_pc_mam = psa2_pc_mam*-1.
            if (vxreg_plot_flag.eq.0) then
@@ -518,8 +518,8 @@ begin
         delete([/rc,tval,df,b,vreg_jja/])
      end if
 
-     if (.not.ismissing(sam_jja({-85},{5}))) then
-        if (sam_jja({-85},{5}).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
+     if (.not.all(ismissing(sam_jja({-87:-82},{2:7})))) then
+        if (avg(sam_jja({-87:-82},{2:7})).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
            sam_jja = sam_jja*-1.
            sam_pc_jja = sam_pc_jja*-1.
            if (vxreg_plot_flag.eq.0) then
@@ -527,8 +527,8 @@ begin
            end if
         end if
      end if
-     if (.not.ismissing(psa1_jja({-62},{210}))) then
-        if (psa1_jja({-62},{210}).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
+     if (.not.all(ismissing(psa1_jja({-65:-60},{207:212})))) then
+        if (avg(psa1_jja({-65:-60},{207:212})).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
            psa1_jja = psa1_jja*-1.
            psa1_pc_jja = psa1_pc_jja*-1.
            if (vxreg_plot_flag.eq.0) then
@@ -536,8 +536,8 @@ begin
            end if
         end if
      end if
-     if (.not.ismissing(psa2_jja({-60},{280}))) then
-        if (psa2_jja({-60},{280}).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
+     if (.not.all(ismissing(psa2_jja({-62:-57},{277:282})))) then
+        if (avg(psa2_jja({-62:-57},{277:282})).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
            psa2_jja = psa2_jja*-1.
            psa2_pc_jja = psa2_pc_jja*-1.
            if (vxreg_plot_flag.eq.0) then
@@ -617,8 +617,8 @@ begin
         delete([/rc,tval,df,b,vreg_son/])
      end if
 
-     if (.not.ismissing(sam_son({-85},{5}))) then
-        if (sam_son({-85},{5}).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
+     if (.not.all(ismissing(sam_son({-87:-82},{2:7})))) then
+        if (avg(sam_son({-87:-82},{2:7})).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
            sam_son = sam_son*-1.
            sam_pc_son = sam_pc_son*-1.
            if (vxreg_plot_flag.eq.0) then
@@ -626,8 +626,8 @@ begin
            end if
         end if
      end if
-     if (.not.ismissing(psa1_son({-62},{210}))) then
-        if (psa1_son({-62},{210}).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
+     if (.not.all(ismissing(psa1_son({-65:-60},{207:212})))) then
+        if (avg(psa1_son({-65:-60},{207:212})).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
            psa1_son = psa1_son*-1.
            psa1_pc_son = psa1_pc_son*-1.
            if (vxreg_plot_flag.eq.0) then
@@ -635,8 +635,8 @@ begin
            end if
         end if
      end if
-     if (.not.ismissing(psa2_son({-60},{280}))) then
-        if (psa2_son({-60},{280}).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
+     if (.not.all(ismissing(psa2_son({-62:-57},{277:282})))) then
+        if (avg(psa2_son({-62:-57},{277:282})).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
            psa2_son = psa2_son*-1.
            psa2_pc_son = psa2_pc_son*-1.
            if (vxreg_plot_flag.eq.0) then
@@ -716,8 +716,8 @@ begin
         delete([/rc,tval,df,b,vreg_ann/])
      end if
 
-     if (.not.ismissing(sam_ann({-85},{5}))) then
-        if (sam_ann({-85},{5}).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
+     if (.not.all(ismissing(sam_ann({-87:-82},{2:7})))) then
+        if (avg(sam_ann({-87:-82},{2:7})).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
            sam_ann = sam_ann*-1.
            sam_pc_ann = sam_pc_ann*-1.
            if (vxreg_plot_flag.eq.0) then
@@ -725,8 +725,8 @@ begin
            end if
         end if
      end if
-     if (.not.ismissing(psa1_ann({-62},{210}))) then
-        if (psa1_ann({-62},{210}).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
+     if (.not.all(ismissing(psa1_ann({-65:-60},{207:212})))) then
+        if (avg(psa1_ann({-65:-60},{207:212})).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
            psa1_ann = psa1_ann*-1.
            psa1_pc_ann = psa1_pc_ann*-1.
            if (vxreg_plot_flag.eq.0) then
@@ -734,8 +734,8 @@ begin
            end if
         end if
      end if
-     if (.not.ismissing(psa2_ann({-60},{280}))) then
-        if (psa2_ann({-60},{280}).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
+     if (.not.all(ismissing(psa2_ann({-62:-57},{277:282})))) then
+        if (avg(psa2_ann({-62:-57},{277:282})).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
            psa2_ann = psa2_ann*-1.
            psa2_pc_ann = psa2_pc_ann*-1.
            if (vxreg_plot_flag.eq.0) then
@@ -816,8 +816,8 @@ begin
            delete([/rc,tval,df,b,vreg/])
         end if
 
-        if (.not.ismissing(sam_mon({-85},{5}))) then
-           if (sam_mon({-85},{5}).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
+        if (.not.all(ismissing(sam_mon({-87:-82},{2:7})))) then
+           if (avg(sam_mon({-87:-82},{2:7})).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
               sam_mon = sam_mon*-1.
               sam_pc_mon = sam_pc_mon*-1.
               if (vxreg_plot_flag.eq.0) then
@@ -825,8 +825,8 @@ begin
               end if
            end if
         end if
-        if (.not.ismissing(psa1_mon({-62},{210}))) then
-           if (psa1_mon({-62},{210}).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
+        if (.not.all(ismissing(psa1_mon({-65:-60},{207:212})))) then
+           if (avg(psa1_mon({-65:-60},{207:212})).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
               psa1_mon = psa1_mon*-1.
               psa1_pc_mon = psa1_pc_mon*-1.
               if (vxreg_plot_flag.eq.0) then
@@ -834,8 +834,8 @@ begin
               end if
            end if
         end if
-        if (.not.ismissing(psa2_mon({-60},{280}))) then
-           if (psa2_mon({-60},{280}).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
+        if (.not.all(ismissing(psa2_mon({-62:-57},{277:282})))) then
+           if (avg(psa2_mon({-62:-57},{277:282})).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
               psa2_mon = psa2_mon*-1.
               psa2_pc_mon = psa2_pc_mon*-1.
               if (vxreg_plot_flag.eq.0) then
@@ -1120,41 +1120,72 @@ begin
      opt@gsnShadeFillDotSizeF  = 0.002
     
      if (isfilepresent2("obs_psl").and.ee.eq.0) then    ; for pattern correlation table. Save entire lat/lon array
-        patcor_sam_djf = new((/nsim,dimsizes(sam_djf&lat),dimsizes(sam_djf&lon)/),typeof(sam_djf))
-        patcor_sam_djf!1 = "lat"
-        patcor_sam_djf&lat = sam_djf&lat
-        patcor_sam_djf!2 = "lon"
-        patcor_sam_djf&lon = sam_djf&lon
-        patcor_sam_jja = patcor_sam_djf
-        patcor_sam_ann = patcor_sam_djf
-        patcor_psa1_djf = patcor_sam_djf
-        patcor_psa1_jja = patcor_sam_djf
-        patcor_psa1_ann = patcor_sam_djf
-        patcor_psa2_djf = patcor_sam_djf
-        patcor_psa2_jja = patcor_sam_djf
-        patcor_psa2_ann = patcor_sam_djf
-        patcor_sam_djf(ee,:,:) = (/ sam_djf /)
-        patcor_sam_jja(ee,:,:) = (/ sam_jja /)
-        patcor_sam_ann(ee,:,:) = (/ sam_ann /)
-        patcor_psa1_djf(ee,:,:) = (/ psa1_djf /)
-        patcor_psa1_jja(ee,:,:) = (/ psa1_jja /)
-        patcor_psa1_ann(ee,:,:) = (/ psa1_ann /)
-        patcor_psa2_djf(ee,:,:) = (/ psa2_djf /)
-        patcor_psa2_jja(ee,:,:) = (/ psa2_jja /)
-        patcor_psa2_ann(ee,:,:) = (/ psa2_ann /)
+        patcor_vreg_sam_djf = new((/nsim,dimsizes(sam_vreg_djf&lat),dimsizes(sam_vreg_djf&lon)/),typeof(sam_vreg_djf))
+        patcor_vreg_sam_djf!1 = "lat"
+        patcor_vreg_sam_djf&lat = sam_vreg_djf&lat
+        patcor_vreg_sam_djf!2 = "lon"
+        patcor_vreg_sam_djf&lon = sam_vreg_djf&lon
+        patcor_vreg_sam_mam  = patcor_vreg_sam_djf
+        patcor_vreg_sam_jja  = patcor_vreg_sam_djf
+        patcor_vreg_sam_son  = patcor_vreg_sam_djf
+        patcor_vreg_sam_ann  = patcor_vreg_sam_djf
+        patcor_vreg_psa1_djf = patcor_vreg_sam_djf
+        patcor_vreg_psa1_mam = patcor_vreg_sam_djf 
+        patcor_vreg_psa1_jja = patcor_vreg_sam_djf
+        patcor_vreg_psa1_son = patcor_vreg_sam_djf 
+        patcor_vreg_psa1_ann = patcor_vreg_sam_djf
+        patcor_vreg_psa2_djf = patcor_vreg_sam_djf
+        patcor_vreg_psa2_mam = patcor_vreg_sam_djf 
+        patcor_vreg_psa2_jja = patcor_vreg_sam_djf
+        patcor_vreg_psa2_son = patcor_vreg_sam_djf 
+        patcor_vreg_psa2_ann = patcor_vreg_sam_djf
+        patcor_vreg_sam_djf(ee,:,:) = (/ sam_vreg_djf /)
+        patcor_vreg_sam_mam(ee,:,:) = (/ sam_vreg_mam /)
+        patcor_vreg_sam_jja(ee,:,:) = (/ sam_vreg_jja /)
+        patcor_vreg_sam_son(ee,:,:) = (/ sam_vreg_son /)
+        patcor_vreg_sam_ann(ee,:,:) = (/ sam_vreg_ann /)
+        patcor_vreg_psa1_djf(ee,:,:) = (/ psa1_vreg_djf /)
+        patcor_vreg_psa1_mam(ee,:,:) = (/ psa1_vreg_mam /)
+        patcor_vreg_psa1_jja(ee,:,:) = (/ psa1_vreg_jja /)
+        patcor_vreg_psa1_son(ee,:,:) = (/ psa1_vreg_son /)
+        patcor_vreg_psa1_ann(ee,:,:) = (/ psa1_vreg_ann /)
+        patcor_vreg_psa2_djf(ee,:,:) = (/ psa2_vreg_djf /)
+        patcor_vreg_psa2_mam(ee,:,:) = (/ psa2_vreg_mam /)
+        patcor_vreg_psa2_jja(ee,:,:) = (/ psa2_vreg_jja /)
+        patcor_vreg_psa2_son(ee,:,:) = (/ psa2_vreg_son /)
+        patcor_vreg_psa2_ann(ee,:,:) = (/ psa2_vreg_ann /)
+        if (COMPUTE_MODES_MON.eq."True") then
+          patcor_vreg_sam_mon  = patcor_vreg_sam_djf
+          patcor_vreg_psa1_mon = patcor_vreg_sam_djf 
+          patcor_vreg_psa2_mon = patcor_vreg_sam_djf
+          patcor_vreg_sam_mon(ee,:,:)  = (/ sam_vreg_mon /)
+          patcor_vreg_psa1_mon(ee,:,:) = (/ psa1_vreg_mon /)
+          patcor_vreg_psa2_mon(ee,:,:) = (/ psa2_vreg_mon /)
+        end if 
      end if
-     if (isfilepresent2("obs_psl").and.ee.ge.1.and.isvar("patcor_sam_djf")) then       
-        patcor_sam_djf(ee,:,:) = (/ totype(linint2(sam_djf&lon,sam_djf&lat,sam_djf,True,patcor_sam_djf&lon,patcor_sam_djf&lat,0),typeof(patcor_sam_djf)) /)
-        patcor_sam_jja(ee,:,:) = (/ totype(linint2(sam_jja&lon,sam_jja&lat,sam_jja,True,patcor_sam_jja&lon,patcor_sam_jja&lat,0),typeof(patcor_sam_jja)) /)
-        patcor_sam_ann(ee,:,:) = (/ totype(linint2(sam_ann&lon,sam_ann&lat,sam_ann,True,patcor_sam_ann&lon,patcor_sam_ann&lat,0),typeof(patcor_sam_ann)) /)
+     if (isfilepresent2("obs_psl").and.ee.ge.1.and.isvar("patcor_vreg_sam_djf")) then       
+        patcor_vreg_sam_djf(ee,:,:) = (/ totype(linint2(sam_vreg_djf&lon,sam_vreg_djf&lat,sam_vreg_djf,True,patcor_vreg_sam_djf&lon,patcor_vreg_sam_djf&lat,0),typeof(patcor_vreg_sam_djf)) /)
+        patcor_vreg_sam_mam(ee,:,:) = (/ totype(linint2(sam_vreg_mam&lon,sam_vreg_mam&lat,sam_vreg_mam,True,patcor_vreg_sam_mam&lon,patcor_vreg_sam_mam&lat,0),typeof(patcor_vreg_sam_mam)) /)
+        patcor_vreg_sam_jja(ee,:,:) = (/ totype(linint2(sam_vreg_jja&lon,sam_vreg_jja&lat,sam_vreg_jja,True,patcor_vreg_sam_jja&lon,patcor_vreg_sam_jja&lat,0),typeof(patcor_vreg_sam_jja)) /)
+        patcor_vreg_sam_son(ee,:,:) = (/ totype(linint2(sam_vreg_son&lon,sam_vreg_son&lat,sam_vreg_son,True,patcor_vreg_sam_son&lon,patcor_vreg_sam_son&lat,0),typeof(patcor_vreg_sam_son)) /)
+        patcor_vreg_sam_ann(ee,:,:) = (/ totype(linint2(sam_vreg_ann&lon,sam_vreg_ann&lat,sam_vreg_ann,True,patcor_vreg_sam_ann&lon,patcor_vreg_sam_ann&lat,0),typeof(patcor_vreg_sam_ann)) /)
         
-        patcor_psa1_djf(ee,:,:) = (/ totype(linint2(psa1_djf&lon,psa1_djf&lat,psa1_djf,True,patcor_psa1_djf&lon,patcor_psa1_djf&lat,0),typeof(patcor_psa1_djf)) /)
-        patcor_psa1_jja(ee,:,:) = (/ totype(linint2(psa1_jja&lon,psa1_jja&lat,psa1_jja,True,patcor_psa1_jja&lon,patcor_psa1_jja&lat,0),typeof(patcor_psa1_jja)) /)
-        patcor_psa1_ann(ee,:,:) = (/ totype(linint2(psa1_ann&lon,psa1_ann&lat,psa1_ann,True,patcor_psa1_ann&lon,patcor_psa1_ann&lat,0),typeof(patcor_psa1_ann)) /)
+        patcor_vreg_psa1_djf(ee,:,:) = (/ totype(linint2(psa1_vreg_djf&lon,psa1_vreg_djf&lat,psa1_vreg_djf,True,patcor_vreg_psa1_djf&lon,patcor_vreg_psa1_djf&lat,0),typeof(patcor_vreg_psa1_djf)) /)
+        patcor_vreg_psa1_mam(ee,:,:) = (/ totype(linint2(psa1_vreg_mam&lon,psa1_vreg_mam&lat,psa1_vreg_mam,True,patcor_vreg_psa1_mam&lon,patcor_vreg_psa1_mam&lat,0),typeof(patcor_vreg_psa1_mam)) /)
+        patcor_vreg_psa1_jja(ee,:,:) = (/ totype(linint2(psa1_vreg_jja&lon,psa1_vreg_jja&lat,psa1_vreg_jja,True,patcor_vreg_psa1_jja&lon,patcor_vreg_psa1_jja&lat,0),typeof(patcor_vreg_psa1_jja)) /)
+        patcor_vreg_psa1_son(ee,:,:) = (/ totype(linint2(psa1_vreg_son&lon,psa1_vreg_son&lat,psa1_vreg_son,True,patcor_vreg_psa1_son&lon,patcor_vreg_psa1_son&lat,0),typeof(patcor_vreg_psa1_son)) /)
+        patcor_vreg_psa1_ann(ee,:,:) = (/ totype(linint2(psa1_vreg_ann&lon,psa1_vreg_ann&lat,psa1_vreg_ann,True,patcor_vreg_psa1_ann&lon,patcor_vreg_psa1_ann&lat,0),typeof(patcor_vreg_psa1_ann)) /)
         
-        patcor_psa2_djf(ee,:,:) = (/ totype(linint2(psa2_djf&lon,psa2_djf&lat,psa2_djf,True,patcor_psa2_djf&lon,patcor_psa2_djf&lat,0),typeof(patcor_psa2_djf)) /)
-        patcor_psa2_jja(ee,:,:) = (/ totype(linint2(psa2_jja&lon,psa2_jja&lat,psa2_jja,True,patcor_psa2_jja&lon,patcor_psa2_jja&lat,0),typeof(patcor_psa2_jja)) /)
-        patcor_psa2_ann(ee,:,:) = (/ totype(linint2(psa2_ann&lon,psa2_ann&lat,psa2_ann,True,patcor_psa2_ann&lon,patcor_psa2_ann&lat,0),typeof(patcor_psa2_ann)) /)
+        patcor_vreg_psa2_djf(ee,:,:) = (/ totype(linint2(psa2_vreg_djf&lon,psa2_vreg_djf&lat,psa2_vreg_djf,True,patcor_vreg_psa2_djf&lon,patcor_vreg_psa2_djf&lat,0),typeof(patcor_vreg_psa2_djf)) /)
+        patcor_vreg_psa2_mam(ee,:,:) = (/ totype(linint2(psa2_vreg_mam&lon,psa2_vreg_mam&lat,psa2_vreg_mam,True,patcor_vreg_psa2_mam&lon,patcor_vreg_psa2_mam&lat,0),typeof(patcor_vreg_psa2_mam)) /)
+        patcor_vreg_psa2_jja(ee,:,:) = (/ totype(linint2(psa2_vreg_jja&lon,psa2_vreg_jja&lat,psa2_vreg_jja,True,patcor_vreg_psa2_jja&lon,patcor_vreg_psa2_jja&lat,0),typeof(patcor_vreg_psa2_jja)) /)
+        patcor_vreg_psa2_son(ee,:,:) = (/ totype(linint2(psa2_vreg_son&lon,psa2_vreg_son&lat,psa2_vreg_son,True,patcor_vreg_psa2_son&lon,patcor_vreg_psa2_son&lat,0),typeof(patcor_vreg_psa2_son)) /)
+        patcor_vreg_psa2_ann(ee,:,:) = (/ totype(linint2(psa2_vreg_ann&lon,psa2_vreg_ann&lat,psa2_vreg_ann,True,patcor_vreg_psa2_ann&lon,patcor_vreg_psa2_ann&lat,0),typeof(patcor_vreg_psa2_ann)) /)
+        if (COMPUTE_MODES_MON.eq."True") then
+          patcor_vreg_sam_mon(ee,:,:)  = (/ totype(linint2(sam_vreg_mon&lon,sam_vreg_mon&lat,sam_vreg_mon,True,patcor_vreg_sam_mon&lon,patcor_vreg_sam_mon&lat,0),typeof(patcor_vreg_sam_mon)) /)
+          patcor_vreg_psa1_mon(ee,:,:) = (/ totype(linint2(psa1_vreg_mon&lon,psa1_vreg_mon&lat,psa1_vreg_mon,True,patcor_vreg_psa1_mon&lon,patcor_vreg_psa1_mon&lat,0),typeof(patcor_vreg_psa1_mon)) /)
+          patcor_vreg_psa2_mon(ee,:,:) = (/ totype(linint2(psa2_vreg_mon&lon,psa2_vreg_mon&lat,psa2_vreg_mon,True,patcor_vreg_psa2_mon&lon,patcor_vreg_psa2_mon&lat,0),typeof(patcor_vreg_psa2_mon)) /)
+        end if
      end if
       
      if (vxreg_plot_flag.eq.0) then
@@ -1285,54 +1316,129 @@ begin
   if (isvar("clim_eyear")) then
      delete(clim_eyear)
   end if
-  
-  if (isvar("patcor_sam_djf")) then    ; for pattern correlation table  
-     clat = cos(0.01745329*patcor_sam_djf&lat)
-     clat!0 = "lat"
-     clat&lat = patcor_sam_djf&lat
-     line3   = "                  "    ; Must be 18 characters long
-     line4   = line3
-     header = (/"","Pattern Correlations   Observations vs. Model(s)",""/)
-     finpr_sam_djf  = "SAM (DJF)         "     
-     do hh = 1,nsim-1
-        dimY = dimsizes(tochar(names(hh)))
-        nchar = dimY
-        nchar = where(nchar.le.10,10,nchar)
-        if (dimY.lt.10) then
-           ntb = ""
-           do ii = 0,10-dimY-1
-              ntb = ntb+" "
-           end do
-           ntb = ntb+names(hh)
-        else
-           ntb = names(hh)
-        end if
-        
-        ntc = ""
-        do ii = 0,nchar-1
-           ntc = ntc+"-"
-        end do
-        format2 = "%"+(nchar-5+1)+".2f"
-        format3 = "%4.2f"
-        line3 = line3+" "+ntb   
-        line4 = line4+" "+ntc 
-        if (all(ismissing(patcor_sam_djf(hh,{:-20},:)))) then
-           finpr_sam_djf = finpr_sam_djf+sprintf(format2,9.99)+"/"+sprintf(format3,9.99)
-        else
-           finpr_sam_djf = finpr_sam_djf+sprintf(format2,(pattern_cor(patcor_sam_djf(0,{:-20},:),patcor_sam_djf(hh,{:-20},:),clat({:-20}),0)))+"/"+sprintf(format3,(wgt_arearmse(patcor_sam_djf(0,{:-20},:),patcor_sam_djf(hh,{:-20},:),clat({:-20}),1.0,0)))
-        end if        
-     end do
-;     
+
+  if (isvar("patcor_vreg_sam_djf").and.isvar("patcor_vreg_psa1_djf").and.isvar("patcor_vreg_psa2_djf")) then    ; for pattern correlation table
+    mods = (/"sam","psa1","psa2"/)
+    if (COMPUTE_MODES_MON.eq."True") then
+      seas = (/"djf","mam","jja","son","ann","mon"/)
+    else 
+      seas = (/"djf","mam","jja","son","ann"/)
+    end if 
+    do kk = 0,dimsizes(seas)-1 
+     do ll = 0,dimsizes(mods)-1
+      vreg_nam  = "patcor_vreg_"+mods(ll)+"_"+seas(kk)
+      if(vreg_nam.eq."patcor_vreg_sam_djf") then 
+        patcor_vreg = patcor_vreg_sam_djf
+      end if 
+      if(vreg_nam.eq."patcor_vreg_sam_mam") then
+        patcor_vreg = patcor_vreg_sam_mam
+      end if
+      if(vreg_nam.eq."patcor_vreg_sam_jja") then
+        patcor_vreg = patcor_vreg_sam_jja
+      end if
+      if(vreg_nam.eq."patcor_vreg_sam_son") then
+        patcor_vreg = patcor_vreg_sam_son
+      end if
+      if(vreg_nam.eq."patcor_vreg_sam_ann") then
+        patcor_vreg = patcor_vreg_sam_ann
+      end if
+      if(vreg_nam.eq."patcor_vreg_sam_mon") then
+        patcor_vreg = patcor_vreg_sam_mon
+      end if
+      if(vreg_nam.eq."patcor_vreg_psa1_djf") then
+        patcor_vreg = patcor_vreg_psa1_djf
+      end if
+      if(vreg_nam.eq."patcor_vreg_psa1_mam") then
+        patcor_vreg = patcor_vreg_psa1_mam
+      end if
+      if(vreg_nam.eq."patcor_vreg_psa1_jja") then
+        patcor_vreg = patcor_vreg_psa1_jja
+      end if
+      if(vreg_nam.eq."patcor_vreg_psa1_son") then
+        patcor_vreg = patcor_vreg_psa1_son
+      end if
+      if(vreg_nam.eq."patcor_vreg_psa1_ann") then
+        patcor_vreg = patcor_vreg_psa1_ann
+      end if
+      if(vreg_nam.eq."patcor_vreg_psa1_mon") then
+        patcor_vreg = patcor_vreg_psa1_mon
+      end if
+      if(vreg_nam.eq."patcor_vreg_psa2_djf") then
+        patcor_vreg = patcor_vreg_psa2_djf
+      end if
+      if(vreg_nam.eq."patcor_vreg_psa2_mam") then
+        patcor_vreg = patcor_vreg_psa2_mam
+      end if
+      if(vreg_nam.eq."patcor_vreg_psa2_jja") then
+        patcor_vreg = patcor_vreg_psa2_jja
+      end if
+      if(vreg_nam.eq."patcor_vreg_psa2_son") then
+        patcor_vreg = patcor_vreg_psa2_son
+      end if
+      if(vreg_nam.eq."patcor_vreg_psa2_ann") then
+        patcor_vreg = patcor_vreg_psa2_ann
+      end if
+      if(vreg_nam.eq."patcor_vreg_psa2_mon") then
+        patcor_vreg = patcor_vreg_psa2_mon
+      end if
+      clat     = cos(0.01745329*patcor_vreg&lat)
+      clat!0   = "lat"
+      clat&lat = patcor_vreg&lat
+      line3    = "                  "    ; Must be 18 characters long
+      line4    = line3
+      header   = (/"","Pattern Correlations   Observations vs. Model(s)",""/)
+      finpr  = str_upper(mods(ll))+" ("+str_upper(seas(kk))+")         "
+      do hh = 1,nsim-1
+         dimY = dimsizes(tochar(names(hh)))
+         nchar = dimY
+         nchar = where(nchar.le.10,10,nchar)
+         if (dimY.lt.10) then
+            ntb = ""
+            do ii = 0,10-dimY-1
+               ntb = ntb+" "
+            end do
+            ntb = ntb+names(hh)
+         else
+            ntb = names(hh)
+         end if
+         
+         ntc = ""
+         do ii = 0,nchar-1
+            ntc = ntc+"-"
+         end do
+         format2 = "%"+(nchar-5+1)+".2f"
+         format3 = "%4.2f"
+         line3 = line3+" "+ntb   
+         line4 = line4+" "+ntc 
+         if (all(ismissing(patcor_vreg_sam_djf(hh,{:-20},:)))) then
+            finpr = finpr+sprintf(format2,9.99)+"/"+sprintf(format3,9.99)
+         else
+            finpr = finpr+sprintf(format2,(pattern_cor(patcor_vreg(0,{:-20},:),patcor_vreg(hh,{:-20},:),clat({:-20}),0)))+"/"+sprintf(format3,(wgt_arearmse(patcor_vreg(0,{:-20},:),patcor_vreg(hh,{:-20},:),clat({:-20}),1.0,0)))
+         end if        
+      end do
+;
      if (dimsizes(tochar(line4)).ge.8190) then   ; system or fortran compiler limit
         print("Metrics table warning: Not creating metrics table as size of comparison results in a invalid ascii row size.")   
-     else           
-        write_table(getenv("OUTDIR")+"metrics.psl.sam_psa_"+vnm+"_regpatt.txt","w",[/header/],"%s")
-        write_table(getenv("OUTDIR")+"metrics.psl.sam_psa_"+vnm+"_regpatt.txt","a",[/line3/],"%s")
-        write_table(getenv("OUTDIR")+"metrics.psl.sam_psa_"+vnm+"_regpatt.txt","a",[/line4/],"%s")  
-        write_table(getenv("OUTDIR")+"metrics.psl.sam_psa_"+vnm+"_regpatt.txt","a",[/finpr_sam_djf/],"%s")
+     else 
+        if(kk.eq.0.and.ll.eq.0) then           
+          write_table(getenv("OUTDIR")+"metrics.psl.sam_psa_"+vnm+"_regpatt.txt","w",[/header/],"%s")
+          write_table(getenv("OUTDIR")+"metrics.psl.sam_psa_"+vnm+"_regpatt.txt","a",[/line3/],"%s")
+          write_table(getenv("OUTDIR")+"metrics.psl.sam_psa_"+vnm+"_regpatt.txt","a",[/line4/],"%s")  
+          write_table(getenv("OUTDIR")+"metrics.psl.sam_psa_"+vnm+"_regpatt.txt","a",[/finpr/],"%s")
+        else 
+          write_table(getenv("OUTDIR")+"metrics.psl.sam_psa_"+vnm+"_regpatt.txt","a",[/finpr/],"%s")
+        end if 
      end if
-     delete([/line3,line4,format2,format3,nchar,ntc,clat,patcor_sam_djf,patcor_sam_jja,patcor_sam_ann/])
-     delete([/patcor_psa1_djf,patcor_psa1_jja,patcor_psa1_ann,patcor_psa2_djf,patcor_psa2_jja,patcor_psa2_ann,dimY,ntb,header/])
+     delete([/line3,line4,format2,format3,nchar,ntc,clat,dimY,ntb,header/])
+     end do
+    end do
+    delete([/mods,seas/])
+    delete([/patcor_vreg_sam_djf,patcor_vreg_sam_mam,patcor_vreg_sam_jja,patcor_vreg_sam_son,patcor_vreg_sam_ann/])
+    delete([/patcor_vreg_psa1_djf,patcor_vreg_psa1_mam,patcor_vreg_psa1_jja,patcor_vreg_psa1_son,patcor_vreg_psa1_ann/])
+    delete([/patcor_vreg_psa2_djf,patcor_vreg_psa2_mam,patcor_vreg_psa2_jja,patcor_vreg_psa2_son,patcor_vreg_psa2_ann/])
+    if (COMPUTE_MODES_MON.eq."True") then
+      delete([/patcor_vreg_sam_mon,patcor_vreg_psa1_mon,patcor_vreg_psa2_mon/])
+    end if 
   end if 
 
   panres = True

@@ -111,11 +111,11 @@ begin
   wks_psa2_ts = gsn_open_wks(wks_type,getenv("OUTDIR")+"psa2.timeseries")
   
   if (COLORMAP.eq.0) then
-     gsn_define_colormap(wks_sam,"ncl_default")   
+     gsn_define_colormap(wks_sam,"cmp_b2r")   
      gsn_define_colormap(wks_sam_ts,"ncl_default")
-     gsn_define_colormap(wks_psa1,"ncl_default")   
+     gsn_define_colormap(wks_psa1,"cmp_b2r")   
      gsn_define_colormap(wks_psa1_ts,"ncl_default")
-     gsn_define_colormap(wks_psa2,"ncl_default")   
+     gsn_define_colormap(wks_psa2,"cmp_b2r")   
      gsn_define_colormap(wks_psa2_ts,"ncl_default")
      gsn_define_colormap(wks_sam_pr,"MPL_BrBG")  
      gsn_define_colormap(wks_psa1_pr,"MPL_BrBG") 
@@ -502,8 +502,8 @@ begin
         delete(pr_djf)
      end if         
      
-     if (.not.ismissing(sam_djf({-85},{5}))) then
-        if (sam_djf({-85},{5}).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
+     if (.not.all(ismissing(sam_djf({-87:-82},{2:7})))) then
+        if (avg(sam_djf({-87:-82},{2:7})).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
            sam_djf = sam_djf*-1.
            sam_pc_djf = sam_pc_djf*-1.
            if (sstreg_plot_flag.eq.0) then
@@ -517,8 +517,8 @@ begin
            end if
         end if
      end if
-     if (.not.ismissing(psa1_djf({-62},{210}))) then
-        if (psa1_djf({-62},{210}).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
+     if (.not.all(ismissing(psa1_djf({-65:-60},{207:212})))) then
+        if (avg(psa1_djf({-65:-60},{207:212})).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
            psa1_djf = psa1_djf*-1.
            psa1_pc_djf = psa1_pc_djf*-1.
            if (sstreg_plot_flag.eq.0) then
@@ -532,8 +532,8 @@ begin
            end if
         end if
      end if
-     if (.not.ismissing(psa2_djf({-60},{280}))) then
-        if (psa2_djf({-60},{280}).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
+     if (.not.all(ismissing(psa2_djf({-62:-57},{277:282})))) then
+        if (avg(psa2_djf({-62:-57},{277:282})).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
            psa2_djf = psa2_djf*-1.
            psa2_pc_djf = psa2_pc_djf*-1.
            if (sstreg_plot_flag.eq.0) then
@@ -612,8 +612,8 @@ begin
         delete(pr_mam)
      end if         
      
-     if (.not.ismissing(sam_mam({-85},{5}))) then
-        if (sam_mam({-85},{5}).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
+     if (.not.all(ismissing(sam_mam({-87:-82},{2:7})))) then
+        if (avg(sam_mam({-87:-82},{2:7})).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
            sam_mam = sam_mam*-1.
            sam_pc_mam = sam_pc_mam*-1.
            if (sstreg_plot_flag.eq.0) then
@@ -627,8 +627,8 @@ begin
            end if
         end if
      end if
-     if (.not.ismissing(psa1_mam({-62},{210}))) then
-        if (psa1_mam({-62},{210}).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
+     if (.not.all(ismissing(psa1_mam({-65:-60},{207:212})))) then
+        if (avg(psa1_mam({-65:-60},{207:212})).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
            psa1_mam = psa1_mam*-1.
            psa1_pc_mam = psa1_pc_mam*-1.
            if (sstreg_plot_flag.eq.0) then
@@ -642,8 +642,8 @@ begin
            end if
         end if
      end if
-     if (.not.ismissing(psa2_mam({-60},{280}))) then
-        if (psa2_mam({-60},{280}).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
+     if (.not.all(ismissing(psa2_mam({-62:-57},{277:282})))) then
+        if (avg(psa2_mam({-62:-57},{277:282})).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
            psa2_mam = psa2_mam*-1.
            psa2_pc_mam = psa2_pc_mam*-1.
            if (sstreg_plot_flag.eq.0) then
@@ -718,8 +718,8 @@ begin
         delete(pr_jja)
      end if         
      
-     if (.not.ismissing(sam_jja({-85},{5}))) then
-        if (sam_jja({-85},{5}).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
+     if (.not.all(ismissing(sam_jja({-87:-82},{2:7})))) then
+        if (avg(sam_jja({-87:-82},{2:7})).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
            sam_jja = sam_jja*-1.
            sam_pc_jja = sam_pc_jja*-1.
            if (sstreg_plot_flag.eq.0) then
@@ -733,8 +733,8 @@ begin
            end if
         end if
      end if
-     if (.not.ismissing(psa1_jja({-62},{210}))) then
-        if (psa1_jja({-62},{210}).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
+     if (.not.all(ismissing(psa1_jja({-65:-60},{207:212})))) then
+        if (avg(psa1_jja({-65:-60},{207:212})).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
            psa1_jja = psa1_jja*-1.
            psa1_pc_jja = psa1_pc_jja*-1.
            if (sstreg_plot_flag.eq.0) then
@@ -748,8 +748,8 @@ begin
            end if
         end if
      end if
-     if (.not.ismissing(psa2_jja({-60},{280}))) then
-        if (psa2_jja({-60},{280}).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
+     if (.not.all(ismissing(psa2_jja({-62:-57},{277:282})))) then
+        if (avg(psa2_jja({-62:-57},{277:282})).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
            psa2_jja = psa2_jja*-1.
            psa2_pc_jja = psa2_pc_jja*-1.
            if (sstreg_plot_flag.eq.0) then
@@ -824,8 +824,8 @@ begin
         delete(pr_son)
      end if         
      
-     if (.not.ismissing(sam_son({-85},{5}))) then
-        if (sam_son({-85},{5}).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
+     if (.not.all(ismissing(sam_son({-87:-82},{2:7})))) then
+        if (avg(sam_son({-87:-82},{2:7})).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
            sam_son = sam_son*-1.
            sam_pc_son = sam_pc_son*-1.
            if (sstreg_plot_flag.eq.0) then
@@ -839,8 +839,8 @@ begin
            end if
         end if
      end if
-     if (.not.ismissing(psa1_son({-62},{210}))) then
-        if (psa1_son({-62},{210}).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
+     if (.not.all(ismissing(psa1_son({-65:-60},{207:212})))) then
+        if (avg(psa1_son({-65:-60},{207:212})).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
            psa1_son = psa1_son*-1.
            psa1_pc_son = psa1_pc_son*-1.
            if (sstreg_plot_flag.eq.0) then
@@ -854,8 +854,8 @@ begin
            end if
         end if
      end if
-     if (.not.ismissing(psa2_son({-60},{280}))) then
-        if (psa2_son({-60},{280}).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
+     if (.not.all(ismissing(psa2_son({-62:-57},{277:282})))) then
+        if (avg(psa2_son({-62:-57},{277:282})).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
            psa2_son = psa2_son*-1.
            psa2_pc_son = psa2_pc_son*-1.
            if (sstreg_plot_flag.eq.0) then
@@ -930,8 +930,8 @@ begin
         delete(pr_ann)
      end if         
      
-     if (.not.ismissing(sam_ann({-85},{5}))) then
-        if (sam_ann({-85},{5}).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
+     if (.not.all(ismissing(sam_ann({-87:-82},{2:7})))) then
+        if (avg(sam_ann({-87:-82},{2:7})).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
            sam_ann = sam_ann*-1.
            sam_pc_ann = sam_pc_ann*-1.
            if (sstreg_plot_flag.eq.0) then
@@ -945,8 +945,8 @@ begin
            end if
         end if
      end if
-     if (.not.ismissing(psa1_ann({-62},{210}))) then
-        if (psa1_ann({-62},{210}).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
+     if (.not.all(ismissing(psa1_ann({-65:-60},{207:212})))) then
+        if (avg(psa1_ann({-65:-60},{207:212})).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
            psa1_ann = psa1_ann*-1.
            psa1_pc_ann = psa1_pc_ann*-1.
            if (sstreg_plot_flag.eq.0) then
@@ -960,8 +960,8 @@ begin
            end if
         end if
      end if
-     if (.not.ismissing(psa2_ann({-60},{280}))) then
-        if (psa2_ann({-60},{280}).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
+     if (.not.all(ismissing(psa2_ann({-62:-57},{277:282})))) then
+        if (avg(psa2_ann({-62:-57},{277:282})).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
            psa2_ann = psa2_ann*-1.
            psa2_pc_ann = psa2_pc_ann*-1.
            if (sstreg_plot_flag.eq.0) then
@@ -1037,8 +1037,8 @@ begin
            delete(pr)
         end if  
 
-        if (.not.ismissing(sam_mon({-85},{5}))) then
-           if (sam_mon({-85},{5}).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
+        if (.not.all(ismissing(sam_mon({-87:-82},{2:7})))) then
+           if (avg(sam_mon({-87:-82},{2:7})).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
               sam_mon = sam_mon*-1.
               sam_pc_mon = sam_pc_mon*-1.
               if (sstreg_plot_flag.eq.0) then
@@ -1052,8 +1052,8 @@ begin
               end if
            end if
         end if
-        if (.not.ismissing(psa1_mon({-62},{210}))) then
-           if (psa1_mon({-62},{210}).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
+        if (.not.all(ismissing(psa1_mon({-65:-60},{207:212})))) then
+           if (avg(psa1_mon({-65:-60},{207:212})).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
               psa1_mon = psa1_mon*-1.
               psa1_pc_mon = psa1_pc_mon*-1.
               if (sstreg_plot_flag.eq.0) then
@@ -1067,8 +1067,8 @@ begin
               end if
            end if
         end if
-        if (.not.ismissing(psa2_mon({-60},{280}))) then
-           if (psa2_mon({-60},{280}).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
+        if (.not.all(ismissing(psa2_mon({-62:-57},{277:282})))) then
+           if (avg(psa2_mon({-62:-57},{277:282})).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
               psa2_mon = psa2_mon*-1.
               psa2_pc_mon = psa2_pc_mon*-1.
               if (sstreg_plot_flag.eq.0) then
@@ -1373,7 +1373,7 @@ begin
      res@mpMaxLatF    = -20.
      res@mpCenterLonF = 0.
      
-     res@cnLevels = (/-7,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6,7./)
+     res@cnLevels = (/-6,-5,-4,-3,-2,-1,-0.5,0,0.5,1,2,3,4,5,6/)
      res@gsnLeftString = syear(ee)+"-"+eyear(ee)
      res@gsnCenterString = names(ee)
  

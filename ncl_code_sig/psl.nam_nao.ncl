@@ -105,9 +105,9 @@ begin
   wks_nao_ts = gsn_open_wks(wks_type,getenv("OUTDIR")+"nao.timeseries")
   
   if (COLORMAP.eq.0) then
-     gsn_define_colormap(wks_nam,"ncl_default")   
+     gsn_define_colormap(wks_nam,"cmp_b2r")   
      gsn_define_colormap(wks_nam_ts,"ncl_default")
-     gsn_define_colormap(wks_nao,"ncl_default")   
+     gsn_define_colormap(wks_nao,"cmp_b2r")   
      gsn_define_colormap(wks_nao_ts,"ncl_default")
      gsn_define_colormap(wks_nam_pr,"MPL_BrBG")  
      gsn_define_colormap(wks_nao_pr,"MPL_BrBG")  
@@ -444,8 +444,8 @@ begin
         nam_pr_djf = pr_djf(0,:,:)
         nam_pr_djf = (/ regCoef(nam_pc_djf,pr_djf(lat|:,lon|:,time|:)) /)
      end if
-     if (.not.ismissing(nam_djf({85},{5}))) then
-        if (nam_djf({85},{5}).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
+     if (.not.all(ismissing(nam_djf({82:87},{2:7})))) then
+        if (avg(nam_djf({82:87},{2:7})).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
            nam_djf = nam_djf*-1.
            nam_pc_djf = nam_pc_djf*-1.
            if (sstreg_plot_flag.eq.0) then
@@ -489,8 +489,8 @@ begin
         nam_pr_mam = pr_mam(0,:,:)
         nam_pr_mam = (/ regCoef(nam_pc_mam,pr_mam(lat|:,lon|:,time|:)) /)
      end if
-     if (.not.ismissing(nam_mam({85},{5}))) then
-        if (nam_mam({85},{5}).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
+     if (.not.all(ismissing(nam_mam({82:87},{2:7})))) then
+        if (avg(nam_mam({82:87},{2:7})).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
            nam_mam = nam_mam*-1.
            nam_pc_mam = nam_pc_mam*-1.
            if (sstreg_plot_flag.eq.0) then
@@ -531,8 +531,8 @@ begin
         nam_pr_jja = pr_jja(0,:,:)
         nam_pr_jja = (/ regCoef(nam_pc_jja,pr_jja(lat|:,lon|:,time|:)) /)
      end if
-     if (.not.ismissing(nam_jja({85},{5}))) then
-        if (nam_jja({85},{5}).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
+     if (.not.all(ismissing(nam_jja({82:87},{2:7})))) then
+        if (avg(nam_jja({82:87},{2:7})).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
            nam_jja = nam_jja*-1.
            nam_pc_jja = nam_pc_jja*-1.
            if (sstreg_plot_flag.eq.0) then
@@ -573,8 +573,8 @@ begin
         nam_pr_son = pr_son(0,:,:)
         nam_pr_son = (/ regCoef(nam_pc_son,pr_son(lat|:,lon|:,time|:)) /)
      end if
-     if (.not.ismissing(nam_son({85},{5}))) then
-        if (nam_son({85},{5}).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
+     if (.not.all(ismissing(nam_son({82:87},{2:7})))) then
+        if (avg(nam_son({82:87},{2:7})).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
            nam_son = nam_son*-1.
            nam_pc_son = nam_pc_son*-1.
            if (sstreg_plot_flag.eq.0) then
@@ -615,8 +615,8 @@ begin
         nam_pr_ann = pr_ann(0,:,:)
         nam_pr_ann = (/ regCoef(nam_pc_ann,pr_ann(lat|:,lon|:,time|:)) /)
      end if
-     if (.not.ismissing(nam_ann({85},{5}))) then
-        if (nam_ann({85},{5}).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
+     if (.not.all(ismissing(nam_ann({82:87},{2:7})))) then
+        if (avg(nam_ann({82:87},{2:7})).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
            nam_ann = nam_ann*-1.
            nam_pc_ann = nam_pc_ann*-1.
            if (sstreg_plot_flag.eq.0) then
@@ -658,8 +658,8 @@ begin
            nam_pr_mon = pr(0,:,:)
            nam_pr_mon = (/ regCoef(nam_pc_mon,pr(lat|:,lon|:,time|:)) /)
         end if
-        if (.not.ismissing(nam_mon({85},{5}))) then
-           if (nam_mon({85},{5}).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
+        if (.not.all(ismissing(nam_mon({82:87},{2:7})))) then
+           if (avg(nam_mon({82:87},{2:7})).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
               nam_mon = nam_mon*-1.
               nam_pc_mon = nam_pc_mon*-1.
               if (sstreg_plot_flag.eq.0) then
@@ -716,8 +716,8 @@ begin
         nao_pr_djf = (/ regCoef(nao_pc_djf,pr_djf(lat|:,lon|:,time|:)) /)
         delete(pr_djf)
      end if
-     if (.not.ismissing(nao_djf({70},{350}))) then
-        if (nao_djf({70},{350}).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
+     if (.not.all(ismissing(nao_djf({67:72},{347:352})))) then
+        if (avg(nao_djf({67:72},{347:352})).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
            nao_djf = nao_djf*-1.
            nao_pc_djf = nao_pc_djf*-1.
            if (sstreg_plot_flag.eq.0) then
@@ -761,8 +761,8 @@ begin
         nao_pr_mam = (/ regCoef(nao_pc_mam,pr_mam(lat|:,lon|:,time|:)) /)
         delete(pr_mam)
      end if
-     if (.not.ismissing(nao_mam({70},{350}))) then
-        if (nao_mam({70},{350}).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
+     if (.not.all(ismissing(nao_mam({67:72},{347:352})))) then
+        if (avg(nao_mam({67:72},{347:352})).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
            nao_mam = nao_mam*-1.
            nao_pc_mam = nao_pc_mam*-1.
            if (sstreg_plot_flag.eq.0) then
@@ -806,8 +806,8 @@ begin
         nao_pr_jja = (/ regCoef(nao_pc_jja,pr_jja(lat|:,lon|:,time|:)) /)
         delete(pr_jja)
      end if
-     if (.not.ismissing(nao_jja({70},{350}))) then
-        if (nao_jja({70},{350}).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
+     if (.not.all(ismissing(nao_jja({67:72},{347:352})))) then
+        if (avg(nao_jja({67:72},{347:352})).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
            nao_jja = nao_jja*-1.
            nao_pc_jja = nao_pc_jja*-1.
            if (sstreg_plot_flag.eq.0) then
@@ -851,8 +851,8 @@ begin
         nao_pr_son = (/ regCoef(nao_pc_son,pr_son(lat|:,lon|:,time|:)) /)
         delete(pr_son)
      end if
-     if (.not.ismissing(nao_son({70},{350}))) then
-        if (nao_son({70},{350}).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
+     if (.not.all(ismissing(nao_son({67:72},{347:352})))) then
+        if (avg(nao_son({67:72},{347:352})).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
            nao_son = nao_son*-1.
            nao_pc_son = nao_pc_son*-1.
            if (sstreg_plot_flag.eq.0) then
@@ -896,8 +896,8 @@ begin
         nao_pr_ann = (/ regCoef(nao_pc_ann,pr_ann(lat|:,lon|:,time|:)) /)
         delete(pr_ann)
      end if
-     if (.not.ismissing(nao_ann({70},{350}))) then
-        if (nao_ann({70},{350}).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
+     if (.not.all(ismissing(nao_ann({67:72},{347:352})))) then
+        if (avg(nao_ann({67:72},{347:352})).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
            nao_ann = nao_ann*-1.
            nao_pc_ann = nao_pc_ann*-1.
            if (sstreg_plot_flag.eq.0) then
@@ -942,8 +942,8 @@ begin
            nao_pr_mon = (/ regCoef(nao_pc_mon,pr(lat|:,lon|:,time|:)) /)
            delete(pr)
         end if
-        if (.not.ismissing(nao_mon({70},{350}))) then
-           if (nao_mon({70},{350}).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
+        if (.not.all(ismissing(nao_mon({67:72},{347:352})))) then
+           if (avg(nao_mon({67:72},{347:352})).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
               nao_mon = nao_mon*-1.
               nao_pc_mon = nao_pc_mon*-1.
               if (sstreg_plot_flag.eq.0) then

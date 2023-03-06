@@ -112,17 +112,17 @@ begin
   if (COLORMAP.eq.0) then
      gsn_define_colormap(wks_samind,"ncl_default") 
      gsn_define_colormap(wks_aslind,"ncl_default")
-     gsn_define_colormap(wks_samlat_tlon,"MPL_rainbow")
+     gsn_define_colormap(wks_samlat_tlon,"MPL_terrain")
      gsn_define_colormap(wks_samind_p,"cb_9step")
      gsn_define_colormap(wks_samind_rst,"ncl_default")   
      gsn_define_colormap(wks_samind_mst,"ncl_default")   
-     gsn_define_colormap(wks_samindsc,"ncl_default")   
+     gsn_define_colormap(wks_samindsc,"cmocean_balance")   
      gsn_define_colormap(wks_samindsc_ppt,"MPL_BrBG")  
   end if
   if (COLORMAP.eq.1) then
      gsn_define_colormap(wks_samind,"ncl_default") 
-     gsn_define_colormap(wks_aslind,"ncl_default")   
-     gsn_define_colormap(wks_samlat_tlon,"MPL_rainbow")
+     gsn_define_colormap(wks_aslind,"ncl_default")  
+     gsn_define_colormap(wks_samlat_tlon,"MPL_terrain")
      gsn_define_colormap(wks_samind_p,"cb_9step")
      gsn_define_colormap(wks_samind_rst,"ncl_default")   
      gsn_define_colormap(wks_samind_mst,"ncl_default")   
@@ -215,24 +215,24 @@ begin
      llone = 360.
 
      sam_p40S = wgt_areaave_Wrap(psl_org(:,{llatn:llatn},{llonw:llone}),coswgt({llatn:llatn}),1.0,0)
-     sam_p40S@comment_cvdp = "domain ("+llats+":"+llatn+"N, "+llonw+":"+llone+"E)"
+     sam_p40S@comment_cvdp = "domain ("+llats+":"+llatn+"S, "+llonw+":"+llone+"E)"
      sam_p40S@units        = psl@units
      sam_p40S@long_name    = "sam psl timeseries at 40S (monthly)"
 
      sam_p65S= wgt_areaave_Wrap(psl_org(:,{llats:llats},{llonw:llone}),coswgt({llats:llats}),1.0,0)
-     sam_p65S@comment_cvdp = "domain ("+llats+":"+llatn+"N, "+llonw+":"+llone+"E)"
+     sam_p65S@comment_cvdp = "domain ("+llats+":"+llatn+"S, "+llonw+":"+llone+"E)"
      sam_p65S@units        = psl@units
      sam_p65S@long_name    = "sam psl timeseries at 65S (monthly)"
 
      samind = dim_standardize(sam_p40S,1) - dim_standardize(sam_p65S,1) 
      copy_VarCoords(sam_p40S,samind)
-     samind@comment_cvdp = "domain ("+llats+":"+llatn+"N, "+llonw+":"+llone+"E)"
+     samind@comment_cvdp = "domain ("+llats+":"+llatn+"S, "+llonw+":"+llone+"E)"
      samind@units = "1"
      samind@long_name = "sam (Mashall) index timeseries (monthly)"
 
      samind_rn = dim_standardize(samind,0)
      copy_VarCoords(samind,samind_rn)
-     samind_rn@comment_cvdp = "domain ("+llats+":"+llatn+"N, "+llonw+":"+llone+"E)"
+     samind_rn@comment_cvdp = "domain ("+llats+":"+llatn+"S, "+llonw+":"+llone+"E)"
      samind_rn@units = "1"
      samind_rn@long_name = "Normalized sam (Mashall) index timeseries (monthly)"
 
@@ -242,32 +242,32 @@ begin
      llone = 298.
 
      asl_rmpsl = wgt_areaave_Wrap(psl(:,{llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0)
-     asl_rmpsl@comment_cvdp  = "domain ("+llats+":"+llatn+"N, "+llonw+":"+llone+"E)"
+     asl_rmpsl@comment_cvdp  = "domain ("+llats+":"+llatn+"S, "+llonw+":"+llone+"E)"
      asl_rmpsl@units  = psl@units
      asl_rmpsl@long_name = "Amundsen Sea Low (ASL) region mean pressure timeseries (monthly)"
 
      asl_clat = asl_rmpsl
-     asl_clat@comment_cvdp  = "domain ("+llats+":"+llatn+"N, "+llonw+":"+llone+"E)"
+     asl_clat@comment_cvdp  = "domain ("+llats+":"+llatn+"S, "+llonw+":"+llone+"E)"
      asl_clat@units  = "degree"
      asl_clat@long_name = "Amundsen Sea Low (ASL) latitude"
 
      asl_clon  = asl_rmpsl
-     asl_clon@comment_cvdp  = "domain ("+llats+":"+llatn+"N, "+llonw+":"+llone+"E)"
+     asl_clon@comment_cvdp  = "domain ("+llats+":"+llatn+"S, "+llonw+":"+llone+"E)"
      asl_clon@units  = "degree"
      asl_clon@long_name = "Amundsen Sea Low (ASL) center longitude"
 
      asl_cpsl  = asl_rmpsl
-     asl_cpsl@comment_cvdp  = "domain ("+llats+":"+llatn+"N, "+llonw+":"+llone+"E)"
+     asl_cpsl@comment_cvdp  = "domain ("+llats+":"+llatn+"S, "+llonw+":"+llone+"E)"
      asl_cpsl@units = psl@units
      asl_cpsl@long_name = "Amundsen Sea Low (ASL) central pressure timeseries (monthly)"
 
      asl_rcpsl = asl_rmpsl
-     asl_rcpsl@comment_cvdp  = "domain ("+llats+":"+llatn+"N, "+llonw+":"+llone+"E)"
+     asl_rcpsl@comment_cvdp  = "domain ("+llats+":"+llatn+"S, "+llonw+":"+llone+"E)"
      asl_rcpsl@units = psl@units
      asl_rcpsl@long_name = "Amundsen Sea Low (ASL) relative central pressure timeseries (monthly)"
 
      aslind = asl_rmpsl
-     aslind@comment_cvdp = "domain ("+llats+":"+llatn+"N, "+llonw+":"+llone+"E)"
+     aslind@comment_cvdp = "domain ("+llats+":"+llatn+"S, "+llonw+":"+llone+"E)"
      aslind@units        = "1"
      aslind@long_name    = "Amundsen Sea Low (ASL) central pressure standardized timeseries (monthly)"
     
@@ -451,6 +451,26 @@ begin
      samind_jja&time = ispan(syear(ee),eyear(ee)-1,1)
      samind_jja      = dtrend_msg(ispan(0,dimsizes(samind_jja&time)-1,1),samind_jja,True,False)
      samind_jja      = dim_standardize(samind_jja,0)
+
+     cntr_hi         = 0
+     cntr_lo         = 0
+     cntr_mid        = 0
+     cntr_lo@_FillValue = default_fillvalue(typeof(cntr_lo))
+     cntr_mid@_FillValue = default_fillvalue(typeof(cntr_mid))
+     cntr_hi@_FillValue = default_fillvalue(typeof(cntr_hi))
+     do gg = 0,dimsizes(samind_jja)-1   
+        if (.not.ismissing(samind_jja(gg))) then    ; note that finsst_* indices 24:52 (Jan+0 -> May +2) are all that is shown in the hovmoller plots
+           if (samind_jja(gg).ge.0.75) then
+              cntr_hi = cntr_hi+1
+           end if
+           if (samind_jja(gg).ge.-0.25.and.samind_jja(gg).le.0.25) then
+              cntr_mid = cntr_mid+1
+           end if
+           if (samind_jja(gg).le.-0.75) then
+              cntr_lo = cntr_lo+1
+           end if
+        end if
+     end do
 
      psl = (/ dtrend_msg_n(ispan(0,dimsizes(psl&time)-1,1),psl,False,False,0) /)  
 
@@ -910,7 +930,7 @@ begin
      delete(samindT)
 ;-----------------------------------------------------------------------------------------
      iopt = 0                ; samind power spectra
-     jave = (7*nyr(ee))/100
+     jave = max((/5,(7*nyr(ee))/100/))
      val1 = .95
      val2 = .99
      pct = 0.1 
@@ -946,7 +966,7 @@ begin
               splt1&frequency@long_name = "power spectra frequency"
               splt1&frequency@units = "1"
               splt1@units_info = "df refers to frequency interval"
-              splt1@units = "hPa^2/df"
+              splt1@units = "1/df"
               splt1@comment_cvdp = "(0,:)=spectrum,(1,:)=Markov red noise spectrum, (2,:)="+val1+"% confidence bound for Markhov, (3,:)="+val2+"% confidence bound for Markhov"
               z->samind_spectra = set_varAtts(splt1,"samind power spectra","","")
            end if
@@ -1103,10 +1123,10 @@ begin
      xyres3 = xyres            ; resource list for monthly samind standard deviations
      xyres3@trXMinF = 0.5
      xyres3@trXMaxF = 12.5
+     xyres3@trYMinF = 0.0
+     xyres3@trYMaxF = 3.0
      xyres3@vpWidthF = 0.65
      xyres3@vpHeightF = 0.35
-     xyres3@trYMinF = 0.2
-     xyres3@trYMaxF = 2.0
      xyres3@gsnAboveYRefLineColor = "gray50"
      xyres3@xyLineColor = "black"
      if (wks_type.eq."png") then
@@ -1207,9 +1227,9 @@ begin
      arr(0,:) = (/ samind /)
      arr(1,:) = (/ runave_n(samind, 11, 0, 0) /)
      arr(2,:) = (/ (ispan(0,dimsizes(samind)-1,1)*tttt@slope)+tttt@y_intercept /)
-     xyres6@tiYAxisString  = ""      ; add an axis title
-     xyres6@tiXAxisString  = "Time"      ; add an axis title
-     xyres6@gsnRightString = "trend: "+ decimalPlaces(tttt@slope*dimsizes(samind),2,True)+samind@units+" "+nyr(ee)+"yr~S~-1~N~"
+     xyres6@tiYAxisString  = "SAM index"      ; add an axis title
+     xyres6@tiXAxisString  = ""      ; add an axis title
+     xyres6@gsnRightString = "trend: "+ decimalPlaces(tttt@slope*dimsizes(samind),2,True)+" "+samind@units+" "+nyr(ee)+"yr~S~-1~N~"
      xysamind(ee) = gsn_csm_xy(wks_samind,fspan(syear(ee),eyear(ee)+.91667,dimsizes(samind)),arr,xyres6) 
      delete(tttt)
  
@@ -1218,8 +1238,8 @@ begin
      arr(1,:) = (/ runave_n(sam_p40S, 11, 0, 0) /)
      arr(2,:) = (/ (ispan(0,dimsizes(sam_p40S)-1,1)*tttt@slope)+tttt@y_intercept /)
      xyres6@tiYAxisString  = sam_p40S@units      ; add an axis title
-     xyres6@tiXAxisString  = "Time"      ; add an axis title
-     xyres6@gsnRightString = "trend: "+ decimalPlaces(tttt@slope*dimsizes(sam_p40S),2,True)+sam_p40S@units+" "+nyr(ee)+"yr~S~-1~N~"
+     xyres6@tiXAxisString  = ""      ; add an axis title
+     xyres6@gsnRightString = "trend: "+ decimalPlaces(tttt@slope*dimsizes(sam_p40S),2,True)+" "+sam_p40S@units+" "+nyr(ee)+"yr~S~-1~N~"
      xyn3(ee) = gsn_csm_xy(wks_samind,fspan(syear(ee),eyear(ee)+.91667,dimsizes(sam_p40S)),arr,xyres6) 
      delete(tttt)
      
@@ -1228,21 +1248,21 @@ begin
      arr(1,:) = (/ runave_n(sam_p65S, 11, 0, 0) /)
      arr(2,:) = (/ (ispan(0,dimsizes(sam_p65S)-1,1)*tttt@slope)+tttt@y_intercept /)
      xyres6@tiYAxisString  = sam_p65S@units      ; add an axis title
-     xyres6@tiXAxisString  = "Time"      ; add an axis title
-     xyres6@gsnRightString = "trend: "+ decimalPlaces(tttt@slope*dimsizes(sam_p65S),2,True)+sam_p65S@units+" "+nyr(ee)+"yr~S~-1~N~"
+     xyres6@tiXAxisString  = ""      ; add an axis title
+     xyres6@gsnRightString = "trend: "+ decimalPlaces(tttt@slope*dimsizes(sam_p65S),2,True)+" "+ sam_p65S@units+" "+nyr(ee)+"yr~S~-1~N~"
      xyn4(ee) = gsn_csm_xy(wks_samind,fspan(syear(ee),eyear(ee)+.91667,dimsizes(sam_p65S)),arr,xyres6)
      delete(tttt)
 
      xyres61 = xyres6
      tttt = dtrend_msg(ispan(0,dimsizes(finpsl_mave(0,:))-1,1),finpsl_mave(0,:),False,True)
      arr(0,:) = (/ finpsl_mave(0,:) /)
-     arr(1,:) = (/ runave_n(finpsl_mave(0,:), 11, 0, 0) /)
+     arr(1,:) = (/ runave_n(finpsl_mave(0,:), 3, 0, 0) /)
      arr(2,:) = (/ (ispan(0,dimsizes(finpsl_mave(0,:))-1,1)*tttt@slope)+tttt@y_intercept /)
-     xyres61@trYMinF = -70.0
-     xyres61@trYMaxF = -20.0 
+     xyres61@trYMinF        = -65.0
+     xyres61@trYMaxF        = -35.0 
      xyres61@tiYAxisString  = "Latitude (degree)"      ; add an axis title
-     xyres61@tiXAxisString  = "Time"      ; add an axis title
-     xyres61@gsnRightString = "trend: "+ decimalPlaces(tttt@slope*dimsizes(finpsl_mave(0,:)),2,True)+finpsl_mave@units+" "+nyr(ee)+"yr~S~-1~N~"
+     xyres61@tiXAxisString  = ""      ; add an axis title
+     xyres61@gsnRightString = "trend: "+ decimalPlaces(tttt@slope*dimsizes(finpsl_mave(0,:)),2,True)+" " +finpsl_mave@units+" "+nyr(ee)+"yr~S~-1~N~"
      xyn5(ee) = gsn_csm_xy(wks_samind,fspan(syear(ee),eyear(ee)+.91667,dimsizes(finpsl_mave(0,:))),arr,xyres61)
      if(.not.isvar("xdum")) then
         xdum = new(1000,graphic)
@@ -1256,15 +1276,15 @@ begin
      xyres62 = xyres6
      tttt = avg(finpsl_tave(0,:))
      arr(0,:) = (/ finpsl_tave(0,:) /)
-     arr(1,:) = (/ runave_n(finpsl_tave(0,:), 11, 0, 0) /)
+     arr(1,:) = (/ runave_n(finpsl_tave(0,:), 3, 0, 0) /)
      arr(2,:) = (/ tttt/)
-     xyres62@trYMinF = -70.0 
-     xyres62@trYMaxF = -20.0 
+     xyres62@trYMinF = -65.0 
+     xyres62@trYMaxF = -35.0 
      xyres62@trXMinF = tofloat(min(finpsl_tave&lon))
      xyres62@trXMaxF = tofloat(max(finpsl_tave&lon))
      xyres62@tiYAxisString  = "Latitude (degree)"      ; add an axis title    
      xyres62@tiXAxisString  = "Longitude (degree)"      ; add an axis title
-     xyres62@gsnRightString = "mean: "+ decimalPlaces(tttt,2,True)+finpsl_mave@units
+     xyres62@gsnRightString = "mean: "+ decimalPlaces(tttt,2,True)+" "+ finpsl_mave@units
      xyn6(ee) = gsn_csm_xy(wks_samind,finpsl_tave&lon,arr,xyres62)
      if(.not.isvar("xdum")) then
         xdum = new(1000,graphic)
@@ -1279,9 +1299,9 @@ begin
      arr(0,:) = (/ aslind /)
      arr(1,:) = (/ runave_n(aslind, 11, 0, 0) /)
      arr(2,:) = (/ (ispan(0,dimsizes(aslind)-1,1)*tttt@slope)+tttt@y_intercept /)
-     xyres6@tiYAxisString  = ""      ; add an axis title
-     xyres6@tiXAxisString  = "Time"      ; add an axis title
-     xyres6@gsnRightString = "trend: "+ decimalPlaces(tttt@slope*dimsizes(aslind),2,True)+aslind@units+" "+nyr(ee)+"yr~S~-1~N~"
+     xyres6@tiYAxisString  = "ASL index"      ; add an axis title
+     xyres6@tiXAxisString  = ""      ; add an axis title
+     xyres6@gsnRightString = "trend: "+ decimalPlaces(tttt@slope*dimsizes(aslind),2,True)+" "+aslind@units+" "+nyr(ee)+"yr~S~-1~N~"
      xytna(ee) = gsn_csm_xy(wks_aslind,fspan(syear(ee),eyear(ee)+.91667,dimsizes(aslind)),arr,xyres6)
      delete(tttt)
      
@@ -1290,7 +1310,7 @@ begin
      arr(1,:) = (/ runave_n(asl_clat, 11, 0, 0) /)
      arr(2,:) = (/ (ispan(0,dimsizes(asl_clat)-1,1)*tttt@slope)+tttt@y_intercept /)
      xyres6@tiYAxisString  = "Latitude (degree)"  ;  add an axis title
-     xyres6@tiXAxisString  = "Time"      ; add an axis title
+     xyres6@tiXAxisString  = ""      ; add an axis title
      xyres6@gsnRightString = "trend: "+ decimalPlaces(tttt@slope*dimsizes(asl_clat),2,True)+asl_clat@units+" "+nyr(ee)+"yr~S~-1~N~"
      xytsa(ee) = gsn_csm_xy(wks_aslind,fspan(syear(ee),eyear(ee)+.91667,dimsizes(asl_clat)),arr,xyres6)
      delete(tttt)
@@ -1300,7 +1320,7 @@ begin
      arr(1,:) = (/ runave_n(asl_clon, 11, 0, 0) /)
      arr(2,:) = (/ (ispan(0,dimsizes(asl_clon)-1,1)*tttt@slope)+tttt@y_intercept /)
      xyres6@tiYAxisString  = "Longitude (degree)"      ; add an axis title
-     xyres6@tiXAxisString  = "Time"      ; add an axis title
+     xyres6@tiXAxisString  = ""      ; add an axis title
      xyres6@gsnRightString = "trend: "+decimalPlaces(tttt@slope*dimsizes(asl_clon),2,True)+asl_clon@units+" "+nyr(ee)+"yr~S~-1~N~"
      xytio(ee) = gsn_csm_xy(wks_aslind,fspan(syear(ee),eyear(ee)+.91667,dimsizes(asl_clon)),arr,xyres6)
      delete(tttt)
@@ -1310,7 +1330,7 @@ begin
      arr(1,:) = (/ runave_n(asl_cpsl, 11, 0, 0) /)
      arr(2,:) = (/ (ispan(0,dimsizes(asl_cpsl)-1,1)*tttt@slope)+tttt@y_intercept /)
      xyres6@tiYAxisString  = asl_cpsl@units      ; add an axis title
-     xyres6@tiXAxisString  = "Time"      ; add an axis title
+     xyres6@tiXAxisString  = ""      ; add an axis title
      xyres6@gsnRightString = "trend: "+decimalPlaces(tttt@slope*dimsizes(asl_cpsl),2,True)+asl_cpsl@units+" "+nyr(ee)+"yr~S~-1~N~"
      xyiod(ee) = gsn_csm_xy(wks_aslind,fspan(syear(ee),eyear(ee)+.91667,dimsizes(asl_cpsl)),arr,xyres6)
      delete([/tttt/])
@@ -1320,7 +1340,7 @@ begin
      arr(1,:) = (/ runave_n(asl_rmpsl, 11, 0, 0) /)
      arr(2,:) = (/ (ispan(0,dimsizes(asl_rmpsl)-1,1)*tttt@slope)+tttt@y_intercept /)
      xyres6@tiYAxisString  = asl_rmpsl@units      ; add an axis title
-     xyres6@tiXAxisString  = "Time"      ; add an axis title
+     xyres6@tiXAxisString  = ""      ; add an axis title
      xyres6@gsnRightString = "trend: "+decimalPlaces(tttt@slope*dimsizes(asl_rmpsl),2,True)+asl_rmpsl@units+" "+nyr(ee)+"yr~S~-1~N~"
      xysocn(ee) = gsn_csm_xy(wks_aslind,fspan(syear(ee),eyear(ee)+.91667,dimsizes(asl_rmpsl)),arr,xyres6)
      delete([/tttt/])
@@ -1330,7 +1350,7 @@ begin
      arr(1,:) = (/ runave_n(asl_rcpsl, 11, 0, 0) /)
      arr(2,:) = (/ (ispan(0,dimsizes(asl_rcpsl)-1,1)*tttt@slope)+tttt@y_intercept /)
      xyres6@tiYAxisString  = asl_rcpsl@units      ; add an axis title
-     xyres6@tiXAxisString  = "Time"      ; add an axis title
+     xyres6@tiXAxisString  = ""      ; add an axis title
      xyres6@gsnRightString = "trend: "+decimalPlaces(tttt@slope*dimsizes(asl_rcpsl),2,True)+asl_rcpsl@units+" "+nyr(ee)+"yr~S~-1~N~"
      xyamm(ee) = gsn_csm_xy(wks_aslind,fspan(syear(ee),eyear(ee)+.91667,dimsizes(asl_rcpsl)),arr,xyres6)
      delete([/tttt/])
@@ -1364,8 +1384,8 @@ begin
      arr2     = -1
      xyres5@trYMinF = -3.0 
      xyres5@trYMaxF =  3.0
-     xyres5@tiYAxisString  = ""          ; add an axis title
-     xyres5@tiXAxisString  = "Time"      ; add an axis title
+     xyres5@tiYAxisString  = "SAM index"          ; add an axis title
+     xyres5@tiXAxisString  = ""      ; add an axis title
      xyres5@gsnRightString = "trend: "+decimalPlaces(tttt@slope*dimsizes(samind_rn),2,True)+samind_rn@units+" "+nyr(ee)+"yr~S~-1~N~"
      xyn12(ee) = gsn_csm_xy(wks_samind,fspan(syear(ee),eyear(ee)+.91667,dimsizes(samind_rn)),arr(0,:),xyres5)
      if(.not.isvar("dum")) then 
@@ -1374,8 +1394,8 @@ begin
      dum(ee)     = gsn_add_polyline(wks_samind,xyn12(ee),fspan(syear(ee),eyear(ee)+.91667,dimsizes(samind_rn)),arr0,gsLine) 
      dum(ee+100) = gsn_add_polyline(wks_samind,xyn12(ee),fspan(syear(ee),eyear(ee)+.91667,dimsizes(samind_rn)),arr1,gsLin0)
      dum(ee+200) = gsn_add_polyline(wks_samind,xyn12(ee),fspan(syear(ee),eyear(ee)+.91667,dimsizes(samind_rn)),arr2,gsLin1)
-     dum(ee+300) = gsn_add_text(wks_samind,xyn12(ee),"SAM (+)",syear(ee)+0.2, 2.50, txre0)
-     dum(ee+400) = gsn_add_text(wks_samind,xyn12(ee),"SAM (-)",syear(ee)+0.2,-2.50, txre1)
+     dum(ee+300) = gsn_add_text(wks_samind,xyn12(ee),"SAM (+) " + num(samind_rn.ge.1),syear(ee)+0.2, 2.50, txre0)
+     dum(ee+400) = gsn_add_text(wks_samind,xyn12(ee),"SAM (-) " + num(samind_rn.le.-1),syear(ee)+0.2,-2.50, txre1)
      delete([/xyres5,gsLine,gsLin0,gsLin1,txre0,txre1/])
      delete([/arr,tttt,arr0,arr1,arr2/])
  
@@ -1388,7 +1408,7 @@ begin
      xyres3@gsnRightStringFontHeightF = xyres3@gsnCenterStringFontHeightF
      xyres3@gsnLeftString = syear(ee)+"-"+eyear(ee)
      xyres3@gsnCenterString = names(ee)
-     xyres3@gsnRightString = "C"
+     xyres3@gsnRightString = "norm. SAM index"
      if (max(samind_mon_sd).gt.xyres3@gsnYRefLine) then
         xysamind_mst(ee) = gsn_csm_xy(wks_samind_mst,ispan(1,12,1),samind_mon_sd,xyres3)
      end if
@@ -1536,18 +1556,18 @@ begin
      wres@cnLineLabelsOn = False
      wres@cnInfoLabelOn = False
      wres@trYReverse = True
-     wres@trYMinF = 1.0
+     wres@trYMinF = 0.1
      wres@trYMaxF = (nyr(ee)/2) - (nyr(ee)*0.05)
      wres@tmYLOn = True
      wres@tmYLMode = "Explicit"
      if (nyr(ee).lt.200) then
-        wres@tmYLValues = (/1,2,3,5,10,20,50,100,150/)
+        wres@tmYLValues = (/0.1,0.2,0.5,1,2,5,10,20,50,100,150/)
      else
         wres@tmYLValues = (/1,5,10,50,100,200,500,1000,2000,5000,10000/)
      end if
      wres@tmYLLabels = wres@tmYLValues
      wres@cnLevelSelectionMode = "ExplicitLevels"
-     wres@cnLevels = ispan(0,40,5)
+     wres@cnLevels = ispan(0,40,4)
      if (COLORMAP.eq.0) then
         wres@cnFillPalette = "precip3_16lev"
      else
@@ -1618,14 +1638,18 @@ begin
      end if
      delete([/wres,wsres,wavecoi/])
 ;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-     pres = True
-     pres@vpXF = 0.07
-     pres@trYMinF = 0.
-     pres@trXMinF = 0.0
-;     pres@trYMaxF = 82.
-     pres@trXMaxF = 0.0832
+     pres               = True
+     pres@vpWidthF      = 0.7
+     pres@vpHeightF     = 0.5
+     pres@vpXF          = 0.07
+     pres@trYMinF       = 0.1
+;    pres@trYMaxF       = 82.
+     pres@trYLog        = True
+     pres@trXLog        = True
+     pres@trXMinF       = 0.01
+     pres@trXMaxF       = 0.3  ;maxx ;0.0832
      pres@tiYAxisString = "Power"              ; yaxis
-     pres@xyLineColor   =  "black"         
+     pres@xyLineColor   =  "black"
      pres@gsnFrame      = False
      pres@gsnDraw       = False
   
@@ -1648,13 +1672,16 @@ begin
      pres@tmXUseBottom = False
      pres@tmXTMode   = "Explicit"  
      pres@tmXBMode   = "Explicit"            
-     pres@tmXTValues = (/".00167",".00833",".01667",".02778",".0416",".0556",".0832"/)
-     pres@tmXTLabels = (/"50","10","5","3","2","1.5","1"/)           
-     pres@tmXBValues = (/".0",".01",".02",".03",".042",".056",".083"/)
-     pres@tmXBLabels =     pres@tmXBValues
-     pres@tmXTLabelFontHeightF = 0.018
-     pres@tmXBLabelFontHeightF = 0.018
-     pres@tmYLLabelFontHeightF = 0.018
+     pres@tmXTLabels = (/50, 40, 30, 25, 20, 15, 10, 8, 5, 3, 2, 1, 0.5, 0.2, 0.1/)
+                      ;(/    "50",    "10",     "5",     "3",    "2",  "1.5",    "1"/)
+     pres@tmXTValues = 1.0 / (12.0*pres@tmXTLabels)
+                      ;(/".00167",".00833",".01667",".02778",".0416",".0556",".0832"/)
+     pres@tmXBValues = (/.01,   .02,  .03, .05,  .08,  0.12, 0.2, 0.3, 0.4, 0.5/)
+                      ;(/    ".0",   ".01",   ".02",   ".03", ".042", ".056", ".083"/)
+     pres@tmXBLabels = pres@tmXBValues
+     pres@tmXTLabelFontHeightF = 0.020
+     pres@tmXBLabelFontHeightF = 0.020
+     pres@tmYLLabelFontHeightF = 0.020
      pres@tiYAxisString = "Power (hPa~S~2~N~ / cycles mo~S~-1~N~)"              ; yaxis
      pres@tiXAxisString = "Frequency (cycles mo~S~-1~N~)"
      pres@tiMainString = ""
@@ -1676,29 +1703,34 @@ begin
            mval = max(splt1(0,:))
         end if
         if (mval.lt.70) then
-           pres@trYMaxF = 75.
-           pres@tmYLMode = "Explicit"
-           pres@tmYLValues = (/0,25,50,75/)
-           pres@tmYLLabels = pres@tmYLValues
-           pres@tmYLMinorValues = ispan(5,70,5)
+           pres@trYMaxF         = 75.
+           pres@tmYLMode        = "Explicit"
+           pres@tmYLValues      = 10^fspan(-4,4,9) ;(/0,50,100,150/)
+           pres@tmYLLabels      = 10^fspan(-4,4,9) ;pres@tmYLValues
+           pres@tmYLMinorValues = 10^(/-3,-2.5,-2,-1.5,-1,-0.5,0,0.5,1,1.5,2/) ;ispan(10,140,10)
         end if
         if (mval.ge.70.and.mval.lt.145) then
-           pres@trYMaxF = 150.
-           pres@tmYLMode = "Explicit"
-           pres@tmYLValues = (/0,50,100,150/)
-           pres@tmYLLabels = pres@tmYLValues
-           pres@tmYLMinorValues = ispan(10,140,10)
+           pres@trYMaxF         = 150.
+           pres@trYMinF         = 0.05
+           pres@tmYLMode        = "Explicit"
+           pres@tmYLValues      = 10^fspan(-4,4,9) ;(/0,50,100,150/)
+           pres@tmYLLabels      = 10^fspan(-4,4,9) ;pres@tmYLValues
+           pres@tmYLMinorValues = 10^(/-3,-2.5,-2,-1.5,-1,-0.5,0,0.5,1,1.5,2/) ;ispan(10,140,10)
         end if
         if (mval.ge.145) then
-           pres@trYMaxF = mval+15.
+           pres@trYMaxF         = mval+15.
+           pres@trYMinF         = 0.05
+           pres@tmYLMode        = "Explicit"
+           pres@tmYLValues      = 10^fspan(-4,4,9) ;(/0,50,100,150/)
+           pres@tmYLLabels      = 10^fspan(-4,4,9) ;pres@tmYLValues
+           pres@tmYLMinorValues = 10^(/-3,-2.5,-2,-1.5,-1,-0.5,0,0.5,1,1.5,2/) ;ispan(10,140,10)
         end if
-        pres@trYMaxF = 100. 
         delete(mval)
      end if
      
      pres@tiMainOn = False
      pres@gsnCenterString = "Period (years)"
-     pres@gsnCenterStringFontHeightF =    pres@tiYAxisFontHeightF
+     pres@gsnCenterStringFontHeightF =   pres@tiYAxisFontHeightF + 0.005
      pres@gsnRightStringFontHeightF =    pres@tiYAxisFontHeightF - 0.005
      pres@gsnRightString = syear(ee)+"-"+eyear(ee)+"  "
      pres@gsnLeftString = "" 
@@ -1738,7 +1770,7 @@ begin
      scres@gsnFrame     = False
      
      scres@cnLevelSelectionMode = "ExplicitLevels"
-     scres@cnLevels = (/-4,-3,-2,-1.5,-1,-.5,-.25,0,.25,.5,1,1.5,2,3.,4/)
+     scres@cnLevels = (/-3,-2.5,-2,-1.5,-1,-.5,-.25,0,.25,.5,1,1.5,2,2.5,3/)
 
      scres@cnLineLabelsOn = False
      scres@cnFillOn        = True
@@ -1755,7 +1787,12 @@ begin
      scres@gsnLeftStringParallelPosF = .005
      scres@gsnRightStringOrthogonalPosF = -0.05
      scres@gsnRightStringParallelPosF = 0.96
-     scres@gsnRightString = ""
+     if (isvar("cntr_hi")) then
+        scres@gsnRightString = cntr_hi+"/"+cntr_lo  ; list number of El Nino / La Nina events that formed composites
+        delete([/cntr_hi,cntr_lo,cntr_mid/])
+     else
+        scres@gsnRightString = ""
+     end if
      scres@gsnLeftString = ""
      scres@gsnLeftStringFontHeightF = 0.014
      scres@gsnCenterStringFontHeightF = 0.018
@@ -1764,7 +1801,7 @@ begin
      scres4 = scres    ; scres4 = ppt composite resources     
      delete(scres4@cnLevels)
      if (COLORMAP.eq.0) then
-        scres4@cnLevels = (/-10,-8,-6,-4,-3,-2,-1,-.5,-.25,0,.25,.5,1,2,3,4,6,8,10/)     
+        scres4@cnLevels = (/-7,-6,-5,-4,-3,-2,-1,-.5,-.25,0,.25,.5,1,2,3,4,5,6,7/)     
      else
         scres4@cnLevels = (/-5,-3,-2,-1,-.5,0,.5,1,2,3,5/)     
      end if
@@ -2080,31 +2117,29 @@ begin
   panres2@lbLabelStride = 1
   panres2@pmLabelBarWidthF = 0.4
   panres2@pmLabelBarHeightF = 0.04
-  panres@pmLabelBarOrthogonalPosF = -0.03
+  panres2@pmLabelBarOrthogonalPosF = -0.02
   panres2@txString = ""   
-
   if (nsim.le.4) then
      if (nsim.eq.1) then
         panres2@txFontHeightF = 0.022
         panres2@gsnPanelBottom = 0.50
-        panres@lbLabelFontHeightF = 0.018
-        panres@lbTitleFontHeightF = 0.018
+        panres2@lbLabelFontHeightF = 0.016
+        panres2@lbTitleFontHeightF = 0.016
      else
         panres2@txFontHeightF = 0.0145
         panres2@gsnPanelBottom = 0.50
-        panres2@lbLabelFontHeightF = 0.012
-        panres2@lbTitleFontHeightF = 0.012
+        panres2@lbLabelFontHeightF = 0.010
+        panres2@lbTitleFontHeightF = 0.010
      end if
   else
-     panres2@txFontHeightF      = 0.012
-     panres2@gsnPanelBottom     = 0.05
-     panres2@lbLabelFontHeightF = 0.008
-     panres2@lbTitleFontHeightF = 0.008
+     panres2@txFontHeightF = 0.016
+     panres2@gsnPanelBottom = 0.05
+     panres2@lbLabelFontHeightF = 0.010
+     panres2@lbTitleFontHeightF = 0.010
   end if
 
   panres2@lbTitleOn = True
   panres2@lbTitlePosition = "Bottom"
-
   panres2@lbTitleString = "Latitude (degree)"
   panres2@txString = "SAM Latitude Position (degree)"
   gsn_panel2(wks_samlat_tlon,plot_samlat,(/nrow,ncol/),panres2)   
@@ -2122,6 +2157,7 @@ begin
      panres@txFontHeightF = 0.016
      panres@gsnPanelBottom = 0.05
   end if  
+
   panres@gsnPanelYWhiteSpacePercent = 3.0
   panres@txString = "SAM (Marshall) index (Monthly, detrended)"
   gsn_panel2(wks_samind_p,pspec,(/nrow,ncol/),panres)  
@@ -2133,13 +2169,25 @@ begin
   gsn_panel2(wks_samind_p,plot_wave34,(/nrow,ncol/),panres2)  
   delete(wks_samind_p)
 
+  if (nsim.le.4) then
+     if (nsim.eq.1) then
+        panres2@lbLabelFontHeightF = 0.018
+        panres2@lbTitleFontHeightF = 0.018
+     else
+        panres2@lbLabelFontHeightF = 0.012
+        panres2@lbTitleFontHeightF = 0.012
+     end if
+  else
+     panres2@lbLabelFontHeightF = 0.012
+     panres2@lbTitleFontHeightF = 0.012
+  end if
   delete(panres2@gsnPanelYWhiteSpacePercent)
   panres2@pmLabelBarWidthF = 0.8
   panres2@lbLabelAutoStride = False
   panres2@gsnPanelXWhiteSpacePercent = 8.5
   if (any(.not.ismissing(map_samindsc_jja0))) then
      panres2@lbTitleString = "SST/TAS (C)"
-     panres2@pmLabelBarOrthogonalPosF = -0.05
+     panres2@pmLabelBarOrthogonalPosF = -0.02
      panres2@txString = "SAM (Marshall) SST,TAS,PSL Spatial Composite (JJA~S~0~N~)"
      gsn_panel2(wks_samindsc,map_samindsc_jja0,(/nrow,ncol/),panres2)   
   
@@ -2156,6 +2204,8 @@ begin
      delete([/map_samindsc_djf1,map_samindsc_jja0,map_samindsc_son0,map_samindsc_mam1/])
   end if     
   if (any(.not.ismissing(map_samindsc_ppt_jja0))) then
+     panres2@lbTitleString = "PR (mm/day)"
+     panres2@pmLabelBarOrthogonalPosF = -0.02
      panres2@txString = "SAM (Marshall) PR Spatial Composite (JJA~S~0~N~)"
      gsn_panel2(wks_samindsc_ppt,map_samindsc_ppt_jja0,(/nrow,ncol/),panres2)   
   

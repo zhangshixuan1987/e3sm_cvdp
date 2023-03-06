@@ -53,12 +53,12 @@ begin
   wks_trends_mon = gsn_open_wks(wks_type,getenv("OUTDIR")+"snd.trends.mon")
 
   if (COLORMAP.eq.0) then
-     gsn_define_colormap(wks_trends_djf,"ncl_default")
-     gsn_define_colormap(wks_trends_mam,"ncl_default")
-     gsn_define_colormap(wks_trends_jja,"ncl_default")
-     gsn_define_colormap(wks_trends_son,"ncl_default")
-     gsn_define_colormap(wks_trends_ann,"ncl_default")
-     gsn_define_colormap(wks_trends_mon,"ncl_default")
+     gsn_define_colormap(wks_trends_djf,"BlueYellowRed")
+     gsn_define_colormap(wks_trends_mam,"BlueYellowRed")
+     gsn_define_colormap(wks_trends_jja,"BlueYellowRed")
+     gsn_define_colormap(wks_trends_son,"BlueYellowRed")
+     gsn_define_colormap(wks_trends_ann,"BlueYellowRed")
+     gsn_define_colormap(wks_trends_mon,"BlueYellowRed")
   end if
   if (COLORMAP.eq.1) then
      gsn_define_colormap(wks_trends_djf,"BlueDarkRed18")
@@ -207,7 +207,7 @@ begin
      snd_trends_ann = where(abs(snd_trends_ann).le..005,snd_trends_ann@_FillValue,snd_trends_ann)      ; areas w/very very small trends..
      snd_trends_mon = where(abs(snd_trends_mon).le..005,snd_trends_mon@_FillValue,snd_trends_mon)
 ;========================================================================
-;     cmap = read_colormap_file("ncl_default")
+;     cmap = read_colormap_file("BlueYellowRed")
      
      
      res = True

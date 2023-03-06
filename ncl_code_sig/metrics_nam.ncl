@@ -50,7 +50,7 @@ end
 
 
 begin
-  print("Starting: metrics_nino34.ncl")
+  print("Starting: metrics_nam.ncl")
   
   nclver = stringtochar(get_ncl_version())   ; check NCL version to turn off error messages
   num0 = toint(tostring(nclver(0)))    
@@ -89,32 +89,32 @@ begin
   seas = (/"djf", "mam", "jja", "son", "ann", "mon"/)
   nsea = dimsizes(seas)
 
-  mods = (/"nino34"/)
+  mods = (/"nam"/)
   nmod = dimsizes(mods)
 
   vars = (/"psl","sst","trefht","prect","u10","v10","taux","tauy","shflx","lhflx", "eth", \
               "swcre","olr","cldtot","u850","v850","th850","z500","u200","v200"/)
   nvar = dimsizes(vars)
 
-  files = "nino34"+"_"+vars + "_regpatt"
-  files = "metrics.sst."+files
+  files = "nam"+"_"+vars + "_regpatt"
+  files = "metrics.psl."+files
   files = files+".txt"
   do gg = 0,dimsizes(files)-1
      if (.not.fileexists(OUTDIR+files(gg))) then
         if(vars(gg).eq."sst") then 
-          ftmp = str_sub_str(files(gg),"_sst_","_ts_") 
+          ftmp = str_sub_str(files(gg),"sst","ts") 
          ;print(ftmp)
           if (fileexists(OUTDIR+ftmp)) then 
              files(gg) = ftmp
           else 
             print(files(gg))
-            print("1 or more metrics files missing, cannot create summary metrics tables, exiting metrics_nino34.ncl")
+            print("1 or more metrics files missing, cannot create summary metrics tables, exiting metrics_nam.ncl")
             exit
           end if  
           delete(ftmp)
         else 
           print(files(gg))
-          print("1 or more metrics files missing, cannot create summary metrics tables, exiting metrics_nino34.ncl")
+          print("1 or more metrics files missing, cannot create summary metrics tables, exiting metrics_nam.ncl")
           exit
         end if 
      end if
@@ -352,7 +352,7 @@ begin
         wks_type@wkHeight = 4000  
      end if
      fac_font = 0.65
-     wks = gsn_open_wks(wks_type,OUTDIR+"table_nino34_regpatt")  ; send graphics to PNG file
+     wks = gsn_open_wks(wks_type,OUTDIR+"table_nam_regpatt")  ; send graphics to PNG file
      gsn_merge_colormaps(wks,"cmp_b2r","gsltod") 
 
      resb                         = True    ; resource list for blank plot that gsn_table will be overlaid on
@@ -559,13 +559,13 @@ begin
      frame(wks)
      delete([/namesF,rmsF,int_s,rms/])
      delete(wks)
-     fils = systemfunc("ls "+OUTDIR+"table_nino34_regpatt*") 
+     fils = systemfunc("ls "+OUTDIR+"table_nam_regpatt*") 
      do gg = 0,dimsizes(fils)-1
-        system("convert -density 2400 -trim +repage -bordercolor white -border 20 "+fils(gg) + " " + OUTDIR+"table_nino34_regpatt_"+gg+".png")
+        system("convert -density 2400 -trim +repage -bordercolor white -border 20 "+fils(gg) + " " + OUTDIR+"table_nam_regpatt_"+gg+".png")
      end do
-     system("mv " + OUTDIR+"table_nino34_regpatt_0.png" + " " + OUTDIR+"metrics.table_"+mods(jx)+"_patcor_"+seas(ix)+".png")
-     system("mv " + OUTDIR+"table_nino34_regpatt_1.png" + " " + OUTDIR+"metrics.table_"+mods(jx)+"_patrms_"+seas(ix)+".png")
-     system("rm "+OUTDIR+"table_nino34_regpatt.*.png")
+     system("mv " + OUTDIR+"table_nam_regpatt_0.png" + " " + OUTDIR+"metrics.table_"+mods(jx)+"_patcor_"+seas(ix)+".png")
+     system("mv " + OUTDIR+"table_nam_regpatt_1.png" + " " + OUTDIR+"metrics.table_"+mods(jx)+"_patrms_"+seas(ix)+".png")
+     system("rm "+OUTDIR+"table_nam_regpatt.*.png")
      delete(fils)
      system("rm "+OUTDIR+"table*.png")
   end if
@@ -574,6 +574,6 @@ begin
  end do 
 
  delete([/patcor_rms,names,nsim/])
- print("Finished: metrics_nino34.ncl")
+ print("Finished: metrics_nam.ncl")
 
 end

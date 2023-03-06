@@ -74,12 +74,12 @@ begin
   wks_iceext_mon = gsn_open_wks(wks_type,getenv("OUTDIR")+"aice.extent.mon")
  
   if (COLORMAP.eq.0) then
-     gsn_define_colormap(wks_trends_djf,"ncl_default")   
-     gsn_define_colormap(wks_trends_mam,"ncl_default")  
-     gsn_define_colormap(wks_trends_jja,"ncl_default") 
-     gsn_define_colormap(wks_trends_son,"ncl_default") 
-     gsn_define_colormap(wks_trends_ann,"ncl_default") 
-     gsn_define_colormap(wks_trends_mon,"ncl_default") 
+     gsn_define_colormap(wks_trends_djf,"BlueYellowRed")   
+     gsn_define_colormap(wks_trends_mam,"BlueYellowRed")  
+     gsn_define_colormap(wks_trends_jja,"BlueYellowRed") 
+     gsn_define_colormap(wks_trends_son,"BlueYellowRed") 
+     gsn_define_colormap(wks_trends_ann,"BlueYellowRed") 
+     gsn_define_colormap(wks_trends_mon,"BlueYellowRed") 
   end if
   if (COLORMAP.eq.1) then
      gsn_define_colormap(wks_trends_djf,"BlueDarkRed18")     
