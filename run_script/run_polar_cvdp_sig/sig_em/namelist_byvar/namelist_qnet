@@ -1,0 +1,6 @@
+ERA5-Qn_SRFmmm | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/ERA5/ERA5.enmn.Qn_SRF.197901-201412.nc | 1985 | 2014 | 0-Observations
+CMIP6_MME-AMIP  mmm | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/CMIP6_MME/amip/CMIPMME/CMIP6_MME.amip.enmn.Qn_SRF.197901-201412.nc | 1985 | 2014 | 1-CMIP6_MME-AMIP
+NCAR_CESM2-AMIP  mmm | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/CESM_ENS/amip/NCAR_CESM2/NCAR_CESM2.amip.enmn.Qn_SRF.197901-201412.nc | 1985 | 2014 | 2-NCAR_CESM2-AMIP
+v1.LR-AMIP  mmm | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/v1.LR.amip/v1.LR.amip.enmn.Qn_SRF.197901-201412.nc | 1985 | 2014 | 3-v1.LR-AMIP
+v2.LR-AMIP  mmm | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/v2.LR.amip/v2.LR.amip.enmn.Qn_SRF.197901-201412.nc | 1985 | 2014 | 4-v2.LR-AMIP
+v3.LR-AMIP  mmm | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/v3.LR.amip.FourthSmoke/v3.LR.amip.FourthSmoke.en00.Qn_SRF.198501-201412.nc | 1985 | 2014 | 5-v3.LR-AMIP

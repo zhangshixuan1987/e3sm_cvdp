@@ -1,0 +1,16 @@
+PRECT  | ERA5-PRECTem  | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/ERA5/ERA5.enmn.PRECT.197901-201412.nc  | 1985 | 2014
+PSL    | ERA5-PSLem    | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/ERA5/ERA5.enmn.PSL.197901-201412.nc    | 1985 | 2014
+TS     | ERA5-TSem     | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/ERA5/ERA5.enmn.TS.197901-201412.nc     | 1985 | 2014
+TREFHT | ERA5-TREFHTem | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/ERA5/ERA5.enmn.TREFHT.197901-201412.nc | 1985 | 2014
+LHFLX  | ERA5-LHFLXem  | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/ERA5/ERA5.enmn.LHFLX.197901-201412.nc  | 1985 | 2014
+SHFLX  | ERA5-SHFLXem  | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/ERA5/ERA5.enmn.SHFLX.197901-201412.nc  | 1985 | 2014
+U10    | ERA5-U10em    | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/ERA5/ERA5.enmn.U10.197901-201412.nc    | 1985 | 2014
+V10    | ERA5-V10em    | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/ERA5/ERA5.enmn.V10.197901-201412.nc    | 1985 | 2014
+S10    | ERA5-S10em    | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/ERA5/ERA5.enmn.S10.197901-201412.nc    | 1985 | 2014
+U850   | ERA5-U850em   | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/ERA5/ERA5.enmn.U850.197901-201412.nc   | 1985 | 2014
+V850   | ERA5-V850em   | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/ERA5/ERA5.enmn.V850.197901-201412.nc   | 1985 | 2014
+TAUX   | ERA5-TAUXem   | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/ERA5/ERA5.enmn.TAUX.197901-201412.nc   | 1985 | 2014
+TAUY   | ERA5-TAUYem   | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/ERA5/ERA5.enmn.TAUY.197901-201412.nc   | 1985 | 2014
+TMQ    | ERA5-TMQem    | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/ERA5/ERA5.enmn.TMQ.197901-201412.nc    | 1985 | 2014
+CLDTOT | ERA5-CLDTOTem | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/ERA5/ERA5.enmn.CLDTOT.197901-201412.nc | 1985 | 2014
+Z500   | ERA5-Z500em   | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/ERA5/ERA5.enmn.Z500.197901-201412.nc   | 1985 | 2014

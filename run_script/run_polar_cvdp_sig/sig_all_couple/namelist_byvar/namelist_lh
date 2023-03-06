@@ -1,0 +1,59 @@
+ERA5-LHFLX00 | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/ERA5/ERA5.en00.LHFLX.197901-201412.nc | 1985 | 2014 | 0-Observations
+ERA5-LHFLX01 | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/ERA5/ERA5.en01.LHFLX.197901-201412.nc | 1985 | 2014 | 0-Observations
+ERA5-LHFLX02 | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/ERA5/ERA5.en02.LHFLX.197901-201412.nc | 1985 | 2014 | 0-Observations
+ERA5-LHFLX03 | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/ERA5/ERA5.en03.LHFLX.197901-201412.nc | 1985 | 2014 | 0-Observations
+ERA5-LHFLX04 | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/ERA5/ERA5.en04.LHFLX.197901-201412.nc | 1985 | 2014 | 0-Observations
+ERA5-LHFLX05 | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/ERA5/ERA5.en05.LHFLX.197901-201412.nc | 1985 | 2014 | 0-Observations
+ERA5-LHFLX06 | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/ERA5/ERA5.en06.LHFLX.197901-201412.nc | 1985 | 2014 | 0-Observations
+ERA5-LHFLX07 | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/ERA5/ERA5.en07.LHFLX.197901-201412.nc | 1985 | 2014 | 0-Observations
+ERA5-LHFLX08 | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/ERA5/ERA5.en08.LHFLX.197901-201412.nc | 1985 | 2014 | 0-Observations
+ERA5-LHFLX09 | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/ERA5/ERA5.en09.LHFLX.197901-201412.nc | 1985 | 2014 | 0-Observations
+ERA5-LHFLX10 | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/ERA5/ERA5.en10.LHFLX.197901-201412.nc | 1985 | 2014 | 0-Observations
+AS-RCEC_TaiESM1 | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/CMIP6_MME/historical/AS-RCEC_TaiESM1/AS-RCEC_TaiESM1.historical.en00.LHFLX.197901-201412.nc | 1985 | 2014 | 1-CMIP6_MME-HISTORICAL
+BCC_BCC-CSM2-MR | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/CMIP6_MME/historical/BCC_BCC-CSM2-MR/BCC_BCC-CSM2-MR.historical.en00.LHFLX.197901-201412.nc | 1985 | 2014 | 1-CMIP6_MME-HISTORICAL
+BCC_BCC-ESM1 | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/CMIP6_MME/historical/BCC_BCC-ESM1/BCC_BCC-ESM1.historical.en00.LHFLX.197901-201412.nc | 1985 | 2014 | 1-CMIP6_MME-HISTORICAL
+CAMS_CAMS-CSM1-0 | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/CMIP6_MME/historical/CAMS_CAMS-CSM1-0/CAMS_CAMS-CSM1-0.historical.en00.LHFLX.197901-201412.nc | 1985 | 2014 | 1-CMIP6_MME-HISTORICAL
+CAS_CAS-ESM2-0 | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/CMIP6_MME/historical/CAS_CAS-ESM2-0/CAS_CAS-ESM2-0.historical.en00.LHFLX.197901-201412.nc | 1985 | 2014 | 1-CMIP6_MME-HISTORICAL
+CCCma_CanESM5 | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/CMIP6_MME/historical/CCCma_CanESM5/CCCma_CanESM5.historical.en00.LHFLX.197901-201412.nc | 1985 | 2014 | 1-CMIP6_MME-HISTORICAL
+DKRZ_MPI-ESM1-2-HR | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/CMIP6_MME/historical/DKRZ_MPI-ESM1-2-HR/DKRZ_MPI-ESM1-2-HR.historical.en00.LHFLX.197901-201412.nc | 1985 | 2014 | 1-CMIP6_MME-HISTORICAL
+DKRZ_MPI-ESM1-2-LR | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/CMIP6_MME/historical/DKRZ_MPI-ESM1-2-LR/DKRZ_MPI-ESM1-2-LR.historical.en00.LHFLX.197901-201412.nc | 1985 | 2014 | 1-CMIP6_MME-HISTORICAL
+E3SM-Project_E3SM-1-0 | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/CMIP6_MME/historical/E3SM-Project_E3SM-1-0/E3SM-Project_E3SM-1-0.historical.en00.LHFLX.197901-201412.nc | 1985 | 2014 | 1-CMIP6_MME-HISTORICAL
+E3SM-Project_E3SM-1-1 | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/CMIP6_MME/historical/E3SM-Project_E3SM-1-1/E3SM-Project_E3SM-1-1.historical.en00.LHFLX.197901-201412.nc | 1985 | 2014 | 1-CMIP6_MME-HISTORICAL
+E3SM-Project_E3SM-1-1-ECA | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/CMIP6_MME/historical/E3SM-Project_E3SM-1-1-ECA/E3SM-Project_E3SM-1-1-ECA.historical.en00.LHFLX.197901-201412.nc | 1985 | 2014 | 1-CMIP6_MME-HISTORICAL
+EC-Earth-Consortium_EC-Earth3 | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/CMIP6_MME/historical/EC-Earth-Consortium_EC-Earth3/EC-Earth-Consortium_EC-Earth3.historical.en00.LHFLX.197901-201412.nc | 1985 | 2014 | 1-CMIP6_MME-HISTORICAL
+EC-Earth-Consortium_EC-Earth3-Veg | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/CMIP6_MME/historical/EC-Earth-Consortium_EC-Earth3-Veg/EC-Earth-Consortium_EC-Earth3-Veg.historical.en00.LHFLX.197901-201412.nc | 1985 | 2014 | 1-CMIP6_MME-HISTORICAL
+HAMMOZ-Consortium_MPI-ESM-1-2-HAM | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/CMIP6_MME/historical/HAMMOZ-Consortium_MPI-ESM-1-2-HAM/HAMMOZ-Consortium_MPI-ESM-1-2-HAM.historical.en00.LHFLX.197901-201412.nc | 1985 | 2014 | 1-CMIP6_MME-HISTORICAL
+IPSL_IPSL-CM6A-LR | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/CMIP6_MME/historical/IPSL_IPSL-CM6A-LR/IPSL_IPSL-CM6A-LR.historical.en00.LHFLX.197901-201412.nc | 1985 | 2014 | 1-CMIP6_MME-HISTORICAL
+MIROC_MIROC6 | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/CMIP6_MME/historical/MIROC_MIROC6/MIROC_MIROC6.historical.en00.LHFLX.197901-201412.nc | 1985 | 2014 | 1-CMIP6_MME-HISTORICAL
+MRI_MRI-ESM2-0 | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/CMIP6_MME/historical/MRI_MRI-ESM2-0/MRI_MRI-ESM2-0.historical.en00.LHFLX.197901-201412.nc | 1985 | 2014 | 1-CMIP6_MME-HISTORICAL
+NASA-GISS_GISS-E2-1-G | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/CMIP6_MME/historical/NASA-GISS_GISS-E2-1-G/NASA-GISS_GISS-E2-1-G.historical.en00.LHFLX.197901-201412.nc | 1985 | 2014 | 1-CMIP6_MME-HISTORICAL
+NASA-GISS_GISS-E2-1-H | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/CMIP6_MME/historical/NASA-GISS_GISS-E2-1-H/NASA-GISS_GISS-E2-1-H.historical.en00.LHFLX.197901-201412.nc | 1985 | 2014 | 1-CMIP6_MME-HISTORICAL
+NCAR_CESM2 | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/CMIP6_MME/historical/NCAR_CESM2/NCAR_CESM2.historical.en00.LHFLX.197901-201412.nc | 1985 | 2014 | 1-CMIP6_MME-HISTORICAL
+NCAR_CESM2-FV2 | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/CMIP6_MME/historical/NCAR_CESM2-FV2/NCAR_CESM2-FV2.historical.en00.LHFLX.197901-201412.nc | 1985 | 2014 | 1-CMIP6_MME-HISTORICAL
+NCAR_CESM2-WACCM | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/CMIP6_MME/historical/NCAR_CESM2-WACCM/NCAR_CESM2-WACCM.historical.en00.LHFLX.197901-201412.nc | 1985 | 2014 | 1-CMIP6_MME-HISTORICAL
+NCAR_CESM2-WACCM-FV2 | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/CMIP6_MME/historical/NCAR_CESM2-WACCM-FV2/NCAR_CESM2-WACCM-FV2.historical.en00.LHFLX.197901-201412.nc | 1985 | 2014 | 1-CMIP6_MME-HISTORICAL
+NCC_NorCPM1 | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/CMIP6_MME/historical/NCC_NorCPM1/NCC_NorCPM1.historical.en00.LHFLX.197901-201412.nc | 1985 | 2014 | 1-CMIP6_MME-HISTORICAL
+NCC_NorESM2-LM | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/CMIP6_MME/historical/NCC_NorESM2-LM/NCC_NorESM2-LM.historical.en00.LHFLX.197901-201412.nc | 1985 | 2014 | 1-CMIP6_MME-HISTORICAL
+NCC_NorESM2-MM | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/CMIP6_MME/historical/NCC_NorESM2-MM/NCC_NorESM2-MM.historical.en00.LHFLX.197901-201412.nc | 1985 | 2014 | 1-CMIP6_MME-HISTORICAL
+NOAA-GFDL_GFDL-CM4 | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/CMIP6_MME/historical/NOAA-GFDL_GFDL-CM4/NOAA-GFDL_GFDL-CM4.historical.en00.LHFLX.197901-201412.nc | 1985 | 2014 | 1-CMIP6_MME-HISTORICAL
+NUIST_NESM3 | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/CMIP6_MME/historical/NUIST_NESM3/NUIST_NESM3.historical.en00.LHFLX.197901-201412.nc | 1985 | 2014 | 1-CMIP6_MME-HISTORICAL
+SNU_SAM0-UNICON | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/CMIP6_MME/historical/SNU_SAM0-UNICON/SNU_SAM0-UNICON.historical.en00.LHFLX.197901-201412.nc | 1985 | 2014 | 1-CMIP6_MME-HISTORICAL
+THU_CIESM | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/CMIP6_MME/historical/THU_CIESM/THU_CIESM.historical.en00.LHFLX.197901-201412.nc | 1985 | 2014 | 1-CMIP6_MME-HISTORICAL
+UA_MCM-UA-1-0 | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/CMIP6_MME/historical/UA_MCM-UA-1-0/UA_MCM-UA-1-0.historical.en00.LHFLX.197901-201412.nc | 1985 | 2014 | 1-CMIP6_MME-HISTORICAL
+NCAR_CESM2-HISTORICAL  #00 | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/CESM_ENS/historical/NCAR_CESM2/NCAR_CESM2.historical.en00.LHFLX.197901-201412.nc | 1985 | 2014 | 2-NCAR_CESM2-HISTORICAL
+NCAR_CESM2-HISTORICAL  #01 | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/CESM_ENS/historical/NCAR_CESM2/NCAR_CESM2.historical.en01.LHFLX.197901-201412.nc | 1985 | 2014 | 2-NCAR_CESM2-HISTORICAL
+NCAR_CESM2-HISTORICAL  #02 | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/CESM_ENS/historical/NCAR_CESM2/NCAR_CESM2.historical.en02.LHFLX.197901-201412.nc | 1985 | 2014 | 2-NCAR_CESM2-HISTORICAL
+NCAR_CESM2-HISTORICAL  #03 | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/CESM_ENS/historical/NCAR_CESM2/NCAR_CESM2.historical.en03.LHFLX.197901-201412.nc | 1985 | 2014 | 2-NCAR_CESM2-HISTORICAL
+NCAR_CESM2-HISTORICAL  #04 | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/CESM_ENS/historical/NCAR_CESM2/NCAR_CESM2.historical.en04.LHFLX.197901-201412.nc | 1985 | 2014 | 2-NCAR_CESM2-HISTORICAL
+NCAR_CESM2-HISTORICAL  #05 | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/CESM_ENS/historical/NCAR_CESM2/NCAR_CESM2.historical.en05.LHFLX.197901-201412.nc | 1985 | 2014 | 2-NCAR_CESM2-HISTORICAL
+NCAR_CESM2-HISTORICAL  #06 | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/CESM_ENS/historical/NCAR_CESM2/NCAR_CESM2.historical.en06.LHFLX.197901-201412.nc | 1985 | 2014 | 2-NCAR_CESM2-HISTORICAL
+NCAR_CESM2-HISTORICAL  #07 | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/CESM_ENS/historical/NCAR_CESM2/NCAR_CESM2.historical.en07.LHFLX.197901-201412.nc | 1985 | 2014 | 2-NCAR_CESM2-HISTORICAL
+NCAR_CESM2-HISTORICAL  #08 | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/CESM_ENS/historical/NCAR_CESM2/NCAR_CESM2.historical.en08.LHFLX.197901-201412.nc | 1985 | 2014 | 2-NCAR_CESM2-HISTORICAL
+NCAR_CESM2-HISTORICAL  #09 | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/CESM_ENS/historical/NCAR_CESM2/NCAR_CESM2.historical.en09.LHFLX.197901-201412.nc | 1985 | 2014 | 2-NCAR_CESM2-HISTORICAL
+v1.LR-HISTORICAL  #00 | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/v1.LR.historical/v1.LR.historical.en00.LHFLX.197901-201412.nc | 1985 | 2014 | 3-v1.LR-HISTORICAL
+v1.LR-HISTORICAL  #01 | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/v1.LR.historical/v1.LR.historical.en01.LHFLX.197901-201412.nc | 1985 | 2014 | 3-v1.LR-HISTORICAL
+v1.LR-HISTORICAL  #02 | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/v1.LR.historical/v1.LR.historical.en02.LHFLX.197901-201412.nc | 1985 | 2014 | 3-v1.LR-HISTORICAL
+v1.LR-HISTORICAL  #03 | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/v1.LR.historical/v1.LR.historical.en03.LHFLX.197901-201412.nc | 1985 | 2014 | 3-v1.LR-HISTORICAL
+v2.LR-HISTORICAL  #00 | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/v2.LR.historical/v2.LR.historical.en00.LHFLX.197901-201412.nc | 1985 | 2014 | 4-v2.LR-HISTORICAL
+v2.LR-HISTORICAL  #01 | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/v2.LR.historical/v2.LR.historical.en01.LHFLX.197901-201412.nc | 1985 | 2014 | 4-v2.LR-HISTORICAL
+v2.LR-HISTORICAL  #02 | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/v2.LR.historical/v2.LR.historical.en02.LHFLX.197901-201412.nc | 1985 | 2014 | 4-v2.LR-HISTORICAL

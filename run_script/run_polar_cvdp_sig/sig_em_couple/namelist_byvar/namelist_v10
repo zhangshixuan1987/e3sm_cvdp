@@ -1,0 +1,5 @@
+ERA5-V10mmm | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/ERA5/ERA5.enmn.V10.197901-201412.nc | 1985 | 2014 | 0-Observations
+CMIP6_MME-HISTORICAL  mmm | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/CMIP6_MME/historical/CMIPMME/CMIP6_MME.historical.enmn.V10.197901-201412.nc | 1985 | 2014 | 1-CMIP6_MME-HISTORICAL
+NCAR_CESM2-HISTORICAL  mmm | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/CESM_ENS/historical/NCAR_CESM2/NCAR_CESM2.historical.enmn.V10.197901-201412.nc | 1985 | 2014 | 2-NCAR_CESM2-HISTORICAL
+v1.LR-HISTORICAL  mmm | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/v1.LR.historical/v1.LR.historical.enmn.V10.197901-201412.nc | 1985 | 2014 | 3-v1.LR-HISTORICAL
+v2.LR-HISTORICAL  mmm | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/v2.LR.historical/v2.LR.historical.enmn.V10.197901-201412.nc | 1985 | 2014 | 4-v2.LR-HISTORICAL

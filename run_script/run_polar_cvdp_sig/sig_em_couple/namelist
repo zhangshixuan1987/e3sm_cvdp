@@ -1,0 +1,5 @@
+CMIP6_MME-AMIP   #em | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/CMIP6_MME/amip/CMIPMME/CMIP6_MME.amip.enmn         | 1985 | 2014 | 1-CMIP6_MME-AMIP
+NCAR_CESM2-AMIP  #em | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/CESM_ENS/amip/NCAR_CESM2/NCAR_CESM2.amip.enmn      | 1985 | 2014 | 2-NCAR_CESM2-AMIP
+v1.LR.amip-AMIP  #em | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/v1.LR.amip/v1.LR.amip.enmn                         | 1985 | 2014 | 3-v1.LR.amip-AMIP
+v2.LR.amip-AMIP  #em | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/v2.LR.amip/v2.LR.amip.enmn                         | 1985 | 2014 | 4-v2.LR.amip-AMIP
+v3.LR.amip-AMIP  #00 | /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/v3.LR.amip.FourthSmoke/v3.LR.amip.FourthSmoke.en00 | 1985 | 2014 | 5-v3.LR.amip-AMIP
