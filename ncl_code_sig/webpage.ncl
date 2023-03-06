@@ -15,9 +15,19 @@ begin
   CLIMO_SYEAR = getenv("CLIMO_SYEAR")
   CLIMO_EYEAR = getenv("CLIMO_EYEAR")
   OBS         = getenv("OBS")
-
+ 
+  NCAR_CVDP_VER = "5.2.0"
   quote = str_get_dq()
-  
+  strs  = str_split(webtitle,";")
+  title_str = new(2,string)
+  if(dimsizes(strs).eq.2) then 
+    title_str(:) = strs 
+  else 
+    title_str(0) = strs(0)
+    title_str(1) = "" 
+  end if 
+  delete(strs)
+
   if (OPT_CLIMO.eq."Full") then
      subtxt = "Climatological Period Used: Full"
   end if
@@ -78,23 +88,24 @@ begin
      txt(22) = "<li class="+quote+"list-inline-item"+quote+">Namelists: <a href="+quote+"namelist_models.html"+quote+">Input</a> | <a href="+quote+"namelist_msftmz.html"+quote+">Derived</a></li><br>"
   end if
 
-  txt(23) = "<li class="+quote+"list-inline-item"+quote+">"+subtxt+"</li><br><li class="+quote+"list-inline-item"+quote+">Created: "+systemfunc("date")+"</li><br><li class="+quote+"list-inline-item"+quote+">CVDP Version "+VERSION+"</li></ul></td>"
+  txt(23) = "<li class="+quote+"list-inline-item"+quote+">"+subtxt+"</li><br><li class="+quote+"list-inline-item"+quote+">Created: "+systemfunc("date")+"</li><br><li class="+quote+"list-inline-item"+quote+">Enhanced on NCAR CVDP V"+NCAR_CVDP_VER+"</li></ul></td>"
 
-  txt(24) = "<td><p class=subtitle>"+webtitle+"</p></td></tr></table></div></div>"
+  txt(24) = "<td><p class=subtitle>"+title_str(0)+"</p></td>"
+  txt(25) = "<td><p class=subtitle>"+title_str(1)+"</p></td></tr></table></div></div>"
   delete([/subtxt/])
 
-  txt(25) = "<div class="+quote+"row"+quote+"><div class="+quote+"col"+quote+">"
-  txt(26) = "<table class="+quote+"table table-striped table-bordered"+quote+">"
-  txt(27) = "<h3 class="+quote+"display-6"+quote+">Means</h3>"
-  txt(28) = "<tr><td><b>SST</b></td><td>"+table_link_setup(OUTDIR,"sst.mean.djf.png","DJF")+"</td><td>"+table_link_setup(OUTDIR,"sst.mean.mam.png","MAM")+"</td><td>"+table_link_setup(OUTDIR,"sst.mean.jja.png","JJA")+"</td><td>"+table_link_setup(OUTDIR,"sst.mean.son.png","SON")+"</td><td>"+table_link_setup(OUTDIR,"sst.mean.ann.png","Annual")+"</td></tr>"    
-  txt(29) = "<tr><td><b>TAS</b></td><td>"+table_link_setup(OUTDIR,"tas.mean.djf.png","DJF")+"</td><td>"+table_link_setup(OUTDIR,"tas.mean.mam.png","MAM")+"</td><td>"+table_link_setup(OUTDIR,"tas.mean.jja.png","JJA")+"</td><td>"+table_link_setup(OUTDIR,"tas.mean.son.png","SON")+"</td><td>"+table_link_setup(OUTDIR,"tas.mean.ann.png","Annual")+"</td></tr>"    
-  txt(30) = "<tr><td><b>PSL</b></td><td>"+table_link_setup(OUTDIR,"psl.mean.djf.png","DJF")+"</td><td>"+table_link_setup(OUTDIR,"psl.mean.mam.png","MAM")+"</td><td>"+table_link_setup(OUTDIR,"psl.mean.jja.png","JJA")+"</td><td>"+table_link_setup(OUTDIR,"psl.mean.son.png","SON")+"</td><td>"+table_link_setup(OUTDIR,"psl.mean.ann.png","Annual")+"</td></tr>"    
-  txt(31) = "<tr><td><b>PR</b></td><td>"+table_link_setup(OUTDIR,"pr.mean.djf.png","DJF")+"</td><td>"+table_link_setup(OUTDIR,"pr.mean.mam.png","MAM")+"</td><td>"+table_link_setup(OUTDIR,"pr.mean.jja.png","JJA")+"</td><td>"+table_link_setup(OUTDIR,"pr.mean.son.png","SON")+"</td><td>"+table_link_setup(OUTDIR,"pr.mean.ann.png","Annual")+"</td></tr>"    
-  txt(32) = "<tr><td><b>[PR]</b></td><td>"+table_link_setup(OUTDIR,"pr.za.djf.png","DJF")+"</td><td>"+table_link_setup(OUTDIR,"pr.za.mam.png","MAM")+"</td><td>"+table_link_setup(OUTDIR,"pr.za.jja.png","JJA")+"</td><td>"+table_link_setup(OUTDIR,"pr.za.son.png","SON")+"</td><td>"+table_link_setup(OUTDIR,"pr.za.ann.png","Annual")+"</td></tr>"
-  txt(33) = "<tr><td><b>SND</b></td><td>"+table_link_setup(OUTDIR,"snd.mean.djf.png","DJF")+"</td><td>"+table_link_setup(OUTDIR,"snd.mean.mam.png","MAM")+"</td><td>"+table_link_setup(OUTDIR,"snd.mean.jja.png","JJA")+"</td><td>"+table_link_setup(OUTDIR,"snd.mean.son.png","SON")+"</td><td>"+table_link_setup(OUTDIR,"snd.mean.ann.png","Annual")+"</td></tr>"      
-  txt(34) = "<tr><td><b>SIC NH</b></td><td>"+table_link_setup(OUTDIR,"aice.mean.nh.djf.png","DJF")+"</td><td>"+table_link_setup(OUTDIR,"aice.mean.nh.mam.png","MAM")+"</td><td>"+table_link_setup(OUTDIR,"aice.mean.nh.jja.png","JJA")+"</td><td>"+table_link_setup(OUTDIR,"aice.mean.nh.son.png","SON")+"</td><td>"+table_link_setup(OUTDIR,"aice.mean.nh.ann.png","Annual")+"</td></tr>"      
-  txt(35) = "<tr><td><b>SIC SH</b></td><td>"+table_link_setup(OUTDIR,"aice.mean.sh.djf.png","DJF")+"</td><td>"+table_link_setup(OUTDIR,"aice.mean.sh.mam.png","MAM")+"</td><td>"+table_link_setup(OUTDIR,"aice.mean.sh.jja.png","JJA")+"</td><td>"+table_link_setup(OUTDIR,"aice.mean.sh.son.png","SON")+"</td><td>"+table_link_setup(OUTDIR,"aice.mean.sh.ann.png","Annual")+"</td></tr>"      
-  txt(36) = "</table></div></div>"  
+  txt(26) = "<div class="+quote+"row"+quote+"><div class="+quote+"col"+quote+">"
+  txt(27) = "<table class="+quote+"table table-striped table-bordered"+quote+">"
+  txt(28) = "<h3 class="+quote+"display-6"+quote+">Means</h3>"
+  txt(29) = "<tr><td><b>SST</b></td><td>"+table_link_setup(OUTDIR,"sst.mean.djf.png","DJF")+"</td><td>"+table_link_setup(OUTDIR,"sst.mean.mam.png","MAM")+"</td><td>"+table_link_setup(OUTDIR,"sst.mean.jja.png","JJA")+"</td><td>"+table_link_setup(OUTDIR,"sst.mean.son.png","SON")+"</td><td>"+table_link_setup(OUTDIR,"sst.mean.ann.png","Annual")+"</td></tr>"    
+  txt(30) = "<tr><td><b>TAS</b></td><td>"+table_link_setup(OUTDIR,"tas.mean.djf.png","DJF")+"</td><td>"+table_link_setup(OUTDIR,"tas.mean.mam.png","MAM")+"</td><td>"+table_link_setup(OUTDIR,"tas.mean.jja.png","JJA")+"</td><td>"+table_link_setup(OUTDIR,"tas.mean.son.png","SON")+"</td><td>"+table_link_setup(OUTDIR,"tas.mean.ann.png","Annual")+"</td></tr>"    
+  txt(31) = "<tr><td><b>PSL</b></td><td>"+table_link_setup(OUTDIR,"psl.mean.djf.png","DJF")+"</td><td>"+table_link_setup(OUTDIR,"psl.mean.mam.png","MAM")+"</td><td>"+table_link_setup(OUTDIR,"psl.mean.jja.png","JJA")+"</td><td>"+table_link_setup(OUTDIR,"psl.mean.son.png","SON")+"</td><td>"+table_link_setup(OUTDIR,"psl.mean.ann.png","Annual")+"</td></tr>"    
+  txt(32) = "<tr><td><b>PR</b></td><td>"+table_link_setup(OUTDIR,"pr.mean.djf.png","DJF")+"</td><td>"+table_link_setup(OUTDIR,"pr.mean.mam.png","MAM")+"</td><td>"+table_link_setup(OUTDIR,"pr.mean.jja.png","JJA")+"</td><td>"+table_link_setup(OUTDIR,"pr.mean.son.png","SON")+"</td><td>"+table_link_setup(OUTDIR,"pr.mean.ann.png","Annual")+"</td></tr>"    
+  txt(33) = "<tr><td><b>[PR]</b></td><td>"+table_link_setup(OUTDIR,"pr.za.djf.png","DJF")+"</td><td>"+table_link_setup(OUTDIR,"pr.za.mam.png","MAM")+"</td><td>"+table_link_setup(OUTDIR,"pr.za.jja.png","JJA")+"</td><td>"+table_link_setup(OUTDIR,"pr.za.son.png","SON")+"</td><td>"+table_link_setup(OUTDIR,"pr.za.ann.png","Annual")+"</td></tr>"
+  txt(34) = "<tr><td><b>SND</b></td><td>"+table_link_setup(OUTDIR,"snd.mean.djf.png","DJF")+"</td><td>"+table_link_setup(OUTDIR,"snd.mean.mam.png","MAM")+"</td><td>"+table_link_setup(OUTDIR,"snd.mean.jja.png","JJA")+"</td><td>"+table_link_setup(OUTDIR,"snd.mean.son.png","SON")+"</td><td>"+table_link_setup(OUTDIR,"snd.mean.ann.png","Annual")+"</td></tr>"      
+  txt(35) = "<tr><td><b>SIC NH</b></td><td>"+table_link_setup(OUTDIR,"aice.mean.nh.djf.png","DJF")+"</td><td>"+table_link_setup(OUTDIR,"aice.mean.nh.mam.png","MAM")+"</td><td>"+table_link_setup(OUTDIR,"aice.mean.nh.jja.png","JJA")+"</td><td>"+table_link_setup(OUTDIR,"aice.mean.nh.son.png","SON")+"</td><td>"+table_link_setup(OUTDIR,"aice.mean.nh.ann.png","Annual")+"</td></tr>"      
+  txt(36) = "<tr><td><b>SIC SH</b></td><td>"+table_link_setup(OUTDIR,"aice.mean.sh.djf.png","DJF")+"</td><td>"+table_link_setup(OUTDIR,"aice.mean.sh.mam.png","MAM")+"</td><td>"+table_link_setup(OUTDIR,"aice.mean.sh.jja.png","JJA")+"</td><td>"+table_link_setup(OUTDIR,"aice.mean.sh.son.png","SON")+"</td><td>"+table_link_setup(OUTDIR,"aice.mean.sh.ann.png","Annual")+"</td></tr>"      
+  txt(37) = "</table></div></div>"  
   
   txt(38) = "<div class="+quote+"row"+quote+">"
   txt(39) = "<div class="+quote+"col"+quote+">"
@@ -603,7 +614,7 @@ begin
   txt(4) = "<script src="+quote+"https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"+quote+" integrity="+quote+"sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"+quote+" crossorigin="+quote+"anonymous"+quote+"></script>"
 
   txt(5) = "<style>body {background-color: WhiteSmoke; font-family: Verdana, Geneva, sans-serif}"
-  txt(6) = "img.title {width:990; height:105; align:left}"
+  txt(6) = "img.title {width:990; height:95; align:left}"
   txt(7) = "p.title {font-size:20pt; color:black; font-weight:bold; text-align:center}"
   txt(8) = "p.subtitle1 {font-size:12pt; color:gray}"
   txt(9) = "p.subtitle {font-size:16pt; color:black; font-weight:bold; text-align:left}"
@@ -717,7 +728,7 @@ begin
   txt(133) = ""
   
   txt(135) = "<br>Created "+systemfunc("date")
-  txt(136) = "<p class=btext>CVDP Version "+VERSION+"</p>"
+  txt(136) = "<p class=btext>Enhanced on NCAR CVDP V"+NCAR_CVDP_VER+"</p>"
   txt(137) = "</body></html>"
   
   tt = ind(.not.ismissing(txt))
@@ -751,7 +762,8 @@ begin
      txt(15) = "<img class=title src="+quote+"e3sm-cvdp.png"+quote+" alt="+quote+"CVDP logo"+quote+">"
      txt(16)= "<TABLE width='990' border=0 cellpadding=6>"
      txt(17) = "<tr><td width='300'><p class=btext><a href="+quote+"index.html"+quote+">Back to Diagnostics Plots</a></p></td>"
-     txt(18) = "<td><p class=subtitle>"+webtitle+"</p></td></tr></table><hr width=990 align=left><p class=subtitle1>Metrics Table</p>" 
+     txt(18) = "<td><p class=subtitle>"+title_str(0)+"</p></td>"
+     txt(19) = "<td><p class=subtitle>"+title_str(1)+"</p></td></tr></table><hr width=990 align=left><p class=subtitle1>Metrics Table</p>" 
      
      z = asciiread(OUTDIR+"metrics.txt",(/-1/),"string")
      nlines = dimsizes(z)
@@ -762,7 +774,7 @@ begin
      txt(25+nlines) = "</PRE>"
      txt(25+nlines+1) = "<p class=btext><a href="+quote+"namelist_obs"+quote+">Observations Used</a></p>"
      txt(25+nlines+2) = "Created "+systemfunc("date")
-     txt(25+nlines+3) = "<p class=btext2>CVDP Version "+VERSION+"</p></body></html>"
+     txt(25+nlines+3) = "<p class=btext2>Enhanced on NCAR CVDP V"+NCAR_CVDP_VER+"</p></body></html>"
   
      tt = ind(.not.ismissing(txt))
      txt2 = txt(:tt(dimsizes(tt)-1)+1)
@@ -810,7 +822,9 @@ begin
      strarr(13) = " "
      do gg = 0,13
            txt(17) = "<tr><td width='50'><p class=btext>Go to:</p></td><td class=s1 width='300'><a href="+quote+"methodology.html"+quote+">Methodology and Definitions</a><br><a href="+quote+"index.html"+quote+">Diagnostics Plots</a><br><a href="+quote+"metrics.table_"+(gg+14)+".html"+quote+">RMS Metric Tables</a></td>"
-           txt(18) = "<td><p class=subtitle>"+webtitle+"</p></td></tr></table><hr width=990 align=left>"
+           txt(18) = "<td><p class=subtitle>"+title_str(0)+"</p></td>"
+           txt(19) = "<td><p class=subtitle>"+title_str(1)+"</p></td></tr></table><hr width=990 align=left>"
+
            sort_txtT = sort_txt
            sort_txtT(gg) = "<b>"+sort_txt2(gg)+"</b>"+strarr(gg)
            txt(24) = "<p class=subtitle1><b>Pattern Correlation Metrics Tables</b></p>"
@@ -818,7 +832,7 @@ begin
            txt(26) = "<img width=980 src="+quote+"metrics.table_"+gg+".gif"+quote+" />"
            txt(27) = "<p class=btext><a href="+quote+"namelist_obs"+quote+">Observations Used</a></p>"
            txt(28) = "Created "+systemfunc("date")
-           txt(29) = "<p class=btext2>CVDP Version "+VERSION+"</p></body></html>"
+           txt(29) = "<p class=btext2>Enhanced on NCAR CVDP V"+NCAR_CVDP_VER+"</p></body></html>"
            tt = ind(.not.ismissing(txt))
            txt2 = txt(:tt(dimsizes(tt)-1)+1)
            txt2 = where(ismissing(txt2),"",txt2)
@@ -829,7 +843,10 @@ begin
      
      do gg = 0,13
            txt(17) = "<tr><td width='50'><p class=btext>Go to:</p></td><td class=s1 width='300'><a href="+quote+"methodology.html"+quote+">Methodology and Definitions</a><br><a href="+quote+"index.html"+quote+">Diagnostics Plots</a><br><a href="+quote+"metrics.table_"+gg+".html"+quote+">Pattern Correlation Metric Tables</a></td>"
-           txt(18) = "<td><p class=subtitle>"+webtitle+"</p></td></tr></table><hr width=990 align=left>"
+
+           txt(18) = "<td><p class=subtitle>"+title_str(0)+"</p></td>"
+           txt(19) = "<td><p class=subtitle>"+title_str(1)+"</p></td></tr></table><hr width=990 align=left>"
+
            sort_txtT = sort_txtA
            sort_txtT(gg) = "<b>"+sort_txt2(gg)+"</b>"+strarr(gg)
            txt(24) = "<p class=subtitle1><b>RMS Metrics Tables</b></p>"
@@ -837,7 +854,7 @@ begin
            txt(26) = "<img width=980 src="+quote+"metrics.table_"+(gg+14)+".gif"+quote+" />"
            txt(27) = "<p class=btext><a href="+quote+"namelist_obs"+quote+">Observations Used</a></p>"
            txt(28) = "Created "+systemfunc("date")
-           txt(29) = "<p class=btext2>CVDP Version "+VERSION+"</p></body></html>"
+           txt(29) = "<p class=btext2>Enhanced on NCAR CVDP V"+NCAR_CVDP_VER+"</p></body></html>"
            tt = ind(.not.ismissing(txt))
            txt2 = txt(:tt(dimsizes(tt)-1)+1)
            txt2 = where(ismissing(txt2),"",txt2)
@@ -874,17 +891,18 @@ begin
      txt(28) = "Input Namelists: <b>Observations</b> | <a href="+quote+"namelist_simulations.html"+quote+">Simulations</a><br>"
      txt(29) = "Derived Namelists: <a href="+quote+"namelist_msftmz.html"+quote+">MSFTMZ</a> | <a href="+quote+"namelist_pr.html"+quote+">PR</a> | <a href="+quote+"namelist_psl.html"+quote+">PSL</a> | "
      txt(30) = "<br><a href="+quote+"namelist_siconc_nh.html"+quote+">SICONC NH</a> | <a href="+quote+"namelist_siconc_sh.html"+quote+">SICONC SH</a> | <a href="+quote+"namelist_snd.html"+quote+">SND</a> | <a href="+quote+"namelist_tas.html"+quote+">TAS</a> |"
-     txt(31) = "<a href="+quote+"namelist_ts.html"+quote+">TS</a></td><td><h2 class="+quote+"text-center"+quote+">"+webtitle+"</h2></td></tr></table><hr width=990 align=left>"
-     txt(32) = "<p class=subtitle1>Input Namelist: Observations</p>" 
+     txt(31) = "<a href="+quote+"namelist_ts.html"+quote+">TS</a></td><td><h2 class="+quote+"text-center"+quote+">"+title_str(0)+"</h2></td>"
+     txt(32) = "<a href="+quote+"namelist_ts.html"+quote+">TS</a></td><td><h2 class="+quote+"text-center"+quote+">"+title_str(1)+"</h2></td></tr></table><hr width=990 align=left>"
+     txt(33) = "<p class=subtitle1>Input Namelist: Observations</p>" 
      z := asciiread(OUTDIR+"namelist_obs",(/-1/),"string")
      nlines = dimsizes(z)
-     txt(33) = "<p class=c>"
+     txt(34) = "<p class=c>"
      do gg = 0,nlines-1
-        txt(33+gg) = z(gg)+"<br>"
+        txt(34+gg) = z(gg)+"<br>"
      end do
-     txt(34+nlines) = "</p>"
-     txt(34+nlines+1) = "Created "+systemfunc("date")
-     txt(34+nlines+2) = "<p class=btext2>CVDP Version "+VERSION+"</p></body></html>"
+     txt(35+nlines) = "</p>"
+     txt(35+nlines+1) = "Created "+systemfunc("date")
+     txt(35+nlines+2) = "<p class=btext2>Enhanced on NCAR CVDP V"+NCAR_CVDP_VER+"</p></body></html>"
      tt := ind(.not.ismissing(txt))
      txt2 := txt(:tt(dimsizes(tt)-1)+1)
      txt2 = where(ismissing(txt2),"",txt2)
@@ -897,17 +915,19 @@ begin
   txt(28) = namelist_obs_qtxt+"<b>Simulations</b><br>"
   txt(29) = "Derived Namelists: <a href="+quote+"namelist_msftmz.html"+quote+">MSFTMZ</a> | <a href="+quote+"namelist_pr.html"+quote+">PR</a> | <a href="+quote+"namelist_psl.html"+quote+">PSL</a> | "
   txt(30) = "<br><a href="+quote+"namelist_siconc_nh.html"+quote+">SICONC NH</a> | <a href="+quote+"namelist_siconc_sh.html"+quote+">SICONC SH</a> | <a href="+quote+"namelist_snd.html"+quote+">SND</a> | <a href="+quote+"namelist_tas.html"+quote+">TAS</a> |"
-  txt(31) = "<a href="+quote+"namelist_ts.html"+quote+">TS</a></td><td><h2 class="+quote+"text-center"+quote+">"+webtitle+"</h2></td></tr></table><hr width=990 align=left>"
-  txt(32) = "<p class=subtitle1>Input Namelist: Simulations</p>" 
+  txt(31) = "<a href="+quote+"namelist_ts.html"+quote+">TS</a></td><td><h2 class="+quote+"text-center"+quote+">"+title_str(0)+"</h2></td>"
+  txt(32) = "<td><h2 class="+quote+"text-center"+quote+">"+title_str(1)+"</h2></td></tr></table><hr width=990 align=left>"
+  txt(33) = "<p class=subtitle1>Input Namelist: Simulations</p>" 
+
   z := asciiread(OUTDIR+"namelist",(/-1/),"string")
   nlines = dimsizes(z)
-  txt(33) = "<p class=c>"
+  txt(34) = "<p class=c>"
   do gg = 0,nlines-1
-     txt(33+gg) = z(gg)+"<br>"
+     txt(34+gg) = z(gg)+"<br>"
   end do
-  txt(34+nlines) = "</p>"
-  txt(34+nlines+1) = "Created "+systemfunc("date")
-  txt(34+nlines+2) = "<p class=btext2>CVDP Version "+VERSION+"</p></body></html>"
+  txt(35+nlines) = "</p>"
+  txt(35+nlines+1) = "Created "+systemfunc("date")
+  txt(35+nlines+2) = "<p class=btext2>Enhanced on NCAR CVDP V"+NCAR_CVDP_VER+"</p></body></html>"
   tt := ind(.not.ismissing(txt))
   txt2 := txt(:tt(dimsizes(tt)-1)+1)
   txt2 = where(ismissing(txt2),"",txt2)
@@ -917,17 +937,19 @@ begin
   txt(28) = namelist_obs_qtxt+"<a href="+quote+"namelist_simulations.html"+quote+">Simulations</a><br>"
   txt(29) = "Derived Namelists: <b>MSFTMZ</b> | <a href="+quote+"namelist_pr.html"+quote+">PR</a> | <a href="+quote+"namelist_psl.html"+quote+">PSL</a> | "
   txt(30) = "<br><a href="+quote+"namelist_siconc_nh.html"+quote+">SICONC NH</a> | <a href="+quote+"namelist_siconc_sh.html"+quote+">SICONC SH</a> | <a href="+quote+"namelist_snd.html"+quote+">SND</a> | <a href="+quote+"namelist_tas.html"+quote+">TAS</a> |"
-  txt(31) = "<a href="+quote+"namelist_ts.html"+quote+">TS</a></td><td><h2 class="+quote+"text-center"+quote+">"+webtitle+"</h2></td></tr></table><hr width=990 align=left>"
-  txt(32) = "<p class=subtitle1>Derived Namelist: MSFTMZ</p>" 
+  txt(31) = "<a href="+quote+"namelist_ts.html"+quote+">TS</a></td><td><h2 class="+quote+"text-center"+quote+">"+title_str(0)+"</h2></td>"
+  txt(32) = "<td><h2 class="+quote+"text-center"+quote+">"+title_str(1)+"</h2></td></tr></table><hr width=990 align=left>"
+
+  txt(33) = "<p class=subtitle1>Derived Namelist: MSFTMZ</p>" 
   z := asciiread(OUTDIR+"namelist_moc",(/-1/),"string")
   nlines = dimsizes(z)
-  txt(33) = "<p class=c>"
+  txt(34) = "<p class=c>"
   do gg = 0,nlines-1
-     txt(33+gg) = z(gg)+"<br>"
+     txt(34+gg) = z(gg)+"<br>"
   end do
-  txt(34+nlines) = "</p>"
-  txt(34+nlines+1) = "Created "+systemfunc("date")
-  txt(34+nlines+2) = "<p class=btext2>CVDP Version "+VERSION+"</p></body></html>"
+  txt(35+nlines) = "</p>"
+  txt(35+nlines+1) = "Created "+systemfunc("date")
+  txt(35+nlines+2) = "<p class=btext2>Enhanced on NCAR CVDP V"+NCAR_CVDP_VER+"</p></body></html>"
   tt := ind(.not.ismissing(txt))
   txt2 := txt(:tt(dimsizes(tt)-1)+1)
   txt2 = where(ismissing(txt2),"",txt2)
@@ -936,17 +958,18 @@ begin
   txt(28) = namelist_obs_qtxt+"<a href="+quote+"namelist_simulations.html"+quote+">Simulations</a><br>"
   txt(29) = "Derived Namelists: <a href="+quote+"namelist_msftmz.html"+quote+">MSFTMZ</a> | <b>PR</b> | <a href="+quote+"namelist_psl.html"+quote+">PSL</a> | "
   txt(30) = "<br><a href="+quote+"namelist_siconc_nh.html"+quote+">SICONC NH</a> | <a href="+quote+"namelist_siconc_sh.html"+quote+">SICONC SH</a> | <a href="+quote+"namelist_snd.html"+quote+">SND</a> | <a href="+quote+"namelist_tas.html"+quote+">TAS</a> |"
-  txt(31) = "<a href="+quote+"namelist_ts.html"+quote+">TS</a></td><td><h2 class="+quote+"text-center"+quote+">"+webtitle+"</h2></td></tr></table><hr width=990 align=left>"
-  txt(32) = "<p class=subtitle1>Derived Namelist: PR</p>" 
+  txt(31) = "<a href="+quote+"namelist_ts.html"+quote+">TS</a></td><td><h2 class="+quote+"text-center"+quote+">"+title_str(0)+"</h2></td>"
+  txt(32) = "<a href="+quote+"namelist_ts.html"+quote+">TS</a></td><td><h2 class="+quote+"text-center"+quote+">"+title_str(1)+"</h2></td></tr></table><hr width=990 align=left>"
+  txt(33) = "<p class=subtitle1>Derived Namelist: PR</p>" 
   z := asciiread(OUTDIR+"namelist_prect",(/-1/),"string")
   nlines = dimsizes(z)
-  txt(33) = "<p class=c>"
+  txt(34) = "<p class=c>"
   do gg = 0,nlines-1
-     txt(33+gg) = z(gg)+"<br>"
+     txt(34+gg) = z(gg)+"<br>"
   end do
-  txt(34+nlines) = "</p>"
-  txt(34+nlines+1) = "Created "+systemfunc("date")
-  txt(34+nlines+2) = "<p class=btext2>CVDP Version "+VERSION+"</p></body></html>"
+  txt(35+nlines) = "</p>"
+  txt(35+nlines+1) = "Created "+systemfunc("date")
+  txt(35+nlines+2) = "<p class=btext2>Enhanced on NCAR CVDP V"+NCAR_CVDP_VER+"</p></body></html>"
   tt := ind(.not.ismissing(txt))
   txt2 := txt(:tt(dimsizes(tt)-1)+1)
   txt2 = where(ismissing(txt2),"",txt2)
@@ -955,17 +978,18 @@ begin
   txt(28) = namelist_obs_qtxt+"<a href="+quote+"namelist_simulations.html"+quote+">Simulations</a><br>"
   txt(29) = "Derived Namelists: <a href="+quote+"namelist_msftmz.html"+quote+">MSFTMZ</a> | <a href="+quote+"namelist_pr.html"+quote+">PR</a> | <b>PSL</b> | "
   txt(30) = "<br><a href="+quote+"namelist_siconc_nh.html"+quote+">SICONC NH</a> | <a href="+quote+"namelist_siconc_sh.html"+quote+">SICONC SH</a> | <a href="+quote+"namelist_snd.html"+quote+">SND</a> | <a href="+quote+"namelist_tas.html"+quote+">TAS</a> |"
-  txt(31) = "<a href="+quote+"namelist_ts.html"+quote+">TS</a></td><td><h2 class="+quote+"text-center"+quote+">"+webtitle+"</h2></td></tr></table><hr width=990 align=left>"
-  txt(32) = "<p class=subtitle1>Derived Namelist: PSL</p>" 
+  txt(31) = "<a href="+quote+"namelist_ts.html"+quote+">TS</a></td><td><h2 class="+quote+"text-center"+quote+">"+title_str(0)+"</h2></td>"
+  txt(32) = "<a href="+quote+"namelist_ts.html"+quote+">TS</a></td><td><h2 class="+quote+"text-center"+quote+">"+title_str(1)+"</h2></td></tr></table><hr width=990 align=left>"
+  txt(33) = "<p class=subtitle1>Derived Namelist: PSL</p>" 
   z := asciiread(OUTDIR+"namelist_psl",(/-1/),"string")
   nlines = dimsizes(z)
-  txt(33) = "<p class=c>"
+  txt(34) = "<p class=c>"
   do gg = 0,nlines-1
-     txt(33+gg) = z(gg)+"<br>"
+     txt(34+gg) = z(gg)+"<br>"
   end do
-  txt(34+nlines) = "</p>"
-  txt(34+nlines+1) = "Created "+systemfunc("date")
-  txt(34+nlines+2) = "<p class=btext2>CVDP Version "+VERSION+"</p></body></html>"
+  txt(35+nlines) = "</p>"
+  txt(35+nlines+1) = "Created "+systemfunc("date")
+  txt(35+nlines+2) = "<p class=btext2>Enhanced on NCAR CVDP V"+NCAR_CVDP_VER+"</p></body></html>"
   tt := ind(.not.ismissing(txt))
   txt2 := txt(:tt(dimsizes(tt)-1)+1)
   txt2 = where(ismissing(txt2),"",txt2)
@@ -974,17 +998,18 @@ begin
   txt(28) = namelist_obs_qtxt+"<a href="+quote+"namelist_simulations.html"+quote+">Simulations</a><br>"
   txt(29) = "Derived Namelists: <a href="+quote+"namelist_msftmz.html"+quote+">MSFTMZ</a> | <a href="+quote+"namelist_pr.html"+quote+">PR</a> | <a href="+quote+"namelist_psl.html"+quote+">PSL</a> | "
   txt(30) = "<br></b>SICONC NH</b> | <a href="+quote+"namelist_siconc_sh.html"+quote+">SICONC SH</a> | <a href="+quote+"namelist_snd.html"+quote+">SND</a> | <a href="+quote+"namelist_tas.html"+quote+">TAS</a> |"
-  txt(31) = "<a href="+quote+"namelist_ts.html"+quote+">TS</a></td><td><h2 class="+quote+"text-center"+quote+">"+webtitle+"</h2></td></tr></table><hr width=990 align=left>"
-  txt(32) = "<p class=subtitle1>Derived Namelist: SICONC NH</p>" 
+  txt(31) = "<a href="+quote+"namelist_ts.html"+quote+">TS</a></td><td><h2 class="+quote+"text-center"+quote+">"+title_str(0)+"</h2></td>"
+  txt(32) = "<a href="+quote+"namelist_ts.html"+quote+">TS</a></td><td><h2 class="+quote+"text-center"+quote+">"+title_str(1)+"</h2></td></tr></table><hr width=990 align=left>"
+  txt(33) = "<p class=subtitle1>Derived Namelist: SICONC NH</p>" 
   z := asciiread(OUTDIR+"namelist_aice_nh",(/-1/),"string")
   nlines = dimsizes(z)
-  txt(33) = "<p class=c>"
+  txt(34) = "<p class=c>"
   do gg = 0,nlines-1
-     txt(33+gg) = z(gg)+"<br>"
+     txt(34+gg) = z(gg)+"<br>"
   end do
-  txt(34+nlines) = "</p>"
-  txt(34+nlines+1) = "Created "+systemfunc("date")
-  txt(34+nlines+2) = "<p class=btext2>CVDP Version "+VERSION+"</p></body></html>"
+  txt(35+nlines) = "</p>"
+  txt(35+nlines+1) = "Created "+systemfunc("date")
+  txt(35+nlines+2) = "<p class=btext2>Enhanced on NCAR CVDP V"+NCAR_CVDP_VER+"</p></body></html>"
   tt := ind(.not.ismissing(txt))
   txt2 := txt(:tt(dimsizes(tt)-1)+1)
   txt2 = where(ismissing(txt2),"",txt2)
@@ -993,17 +1018,18 @@ begin
   txt(28) = namelist_obs_qtxt+"<a href="+quote+"namelist_simulations.html"+quote+">Simulations</a><br>"
   txt(29) = "Derived Namelists: <a href="+quote+"namelist_msftmz.html"+quote+">MSFTMZ</a> | <a href="+quote+"namelist_pr.html"+quote+">PR</a> | <a href="+quote+"namelist_psl.html"+quote+">PSL</a> | "
   txt(30) = "<br><a href="+quote+"namelist_siconc_nh.html"+quote+">SICONC NH</a> | <b>SICONC SH</b> | <a href="+quote+"namelist_snd.html"+quote+">SND</a> | <a href="+quote+"namelist_tas.html"+quote+">TAS</a> |"
-  txt(31) = "<a href="+quote+"namelist_ts.html"+quote+">TS</a></td><td><h2 class="+quote+"text-center"+quote+">"+webtitle+"</h2></td></tr></table><hr width=990 align=left>"
-  txt(32) = "<p class=subtitle1>Derived Namelist: SICONC SH</p>" 
+  txt(31) = "<a href="+quote+"namelist_ts.html"+quote+">TS</a></td><td><h2 class="+quote+"text-center"+quote+">"+title_str(0)+"</h2></td>"
+  txt(32) = "<a href="+quote+"namelist_ts.html"+quote+">TS</a></td><td><h2 class="+quote+"text-center"+quote+">"+title_str(1)+"</h2></td></tr></table><hr width=990 align=left>"
+  txt(33) = "<p class=subtitle1>Derived Namelist: SICONC SH</p>" 
   z := asciiread(OUTDIR+"namelist_aice_sh",(/-1/),"string")
   nlines = dimsizes(z)
-  txt(33) = "<p class=c>"
+  txt(34) = "<p class=c>"
   do gg = 0,nlines-1
-     txt(33+gg) = z(gg)+"<br>"
+     txt(34+gg) = z(gg)+"<br>"
   end do
-  txt(34+nlines) = "</p>"
-  txt(34+nlines+1) = "Created "+systemfunc("date")
-  txt(34+nlines+2) = "<p class=btext2>CVDP Version "+VERSION+"</p></body></html>"
+  txt(35+nlines) = "</p>"
+  txt(35+nlines+1) = "Created "+systemfunc("date")
+  txt(35+nlines+2) = "<p class=btext2>Enhanced on NCAR CVDP V"+NCAR_CVDP_VER+"</p></body></html>"
   tt := ind(.not.ismissing(txt))
   txt2 := txt(:tt(dimsizes(tt)-1)+1)
   txt2 = where(ismissing(txt2),"",txt2)
@@ -1012,17 +1038,18 @@ begin
   txt(28) = namelist_obs_qtxt+"<a href="+quote+"namelist_simulations.html"+quote+">Simulations</a><br>"
   txt(29) = "Derived Namelists: <a href="+quote+"namelist_msftmz.html"+quote+">MSFTMZ</a> | <a href="+quote+"namelist_pr.html"+quote+">PR</a> | <a href="+quote+"namelist_psl.html"+quote+">PSL</a> | "
   txt(30) = "<br><a href="+quote+"namelist_siconc_nh.html"+quote+">SICONC NH</a> | <a href="+quote+"namelist_siconc_sh.html"+quote+">SICONC SH</a> | <b>SND</b> | <a href="+quote+"namelist_tas.html"+quote+">TAS</a> |"
-  txt(31) = "<a href="+quote+"namelist_ts.html"+quote+">TS</a></td><td><h2 class="+quote+"text-center"+quote+">"+webtitle+"</h2></td></tr></table><hr width=990 align=left>"
-  txt(32) = "<p class=subtitle1>Derived Namelist: SND</p>" 
+  txt(31) = "<a href="+quote+"namelist_ts.html"+quote+">TS</a></td><td><h2 class="+quote+"text-center"+quote+">"+title_str(0)+"</h2></td>"
+  txt(32) = "<a href="+quote+"namelist_ts.html"+quote+">TS</a></td><td><h2 class="+quote+"text-center"+quote+">"+title_str(1)+"</h2></td></tr></table><hr width=990 align=left>"
+  txt(33) = "<p class=subtitle1>Derived Namelist: SND</p>" 
   z := asciiread(OUTDIR+"namelist_snowdp",(/-1/),"string")
   nlines = dimsizes(z)
-  txt(33) = "<p class=c>"
+  txt(34) = "<p class=c>"
   do gg = 0,nlines-1
-     txt(33+gg) = z(gg)+"<br>"
+     txt(34+gg) = z(gg)+"<br>"
   end do
-  txt(34+nlines) = "</p>"
-  txt(34+nlines+1) = "Created "+systemfunc("date")
-  txt(34+nlines+2) = "<p class=btext2>CVDP Version "+VERSION+"</p></body></html>"
+  txt(35+nlines) = "</p>"
+  txt(35+nlines+1) = "Created "+systemfunc("date")
+  txt(35+nlines+2) = "<p class=btext2>Enhanced on NCAR CVDP V"+NCAR_CVDP_VER+"</p></body></html>"
   tt := ind(.not.ismissing(txt))
   txt2 := txt(:tt(dimsizes(tt)-1)+1)
   txt2 = where(ismissing(txt2),"",txt2)
@@ -1031,17 +1058,18 @@ begin
   txt(28) = namelist_obs_qtxt+"<a href="+quote+"namelist_simulations.html"+quote+">Simulations</a><br>"
   txt(29) = "Derived Namelists: <a href="+quote+"namelist_msftmz.html"+quote+">MSFTMZ</a> | <a href="+quote+"namelist_pr.html"+quote+">PR</a> | <a href="+quote+"namelist_psl.html"+quote+">PSL</a> | "
   txt(30) = "<br><a href="+quote+"namelist_siconc_nh.html"+quote+">SICONC NH</a> | <a href="+quote+"namelist_siconc_sh.html"+quote+">SICONC SH</a> | <a href="+quote+"namelist_snd.html"+quote+">SND</a> | <b>TAS</b> |"
-  txt(31) = "<a href="+quote+"namelist_ts.html"+quote+">TS</a></td><td><h2 class="+quote+"text-center"+quote+">"+webtitle+"</h2></td></tr></table><hr width=990 align=left>"
-  txt(32) = "<p class=subtitle1>Derived Namelist: TAS</p>" 
+  txt(31) = "<a href="+quote+"namelist_ts.html"+quote+">TS</a></td><td><h2 class="+quote+"text-center"+quote+">"+title_str(0)+"</h2></td>"
+  txt(32) = "<a href="+quote+"namelist_ts.html"+quote+">TS</a></td><td><h2 class="+quote+"text-center"+quote+">"+title_str(1)+"</h2></td></tr></table><hr width=990 align=left>"
+  txt(33) = "<p class=subtitle1>Derived Namelist: TAS</p>" 
   z := asciiread(OUTDIR+"namelist_trefht",(/-1/),"string")
   nlines = dimsizes(z)
-  txt(33) = "<p class=c>"
+  txt(34) = "<p class=c>"
   do gg = 0,nlines-1
-     txt(33+gg) = z(gg)+"<br>"
+     txt(34+gg) = z(gg)+"<br>"
   end do
-  txt(34+nlines) = "</p>"
-  txt(34+nlines+1) = "Created "+systemfunc("date")
-  txt(34+nlines+2) = "<p class=btext2>CVDP Version "+VERSION+"</p></body></html>"
+  txt(35+nlines) = "</p>"
+  txt(35+nlines+1) = "Created "+systemfunc("date")
+  txt(35+nlines+2) = "<p class=btext2>Enhanced on NCAR CVDP V"+NCAR_CVDP_VER+"</p></body></html>"
   tt := ind(.not.ismissing(txt))
   txt2 := txt(:tt(dimsizes(tt)-1)+1)
   txt2 = where(ismissing(txt2),"",txt2)
@@ -1050,17 +1078,18 @@ begin
   txt(28) = namelist_obs_qtxt+"<a href="+quote+"namelist_simulations.html"+quote+">Simulations</a><br>"
   txt(29) = "Derived Namelists: <a href="+quote+"namelist_msftmz.html"+quote+">MSFTMZ</a> | <a href="+quote+"namelist_pr.html"+quote+">PR</a> | <a href="+quote+"namelist_psl.html"+quote+">PSL</a> | "
   txt(30) = "<br><a href="+quote+"namelist_siconc_nh.html"+quote+">SICONC NH</a> | <a href="+quote+"namelist_siconc_sh.html"+quote+">SICONC SH</a> | <a href="+quote+"namelist_snd.html"+quote+">SND</a> | <a href="+quote+"namelist_tas.html"+quote+">TAS</a> |"
-  txt(31) = "<b>TS</b></td><td><h2 class="+quote+"text-center"+quote+">"+webtitle+"</h2></td></tr></table><hr width=990 align=left>"
-  txt(32) = "<p class=subtitle1>Derived Namelist: TS</p>" 
+  txt(31) = "<a href="+quote+"namelist_ts.html"+quote+">TS</a></td><td><h2 class="+quote+"text-center"+quote+">"+title_str(0)+"</h2></td>"
+  txt(32) = "<a href="+quote+"namelist_ts.html"+quote+">TS</a></td><td><h2 class="+quote+"text-center"+quote+">"+title_str(1)+"</h2></td></tr></table><hr width=990 align=left>"
+  txt(33) = "<p class=subtitle1>Derived Namelist: TS</p>" 
   z := asciiread(OUTDIR+"namelist_ts",(/-1/),"string")
   nlines = dimsizes(z)
-  txt(33) = "<p class=c>"
+  txt(34) = "<p class=c>"
   do gg = 0,nlines-1
-     txt(33+gg) = z(gg)+"<br>"
+     txt(34+gg) = z(gg)+"<br>"
   end do
-  txt(34+nlines) = "</p>"
-  txt(34+nlines+1) = "Created "+systemfunc("date")
-  txt(34+nlines+2) = "<p class=btext2>CVDP Version "+VERSION+"</p></body></html>"
+  txt(35+nlines) = "</p>"
+  txt(35+nlines+1) = "Created "+systemfunc("date")
+  txt(35+nlines+2) = "<p class=btext2>Enhanced on NCAR CVDP V"+NCAR_CVDP_VER+"</p></body></html>"
   tt := ind(.not.ismissing(txt))
   txt2 := txt(:tt(dimsizes(tt)-1)+1)
   txt2 = where(ismissing(txt2),"",txt2)
