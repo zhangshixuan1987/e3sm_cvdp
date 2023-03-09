@@ -430,32 +430,32 @@ begin
         finua_tave(2,:) = dim_max_n(finua,0)
         
         if (OUTPUT_DATA.eq."True") then 
-           hov_all = (/ finua /)  
-           time_mon1 = cd_calendar(ua&time,1) 
-           time_mon1@long_name = "Time"
-           time_mon1@standard_name = "time"
-           time_mon1@calendar = "standard"
-           time_mon1!0 = "time_mon1"
+           time_mon1           = cd_calendar(ua&time,1) 
+           time_mon1!0         = "time_mon1"
            time_mon1&time_mon1 = time_mon1
-           hov_all!0 = "time_mon1"
-           hov_all&time_mon1 = time_mon1
-           lon1 = finua&lon
-           lon1@standard_name = "longitude"
-           hov_all!1    = "lon1"
-           hov_all&lon1 = lon1
-           hov_all@_FillValue = finua@_FillValue 
+           time_mon1@long_name = "Time"
+           time_mon1@calendar  = "standard"
+           time_mon1@standard_name = "time"
+           lon1                = finua&lon
+           lon1@standard_name  = "longitude"
+           hov_all             = (/ finua /)
+           hov_all!0           = "time_mon1"
+           hov_all&time_mon1   = time_mon1
+           hov_all!1           = "lon1"
+           hov_all&lon1        = lon1
+           hov_all@units       = "degree"
+           hov_all@_FillValue  = finua@_FillValue 
+           hov_mave            = (/ finua_mave /)
+           hov_mave!0          = "nx"
+           hov_mave!1          = "time_mon1"
+           hov_mave&time_mon1  = hov_all&time_mon1
+           hov_mave@units      = "degree"
+           hov_tave            = (/ finua_tave /)
+           hov_tave!0          = "nx"
+           hov_tave!1          = "lon1"
+           hov_tave&lon1       = hov_all&lon1
+           hov_tave@units      = "degree"
            delete([/time_mon1,lon1/])
-           hov_mave = (/ finua_mave /)  
-           hov_tave = (/ finua_tave /)
-           hov_mave!0 = "nx"
-           hov_mave!1 = "time_mon1"
-           hov_mave&time_mon1 = hov_all&time_mon1
-           hov_tave!0 = "nx"
-           hov_mave!1 = "lon1"
-           hov_mave&lon1  = hov_all&lon1 
-           hov_all@units  = "degree"
-           hov_mave@units = "degree"
-           hov_tave@units = "degree"
            z->jetlat_hov_all  = set_varAtts(hov_all, "Polar Jet Position hovmoller (time-lon)","","")
            z->jetlat_hov_mave = set_varAtts(hov_mave,"Polar Jet Position time series (lon mean)","","")
            z->jetlat_hov_tave = set_varAtts(hov_tave,"Polar Jet Position meridional series (time mean)","","")
@@ -1344,19 +1344,20 @@ begin
      overlay(xyn6(ee),xdum(ee))
      delete([/tttt,xyres61/])
 
-     xyres62 = xyres6
-     tttt = avg(finua_tave(0,:))
-     arr(0,:) = (/ finua_tave(0,:) /)
-     arr(1,:) = (/ runave_n(finua_tave(0,:), 11, 0, 0) /)
-     arr(2,:) = (/ tttt/)
-     xyres62@trYMinF = -70.0 
-     xyres62@trYMaxF = -20.0 
+     xyres62   = xyres6
+     tttt      = avg(finua_tave(0,:))
+     arr0      = new((/3,dimsizes(finua_tave(0,:))/),typeof(finua_tave))
+     arr0(0,:) = (/ finua_tave(0,:) /)
+     arr0(1,:) = (/ runave_n(finua_tave(0,:), 11, 0, 0) /)
+     arr0(2,:) = (/ tttt/)
+     xyres62@trYMinF = 20.0
+     xyres62@trYMaxF = 70.0
      xyres62@trXMinF = tofloat(min(finua_tave&lon))
      xyres62@trXMaxF = tofloat(max(finua_tave&lon))
-     xyres62@tiYAxisString  = "Latitude (degree)"      ; add an axis title    
+     xyres62@tiYAxisString  = "Latitude (degree)"      ; add an axis title
      xyres62@tiXAxisString  = "Longitude (degree)"      ; add an axis title
      xyres62@gsnRightString = "mean: "+ decimalPlaces(tttt,2,True)+finua_mave@units
-     xyn7(ee) = gsn_csm_xy(wks_psjet_ts,finua_tave&lon,arr,xyres62)
+     xyn7(ee) = gsn_csm_xy(wks_psjet_ts,finua_tave&lon,arr0,xyres62)
      if(.not.isvar("xdum")) then
         xdum = new(1000,graphic)
      end if
@@ -1364,7 +1365,7 @@ begin
      xyres7@trYMaxF = max(finua_tave(:,:))
      xdum(100+ee) = gsn_csm_xy(wks_psjet_ts,finua_tave&lon,finua_tave(1:2,:),xyres7)
      overlay(xyn7(ee),xdum(100+ee))
-     delete([/tttt,xyres62/])
+     delete([/tttt,xyres62,arr0/])
 
      ;*********************************
      ;plot the jet position normalized index (also mark positive and negative events) 

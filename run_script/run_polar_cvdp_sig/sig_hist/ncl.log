@@ -1,0 +1,174 @@
+nohup: ignoring input
+removed 'obs_aice_nh'
+removed 'obs_aice_sh'
+removed 'obs_prect'
+removed 'obs_psl'
+removed 'obs_ts'
+removed 'obs_trefht'
+removed 'obs_shflx'
+removed 'obs_lhflx'
+removed 'obs_u10'
+removed 'obs_v10'
+removed 'obs_u850'
+removed 'obs_v850'
+removed 'obs_taux'
+removed 'obs_tauy'
+removed 'obs_qnet'
+removed 'obs_olr'
+removed 'obs_flds'
+removed 'obs_fldsc'
+removed 'obs_flns'
+removed 'obs_swcre'
+removed 'obs_lwcre'
+removed 'obs_eth'
+removed 'obs_th850'
+removed 'obs_cldtot'
+removed 'obs_z500'
+removed 'obs_u200'
+removed 'obs_v200'
+removed 'obs_precst'
+removed 'obs_zmsf'
+removed 'obs_snowdp'
+removed './namelist_byvar/namelist_snowdp'
+removed 'obs_moc'
+removed './namelist_byvar/namelist_moc'
+removed 'obs_maxnum'
+removed './namelist'
+removed './namelist_obs'
+removed './namelist_byvar/namelist_aice_nh'
+ls: cannot access '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/ERA5/ERA5.en00.SICONC.*.nc': No such file or directory
+ls: cannot access '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/v3.LR.amip.FourthSmoke/v3.LR.amip.FourthSmoke.en00.SICONC.*.nc': No such file or directory
+ls: cannot access '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/v2.LR.amip/v2.LR.amip.en00.SICONC.*.nc': No such file or directory
+ls: cannot access '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/v1.LR.amip/v1.LR.amip.en00.SICONC.*.nc': No such file or directory
+removed './namelist_byvar/namelist_aice_sh'
+ls: cannot access '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/ERA5/ERA5.en00.SICONC.*.nc': No such file or directory
+ls: cannot access '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/v3.LR.amip.FourthSmoke/v3.LR.amip.FourthSmoke.en00.SICONC.*.nc': No such file or directory
+ls: cannot access '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/v2.LR.amip/v2.LR.amip.en00.SICONC.*.nc': No such file or directory
+ls: cannot access '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/v1.LR.amip/v1.LR.amip.en00.SICONC.*.nc': No such file or directory
+removed './namelist_byvar/namelist_prect'
+removed './namelist_byvar/namelist_psl'
+removed './namelist_byvar/namelist_ts'
+removed './namelist_byvar/namelist_trefht'
+removed './namelist_byvar/namelist_shflx'
+removed './namelist_byvar/namelist_lhflx'
+removed './namelist_byvar/namelist_u10'
+removed './namelist_byvar/namelist_v10'
+removed './namelist_byvar/namelist_u850'
+removed './namelist_byvar/namelist_v850'
+removed './namelist_byvar/namelist_taux'
+removed './namelist_byvar/namelist_tauy'
+removed './namelist_byvar/namelist_qnet'
+removed './namelist_byvar/namelist_olr'
+removed './namelist_byvar/namelist_flds'
+removed './namelist_byvar/namelist_fldsc'
+removed './namelist_byvar/namelist_flns'
+removed './namelist_byvar/namelist_swcre'
+removed './namelist_byvar/namelist_lwcre'
+removed './namelist_byvar/namelist_eth'
+removed './namelist_byvar/namelist_th850'
+removed './namelist_byvar/namelist_cldtot'
+removed './namelist_byvar/namelist_z500'
+removed './namelist_byvar/namelist_u200'
+removed './namelist_byvar/namelist_v200'
+removed './namelist_byvar/namelist_precst'
+removed './namelist_byvar/namelist_zmsf'
+input in flex scanner failed
+ Copyright (C) 1995-2018 - All Rights Reserved
+ University Corporation for Atmospheric Research
+ NCAR Command Language Version 6.5.0
+ The use of this software is governed by a License Agreement.
+ See http://www.ncl.ucar.edu/ for more details.
+Warning: Python module not loaded, you already have Python loaded via conda init
+Warning: Python module not loaded, you already have Python loaded via conda init
+Warning: Python module not loaded, you already have Python loaded via conda init
+Warning: Python module not loaded, you already have Python loaded via conda init
+(0)	Starting: tas.trends_timeseries.ncl
+(0)	Possible mismatch detected between time specified in file name and file variables, setting array to missing
+(0)	File = /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/ERA5/ERA5.en00.TREFHT.197901-201912.nc
+(0)	Read from file name: 197901-201912
+fatal:Undefined identifier: (tas_aa_seas_obs) is undefined, can't continue
+fatal:["Execute.c":8637]:Execute: Error occurred at or near line 378 in file /global/cfs/cdirs/e3sm/zhan391/e3sm_cvdp/ncl_code_sig/tas.trends_timeseries.ncl
+
+input in flex scanner failed
+Warning: Python module not loaded, you already have Python loaded via conda init
+input in flex scanner failed
+(0)	Starting: psl.trends.ncl
+(0)	Possible mismatch detected between time specified in file name and file variables, setting array to missing
+(0)	File = /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/ERA5/ERA5.en00.PSL.197901-201912.nc
+(0)	Read from file name: 197901-201912
+(0)	Finished: psl.trends.ncl
+Warning: Python module not loaded, you already have Python loaded via conda init
+(0)	Starting: amo.ncl
+(0)	Possible mismatch detected between time specified in file name and file variables, setting array to missing
+(0)	File = /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/ERA5/ERA5.en00.TS.197901-201912.nc
+(0)	Read from file name: 197901-201912
+fatal:Variable (spectra_mvf_obs) is undefined
+fatal:["Execute.c":8637]:Execute: Error occurred at or near line 589 in file /global/cfs/cdirs/e3sm/zhan391/e3sm_cvdp/ncl_code_sig/amo.ncl
+
+input in flex scanner failed
+(0)	Starting: pdo.ncl
+(0)	Possible mismatch detected between time specified in file name and file variables, setting array to missing
+(0)	File = /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/ERA5/ERA5.en00.TS.197901-201912.nc
+(0)	Read from file name: 197901-201912
+fatal:Variable (spectra_mvf_obs) is undefined
+fatal:["Execute.c":8637]:Execute: Error occurred at or near line 577 in file /global/cfs/cdirs/e3sm/zhan391/e3sm_cvdp/ncl_code_sig/pdo.ncl
+
+input in flex scanner failed
+Warning: Python module not loaded, you already have Python loaded via conda init
+Warning: Python module not loaded, you already have Python loaded via conda init
+(0)	Starting: pr.trends_timeseries.ncl
+(0)	Possible mismatch detected between time specified in file name and file variables, setting array to missing
+(0)	File = /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/ERA5/ERA5.en00.PRECT.197901-201912.nc
+(0)	Read from file name: 197901-201912
+fatal:Undefined identifier: (ppt_aa_seas_obs) is undefined, can't continue
+fatal:["Execute.c":8637]:Execute: Error occurred at or near line 368 in file /global/cfs/cdirs/e3sm/zhan391/e3sm_cvdp/ncl_code_sig/pr.trends_timeseries.ncl
+
+input in flex scanner failed
+Warning: Python module not loaded, you already have Python loaded via conda init
+(0)	Starting: sst.indices.ncl
+(0)	Possible mismatch detected between time specified in file name and file variables, setting array to missing
+(0)	File = /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/ERA5/ERA5.en00.TS.197901-201912.nc
+(0)	Read from file name: 197901-201912
+fatal:Variable (spectra_mvf_obs) is undefined
+fatal:["Execute.c":8637]:Execute: Error occurred at or near line 1589 in file /global/cfs/cdirs/e3sm/zhan391/e3sm_cvdp/ncl_code_sig/sst.indices.ncl
+
+input in flex scanner failed
+Warning: Python module not loaded, you already have Python loaded via conda init
+input in flex scanner failed
+(0)	Starting: psl.pna_npo.ncl
+(0)	Possible mismatch detected between time specified in file name and file variables, setting array to missing
+(0)	File = /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/ERA5/ERA5.en00.PSL.197901-201912.nc
+(0)	Read from file name: 197901-201912
+(0)	Finished: psl.pna_npo.ncl
+Warning: Python module not loaded, you already have Python loaded via conda init
+input in flex scanner failed
+(0)	Starting: psl.nam_nao.ncl
+(0)	Possible mismatch detected between time specified in file name and file variables, setting array to missing
+(0)	File = /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/ERA5/ERA5.en00.PSL.197901-201912.nc
+(0)	Read from file name: 197901-201912
+(0)	Finished: psl.nam_nao.ncl
+Warning: Python module not loaded, you already have Python loaded via conda init
+removed 'src_SCRIP.nc'
+removed 'dst_SCRIP.nc'
+removed 'PET0.RegridWeightGen.Log'
+input in flex scanner failed
+(0)	Starting: psl.mean_stddev.ncl
+(0)	Possible mismatch detected between time specified in file name and file variables, setting array to missing
+(0)	File = /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/ERA5/ERA5.en00.PSL.197901-201912.nc
+(0)	Read from file name: 197901-201912
+(0)	Finished: psl.mean_stddev.ncl
+Warning: Python module not loaded, you already have Python loaded via conda init
+input in flex scanner failed
+(0)	Starting: sst.mean_stddev.ncl
+(0)	Possible mismatch detected between time specified in file name and file variables, setting array to missing
+(0)	File = /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/ERA5/ERA5.en00.TS.197901-201912.nc
+(0)	Read from file name: 197901-201912
+(0)	Finished: sst.mean_stddev.ncl
+(0)	Starting: pr.mean_stddev.ncl
+(0)	Possible mismatch detected between time specified in file name and file variables, setting array to missing
+(0)	File = /global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/ERA5/ERA5.en00.PRECT.197901-201912.nc
+(0)	Read from file name: 197901-201912
+fatal:overlay: missing value as input, can't continue
+fatal:["Execute.c":8637]:Execute: Error occurred at or near line 389 in file /global/cfs/cdirs/e3sm/zhan391/e3sm_cvdp/ncl_code_sig/pr.mean_stddev.ncl
+
+input in flex scanner failed
