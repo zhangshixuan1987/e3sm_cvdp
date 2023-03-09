@@ -687,7 +687,7 @@ begin
   txt(77) = "<tr><td><b>OLR (Outgoing Longwave Radiation) Regressions</b></td>"
   txt(78) = "<td>OLR anomalies (in W/m2) at each grid box are regressed upon the normalized atmospheric mode timeseries (dotted patterns indicate the region passes a 95% confidence level).</td></tr>"
   txt(79) = "<tr><td><b>SIC (Sea Ice Concentration) Regressions</b></td>"
-  txt(80) = "<td>OLR anomalies (in W/m2) at each grid box are regressed upon the normalized atmospheric mode timeseries (dotted patterns indicate the region passes a 95% confidence level).</td></tr>"
+  txt(80) = "<td>To be added in near future.</td></tr>"
   txt(81) = "</td></tr></table>"
 
   txt(100) = "<p class=subtitle>Climate Indices</p>"
