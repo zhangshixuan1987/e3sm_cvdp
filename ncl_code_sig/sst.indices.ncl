@@ -1330,7 +1330,7 @@ begin
      title_socn = socn@comment_cvdp
      title_amm  = amm@comment_cvdp
      title_atl3 = atl3@comment_cvdp
-     delete([/nino34,nino3,nino4,nino12,tsa,tna,tio,iod,socn,amm,atl3/])
+     delete([/oni,nino34,nino3,nino4,nino12,tsa,tna,tio,iod,socn,amm,atl3/])
 
      if (spectra_mvf.eq.False) then
         xyres4@gsnCenterString = names(ee)

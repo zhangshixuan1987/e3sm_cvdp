@@ -585,7 +585,7 @@ begin
            delete([/modname,fn/])
         end if
      end if     
-     delete([/nao_pc_djf,nao_pc_jja,nao_pc_mam,nao_pc_son,nao_pc_mon/])
+     delete([/nao_pc_djf,nao_pc_jja,nao_pc_mam,nao_pc_son,nao_pc_ann,nao_pc_mon/])
 
 ;========================================================================
      res = True

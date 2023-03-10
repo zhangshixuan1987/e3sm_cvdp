@@ -143,7 +143,6 @@ begin
         end if
         delete([/zmsf_seas,zmsf_ann/])
      end do
-     delete(zmsf)
      copy_VarMeta(zmsf_mean_djf,zmsf_sd_djf)
      copy_VarMeta(zmsf_mean_mam,zmsf_sd_mam)
      copy_VarMeta(zmsf_mean_jja,zmsf_sd_jja)
@@ -188,7 +187,15 @@ begin
         z->zmsf_spatialstddev_ann     = set_varAtts(zmsf_sd_ann,"zmsf standard deviation (annual)","","")
         delete(z)
      end if
-     
+     if(isvar("zmsf_seas")) then
+       delete([/zmsf_seas/])
+     end if
+     if(isvar("zmsf_ann")) then
+       delete([/zmsf_ann/])
+     end if
+      if(isvar("zmsf")) then
+       delete([/zmsf/])
+     end if     
 ;==========================================================================================
      res = True
      res@vpWidthF   = 0.8
@@ -285,7 +292,9 @@ begin
      plot_mean_jja(ee) = gsn_csm_contour(wks_mean_jja,zmsf_mean_jja,sres)
      plot_mean_son(ee) = gsn_csm_contour(wks_mean_son,zmsf_mean_son,sres)
      plot_mean_ann(ee) = gsn_csm_contour(wks_mean_ann,zmsf_mean_ann,sres)
-     delete([/zmsf_sd_djf,zmsf_sd_mam,zmsf_sd_jja,zmsf_sd_son,zmsf_sd_ann,zmsf_mean_djf,zmsf_mean_mam,zmsf_mean_jja,zmsf_mean_son,zmsf_mean_ann,res,sres/])
+     delete([/zmsf_sd_djf,zmsf_sd_mam,zmsf_sd_jja,zmsf_sd_son,zmsf_sd_ann/])
+     delete([/zmsf_mean_djf,zmsf_mean_mam,zmsf_mean_jja,zmsf_mean_son,zmsf_mean_ann/])
+     delete([/res,sres/])
   end do     
      
   panres = True

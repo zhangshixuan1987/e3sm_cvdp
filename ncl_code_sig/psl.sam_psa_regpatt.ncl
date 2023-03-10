@@ -666,9 +666,9 @@ begin
      copy_VarCoords(sam_pc_djf,psa2_pc_son)  
      delete([/evecv,pcts/])
 
-     evecv = eofunc(arr_ann_CW({lat|:-20},lon|:,time|:),4,75)
-     pcts = eofunc_ts(arr_ann_CW({lat|:-20},lon|:,time|:),evecv,False)  
-     sam_pc_ann = dim_standardize(pcts(0,:),0)
+     evecv       = eofunc(arr_ann_CW({lat|:-20},lon|:,time|:),4,75)
+     pcts        = eofunc_ts(arr_ann_CW({lat|:-20},lon|:,time|:),evecv,False)  
+     sam_pc_ann  = dim_standardize(pcts(0,:),0)
      psa1_pc_ann = dim_standardize(pcts(1,:),0)
      psa2_pc_ann = dim_standardize(pcts(2,:),0)     
      sam_ann = arr_ann(0,:,:)
@@ -1051,9 +1051,9 @@ begin
            delete([/modname,fn/])
         end if
      end if     
-     delete([/sam_pc_djf,sam_pc_jja,sam_pc_mam,sam_pc_son,sam_pc_mon/])
-     delete([/psa1_pc_djf,psa1_pc_jja,psa1_pc_mam,psa1_pc_son,psa1_pc_mon/])
-     delete([/psa2_pc_djf,psa2_pc_jja,psa2_pc_mam,psa2_pc_son,psa2_pc_mon/])
+     delete([/sam_pc_djf,sam_pc_jja,sam_pc_mam,sam_pc_son,sam_pc_ann,sam_pc_mon/])
+     delete([/psa1_pc_djf,psa1_pc_jja,psa1_pc_mam,psa1_pc_son,psa1_pc_ann,psa1_pc_mon/])
+     delete([/psa2_pc_djf,psa2_pc_jja,psa2_pc_mam,psa2_pc_son,psa2_pc_ann,psa2_pc_mon/])
 
 ;========================================================================
      res = True

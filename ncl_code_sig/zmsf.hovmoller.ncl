@@ -102,11 +102,11 @@ begin
      
      zmsf_920_hovmoller_seas      = zmsf_seas(lev|0:3,lat|:,time|0::12)
      zmsf_920_hovmoller_seas      = zmsf_920_hovmoller_seas@_FillValue
-     zmsf_920_hovmoller_ann       = zmsf_920_hovmoller_seas(0,:,:)
      zmsf_920_hovmoller_seas!1    = "lat"
      zmsf_920_hovmoller_seas&lat  = zmsf_seas&lat
      zmsf_920_hovmoller_seas!2    = "time"
      zmsf_920_hovmoller_seas&time = ispan(syear(ee),eyear(ee),1)
+     zmsf_920_hovmoller_ann       = zmsf_920_hovmoller_seas(0,:,:)
      zmsf_920_hovmoller_ann!0     = "lat"
      zmsf_920_hovmoller_ann&lat   = zmsf_seas&lat  
      zmsf_920_hovmoller_ann!1     = "time"
@@ -164,6 +164,7 @@ begin
             delete([/tmpx/])
           end do 
         end do
+        delete(tarr)
     end do 
 
     delete([/zmsf_seas,zmsf_ann,zmsf,dpth,plev/])
@@ -198,7 +199,7 @@ begin
         z->zmsf920_hovmoller_mam = set_varAtts(zmsf_920_hovmoller_seas(1,:,:),"zmsf 900-200hPa mean hovmoller (MAM)","","")
         z->zmsf920_hovmoller_jja = set_varAtts(zmsf_920_hovmoller_seas(2,:,:),"zmsf 900-200hPa mean hovmoller (JJA)","","")
         z->zmsf920_hovmoller_son = set_varAtts(zmsf_920_hovmoller_seas(3,:,:),"zmsf 900-200hPa mean hovmoller (SON)","","")
-        z->zmsf920_hovmoller_ann = set_varAtts(zmsf_740_hovmoller_ann,"zmsf 900-200hPa mean (annual)","","")
+        z->zmsf920_hovmoller_ann = set_varAtts(zmsf_920_hovmoller_ann,"zmsf 900-200hPa mean (annual)","","")
 
         z->zmsf740_hovmoller_djf = set_varAtts(zmsf_740_hovmoller_seas(0,:,:),"zmsf 700-400hPa mean hovmoller (DJF)","","")
         z->zmsf740_hovmoller_mam = set_varAtts(zmsf_740_hovmoller_seas(1,:,:),"zmsf 700-400hPa mean hovmoller (MAM)","","")
@@ -374,7 +375,10 @@ begin
      overlay(map_son(ee),dum_son(ee+100))
      overlay(map_ann(ee),dum_ann(ee+100))
 
-     delete([/res,res1,res2,zmsf_920_hovmoller_seas,zmsf_920_hovmoller_ann,zmsf_740_hovmoller_seas,zmsf_740_hovmoller_ann/])
+     delete([/res,res1,res2/])
+     delete([/zmsf_920_hc_lat_seas,zmsf_920_hc_lat_ann/])
+     delete([/zmsf_740_hovmoller_seas,zmsf_740_hovmoller_ann/])
+     delete([/zmsf_920_hovmoller_seas,zmsf_920_hovmoller_ann/])
   end do     
      
   panres = True

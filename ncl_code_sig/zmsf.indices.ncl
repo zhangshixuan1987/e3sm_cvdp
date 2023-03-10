@@ -234,24 +234,29 @@ begin
      coswgt!0 = "lat"
      coswgt&lat= zmsf&lat
    
-     hcin_mon    = zmsf(:,0,0) 
-     hxcin_mon   = hcin_mon
-     hmcin_mon   = hcin_mon
-     hcis_mon    = hcin_mon 
-     hxcis_mon   = hcin_mon
-     hmcis_mon   = hcin_mon
-     hpin_mon    = hcin_mon 
-     hxpin_mon   = hcin_mon
-     hmpin_mon   = hcin_mon
-     hpis_mon    = hcin_mon
-     hxpis_mon   = hcin_mon
-     hmpis_mon   = hcin_mon
-     hcei_mon    = hcin_mon
-     hcen_mon    = hcin_mon
-     hces_mon    = hcin_mon
-     hcwn_mon    = hcin_mon
-     hcws_mon    = hcin_mon
-     hcwd_mon    = hcin_mon
+     hcin_mon       = zmsf(:,0,0) 
+     hcin_mon!0     = "time"
+     hcin_mon&time  = zmsf&time 
+     hcin_mon@units = zmsf@units 
+     hxcin_mon      = hcin_mon
+     hmcin_mon      = hcin_mon
+     hcis_mon       = hcin_mon 
+     hxcis_mon      = hcin_mon
+     hmcis_mon      = hcin_mon
+
+     hcei_mon       = hcin_mon
+     hcei_mon@units = "degree"
+     hcen_mon       = hcei_mon
+     hces_mon       = hcei_mon 
+     hcwn_mon       = hcei_mon 
+     hcws_mon       = hcei_mon 
+     hcwd_mon       = hcei_mon 
+     hpin_mon       = hcei_mon
+     hxpin_mon      = hcei_mon
+     hmpin_mon      = hcei_mon
+     hpis_mon       = hcei_mon
+     hxpis_mon      = hcei_mon
+     hmpis_mon      = hcei_mon
 
      do kk  = 0, dimsizes(zmsf&time) -1
 

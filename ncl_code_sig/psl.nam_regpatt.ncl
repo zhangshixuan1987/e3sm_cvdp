@@ -572,7 +572,7 @@ begin
            delete([/modname,fn/])
         end if
      end if     
-     delete([/nam_pc_djf,nam_pc_jja,nam_pc_mam,nam_pc_son,nam_pc_mon/])
+     delete([/nam_pc_djf,nam_pc_jja,nam_pc_mam,nam_pc_son,nam_pc_ann,nam_pc_mon/])
 
 ;========================================================================
      res = True

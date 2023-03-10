@@ -812,8 +812,8 @@ begin
            delete([/modname,fn/])
         end if
      end if     
-     delete([/pna_pc_djf,pna_pc_jja,pna_pc_mam,pna_pc_son,pna_pc_mon/])
-     delete([/npo_pc_djf,npo_pc_jja,npo_pc_mam,npo_pc_son,npo_pc_mon/])
+     delete([/pna_pc_djf,pna_pc_jja,pna_pc_mam,pna_pc_son,pna_pc_ann,pna_pc_mon/])
+     delete([/npo_pc_djf,npo_pc_jja,npo_pc_mam,npo_pc_son,npo_pc_ann,npo_pc_mon/])
 
 ;========================================================================
      res = True

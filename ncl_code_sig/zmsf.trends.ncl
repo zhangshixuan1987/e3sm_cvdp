@@ -113,7 +113,6 @@ begin
      zmsf_seas(0,:,:) = (/ dim_avg_n(zmsf(:1,:,:),0) /)
      zmsf_seas(dimsizes(zmsf&time)-1,:,:) = (/ dim_avg_n(zmsf(dimsizes(zmsf&time)-2:,:,:),0) /)
      zmsf_ann = runave_n_Wrap(zmsf,12,0,0)
-     delete(zmsf)
      
      zmsf_trends_seas = zmsf_seas(:3,:,:)
      zmsf_trends_seas = zmsf_trends_seas@_FillValue
@@ -139,7 +138,6 @@ begin
      zmsf_trends_ann = zmsf_trends_ann*nyr(ee)
      zmsf_trends_ann@units = zmsf_ann@units+" "+nyr(ee)+"yr~S~-1~N~"
      lbunit = lbunit + " "+nyr(ee)+"yr~S~-1~N~" 
-     delete([/zmsf_seas,zmsf_ann/])
 
      if (OUTPUT_DATA.eq."True") then
         modname = str_sub_str(names(ee)," ","_")
@@ -175,7 +173,15 @@ begin
         delete(z)
         delete([/modname,fn/])
      end if
-     
+     if(isvar("zmsf_seas")) then 
+       delete([/zmsf_seas/])
+     end if 
+     if(isvar("zmsf_ann")) then
+       delete([/zmsf_ann/])
+     end if
+      if(isvar("zmsf")) then
+       delete([/zmsf/])
+     end if
 ;==========================================================================================
      res = True
      res@vpWidthF   = 0.8
