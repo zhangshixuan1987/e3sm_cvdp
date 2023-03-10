@@ -101,7 +101,7 @@ begin
   do gg = 0,dimsizes(files)-1
      if (.not.fileexists(OUTDIR+files(gg))) then
         if(vars(gg).eq."sst") then 
-          ftmp = str_sub_str(files(gg),"_sst_","_ts_") 
+          ftmp = str_sub_str(files(gg),"_sst","_ts") 
          ;print(ftmp)
           if (fileexists(OUTDIR+ftmp)) then 
              files(gg) = ftmp
