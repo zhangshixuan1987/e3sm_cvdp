@@ -1327,7 +1327,7 @@ begin
      xyres61 = xyres6
      tttt = dtrend_msg(ispan(0,dimsizes(finua_mave(0,:))-1,1),finua_mave(0,:),False,True)
      arr(0,:) = (/ finua_mave(0,:) /)
-     arr(1,:) = (/ runave_n(finua_mave(0,:), 11, 0, 0) /)
+     arr(1,:) = (/ runave_n(finua_mave(0,:), 3, 0, 0) /)
      arr(2,:) = (/ (ispan(0,dimsizes(finua_mave(0,:))-1,1)*tttt@slope)+tttt@y_intercept /)
      xyres61@trYMinF = 20.0
      xyres61@trYMaxF = 70.0 
@@ -1348,7 +1348,7 @@ begin
      tttt      = avg(finua_tave(0,:))
      arr0      = new((/3,dimsizes(finua_tave(0,:))/),typeof(finua_tave))
      arr0(0,:) = (/ finua_tave(0,:) /)
-     arr0(1,:) = (/ runave_n(finua_tave(0,:), 11, 0, 0) /)
+     arr0(1,:) = (/ runave_n(finua_tave(0,:), 3, 0, 0) /)
      arr0(2,:) = (/ tttt/)
      xyres62@trYMinF = 20.0 
      xyres62@trYMaxF = 70.0 
@@ -1356,7 +1356,7 @@ begin
      xyres62@trXMaxF = tofloat(max(finua_tave&lon))
      xyres62@tiYAxisString  = "Latitude (degree)"      ; add an axis title    
      xyres62@tiXAxisString  = "Longitude (degree)"      ; add an axis title
-     xyres62@gsnRightString = "mean: "+ decimalPlaces(tttt,2,True)+finua_mave@units
+     xyres62@gsnRightString = "mean: "+ decimalPlaces(tttt,2,True)+finua_tave@units
      xyn7(ee) = gsn_csm_xy(wks_pnjet_ts,finua_tave&lon,arr0,xyres62)
      if(.not.isvar("xdum")) then
         xdum = new(1000,graphic)

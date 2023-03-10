@@ -411,32 +411,32 @@ begin
         finpsl_tave(2,:) = dim_max_n(finpsl,0)
         
         if (OUTPUT_DATA.eq."True") then 
-           hov_all = (/ finpsl /)  
-           time_mon1 = cd_calendar(psl&time,1) 
-           time_mon1@long_name = "Time"
-           time_mon1@standard_name = "time"
-           time_mon1@calendar = "standard"
-           time_mon1!0 = "time_mon1"
+           time_mon1           = cd_calendar(ua&time,1)
+           time_mon1!0         = "time_mon1"
            time_mon1&time_mon1 = time_mon1
-           hov_all!0 = "time_mon1"
-           hov_all&time_mon1 = time_mon1
-           lon1 = finpsl&lon
-           lon1@standard_name = "longitude"
-           hov_all!1    = "lon1"
-           hov_all&lon1 = lon1
-           hov_all@_FillValue = finpsl@_FillValue 
+           time_mon1@long_name = "Time"
+           time_mon1@calendar  = "standard"
+           time_mon1@standard_name = "time"
+           lon1                = finpsl&lon
+           lon1@standard_name  = "longitude"
+           hov_all             = (/ finpsl /)
+           hov_all!0           = "time_mon1"
+           hov_all&time_mon1   = time_mon1
+           hov_all!1           = "lon1"
+           hov_all&lon1        = lon1
+           hov_all@units       = "degree"
+           hov_all@_FillValue  = finpsl@_FillValue
+           hov_mave            = (/ finpsl_mave /)
+           hov_mave!0          = "nx"
+           hov_mave!1          = "time_mon1"
+           hov_mave&time_mon1  = hov_all&time_mon1
+           hov_mave@units      = "degree"
+           hov_tave            = (/ finpsl_tave /)
+           hov_tave!0          = "nx"
+           hov_tave!1          = "lon1"
+           hov_tave&lon1       = hov_all&lon1
+           hov_tave@units      = "degree"
            delete([/time_mon1,lon1/])
-           hov_mave = (/ finpsl_mave /)  
-           hov_tave = (/ finpsl_tave /)
-           hov_mave!0 = "nx"
-           hov_mave!1 = "time_mon1"
-           hov_mave&time_mon1 = hov_all&time_mon1
-           hov_tave!0 = "nx"
-           hov_mave!1 = "lon1"
-           hov_mave&lon1  = hov_all&lon1 
-           hov_all@units  = "degree"
-           hov_mave@units = "degree"
-           hov_tave@units = "degree"
            z->samlat_hov_all  = set_varAtts(hov_all, "SAM latitude Hovmoller (time-lon)","","")
            z->samlat_hov_mave = set_varAtts(hov_mave,"SAM latitude time series (lon mean)","","")
            z->samlat_hov_tave = set_varAtts(hov_tave,"SAM latitude meridional series (time mean)","","")
@@ -1275,17 +1275,18 @@ begin
 
      xyres62 = xyres6
      tttt = avg(finpsl_tave(0,:))
-     arr(0,:) = (/ finpsl_tave(0,:) /)
-     arr(1,:) = (/ runave_n(finpsl_tave(0,:), 3, 0, 0) /)
-     arr(2,:) = (/ tttt/)
+     arr0      = new((/3,dimsizes(finpsl_tave(0,:))/),typeof(finpsl_tave))
+     arr0(0,:) = (/ finpsl_tave(0,:) /)
+     arr0(1,:) = (/ runave_n(finpsl_tave(0,:), 3, 0, 0) /)
+     arr0(2,:) = (/ tttt/)
      xyres62@trYMinF = -65.0 
      xyres62@trYMaxF = -35.0 
      xyres62@trXMinF = tofloat(min(finpsl_tave&lon))
      xyres62@trXMaxF = tofloat(max(finpsl_tave&lon))
      xyres62@tiYAxisString  = "Latitude (degree)"      ; add an axis title    
      xyres62@tiXAxisString  = "Longitude (degree)"      ; add an axis title
-     xyres62@gsnRightString = "mean: "+ decimalPlaces(tttt,2,True)+" "+ finpsl_mave@units
-     xyn6(ee) = gsn_csm_xy(wks_samind,finpsl_tave&lon,arr,xyres62)
+     xyres62@gsnRightString = "mean: "+ decimalPlaces(tttt,2,True)+" "+ finpsl_tave@units
+     xyn6(ee) = gsn_csm_xy(wks_samind,finpsl_tave&lon,arr0,xyres62)
      if(.not.isvar("xdum")) then
         xdum = new(1000,graphic)
      end if
@@ -1293,7 +1294,7 @@ begin
      xyres7@trYMaxF = max(finpsl_tave(:,:))
      xdum(100+ee) = gsn_csm_xy(wks_samind,finpsl_tave&lon,finpsl_tave(1:2,:),xyres7)
      overlay(xyn6(ee),xdum(100+ee))
-     delete([/tttt,xyres62/])
+     delete([/tttt,xyres62,arr0/])
 
      tttt = dtrend_msg(ispan(0,dimsizes(aslind)-1,1),aslind,False,True)
      arr(0,:) = (/ aslind /)
