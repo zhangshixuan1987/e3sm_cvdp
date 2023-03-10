@@ -96,8 +96,7 @@ begin
               "swcre","olr","cldtot","u850","v850","th850","z500","u200","v200"/)
   nvar = dimsizes(vars)
 
-  files = "regpatt_nino34"+"_"+vars 
-  files = "metrics.sst."+files
+  files = "regpatt_metrics.sst.nino34"+"_"+vars
   files = files+".txt"
   do gg = 0,dimsizes(files)-1
      if (.not.fileexists(OUTDIR+files(gg))) then
