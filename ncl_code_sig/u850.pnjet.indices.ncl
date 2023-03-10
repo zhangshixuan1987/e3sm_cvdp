@@ -430,36 +430,35 @@ begin
         finua_tave(2,:) = dim_max_n(finua,0)
         
         if (OUTPUT_DATA.eq."True") then 
-           time_mon1           = cd_calendar(ua&time,1)
-           time_mon1!0         = "time_mon1"
-           time_mon1&time_mon1 = time_mon1
-           time_mon1@long_name = "Time"
-           time_mon1@calendar  = "standard"
-           time_mon1@standard_name = "time"
-           lon1                = finua&lon
-           lon1@standard_name  = "longitude"
+           time_mon0           = cd_calendar(ua&time,1)
+           time_mon0!0         = "time_mon0"
+           time_mon0&time_mon0 = time_mon0
+           time_mon0@long_name = "Time"
+           time_mon0@calendar  = "standard"
+           time_mon0@standard_name = "time"
+           lon0                = finua&lon
+           lon0@standard_name  = "longitude"
            hov_all             = (/ finua /)
-           hov_all!0           = "time_mon1"
-           hov_all&time_mon1   = time_mon1
-           hov_all!1           = "lon1"
-           hov_all&lon1        = lon1
+           hov_all!0           = "time_mon0"
+           hov_all&time_mon0   = time_mon0
+           hov_all!1           = "lon0"
+           hov_all&lon0        = lon0
            hov_all@units       = "degree"
            hov_all@_FillValue  = finua@_FillValue
            hov_mave            = (/ finua_mave /)
            hov_mave!0          = "nx"
-           hov_mave!1          = "time_mon1"
-           hov_mave&time_mon1  = hov_all&time_mon1
+           hov_mave!1          = "time_mon0"
+           hov_mave&time_mon0  = hov_all&time_mon0
            hov_mave@units      = "degree"
            hov_tave            = (/ finua_tave /)
            hov_tave!0          = "nx"
-           hov_tave!1          = "lon1"
-           hov_tave&lon1       = hov_all&lon1
+           hov_tave!1          = "lon0"
+           hov_tave&lon0       = hov_all&lon0
            hov_tave@units      = "degree"
-           delete([/time_mon1,lon1/])
            z->jetlat_hov_all  = set_varAtts(hov_all, "Polar Jet Position hovmoller (time-lon)","","")
            z->jetlat_hov_mave = set_varAtts(hov_mave,"Polar Jet Position time series (lon mean)","","")
            z->jetlat_hov_tave = set_varAtts(hov_tave,"Polar Jet Position meridional series (time mean)","","")
-           delete([/hov_mave,hov_tave,hov_all/])
+           delete([/hov_mave,hov_tave,hov_all,time_mon0,lon0/])
         end if
      end if     
 
@@ -1384,7 +1383,7 @@ begin
      xyres5@trYMaxF =  4.0
      xyres5@tiYAxisString  = "Polar Jet Position (norm.)"          ; add an axis title
      xyres5@tiXAxisString  = ""      ; add an axis title
-     xyres5@gsnRightString = "trend: "+decimalPlaces(tttt@slope*dimsizes(pnjetind_mon),2,True)+" "+pnjetind_mon@units+" "+nyr(ee)+"yr~S~-1~N~"
+     xyres5@gsnRightString = "trend: "+decimalPlaces(tttt@slope*dimsizes(pnjetind_mon),2,True)+" "+nyr(ee)+"yr~S~-1~N~"
      xyn8(ee) = gsn_csm_xy(wks_pnjet_ts,fspan(syear(ee),eyear(ee)+.91667,dimsizes(pnjetind_mon)),arr(0,:),xyres5)
      if(.not.isvar("dum")) then 
         dum = new(1000,graphic)

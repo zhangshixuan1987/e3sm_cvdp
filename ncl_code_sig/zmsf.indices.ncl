@@ -1445,7 +1445,7 @@ begin
      xyres5@trYMaxF =  4.0
      xyres5@tiYAxisString  = "Hadley Cell Width (norm.)" ; add an axis title
      xyres5@tiXAxisString  = ""      ; add an axis title
-     xyres5@gsnRightString = "trend: "+decimalPlaces(tttt@slope*dimsizes(hcwd_nm),2,True)+hcwd_nm@units+" "+nyr(ee)+"yr~S~-1~N~"
+     xyres5@gsnRightString = "trend: "+decimalPlaces(tttt@slope*dimsizes(hcwd_nm),2,True)+" "+nyr(ee)+"yr~S~-1~N~"
      xyn6(ee) = gsn_csm_xy(wks_hc_ts,fspan(syear(ee),eyear(ee)+.91667,dimsizes(hcwd_nm)),arr(0,:),xyres5)
      if(.not.isvar("dum")) then
         dum = new(1000,graphic)
@@ -1453,8 +1453,8 @@ begin
      dum(ee)     = gsn_add_polyline(wks_hc_ts,xyn6(ee),fspan(syear(ee),eyear(ee)+.91667,dimsizes(hcwd_nm)),arr0,gsLine)
      dum(ee+100) = gsn_add_polyline(wks_hc_ts,xyn6(ee),fspan(syear(ee),eyear(ee)+.91667,dimsizes(hcwd_nm)),arr1,gsLin0)
      dum(ee+200) = gsn_add_polyline(wks_hc_ts,xyn6(ee),fspan(syear(ee),eyear(ee)+.91667,dimsizes(hcwd_nm)),arr2,gsLin1)
-     dum(ee+300) = gsn_add_text(wks_hc_ts,xyn6(ee),"Jet (+) " + num(hcwd_nm.ge.1),syear(ee)+0.2, 2.50, txre0)
-     dum(ee+400) = gsn_add_text(wks_hc_ts,xyn6(ee),"Jet (-) " + num(hcwd_nm.le.-1),syear(ee)+0.2,-2.50, txre1)
+     dum(ee+300) = gsn_add_text(wks_hc_ts,xyn6(ee),"HC width (+) " + num(hcwd_nm.ge.1),syear(ee)+0.2, 2.50, txre0)
+     dum(ee+400) = gsn_add_text(wks_hc_ts,xyn6(ee),"HC width (-) " + num(hcwd_nm.le.-1),syear(ee)+0.2,-2.50, txre1)
      delete([/xyres5,gsLine,gsLin0,gsLin1,txre0,txre1/])
      delete([/arr,tttt,arr0,arr1,arr2,hcwd_nm/])
 

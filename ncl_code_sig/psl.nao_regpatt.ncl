@@ -795,15 +795,15 @@ begin
       end do
 ;
      if (dimsizes(tochar(line4)).ge.8190) then   ; system or fortran compiler limit
-        print("Metrics table warning: Not creating metrics table as size of comparison results in a invalid ascii row size.")
+        print("Metrics table warning: Not creating regpatt_metrics.table as size of comparison results in a invalid ascii row size.")
      else
         if(kk.eq.0.and.ll.eq.0) then
-          write_table(getenv("OUTDIR")+"metrics.psl.nao_"+vnm+"_regpatt.txt","w",[/header/],"%s")
-          write_table(getenv("OUTDIR")+"metrics.psl.nao_"+vnm+"_regpatt.txt","a",[/line3/],"%s")
-          write_table(getenv("OUTDIR")+"metrics.psl.nao_"+vnm+"_regpatt.txt","a",[/line4/],"%s")
-          write_table(getenv("OUTDIR")+"metrics.psl.nao_"+vnm+"_regpatt.txt","a",[/finpr/],"%s")
+          write_table(getenv("OUTDIR")+"regpatt_metrics.psl.nao_"+vnm+".txt","w",[/header/],"%s")
+          write_table(getenv("OUTDIR")+"regpatt_metrics.psl.nao_"+vnm+".txt","a",[/line3/],"%s")
+          write_table(getenv("OUTDIR")+"regpatt_metrics.psl.nao_"+vnm+".txt","a",[/line4/],"%s")
+          write_table(getenv("OUTDIR")+"regpatt_metrics.psl.nao_"+vnm+".txt","a",[/finpr/],"%s")
         else
-          write_table(getenv("OUTDIR")+"metrics.psl.nao_"+vnm+"_regpatt.txt","a",[/finpr/],"%s")
+          write_table(getenv("OUTDIR")+"regpatt_metrics.psl.nao_"+vnm+".txt","a",[/finpr/],"%s")
         end if
      end if
      delete([/line3,line4,format2,format3,nchar,ntc,clat,dimY,ntb,header/])

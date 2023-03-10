@@ -96,7 +96,7 @@ begin
               "swcre","olr","cldtot","u850","v850","th850","z500","u200","v200"/)
   nvar = dimsizes(vars)
 
-  files = "nam"+"_"+vars + "_regpatt"
+  files = "regpatt_nam"+"_"+vars 
   files = "metrics.psl."+files
   files = files+".txt"
   do gg = 0,dimsizes(files)-1
@@ -225,7 +225,7 @@ begin
   pc_score = where(pc_score.eq." nan","----",pc_score)  ; needed for when the nan's come out of the z-transform (likey due to numerous pattern correlations = 1)
   
   header = (/"","Pattern Correlations/RMS Differences   Observations vs. Model(s)",""/)
-  write_table(OUTDIR+"metrics_"+mods(jx)+"_regpatt_"+seas(ix)+".txt","w",[/header/],"%s")
+  write_table(OUTDIR+"regpatt_metrics_"+mods(jx)+"_"+seas(ix)+".txt","w",[/header/],"%s")
   head1 =""
   head2 =""
   head3 =""

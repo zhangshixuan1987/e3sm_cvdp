@@ -411,35 +411,35 @@ begin
         finpsl_tave(2,:) = dim_max_n(finpsl,0)
         
         if (OUTPUT_DATA.eq."True") then 
-           time_mon1           = cd_calendar(ua&time,1)
-           time_mon1!0         = "time_mon1"
-           time_mon1&time_mon1 = time_mon1
-           time_mon1@long_name = "Time"
-           time_mon1@calendar  = "standard"
-           time_mon1@standard_name = "time"
-           lon1                = finpsl&lon
-           lon1@standard_name  = "longitude"
+           time_mon0           = cd_calendar(psl&time,1)
+           time_mon0!0         = "time_mon0"
+           time_mon0&time_mon0 = time_mon0
+           time_mon0@long_name = "Time"
+           time_mon0@calendar  = "standard"
+           time_mon0@standard_name = "time"
+           lon0                = finpsl&lon
+           lon0@standard_name  = "longitude"
            hov_all             = (/ finpsl /)
-           hov_all!0           = "time_mon1"
-           hov_all&time_mon1   = time_mon1
-           hov_all!1           = "lon1"
-           hov_all&lon1        = lon1
+           hov_all!0           = "time_mon0"
+           hov_all&time_mon0   = time_mon0
+           hov_all!1           = "lon0"
+           hov_all&lon0        = lon0
            hov_all@units       = "degree"
            hov_all@_FillValue  = finpsl@_FillValue
            hov_mave            = (/ finpsl_mave /)
            hov_mave!0          = "nx"
-           hov_mave!1          = "time_mon1"
-           hov_mave&time_mon1  = hov_all&time_mon1
+           hov_mave!1          = "time_mon0"
+           hov_mave&time_mon0  = hov_all&time_mon0
            hov_mave@units      = "degree"
            hov_tave            = (/ finpsl_tave /)
            hov_tave!0          = "nx"
-           hov_tave!1          = "lon1"
-           hov_tave&lon1       = hov_all&lon1
+           hov_tave!1          = "lon0"
+           hov_tave&lon0       = hov_all&lon0
            hov_tave@units      = "degree"
            z->samlat_hov_all  = set_varAtts(hov_all, "SAM latitude Hovmoller (time-lon)","","")
            z->samlat_hov_mave = set_varAtts(hov_mave,"SAM latitude time series (lon mean)","","")
            z->samlat_hov_tave = set_varAtts(hov_tave,"SAM latitude meridional series (time mean)","","")
-           delete([/hov_mave,hov_tave,hov_all,time_mon1,lon1/])
+           delete([/hov_mave,hov_tave,hov_all,time_mon0,lon0/])
         end if
      end if     
 
@@ -1456,23 +1456,7 @@ begin
      res@gsnDraw = False 
   
 
-     res@tmYLMode = "Explicit"
-;     res@tmYLValues = ispan(0,72,6)
-;     res@tmYLLabels = (/"Jan~S~-2~N~","Jul~S~-2~N~","Jan~S~-1~N~","Jul~S~-1~N~", \
-;                     "Jan~S~0~N~","Jul~S~0~N~","Jan~S~+1~N~","Jul~S~+1~N~", \
-;                     "Jan~S~+2~N~","Jul~S~+2~N~","Jan~S~+3~N~","Jul~S~+3~N~","Jan~S~+4~N~"/)
-;     res@trYMinF = 24
-;     res@trYMaxF = 52  
-;     res@tmYLValues = ispan(24,52,4)
-;     res@tmYLLabels = (/"Jan~S~0~N~","May~S~0~N~","Sep~S~0~N~","Jan~S~+1~N~", \
-;                     "May~S~+1~N~","Sep~S~+1~N~","Jan~S~+2~N~","May~S~+2~N~"/)    
-;     res@tmYLMinorValues = ispan(24,52,2)               
-
-     ;res@trYMinF         = toint(syear(ee)+"01")
-     ;res@trYMaxF         = toint(eyear(ee)+"12") 
-     ;print(finpsl&time_mon1(::12))
-     ;exit
-
+     res@tmYLMode        = "Explicit"
      res@tmYLValues      = yyyyFrac(::60)
      res@tmYLLabels      = yymm(::60) 
      res@tmYLMinorValues = yyyyFrac(::12)
