@@ -436,11 +436,10 @@ begin
            hov_tave!1          = "lon1"
            hov_tave&lon1       = hov_all&lon1
            hov_tave@units      = "degree"
-           delete([/time_mon1,lon1/])
            z->samlat_hov_all  = set_varAtts(hov_all, "SAM latitude Hovmoller (time-lon)","","")
            z->samlat_hov_mave = set_varAtts(hov_mave,"SAM latitude time series (lon mean)","","")
            z->samlat_hov_tave = set_varAtts(hov_tave,"SAM latitude meridional series (time mean)","","")
-           delete([/hov_mave,hov_tave,hov_all/])
+           delete([/hov_mave,hov_tave,hov_all,time_mon1,lon1/])
         end if
      end if     
 

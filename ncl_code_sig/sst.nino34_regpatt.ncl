@@ -583,7 +583,7 @@ begin
            delete([/modname,fn/])
         end if
      end if     
-     delete([/nino34_pc_djf,nino34_pc_jja,nino34_pc_mam,nino34_pc_son,nino34_pc_mon/])
+     delete([/nino34_pc_djf,nino34_pc_jja,nino34_pc_mam,nino34_pc_son,nino34_pc_ann,nino34_pc_mon/])
 
 ;========================================================================
      res = True

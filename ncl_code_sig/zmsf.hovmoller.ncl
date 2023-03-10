@@ -161,7 +161,7 @@ begin
             if (ff.eq.4) then
               zmsf_920_hc_lat_ann(ii,kk) = tofloat(avg(tmpx&lat(nmax(kk,:))))
             end if
-            delete([/tmpx/])
+            delete([/tmpx,nmax/])
           end do 
         end do
         delete(tarr)

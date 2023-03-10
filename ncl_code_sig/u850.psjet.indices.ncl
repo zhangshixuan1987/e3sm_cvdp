@@ -262,7 +262,7 @@ begin
      ;create temporay array for plotting section
      seas  = (/"mon","djf","mam","jja","son","ann"/)
      iname = (/"psjetins","psjetloc"/)
-     metric_nam         = new((/dimsizes(iname)/),string)
+     metric_nam        = new((/dimsizes(iname)/),string)
      jetind_mon        = new((/dimsizes(psjetloc_mon),dimsizes(iname)/),typeof(psjetloc_mon))
      jetind_mon!0      = "time"
      jetind_mon!1      = "x"
@@ -1416,6 +1416,7 @@ begin
      title_n3  = "domain(20S-70S)"
 
      delete([/psjetind_mon,finua_mave,finua_tave,psjetisd_mon,psjetins_mon,psjetloc_mon/])
+     delete([/jetind_djf,jetind_mam,jetind_jja,jetind_son,jetind_ann,jetind_mon/])
 
      if (spectra_mvf.eq.False) then
         xyres4@gsnCenterString = names(ee)
