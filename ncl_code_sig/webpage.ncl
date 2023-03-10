@@ -90,27 +90,14 @@ begin
 
   txt(23) = "<li class="+quote+"list-inline-item"+quote+">"+subtxt+"</li><br><li class="+quote+"list-inline-item"+quote+">Created: "+systemfunc("date")+"</li><br><li class="+quote+"list-inline-item"+quote+">Enhanced on NCAR CVDP V"+NCAR_CVDP_VER+"</li></ul></td>"
 
-  txt(24) = "<td><p class=subtitle>"+title_str(0)+"</p></td>"
-  txt(25) = "<td><p class=subtitle>"+title_str(1)+"</p></td></tr></table></div></div>"
+  txt(24) = "<td><p class=subtitle>"+title_str(0)+"</p><p class=subtitle>"+title_str(1)+"</p></td></tr></table></div></div>"
   delete([/subtxt/])
 
-  txt(26) = "<div class="+quote+"row"+quote+"><div class="+quote+"col"+quote+">"
-  txt(27) = "<table class="+quote+"table table-striped table-bordered"+quote+">"
-  txt(28) = "<h3 class="+quote+"display-6"+quote+">Means</h3>"
-  txt(29) = "<tr><td><b>SST</b></td><td>"+table_link_setup(OUTDIR,"sst.mean.djf.png","DJF")+"</td><td>"+table_link_setup(OUTDIR,"sst.mean.mam.png","MAM")+"</td><td>"+table_link_setup(OUTDIR,"sst.mean.jja.png","JJA")+"</td><td>"+table_link_setup(OUTDIR,"sst.mean.son.png","SON")+"</td><td>"+table_link_setup(OUTDIR,"sst.mean.ann.png","Annual")+"</td></tr>"    
-  txt(30) = "<tr><td><b>TAS</b></td><td>"+table_link_setup(OUTDIR,"tas.mean.djf.png","DJF")+"</td><td>"+table_link_setup(OUTDIR,"tas.mean.mam.png","MAM")+"</td><td>"+table_link_setup(OUTDIR,"tas.mean.jja.png","JJA")+"</td><td>"+table_link_setup(OUTDIR,"tas.mean.son.png","SON")+"</td><td>"+table_link_setup(OUTDIR,"tas.mean.ann.png","Annual")+"</td></tr>"    
-  txt(31) = "<tr><td><b>PSL</b></td><td>"+table_link_setup(OUTDIR,"psl.mean.djf.png","DJF")+"</td><td>"+table_link_setup(OUTDIR,"psl.mean.mam.png","MAM")+"</td><td>"+table_link_setup(OUTDIR,"psl.mean.jja.png","JJA")+"</td><td>"+table_link_setup(OUTDIR,"psl.mean.son.png","SON")+"</td><td>"+table_link_setup(OUTDIR,"psl.mean.ann.png","Annual")+"</td></tr>"    
-  txt(32) = "<tr><td><b>PR</b></td><td>"+table_link_setup(OUTDIR,"pr.mean.djf.png","DJF")+"</td><td>"+table_link_setup(OUTDIR,"pr.mean.mam.png","MAM")+"</td><td>"+table_link_setup(OUTDIR,"pr.mean.jja.png","JJA")+"</td><td>"+table_link_setup(OUTDIR,"pr.mean.son.png","SON")+"</td><td>"+table_link_setup(OUTDIR,"pr.mean.ann.png","Annual")+"</td></tr>"    
-  txt(33) = "<tr><td><b>[PR]</b></td><td>"+table_link_setup(OUTDIR,"pr.za.djf.png","DJF")+"</td><td>"+table_link_setup(OUTDIR,"pr.za.mam.png","MAM")+"</td><td>"+table_link_setup(OUTDIR,"pr.za.jja.png","JJA")+"</td><td>"+table_link_setup(OUTDIR,"pr.za.son.png","SON")+"</td><td>"+table_link_setup(OUTDIR,"pr.za.ann.png","Annual")+"</td></tr>"
-  txt(34) = "<tr><td><b>SND</b></td><td>"+table_link_setup(OUTDIR,"snd.mean.djf.png","DJF")+"</td><td>"+table_link_setup(OUTDIR,"snd.mean.mam.png","MAM")+"</td><td>"+table_link_setup(OUTDIR,"snd.mean.jja.png","JJA")+"</td><td>"+table_link_setup(OUTDIR,"snd.mean.son.png","SON")+"</td><td>"+table_link_setup(OUTDIR,"snd.mean.ann.png","Annual")+"</td></tr>"      
-  txt(35) = "<tr><td><b>SIC NH</b></td><td>"+table_link_setup(OUTDIR,"aice.mean.nh.djf.png","DJF")+"</td><td>"+table_link_setup(OUTDIR,"aice.mean.nh.mam.png","MAM")+"</td><td>"+table_link_setup(OUTDIR,"aice.mean.nh.jja.png","JJA")+"</td><td>"+table_link_setup(OUTDIR,"aice.mean.nh.son.png","SON")+"</td><td>"+table_link_setup(OUTDIR,"aice.mean.nh.ann.png","Annual")+"</td></tr>"      
-  txt(36) = "<tr><td><b>SIC SH</b></td><td>"+table_link_setup(OUTDIR,"aice.mean.sh.djf.png","DJF")+"</td><td>"+table_link_setup(OUTDIR,"aice.mean.sh.mam.png","MAM")+"</td><td>"+table_link_setup(OUTDIR,"aice.mean.sh.jja.png","JJA")+"</td><td>"+table_link_setup(OUTDIR,"aice.mean.sh.son.png","SON")+"</td><td>"+table_link_setup(OUTDIR,"aice.mean.sh.ann.png","Annual")+"</td></tr>"      
-  txt(37) = "</table></div></div>"  
-  
+  txt(37)   = "<a name="+quote+"stddev"+quote+">"
   txt(38) = "<div class="+quote+"row"+quote+">"
   txt(39) = "<div class="+quote+"col"+quote+">"
   txt(40) = "<table class="+quote+"table table-striped table-bordered"+quote+">"
-  txt(41) = "<h3 class="+quote+"display-6"+quote+">Standard Deviations</h3>"
+  txt(41) = "<h3 class="+quote+"display-6"+quote+">Standard Deviations (link to <a href="+quote+"#mean"+quote+">Mean Climatology)</a></h3>"
   txt(42) = "<tr><td><b>SST</b></td><td>"+table_link_setup(OUTDIR,"sst.stddev.djf.png","DJF")+"</td><td>"+table_link_setup(OUTDIR,"sst.stddev.mam.png","MAM")+"</td><td>"+table_link_setup(OUTDIR,"sst.stddev.jja.png","JJA")+"</td><td>"+table_link_setup(OUTDIR,"sst.stddev.son.png","SON")+"</td><td>"+table_link_setup(OUTDIR,"sst.stddev.ann.png","Annual")+"</td></tr>"    
   txt(43) = "<tr><td><b>TAS</b></td><td>"+table_link_setup(OUTDIR,"tas.stddev.djf.png","DJF")+"</td><td>"+table_link_setup(OUTDIR,"tas.stddev.mam.png","MAM")+"</td><td>"+table_link_setup(OUTDIR,"tas.stddev.jja.png","JJA")+"</td><td>"+table_link_setup(OUTDIR,"tas.stddev.son.png","SON")+"</td><td>"+table_link_setup(OUTDIR,"tas.stddev.ann.png","Annual")+"</td></tr>"    
   txt(44) = "<tr><td><b>PSL</b></td><td>"+table_link_setup(OUTDIR,"psl.stddev.djf.png","DJF")+"</td><td>"+table_link_setup(OUTDIR,"psl.stddev.mam.png","MAM")+"</td><td>"+table_link_setup(OUTDIR,"psl.stddev.jja.png","JJA")+"</td><td>"+table_link_setup(OUTDIR,"psl.stddev.son.png","SON")+"</td><td>"+table_link_setup(OUTDIR,"psl.stddev.ann.png","Annual")+"</td></tr>"    
@@ -587,13 +574,28 @@ begin
   txt(tt4+27) = "<td>"+table_link_setup(OUTDIR,"psjet_norm.timeseries.png","Polar Jet (SH) Position (norm.)")+"</td>"
   txt(tt4+28) = "</table></div></div>"
   
-  tt5 = tt4+37
+  tt5 = tt4+35
+  txt(tt5)   = "<a name="+quote+"mean"+quote+">"
+  txt(tt5+1) = "<div class="+quote+"row"+quote+"><div class="+quote+"col"+quote+">"
+  txt(tt5+2) = "<table class="+quote+"table table-striped table-bordered"+quote+">"
+  txt(tt5+3) = "<h3 class="+quote+"display-6"+quote+">Mean Climatology  (back to <a href="+quote+"#stddev"+quote+">Standard Deviation)</a></h3>"
+  txt(tt5+4) = "<tr><td><b>SST</b></td><td>"+table_link_setup(OUTDIR,"sst.mean.djf.png","DJF")+"</td><td>"+table_link_setup(OUTDIR,"sst.mean.mam.png","MAM")+"</td><td>"+table_link_setup(OUTDIR,"sst.mean.jja.png","JJA")+"</td><td>"+table_link_setup(OUTDIR,"sst.mean.son.png","SON")+"</td><td>"+table_link_setup(OUTDIR,"sst.mean.ann.png","Annual")+"</td></tr>"
+  txt(tt5+5) = "<tr><td><b>TAS</b></td><td>"+table_link_setup(OUTDIR,"tas.mean.djf.png","DJF")+"</td><td>"+table_link_setup(OUTDIR,"tas.mean.mam.png","MAM")+"</td><td>"+table_link_setup(OUTDIR,"tas.mean.jja.png","JJA")+"</td><td>"+table_link_setup(OUTDIR,"tas.mean.son.png","SON")+"</td><td>"+table_link_setup(OUTDIR,"tas.mean.ann.png","Annual")+"</td></tr>"
+  txt(tt5+6) = "<tr><td><b>PSL</b></td><td>"+table_link_setup(OUTDIR,"psl.mean.djf.png","DJF")+"</td><td>"+table_link_setup(OUTDIR,"psl.mean.mam.png","MAM")+"</td><td>"+table_link_setup(OUTDIR,"psl.mean.jja.png","JJA")+"</td><td>"+table_link_setup(OUTDIR,"psl.mean.son.png","SON")+"</td><td>"+table_link_setup(OUTDIR,"psl.mean.ann.png","Annual")+"</td></tr>"
+  txt(tt5+7) = "<tr><td><b>PR</b></td><td>"+table_link_setup(OUTDIR,"pr.mean.djf.png","DJF")+"</td><td>"+table_link_setup(OUTDIR,"pr.mean.mam.png","MAM")+"</td><td>"+table_link_setup(OUTDIR,"pr.mean.jja.png","JJA")+"</td><td>"+table_link_setup(OUTDIR,"pr.mean.son.png","SON")+"</td><td>"+table_link_setup(OUTDIR,"pr.mean.ann.png","Annual")+"</td></tr>"
+  txt(tt5+8) = "<tr><td><b>[PR]</b></td><td>"+table_link_setup(OUTDIR,"pr.za.djf.png","DJF")+"</td><td>"+table_link_setup(OUTDIR,"pr.za.mam.png","MAM")+"</td><td>"+table_link_setup(OUTDIR,"pr.za.jja.png","JJA")+"</td><td>"+table_link_setup(OUTDIR,"pr.za.son.png","SON")+"</td><td>"+table_link_setup(OUTDIR,"pr.za.ann.png","Annual")+"</td></tr>"
+  txt(tt5+9) = "<tr><td><b>SND</b></td><td>"+table_link_setup(OUTDIR,"snd.mean.djf.png","DJF")+"</td><td>"+table_link_setup(OUTDIR,"snd.mean.mam.png","MAM")+"</td><td>"+table_link_setup(OUTDIR,"snd.mean.jja.png","JJA")+"</td><td>"+table_link_setup(OUTDIR,"snd.mean.son.png","SON")+"</td><td>"+table_link_setup(OUTDIR,"snd.mean.ann.png","Annual")+"</td></tr>"
+  txt(tt5+10) = "<tr><td><b>SIC NH</b></td><td>"+table_link_setup(OUTDIR,"aice.mean.nh.djf.png","DJF")+"</td><td>"+table_link_setup(OUTDIR,"aice.mean.nh.mam.png","MAM")+"</td><td>"+table_link_setup(OUTDIR,"aice.mean.nh.jja.png","JJA")+"</td><td>"+table_link_setup(OUTDIR,"aice.mean.nh.son.png","SON")+"</td><td>"+table_link_setup(OUTDIR,"aice.mean.nh.ann.png","Annual")+"</td></tr>" 
+  txt(tt5+11) = "<tr><td><b>SIC SH</b></td><td>"+table_link_setup(OUTDIR,"aice.mean.sh.djf.png","DJF")+"</td><td>"+table_link_setup(OUTDIR,"aice.mean.sh.mam.png","MAM")+"</td><td>"+table_link_setup(OUTDIR,"aice.mean.sh.jja.png","JJA")+"</td><td>"+table_link_setup(OUTDIR,"aice.mean.sh.son.png","SON")+"</td><td>"+table_link_setup(OUTDIR,"aice.mean.sh.ann.png","Annual")+"</td></tr>" 
+  txt(tt5+12) = "</table></div></div>"
+
+  tt6 = tt5+37
 ;  if (OT.eq."True") then
 ;     txt(265) = "<p class=btext>Output timeseries written to "+OUTDIR+"</p>"
 ;  else
-     txt(tt5+1) = "<br>"
+     txt(tt6+1) = "<br>"
 ;  end if  
-  txt(tt5+2) = "</body></html>"
+  txt(tt6+2) = "</body></html>"
   
   tft   = ind(.not.ismissing(txt))
   txt2 = txt(:tft(dimsizes(tft)-1)+1)
@@ -762,8 +764,7 @@ begin
      txt(15) = "<img class=title src="+quote+"e3sm-cvdp.png"+quote+" alt="+quote+"CVDP logo"+quote+">"
      txt(16)= "<TABLE width='990' border=0 cellpadding=6>"
      txt(17) = "<tr><td width='300'><p class=btext><a href="+quote+"index.html"+quote+">Back to Diagnostics Plots</a></p></td>"
-     txt(18) = "<td><p class=subtitle>"+title_str(0)+"</p></td>"
-     txt(19) = "<td><p class=subtitle>"+title_str(1)+"</p></td></tr></table><hr width=990 align=left><p class=subtitle1>Metrics Table</p>" 
+     txt(18) = "<td><p class=subtitle>"+title_str(0)+"</p><p class=subtitle>"+title_str(1)+"</p></td></tr></table><hr width=990 align=left><p class=subtitle1>Metrics Table</p>" 
      
      z = asciiread(OUTDIR+"metrics.txt",(/-1/),"string")
      nlines = dimsizes(z)
@@ -822,9 +823,7 @@ begin
      strarr(13) = " "
      do gg = 0,13
            txt(17) = "<tr><td width='50'><p class=btext>Go to:</p></td><td class=s1 width='300'><a href="+quote+"methodology.html"+quote+">Methodology and Definitions</a><br><a href="+quote+"index.html"+quote+">Diagnostics Plots</a><br><a href="+quote+"metrics.table_"+(gg+14)+".html"+quote+">RMS Metric Tables</a></td>"
-           txt(18) = "<td><p class=subtitle>"+title_str(0)+"</p></td>"
-           txt(19) = "<td><p class=subtitle>"+title_str(1)+"</p></td></tr></table><hr width=990 align=left>"
-
+           txt(18) = "<td><p class=subtitle>"+title_str(0)+"</p><p class=subtitle>"+title_str(1)+"</p></td></tr></table><hr width=990 align=left>"
            sort_txtT = sort_txt
            sort_txtT(gg) = "<b>"+sort_txt2(gg)+"</b>"+strarr(gg)
            txt(24) = "<p class=subtitle1><b>Pattern Correlation Metrics Tables</b></p>"
@@ -844,8 +843,7 @@ begin
      do gg = 0,13
            txt(17) = "<tr><td width='50'><p class=btext>Go to:</p></td><td class=s1 width='300'><a href="+quote+"methodology.html"+quote+">Methodology and Definitions</a><br><a href="+quote+"index.html"+quote+">Diagnostics Plots</a><br><a href="+quote+"metrics.table_"+gg+".html"+quote+">Pattern Correlation Metric Tables</a></td>"
 
-           txt(18) = "<td><p class=subtitle>"+title_str(0)+"</p></td>"
-           txt(19) = "<td><p class=subtitle>"+title_str(1)+"</p></td></tr></table><hr width=990 align=left>"
+           txt(18) = "<td><p class=subtitle>"+title_str(0)+"</p><p class=subtitle>"+title_str(1)+"</p></td></tr></table><hr width=990 align=left>"
 
            sort_txtT = sort_txtA
            sort_txtT(gg) = "<b>"+sort_txt2(gg)+"</b>"+strarr(gg)
@@ -891,8 +889,7 @@ begin
      txt(28) = "Input Namelists: <b>Observations</b> | <a href="+quote+"namelist_simulations.html"+quote+">Simulations</a><br>"
      txt(29) = "Derived Namelists: <a href="+quote+"namelist_msftmz.html"+quote+">MSFTMZ</a> | <a href="+quote+"namelist_pr.html"+quote+">PR</a> | <a href="+quote+"namelist_psl.html"+quote+">PSL</a> | "
      txt(30) = "<br><a href="+quote+"namelist_siconc_nh.html"+quote+">SICONC NH</a> | <a href="+quote+"namelist_siconc_sh.html"+quote+">SICONC SH</a> | <a href="+quote+"namelist_snd.html"+quote+">SND</a> | <a href="+quote+"namelist_tas.html"+quote+">TAS</a> |"
-     txt(31) = "<a href="+quote+"namelist_ts.html"+quote+">TS</a></td><td><h2 class="+quote+"text-center"+quote+">"+title_str(0)+"</h2></td>"
-     txt(32) = "<a href="+quote+"namelist_ts.html"+quote+">TS</a></td><td><h2 class="+quote+"text-center"+quote+">"+title_str(1)+"</h2></td></tr></table><hr width=990 align=left>"
+     txt(31) = "<a href="+quote+"namelist_ts.html"+quote+">TS</a></td><td><h2 class="+quote+"text-center"+quote+">"+title_str(0)+"</h2><h2 class="+quote+"text-center"+quote+">"+title_str(1)+"</h2></td></tr></table><hr width=990 align=left>"
      txt(33) = "<p class=subtitle1>Input Namelist: Observations</p>" 
      z := asciiread(OUTDIR+"namelist_obs",(/-1/),"string")
      nlines = dimsizes(z)
@@ -915,9 +912,8 @@ begin
   txt(28) = namelist_obs_qtxt+"<b>Simulations</b><br>"
   txt(29) = "Derived Namelists: <a href="+quote+"namelist_msftmz.html"+quote+">MSFTMZ</a> | <a href="+quote+"namelist_pr.html"+quote+">PR</a> | <a href="+quote+"namelist_psl.html"+quote+">PSL</a> | "
   txt(30) = "<br><a href="+quote+"namelist_siconc_nh.html"+quote+">SICONC NH</a> | <a href="+quote+"namelist_siconc_sh.html"+quote+">SICONC SH</a> | <a href="+quote+"namelist_snd.html"+quote+">SND</a> | <a href="+quote+"namelist_tas.html"+quote+">TAS</a> |"
-  txt(31) = "<a href="+quote+"namelist_ts.html"+quote+">TS</a></td><td><h2 class="+quote+"text-center"+quote+">"+title_str(0)+"</h2></td>"
-  txt(32) = "<td><h2 class="+quote+"text-center"+quote+">"+title_str(1)+"</h2></td></tr></table><hr width=990 align=left>"
-  txt(33) = "<p class=subtitle1>Input Namelist: Simulations</p>" 
+  txt(31) = "<a href="+quote+"namelist_ts.html"+quote+">TS</a></td><td><h2 class="+quote+"text-center"+quote+">"+title_str(0)+"</h2><h2 class="+quote+"text-center"+quote+">"+title_str(1)+"</h2></td></tr></table><hr width=990 align=left>"
+  txt(32) = "<p class=subtitle1>Input Namelist: Simulations</p>" 
 
   z := asciiread(OUTDIR+"namelist",(/-1/),"string")
   nlines = dimsizes(z)
@@ -937,8 +933,7 @@ begin
   txt(28) = namelist_obs_qtxt+"<a href="+quote+"namelist_simulations.html"+quote+">Simulations</a><br>"
   txt(29) = "Derived Namelists: <b>MSFTMZ</b> | <a href="+quote+"namelist_pr.html"+quote+">PR</a> | <a href="+quote+"namelist_psl.html"+quote+">PSL</a> | "
   txt(30) = "<br><a href="+quote+"namelist_siconc_nh.html"+quote+">SICONC NH</a> | <a href="+quote+"namelist_siconc_sh.html"+quote+">SICONC SH</a> | <a href="+quote+"namelist_snd.html"+quote+">SND</a> | <a href="+quote+"namelist_tas.html"+quote+">TAS</a> |"
-  txt(31) = "<a href="+quote+"namelist_ts.html"+quote+">TS</a></td><td><h2 class="+quote+"text-center"+quote+">"+title_str(0)+"</h2></td>"
-  txt(32) = "<td><h2 class="+quote+"text-center"+quote+">"+title_str(1)+"</h2></td></tr></table><hr width=990 align=left>"
+  txt(31) = "<a href="+quote+"namelist_ts.html"+quote+">TS</a></td><td><h2 class="+quote+"text-center"+quote+">"+title_str(0)+"</h2><h2 class="+quote+"text-center"+quote+">"+title_str(1)+"</h2></td></tr></table><hr width=990 align=left>"
 
   txt(33) = "<p class=subtitle1>Derived Namelist: MSFTMZ</p>" 
   z := asciiread(OUTDIR+"namelist_moc",(/-1/),"string")
@@ -958,8 +953,7 @@ begin
   txt(28) = namelist_obs_qtxt+"<a href="+quote+"namelist_simulations.html"+quote+">Simulations</a><br>"
   txt(29) = "Derived Namelists: <a href="+quote+"namelist_msftmz.html"+quote+">MSFTMZ</a> | <b>PR</b> | <a href="+quote+"namelist_psl.html"+quote+">PSL</a> | "
   txt(30) = "<br><a href="+quote+"namelist_siconc_nh.html"+quote+">SICONC NH</a> | <a href="+quote+"namelist_siconc_sh.html"+quote+">SICONC SH</a> | <a href="+quote+"namelist_snd.html"+quote+">SND</a> | <a href="+quote+"namelist_tas.html"+quote+">TAS</a> |"
-  txt(31) = "<a href="+quote+"namelist_ts.html"+quote+">TS</a></td><td><h2 class="+quote+"text-center"+quote+">"+title_str(0)+"</h2></td>"
-  txt(32) = "<a href="+quote+"namelist_ts.html"+quote+">TS</a></td><td><h2 class="+quote+"text-center"+quote+">"+title_str(1)+"</h2></td></tr></table><hr width=990 align=left>"
+  txt(31) = "<a href="+quote+"namelist_ts.html"+quote+">TS</a></td><td><h2 class="+quote+"text-center"+quote+">"+title_str(0)+"</h2><h2 class="+quote+"text-center"+quote+">"+title_str(1)+"</h2></td></tr></table><hr width=990 align=left>"
   txt(33) = "<p class=subtitle1>Derived Namelist: PR</p>" 
   z := asciiread(OUTDIR+"namelist_prect",(/-1/),"string")
   nlines = dimsizes(z)
@@ -978,8 +972,7 @@ begin
   txt(28) = namelist_obs_qtxt+"<a href="+quote+"namelist_simulations.html"+quote+">Simulations</a><br>"
   txt(29) = "Derived Namelists: <a href="+quote+"namelist_msftmz.html"+quote+">MSFTMZ</a> | <a href="+quote+"namelist_pr.html"+quote+">PR</a> | <b>PSL</b> | "
   txt(30) = "<br><a href="+quote+"namelist_siconc_nh.html"+quote+">SICONC NH</a> | <a href="+quote+"namelist_siconc_sh.html"+quote+">SICONC SH</a> | <a href="+quote+"namelist_snd.html"+quote+">SND</a> | <a href="+quote+"namelist_tas.html"+quote+">TAS</a> |"
-  txt(31) = "<a href="+quote+"namelist_ts.html"+quote+">TS</a></td><td><h2 class="+quote+"text-center"+quote+">"+title_str(0)+"</h2></td>"
-  txt(32) = "<a href="+quote+"namelist_ts.html"+quote+">TS</a></td><td><h2 class="+quote+"text-center"+quote+">"+title_str(1)+"</h2></td></tr></table><hr width=990 align=left>"
+  txt(31) = "<a href="+quote+"namelist_ts.html"+quote+">TS</a></td><td><h2 class="+quote+"text-center"+quote+">"+title_str(0)+"</h2><h2 class="+quote+"text-center"+quote+">"+title_str(1)+"</h2></td></tr></table><hr width=990 align=left>"
   txt(33) = "<p class=subtitle1>Derived Namelist: PSL</p>" 
   z := asciiread(OUTDIR+"namelist_psl",(/-1/),"string")
   nlines = dimsizes(z)
@@ -998,8 +991,7 @@ begin
   txt(28) = namelist_obs_qtxt+"<a href="+quote+"namelist_simulations.html"+quote+">Simulations</a><br>"
   txt(29) = "Derived Namelists: <a href="+quote+"namelist_msftmz.html"+quote+">MSFTMZ</a> | <a href="+quote+"namelist_pr.html"+quote+">PR</a> | <a href="+quote+"namelist_psl.html"+quote+">PSL</a> | "
   txt(30) = "<br></b>SICONC NH</b> | <a href="+quote+"namelist_siconc_sh.html"+quote+">SICONC SH</a> | <a href="+quote+"namelist_snd.html"+quote+">SND</a> | <a href="+quote+"namelist_tas.html"+quote+">TAS</a> |"
-  txt(31) = "<a href="+quote+"namelist_ts.html"+quote+">TS</a></td><td><h2 class="+quote+"text-center"+quote+">"+title_str(0)+"</h2></td>"
-  txt(32) = "<a href="+quote+"namelist_ts.html"+quote+">TS</a></td><td><h2 class="+quote+"text-center"+quote+">"+title_str(1)+"</h2></td></tr></table><hr width=990 align=left>"
+  txt(31) = "<a href="+quote+"namelist_ts.html"+quote+">TS</a></td><td><h2 class="+quote+"text-center"+quote+">"+title_str(0)+"</h2><h2 class="+quote+"text-center"+quote+">"+title_str(1)+"</h2></td></tr></table><hr width=990 align=left>"
   txt(33) = "<p class=subtitle1>Derived Namelist: SICONC NH</p>" 
   z := asciiread(OUTDIR+"namelist_aice_nh",(/-1/),"string")
   nlines = dimsizes(z)
@@ -1018,8 +1010,7 @@ begin
   txt(28) = namelist_obs_qtxt+"<a href="+quote+"namelist_simulations.html"+quote+">Simulations</a><br>"
   txt(29) = "Derived Namelists: <a href="+quote+"namelist_msftmz.html"+quote+">MSFTMZ</a> | <a href="+quote+"namelist_pr.html"+quote+">PR</a> | <a href="+quote+"namelist_psl.html"+quote+">PSL</a> | "
   txt(30) = "<br><a href="+quote+"namelist_siconc_nh.html"+quote+">SICONC NH</a> | <b>SICONC SH</b> | <a href="+quote+"namelist_snd.html"+quote+">SND</a> | <a href="+quote+"namelist_tas.html"+quote+">TAS</a> |"
-  txt(31) = "<a href="+quote+"namelist_ts.html"+quote+">TS</a></td><td><h2 class="+quote+"text-center"+quote+">"+title_str(0)+"</h2></td>"
-  txt(32) = "<a href="+quote+"namelist_ts.html"+quote+">TS</a></td><td><h2 class="+quote+"text-center"+quote+">"+title_str(1)+"</h2></td></tr></table><hr width=990 align=left>"
+  txt(31) = "<a href="+quote+"namelist_ts.html"+quote+">TS</a></td><td><h2 class="+quote+"text-center"+quote+">"+title_str(0)+"</h2><h2 class="+quote+"text-center"+quote+">"+title_str(1)+"</h2></td></tr></table><hr width=990 align=left>"
   txt(33) = "<p class=subtitle1>Derived Namelist: SICONC SH</p>" 
   z := asciiread(OUTDIR+"namelist_aice_sh",(/-1/),"string")
   nlines = dimsizes(z)
@@ -1038,8 +1029,7 @@ begin
   txt(28) = namelist_obs_qtxt+"<a href="+quote+"namelist_simulations.html"+quote+">Simulations</a><br>"
   txt(29) = "Derived Namelists: <a href="+quote+"namelist_msftmz.html"+quote+">MSFTMZ</a> | <a href="+quote+"namelist_pr.html"+quote+">PR</a> | <a href="+quote+"namelist_psl.html"+quote+">PSL</a> | "
   txt(30) = "<br><a href="+quote+"namelist_siconc_nh.html"+quote+">SICONC NH</a> | <a href="+quote+"namelist_siconc_sh.html"+quote+">SICONC SH</a> | <b>SND</b> | <a href="+quote+"namelist_tas.html"+quote+">TAS</a> |"
-  txt(31) = "<a href="+quote+"namelist_ts.html"+quote+">TS</a></td><td><h2 class="+quote+"text-center"+quote+">"+title_str(0)+"</h2></td>"
-  txt(32) = "<a href="+quote+"namelist_ts.html"+quote+">TS</a></td><td><h2 class="+quote+"text-center"+quote+">"+title_str(1)+"</h2></td></tr></table><hr width=990 align=left>"
+  txt(31) = "<a href="+quote+"namelist_ts.html"+quote+">TS</a></td><td><h2 class="+quote+"text-center"+quote+">"+title_str(0)+"</h2><h2 class="+quote+"text-center"+quote+">"+title_str(1)+"</h2></td></tr></table><hr width=990 align=left>"
   txt(33) = "<p class=subtitle1>Derived Namelist: SND</p>" 
   z := asciiread(OUTDIR+"namelist_snowdp",(/-1/),"string")
   nlines = dimsizes(z)
@@ -1058,8 +1048,7 @@ begin
   txt(28) = namelist_obs_qtxt+"<a href="+quote+"namelist_simulations.html"+quote+">Simulations</a><br>"
   txt(29) = "Derived Namelists: <a href="+quote+"namelist_msftmz.html"+quote+">MSFTMZ</a> | <a href="+quote+"namelist_pr.html"+quote+">PR</a> | <a href="+quote+"namelist_psl.html"+quote+">PSL</a> | "
   txt(30) = "<br><a href="+quote+"namelist_siconc_nh.html"+quote+">SICONC NH</a> | <a href="+quote+"namelist_siconc_sh.html"+quote+">SICONC SH</a> | <a href="+quote+"namelist_snd.html"+quote+">SND</a> | <b>TAS</b> |"
-  txt(31) = "<a href="+quote+"namelist_ts.html"+quote+">TS</a></td><td><h2 class="+quote+"text-center"+quote+">"+title_str(0)+"</h2></td>"
-  txt(32) = "<a href="+quote+"namelist_ts.html"+quote+">TS</a></td><td><h2 class="+quote+"text-center"+quote+">"+title_str(1)+"</h2></td></tr></table><hr width=990 align=left>"
+  txt(31) = "<a href="+quote+"namelist_ts.html"+quote+">TS</a></td><td><h2 class="+quote+"text-center"+quote+">"+title_str(0)+"</h2><h2 class="+quote+"text-center"+quote+">"+title_str(1)+"</h2></td></tr></table><hr width=990 align=left>"
   txt(33) = "<p class=subtitle1>Derived Namelist: TAS</p>" 
   z := asciiread(OUTDIR+"namelist_trefht",(/-1/),"string")
   nlines = dimsizes(z)
@@ -1078,8 +1067,7 @@ begin
   txt(28) = namelist_obs_qtxt+"<a href="+quote+"namelist_simulations.html"+quote+">Simulations</a><br>"
   txt(29) = "Derived Namelists: <a href="+quote+"namelist_msftmz.html"+quote+">MSFTMZ</a> | <a href="+quote+"namelist_pr.html"+quote+">PR</a> | <a href="+quote+"namelist_psl.html"+quote+">PSL</a> | "
   txt(30) = "<br><a href="+quote+"namelist_siconc_nh.html"+quote+">SICONC NH</a> | <a href="+quote+"namelist_siconc_sh.html"+quote+">SICONC SH</a> | <a href="+quote+"namelist_snd.html"+quote+">SND</a> | <a href="+quote+"namelist_tas.html"+quote+">TAS</a> |"
-  txt(31) = "<a href="+quote+"namelist_ts.html"+quote+">TS</a></td><td><h2 class="+quote+"text-center"+quote+">"+title_str(0)+"</h2></td>"
-  txt(32) = "<a href="+quote+"namelist_ts.html"+quote+">TS</a></td><td><h2 class="+quote+"text-center"+quote+">"+title_str(1)+"</h2></td></tr></table><hr width=990 align=left>"
+  txt(31) = "<a href="+quote+"namelist_ts.html"+quote+">TS</a></td><td><h2 class="+quote+"text-center"+quote+">"+title_str(0)+"</h2><h2 class="+quote+"text-center"+quote+">"+title_str(1)+"</h2></td></tr></table><hr width=990 align=left>"
   txt(33) = "<p class=subtitle1>Derived Namelist: TS</p>" 
   z := asciiread(OUTDIR+"namelist_ts",(/-1/),"string")
   nlines = dimsizes(z)
