@@ -1,5 +1,5 @@
 /data/*
-#/run_script/*
+/run_script/*
 /work/*
 /cvdp_polar/*.nc
 /cvdp_polar/*.csh
