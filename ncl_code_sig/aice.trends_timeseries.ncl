@@ -1309,12 +1309,30 @@ begin
      panres@gsnPanelBottom = 0.05
   end if
 
-  ncol = floattointeger(sqrt(nsim))
-  nrow = (nsim/ncol)+mod(nsim,ncol) 
+  if (nsim.le.3) then
+    ncol = nsim
+    nrow = 1
+  else if (nsim.le.6) then
+    nrow = 2
+    ncol = 3
+  else
+    ncol = floattointeger(sqrt(nsim))
+    nrow = (nsim/ncol)+mod(nsim,ncol)
+  end if
+  end if
 
-  ncol_sh = floattointeger(sqrt(nsim_sh))
-  nrow_sh = (nsim_sh/ncol_sh)+mod(nsim_sh,ncol_sh)   
-  
+  if (nsim_sh.le.3) then
+    ncol_sh = nsim_sh
+    nrow_sh = 1
+  else if (nsim_sh.le.6) then
+    nrow_sh = 2
+    ncol_sh = 3
+  else
+    ncol_sh = floattointeger(sqrt(nsim_sh))
+    nrow_sh = (nsim_sh/ncol_sh)+mod(nsim_sh,ncol_sh)
+  end if
+  end if
+
   panres@txString = "SIC Trends (DJF)"  
   gsn_panel2(wks_trends_djf,plot_trends_nh_djf,(/nrow,ncol/),panres)
   gsn_panel2(wks_trends_djf,plot_trends_sh_djf,(/nrow_sh,ncol_sh/),panres)
@@ -1435,11 +1453,29 @@ begin
   else
      panres2@txFontHeightF = 0.014
   end if
-  ncol = floattointeger(sqrt(nsim))
-  nrow = (nsim/ncol)+mod(nsim,ncol) 
+  if (nsim.le.3) then
+    ncol = nsim
+    nrow = 1
+  else if (nsim.le.6) then
+    nrow = 2
+    ncol = 3
+  else
+    ncol = floattointeger(sqrt(nsim))
+    nrow = (nsim/ncol)+mod(nsim,ncol)
+  end if
+  end if
 
-  ncol_sh = floattointeger(sqrt(nsim_sh))
-  nrow_sh = (nsim_sh/ncol_sh)+mod(nsim_sh,ncol_sh)
+  if (nsim_sh.le.3) then
+    ncol_sh = nsim_sh
+    nrow_sh = 1
+  else if (nsim_sh.le.6) then
+    nrow_sh = 2
+    ncol_sh = 3
+  else
+    ncol_sh = floattointeger(sqrt(nsim_sh))
+    nrow_sh = (nsim_sh/ncol_sh)+mod(nsim_sh,ncol_sh)
+  end if
+  end if
 
   panres2@txString = "SIC NH Extent Climatology"
   gsn_panel2(wks_iceext_mon,plot_iceext_nh_climo,(/nrow,ncol/),panres2)  

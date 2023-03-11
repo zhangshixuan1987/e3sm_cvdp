@@ -764,7 +764,7 @@ function data_read_in_ocean_MOC(zpath:string,vn:string,yearS:integer,yearE:integ
 local zpath,vn,cpath0,ta,tfiles,c,arr,farr,yearS,yearE,mocheck,dimC,lev
 begin
   if (vn.eq."MOC") then
-     vname = (/"MOC","msftmyz","stfmmc","msftmz"/)
+     vname = (/"AMOC","MOC","msftmyz","stfmmc","msftmz"/)
   end if
 
   if (ismissing(zpath) ) then
@@ -819,9 +819,12 @@ begin
                  else
                     arr = c->$vname(i)$(:,1,0,:,:)        ; select Atl+Med+Labrador+GIN sea+Arctic+Hudson Bay transport region         
                  end if
+              else if (vname(i).eq."AMOC") then ; E3SM file 
+                 arr = c->$vname(i)$(:,:,:)
               else                           ; CMIP file
                  arr = c->$vname(i)$(:,0,:,:)             ; CMIP file: 0th basin/region = atlantic_ocean (CMIP3) or atlantic_arctic_ocean (CMIP5)         
-              end if   
+              end if  
+              end if  
               delete(dimC)                       
               break
            end if                             

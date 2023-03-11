@@ -566,8 +566,17 @@ begin
   end if
   panres@lbLabelFontHeightF = 0.013
   panres@lbLabelStride = 1
-  ncol = floattointeger(sqrt(nsim))
-  nrow = (nsim/ncol)+mod(nsim,ncol)  
+  if (nsim.le.3) then
+    ncol = nsim
+    nrow = 1
+  else if (nsim.le.6) then
+    nrow = 2
+    ncol = 3
+  else
+    ncol = floattointeger(sqrt(nsim))
+    nrow = (nsim/ncol)+mod(nsim,ncol)
+  end if
+  end if
 
   c_sd = (/4,8,12,16,20,24,28,32,36/)
   if (dimsizes(c_sd).eq.dimsizes(contour_sd).and.all((c_sd - contour_sd).eq.0)) then  ; needed to make sure contour intervals

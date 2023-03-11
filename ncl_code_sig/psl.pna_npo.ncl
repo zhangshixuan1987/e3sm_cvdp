@@ -1402,8 +1402,17 @@ begin
      panres@txFontHeightF = 0.016
      panres@gsnPanelBottom = 0.05
   end if
-  ncol = floattointeger(sqrt(nsim))
-  nrow = (nsim/ncol)+mod(nsim,ncol) 
+  if (nsim.le.3) then
+    ncol = nsim
+    nrow = 1
+  else if (nsim.le.6) then
+    nrow = 2
+    ncol = 3
+  else
+    ncol = floattointeger(sqrt(nsim))
+    nrow = (nsim/ncol)+mod(nsim,ncol)
+  end if
+  end if
   
   panres@txString = "PNA (DJF)" 
   gsn_panel2(wks_pna,map_pna_djf,(/nrow,ncol/),panres)

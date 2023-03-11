@@ -2004,9 +2004,6 @@ begin
      delete([/finpr_hi,finpr_lo,line3,line4,format2,format3,nchar,ntc,patcor_hov_hi,patcor_hov_lo,dimY,ntb,header/])  
   end if
   
-  ncol = floattointeger(sqrt(nsim))
-  nrow = (nsim/ncol)+mod(nsim,ncol) 
-  
   panres = True
   panres@gsnMaximize = True
   panres@gsnPaperOrientation = "portrait"
@@ -2024,12 +2021,16 @@ begin
   end if
 
   if (nsim.le.3) then
-    nrow = nsim
-    ncol = 1
-  else 
+    ncol = nsim
+    nrow = 1
+  else if (nsim.le.6) then
+    nrow = 2
+    ncol = 3
+  else
     ncol = floattointeger(sqrt(nsim))
     nrow = (nsim/ncol)+mod(nsim,ncol)
-  end if 
+  end if
+  end if
   lp = (/nrow,ncol/)
 
   if (isvar("title_n0")) then

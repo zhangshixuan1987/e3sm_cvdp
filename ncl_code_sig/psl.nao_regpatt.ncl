@@ -845,8 +845,17 @@ begin
      panres@lbLabelFontHeightF = 0.012
      panres@lbTitleFontHeightF = 0.012
   end if
-  ncol = floattointeger(sqrt(nsim))
-  nrow = (nsim/ncol)+mod(nsim,ncol)
+  if (nsim.le.3) then
+    ncol = nsim
+    nrow = 1
+  else if (nsim.le.6) then
+    nrow = 2
+    ncol = 3
+  else
+    ncol = floattointeger(sqrt(nsim))
+    nrow = (nsim/ncol)+mod(nsim,ncol)
+  end if
+  end if
   
   if (vxreg_frame.eq.0) then
      if(vnm.eq."qnet") then

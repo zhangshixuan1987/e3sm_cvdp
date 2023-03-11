@@ -90,13 +90,13 @@ begin
   wks_amoc_amo     = gsn_open_wks(wks_type,getenv("OUTDIR")+"amoc_amo.leadlag.ann")
  
   if (COLORMAP.eq.0) then
-     gsn_define_colormap(wks_mean,"rainbow+white")
-     gsn_define_colormap(wks_stddev,"rainbow+white")
-     gsn_define_colormap(wks_amoc,"ncl_default")
-     gsn_define_colormap(wks_amoc_ts,"ncl_default")
+     gsn_define_colormap(wks_mean,        "NCV_jaisnd")
+     gsn_define_colormap(wks_stddev,      "precip3_16lev")
+     gsn_define_colormap(wks_amoc,        "cmp_b2r")
+     gsn_define_colormap(wks_amoc_ts,     "ncl_default")
      gsn_define_colormap(wks_amoc_powspec,"ncl_default")
-     gsn_define_colormap(wks_amoc_sstreg,"ncl_default")
-     gsn_define_colormap(wks_amoc_tasreg,"ncl_default")
+     gsn_define_colormap(wks_amoc_sstreg,"cmp_b2r")
+     gsn_define_colormap(wks_amoc_tasreg,"cmp_b2r")
      gsn_define_colormap(wks_amoc_amo,"ncl_default")
   end if
   if (COLORMAP.eq.1) then
@@ -602,7 +602,7 @@ begin
      mocres@gsnLeftString = names(ee)
  
  
-     mocres@cnLevels = ispan(-4,28,2)
+     mocres@cnLevels = ispan(-4,20,2)
      mocres@cnLineThicknesses  = (/1,1,2,1,1,1,1,2,1,1,1,1,2,1,1,1,1/)
      mocres@cnLineDashPatterns = (/1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0/)
      plot_mean_ann(ee) = gsn_csm_contour(wks_mean,moc_mean_ann,mocres)  
@@ -611,9 +611,11 @@ begin
      delete(mocres@cnLineThicknesses)
      delete(mocres@cnLineDashPatterns)
      
-     mocres@cnLevels = (/.1,.3,.5,1.0,1.5,2.0,2.5,3.0,4.0,5.0/)  
-     if (COLORMAP.eq.0) then     
-        mocres@cnFillColors = (/20,38,54,80,95,125,175,185,195,205,236/)
+     mocres@cnLevels = (/.1,.2,.5,0.8,1.0,1.5,2.0,2.5,3.0,3.5/)  
+     if (COLORMAP.eq.0) then 
+        cmap := read_colormap_file("precip3_16lev")
+        mocres@cnFillColors = cmap((/0,2,3,4,6,8,10,11,12,14,15,16/),:)
+       ;mocres@cnFillColors = (/20,38,54,80,95,125,175,185,195,205,236/)
      end if
      if (COLORMAP.eq.1) then     
         mocres@cnFillColors = (/14,23,35,47,63,79,95,111,124,155,175/)
@@ -676,47 +678,102 @@ begin
      plot_amoc_ts_ann(ee) = gsn_csm_xy(wks_amoc_ts,ispan(syear(ee),eyear(ee),1),amoc_pc_ann,xyres)  ; use standardized timeseries  
      delete(amoc_pc_ann)
      delete(xyres)
-    
-     pres = True
-     pres@vpXF = 0.07
-     pres@trYMinF = 0.
-     pres@trXMinF = 0.0
-     pres@trXMaxF = 0.5
+  
+     pres               = True
+     pres@vpWidthF      = 0.7
+     pres@vpHeightF     = 0.5
+     pres@vpXF          = 0.07
+     pres@trYMinF       = 0.01
+;    pres@trYMaxF       = 82.
+     pres@trYLog        = True
+     pres@trXLog        = True
+     pres@trXMinF       = 3.0e-3
+     pres@trXMaxF       = 0.5 ;maxx ;0.0832
      pres@tiYAxisString = "Power"              ; yaxis
-     pres@xyLineColor   =  "black"         
+     pres@xyLineColor   = "black"
      pres@gsnFrame      = False
      pres@gsnDraw       = False
   
      pres@tmXBLabelDeltaF = -.8
      pres@tmXTLabelDeltaF = -.8
      pres@pmLegendDisplayMode    = "Never"
-     pres@xyLineThicknesses   = (/3.5,2.,1.,1./) 
+     if (wks_type.eq."png") then
+        pres@xyLineThicknesses   = (/3.5,2.,1.,1./)
+     else
+        pres@xyLineThicknesses   = (/2.5,1.5,1.,1./)
+     end if
      pres@xyDashPatterns      = (/0,0,0,0/)
-     pres@xyLineColors        = (/"foreground","red","blue","green"/)      
+     pres@xyLineColors        = (/"foreground","red","blue","green"/)
      pres@xyLabelMode = "custom"
-     pres@xyLineLabelFontColors = pres@xyLineColors 
+     pres@xyLineLabelFontColors = pres@xyLineColors
      pres@xyExplicitLabels = (/"","",val1*100+"%",val2*100+"%"/)
      pres@tmXTOn = True
      pres@tmYROn = False
      pres@tmXTLabelsOn = True
      pres@tmXUseBottom = False
-     pres@tmXTMode   = "Explicit"  
-     pres@tmXTValues = (/".02",".10",".20",".3333",".50"/)
-     pres@tmXTLabels = (/"50","10","5","3","2"/)         
+     pres@tmXTMode   = "Explicit"
+     pres@tmXBMode   = "Explicit"
+     pres@tmXTLabels = (/50, 25, 15, 8, 5, 3, 1.5, 0.8, 0.4, 0.2, 0.1/)
+     pres@tmXTValues = 1.0 / (12.0*pres@tmXTLabels)
+     pres@tmXBValues = (/3e-3,8e-3,1.5e-2,3e-2,5e-2,8e-2,1.2e-1, 2.5e-1, 5e-1/)
 
-     pres@tmXTLabelFontHeightF = 0.018
-     pres@tmXBLabelFontHeightF = 0.018
-     pres@tmYLLabelFontHeightF = 0.018
-     pres@tiYAxisString = "Variance" ;"Power (~S~o~N~C~S~2~N~ / cycles mo~S~-1~N~)"              ; yaxis
-     pres@tiXAxisString = "Frequency (cycles mo~S~-1~N~)"
-     pres@tiMainString = ""
-     pres@txFontHeightF = 0.015
+     pres@tmXBLabels = pres@tmXBValues
+     pres@tmXTLabelFontHeightF   = 0.020
+     pres@tmXBLabelFontHeightF   = 0.020
+     pres@tmYLLabelFontHeightF   = 0.020
+     pres@tiYAxisString          = "Variance" 
+     pres@tiXAxisString          = "Frequency (cycles mo~S~-1~N~)"
+     pres@tiMainString           = ""
+     pres@txFontHeightF          = 0.015
      pres@xyLineLabelFontHeightF = 0.022
-     pres@tiXAxisFontHeightF = 0.025
-     pres@tiYAxisFontHeightF = 0.025
-     pres@tiMainFontHeightF = 0.03
-     pres@gsnRightStringOrthogonalPosF = -0.115
-     
+     pres@tiXAxisFontHeightF     = 0.025
+     pres@tiYAxisFontHeightF     = 0.025
+     pres@tiMainFontHeightF      = 0.03
+     pres@gsnRightStringOrthogonalPosF = -0.14
+
+     if (spectra_mvf.eq.False) then
+        if (isfilepresent2("obs_ts").and.ee.ge.1.and.spectra_mvf_obs.eq.False) then
+           val = new(2,typeof(sdof_obs@spcx))
+           val(0) = max(sdof_obs@spcx)
+           val(1) = totype(max(splt1(0,:)),typeof(sdof_obs@spcx))
+           mval = max(val)
+           delete(val)
+        else
+           mval = max(splt1(0,:))
+        end if
+        if (mval.lt.30) then
+           pres@trYMaxF         = 35. 
+           pres@tmYLMode        = "Explicit"
+           pres@tmYLValues      = 10^fspan(-4,4,9) ;(/0,50,100,150/)
+           pres@tmYLLabels      = 10^fspan(-4,4,9) ;pres@tmYLValues
+           pres@tmYLMinorValues = 10^(/-3,-2.5,-2,-1.5,-1,-0.5,0,0.5,1,1.5,2/) ;ispan(10,140,10)
+        end if
+        if (mval.lt.70) then
+           pres@trYMaxF         = 75.
+           pres@tmYLMode        = "Explicit"
+           pres@tmYLValues      = 10^fspan(-4,4,9) ;(/0,50,100,150/)
+           pres@tmYLLabels      = 10^fspan(-4,4,9) ;pres@tmYLValues
+           pres@tmYLMinorValues = 10^(/-3,-2.5,-2,-1.5,-1,-0.5,0,0.5,1,1.5,2/) ;ispan(10,140,10)
+        end if
+        if (mval.ge.70.and.mval.lt.145) then
+           pres@trYMaxF         = 150.
+           pres@trYMinF         = 1e-3
+           pres@tmYLMode        = "Explicit"
+           pres@tmYLValues      = 10^fspan(-4,4,9) ;(/0,50,100,150/)
+           pres@tmYLLabels      = 10^fspan(-4,4,9) ;pres@tmYLValues
+           pres@tmYLMinorValues = 10^(/-3,-2.5,-2,-1.5,-1,-0.5,0,0.5,1,1.5,2/) ;ispan(10,140,10)
+        end if
+        if (mval.ge.145) then
+           pres@trYMaxF         = mval+15.
+           pres@trYMinF         = 1e-3
+           pres@tmYLMode        = "Explicit"
+           pres@tmYLValues      = 10^fspan(-4,4,9) ;(/0,50,100,150/)
+           pres@tmYLLabels      = 10^fspan(-4,4,9) ;pres@tmYLValues
+           pres@tmYLMinorValues = 10^(/-3,-2.5,-2,-1.5,-1,-0.5,0,0.5,1,1.5,2/) ;ispan(10,140,10)
+        end if
+        delete(mval)
+     end if
+
      pres@tiMainOn = False
      pres@gsnCenterString = "Period (years)"
      pres@gsnCenterStringFontHeightF =    pres@tiYAxisFontHeightF
@@ -766,10 +823,10 @@ begin
 ;     res@cnFillMode = "RasterFill"
      res@cnLevelSelectionMode = "ExplicitLevels"
      if (COLORMAP.eq."0") then
-        res@cnLevels = fspan(-.5,.5,21)
+        res@cnLevels = fspan(-.3,.3,21)
      end if
      if (COLORMAP.eq."1") then
-        res@cnLevels = fspan(-.4,.4,17)
+        res@cnLevels = fspan(-.3,.3,16)
      end if
 
      res@cnLineLabelsOn = False
@@ -868,8 +925,17 @@ begin
   end if
   panres@lbLabelFontHeightF = 0.013
   panres@lbLabelStride = 1
-  ncol = floattointeger(sqrt(nsim))
-  nrow = (nsim/ncol)+mod(nsim,ncol)  
+  if (nsim.le.3) then
+    ncol = nsim
+    nrow = 1
+  else if (nsim.le.6) then
+    nrow = 2
+    ncol = 3
+  else
+    ncol = floattointeger(sqrt(nsim))
+    nrow = (nsim/ncol)+mod(nsim,ncol)
+  end if
+  end if
   
   panres@txString = "AMOC Means (Annual)"
   gsn_panel2(wks_mean,plot_mean_ann,(/nrow,ncol/),panres)
@@ -912,7 +978,7 @@ begin
      delete(tt)
   end if
   panres2@txString = "AMOC PC1 (Annual)"
-  gsn_panel2(wks_amoc_ts,plot_amoc_ts_ann,(/nrow,ncol/),panres2)
+  gsn_panel2(wks_amoc_ts,plot_amoc_ts_ann,lp,panres2)
   delete(wks_amoc_ts)
 
   if (isatt(panres2,"gsnPanelScalePlotIndex")) then

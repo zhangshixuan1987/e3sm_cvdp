@@ -661,8 +661,17 @@ begin
      panres@gsnPanelBottom = 0.05
   end if
   panres@txString = "IPO (Monthly)"
-  ncol = floattointeger(sqrt(nsim))
-  nrow = (nsim/ncol)+mod(nsim,ncol)  
+  if (nsim.le.3) then
+    ncol = nsim
+    nrow = 1
+  else if (nsim.le.6) then
+    nrow = 2
+    ncol = 3
+  else
+    ncol = floattointeger(sqrt(nsim))
+    nrow = (nsim/ncol)+mod(nsim,ncol)
+  end if
+  end if
   gsn_panel2(wks,map,(/nrow,ncol/),panres)
 
   if (tasreg_frame.eq.0) then
