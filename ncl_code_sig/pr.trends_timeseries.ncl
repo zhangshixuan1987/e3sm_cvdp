@@ -281,7 +281,7 @@ begin
   
      res@cnLevelSelectionMode = "ExplicitLevels"
      if (COLORMAP.eq.0) then
-        res@cnLevels = (/-6,-4,-2,-1,-0.5,-0.2,0,0.2,0.5,1,2,4,6/)
+        res@cnLevels = (/-3,-2,-1.5,-1,-0.5,-0.2,0,0.2,0.5,1,1.5,2,3/)
         res@cnFillColors = (/2,3,4,5,6,7,8,8,9,10,11,12,13,14/)
      end if
      if (COLORMAP.eq.1) then

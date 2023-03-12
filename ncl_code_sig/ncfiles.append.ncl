@@ -55,12 +55,12 @@ begin
            if (isfilepresent(ofile)) then                                    ; if file master is present append individual data files to file master.
               do hh = 0,dimf-1
                  if (fils(hh).ne.ofile) then
-                    system("ncks -A -h "+fils(hh)+" "+ofile)
+                    system("ncks -C -A -h "+fils(hh)+" "+ofile)
                  end if
               end do
            else                                                              ; if file master is not present, append individual data files to last file in list,
               do hh = 0,dimf-2                                               ; and when done move the last file to be the master file
-                 system("ncks -A -h "+fils(hh)+" "+fils(dimf-1))             
+                 system("ncks -C -A -h "+fils(hh)+" "+fils(dimf-1))             
               end do
               system("mv "+fils(dimf-1)+" "+ofile)
            end if
@@ -68,7 +68,7 @@ begin
               system("rm "+str_sub_str(str_join(fils(:dimf-2)," "),ofile,""))   ; remove each script's file, but do not remove the master file (if present)
            end if
         end if
-        system("ncks -O "+ofile+" "+ofile)   ; done to alphabetize output variable
+        system("ncks -C -O "+ofile+" "+ofile)   ; done to alphabetize output variable
         delete([/dimf,ofile/])
      else
 ;        print("NetCDF files not found for "+names+", skipping appending")
@@ -83,6 +83,8 @@ begin
      namelist_files = (/"psl","prect","trefht","ts","snowdp","moc","aice_nh","aice_sh"/)
      delim = "|"
      cntr = 0
+     print(maxnumobs)
+     print(namelist_files)
      namesB = new(maxnumobs*dimsizes(namelist_files),string)
      do gg = 0,dimsizes(namelist_files)-1                    ; grab all observational dataset names from namelist_$var files
         na = asciiread("namelist_byvar/namelist_"+namelist_files(gg),(/maxnumobs/),"string")
@@ -110,12 +112,12 @@ begin
                  if (isfilepresent(ofi)) then                   ; if file master is present append individual data files to file master.
                     do hh = 0,dimf-1
                        if (fils(hh).ne.ofi) then
-                          system("ncks -A -h "+fils(hh)+" "+ofi)
+                          system("ncks -C -A -h "+fils(hh)+" "+ofi)
                        end if
                     end do
                  else                                                        ; if file master is not present, append individual data files to last file in list,
                     do hh = 0,dimf-2                                         ; and when done move the last file to be the master file
-                       system("ncks -A -h "+fils(hh)+" "+fils(dimf-1))
+                       system("ncks -C -A -h "+fils(hh)+" "+fils(dimf-1))
                     end do
                     system("mv "+fils(dimf-1)+" "+ofi)
                  end if
@@ -128,7 +130,7 @@ begin
                     system("mv "+fils(0)+" "+ofi)
                  end if
               end if
-              system("ncks -O "+ofi+" "+ofi)   ; done to alphabetize output variable
+              system("ncks -C -O "+ofi+" "+ofi)   ; done to alphabetize output variable
               delete([/dimf,ofi/])
            else
 ;              print("NetCDF files not found for "+namesB(gg)+", skipping appending")

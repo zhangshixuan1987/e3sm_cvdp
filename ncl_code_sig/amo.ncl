@@ -528,6 +528,8 @@ begin
      end if
      
      pres = True
+     pres@vpWidthF      = 0.7
+     pres@vpHeightF     = 0.5
      pres@vpXF = 0.07
      pres@trYMinF = 0.
      pres@trXMinF = 0.0

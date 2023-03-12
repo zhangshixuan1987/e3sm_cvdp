@@ -88,9 +88,9 @@ begin
   wks_psa2 = gsn_open_wks(wks_type,getenv("OUTDIR")+"psa2.vxreg")
   
   if (COLORMAP.eq.0) then
-     gsn_define_colormap(wks_sam,"cmp_b2r")  
-     gsn_define_colormap(wks_psa1,"cmp_b2r") 
-     gsn_define_colormap(wks_psa2,"cmp_b2r") 
+     gsn_define_colormap(wks_sam,"MPL_RdBu")  
+     gsn_define_colormap(wks_psa1,"MPL_RdBu") 
+     gsn_define_colormap(wks_psa2,"MPL_RdBu") 
      gsn_reverse_colormap(wks_sam)           ; Reverse the color map.
      gsn_reverse_colormap(wks_psa1)           ; Reverse the color map.
      gsn_reverse_colormap(wks_psa2)           ; Reverse the color map.

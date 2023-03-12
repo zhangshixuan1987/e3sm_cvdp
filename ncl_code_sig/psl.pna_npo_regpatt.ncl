@@ -87,8 +87,8 @@ begin
   wks_npo = gsn_open_wks(wks_type,getenv("OUTDIR")+"npo.vxreg")
   
   if (COLORMAP.eq.0) then
-     gsn_define_colormap(wks_pna,"cmp_b2r")  
-     gsn_define_colormap(wks_npo,"cmp_b2r") 
+     gsn_define_colormap(wks_pna,"MPL_RdBu")  
+     gsn_define_colormap(wks_npo,"MPL_RdBu") 
      gsn_reverse_colormap(wks_pna)           ; Reverse the color map.
      gsn_reverse_colormap(wks_npo)           ; Reverse the color map.
   end if

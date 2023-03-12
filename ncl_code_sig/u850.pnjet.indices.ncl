@@ -214,7 +214,7 @@ begin
      llatn = 70.
      llonw = 0.
      llone = 360.
-     finjet = calculate_jet_info(ua,llats,llatn,llonw,llone)
+     finjet = calculate_jet_info(ua(:,{llats:llatn},{llonw:llone}),llats,llatn,llonw,llone)
 
      if (OPT_CLIMO.eq."Full") then
         ua = rmMonAnnCycTLL(ua)
@@ -1445,9 +1445,20 @@ begin
      res@gsnDraw = False 
   
      res@tmYLMode        = "Explicit"
-     res@tmYLValues      = yyyyFrac(::60)
-     res@tmYLLabels      = yymm(::60) 
-     res@tmYLMinorValues = yyyyFrac(::12)
+     if(dimsizes(yyyyFrac)/12.le.50) then
+       int_major = 60
+       int_minor = 12
+     else if(dimsizes(yyyyFrac)/12.le.100) then
+       int_major = 60 * 2
+       int_minor = 12 * 2
+     else
+       int_major = 60 * 4
+       int_minor = 12 * 4
+     end if
+     end if
+     res@tmYLValues      = yyyyFrac(::int_major)
+     res@tmYLLabels      = yymm(::int_major)
+     res@tmYLMinorValues = yyyyFrac(::int_minor)
 
      res@tmYLLabelJust = "CenterCenter"               
      res@tmYLLabelDeltaF = 1.3    ;0.05

@@ -3,7 +3,7 @@
 ; 
 undef("calculate_jet_info")
 function calculate_jet_info(karr:numeric,minlat[1]:numeric,maxlat[1]:numeric,minlon[1]:numeric,maxlon[1]:numeric)
-local karr,kan,minlat,maxlat,minlon,maxlon,krgd,kzon,Opt,m,pcts_s,gg,nmax_ind,wgtfile,dimz,attstring
+local karr,tmp,minlat,maxlat,minlon,maxlon,krgd,kzon,Opt,m,pcts_s,gg,nmax_ind,wgtfile,dimz,attstring,ix0,ix1,nsig
 begin
 
   dimz        = dimsizes(karr)
@@ -12,8 +12,6 @@ begin
   finjet&nid  = ispan(1,4,1)
   finjet!1    = "time"
   finjet&time = karr&time
-
-  kan     = karr(:,{minlat:maxlat},{minlon:maxlon})
 
  ; ====================================================================
  ; First step: regrid the data to 0.1x0.1 within 70S and 20S region
@@ -24,13 +22,40 @@ begin
   Opt                = True
   Opt@SrcFileName    = "src_SCRIP.nc"
   Opt@DstFileName    = "dst_SCRIP.nc"
-  Opt@WgtFileName    = "1deg_to_0.1deg.nc"
+  Opt@WgtFileName    = wgtfile 
   Opt@ForceOverwrite = True
   Opt@DstGridType    = "0.1x0.1"
   Opt@DstLLCorner    = (/ minlat,   0.25d/)
   Opt@DstURCorner    = (/ maxlat, 359.75d/)
-  krgd               = ESMF_regrid(kan,Opt)
-  delete(Opt)
+
+  if(dimz(0)/12.ge.50) then ; when data size is large, loop the time demension to avoid memory issue 
+    nsig = dimz(0)/300 + 1 ; separate it to 25-year slices 
+    do ff = 0,nsig-1
+      ix0 = ff*300
+      ix1 = (ff+1)*300 - 1 
+      if(ix1.gt.dimz(0)) then 
+         ix1 = dimz(0)
+      end if 
+      if(ff.eq.0) then 
+        tmp          = ESMF_regrid(karr(ix0:ix1,:,:),Opt)
+        dmx          = dimsizes(tmp)
+        krgd         = new((/dimz(0),dmx(1),dmx(2)/),typeof(tmp))
+        krgd!0       = "time"
+        krgd!1       = "lat"
+        krgd!2       = "lon" 
+        krgd&time    = karr&time 
+        krgd&lat     = tmp&lat 
+        krgd&lon     = tmp&lon
+        krgd(ix0:ix1,:,:) = (/tmp/)
+      else 
+        krgd(ix0:ix1,:,:) = (/ESMF_regrid_with_weights(karr(ix0:ix1,:,:),wgtfile,False)/)
+      end if
+      delete([/tmp,dmx,ix0,ix1,nsig/])
+    end do 
+  else 
+    krgd = ESMF_regrid(karr,Opt)
+  end if 
+  delete([/Opt/])
   system("rm -rvf src_SCRIP.nc  dst_SCRIP.nc *.Log "+ wgtfile)
 
   m    = addfile("$NCARG_ROOT/lib/ncarg/data/cdf/landsea.nc","r")   ; mask out land (this is redundant for data that is already masked)
@@ -44,6 +69,7 @@ begin
  ; magnitude (which is the jet strength)
  ; ==================================================================
   kzon = dim_avg_n_Wrap(krgd,2)
+  delete([/krgd/])
 
   finjet(0,:) = dim_max_n(kzon,1)
   nmax_ind    = dim_maxind(kzon(lat|:,time|:), 0)
@@ -62,7 +88,7 @@ begin
   finjet@$attstring$ = pcts_s
  end do
 
- delete([/kan,krgd,kzon,nmax_ind,pcts_s,attstring/])
+ delete([/kzon,nmax_ind,pcts_s,attstring/])
 
  return(finjet)
 

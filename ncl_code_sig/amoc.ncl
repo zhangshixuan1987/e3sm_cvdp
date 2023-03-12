@@ -92,7 +92,7 @@ begin
   if (COLORMAP.eq.0) then
      gsn_define_colormap(wks_mean,        "NCV_jaisnd")
      gsn_define_colormap(wks_stddev,      "precip3_16lev")
-     gsn_define_colormap(wks_amoc,        "cmp_b2r")
+     gsn_define_colormap(wks_amoc,        "cmocean_balance")
      gsn_define_colormap(wks_amoc_ts,     "ncl_default")
      gsn_define_colormap(wks_amoc_powspec,"ncl_default")
      gsn_define_colormap(wks_amoc_sstreg,"cmp_b2r")
@@ -389,7 +389,7 @@ begin
 ;---------------compute AMOC/AMO lead/lags----------------------------------------------------------------------------- 
      if (nyr(ee).ge.90.and.isvar("AMO")) then    ; need a minimum number of years to compute lead/lag correlations
         nwt = 51
-        pda = 15            ; longest period
+        pda = 15           ; longest period
         pdb = 1            ; shortest period
         fca = 1./pda       ;  ==> lowest allowed frequency
         fcb = 1./pdb       ;  ==> highest allowed frequency
@@ -683,11 +683,9 @@ begin
      pres@vpWidthF      = 0.7
      pres@vpHeightF     = 0.5
      pres@vpXF          = 0.07
-     pres@trYMinF       = 0.01
-;    pres@trYMaxF       = 82.
-     pres@trYLog        = True
-     pres@trXLog        = True
-     pres@trXMinF       = 3.0e-3
+     pres@trYMinF       = 0.0
+;    pres@trYMaxF       = 40
+     pres@trXMinF       = 0.0
      pres@trXMaxF       = 0.5 ;maxx ;0.0832
      pres@tiYAxisString = "Power"              ; yaxis
      pres@xyLineColor   = "black"
@@ -708,69 +706,64 @@ begin
      pres@xyLineLabelFontColors = pres@xyLineColors
      pres@xyExplicitLabels = (/"","",val1*100+"%",val2*100+"%"/)
      pres@tmXTOn = True
-     pres@tmYROn = False
-     pres@tmXTLabelsOn = True
-     pres@tmXUseBottom = False
-     pres@tmXTMode   = "Explicit"
-     pres@tmXBMode   = "Explicit"
-     pres@tmXTLabels = (/50, 25, 15, 8, 5, 3, 1.5, 0.8, 0.4, 0.2, 0.1/)
-     pres@tmXTValues = 1.0 / (12.0*pres@tmXTLabels)
-     pres@tmXBValues = (/3e-3,8e-3,1.5e-2,3e-2,5e-2,8e-2,1.2e-1, 2.5e-1, 5e-1/)
+     pres@tmYROn = False         
+     pres@tmXTLabelsOn = True      
+     pres@tmXUseBottom = False     
+     pres@tmXTMode   = "Explicit"  
+    ;pres@tmXTValues = (/".02",".10",".20",".3333",".50"/)
+     pres@tmXTLabels = (/"50","10","5","3","2", "1", "0.5", "0.1"/)
+     pres@tmXTValues =  1.0 / (/50.0,10.0,5.0,3.0,2.0,1.0,0.5,0.1/)
 
-     pres@tmXBLabels = pres@tmXBValues
-     pres@tmXTLabelFontHeightF   = 0.020
-     pres@tmXBLabelFontHeightF   = 0.020
-     pres@tmYLLabelFontHeightF   = 0.020
-     pres@tiYAxisString          = "Variance" 
-     pres@tiXAxisString          = "Frequency (cycles mo~S~-1~N~)"
-     pres@tiMainString           = ""
-     pres@txFontHeightF          = 0.015
+     pres@tmXTLabelFontHeightF = 0.018
+     pres@tmXBLabelFontHeightF = 0.018
+     pres@tmYLLabelFontHeightF = 0.018
+     pres@tiYAxisString = "Variance" ;"Power (~S~o~N~C~S~2~N~ / cycles mo~S~-1~N~)"              ; yaxis
+     pres@tiXAxisString = "Frequency (cycles yr~S~-1~N~)"
+     pres@tiMainString = ""
+     pres@txFontHeightF = 0.015
      pres@xyLineLabelFontHeightF = 0.022
-     pres@tiXAxisFontHeightF     = 0.025
-     pres@tiYAxisFontHeightF     = 0.025
-     pres@tiMainFontHeightF      = 0.03
+     pres@tiXAxisFontHeightF = 0.025
+     pres@tiYAxisFontHeightF = 0.025
+     pres@tiMainFontHeightF = 0.03
      pres@gsnRightStringOrthogonalPosF = -0.14
 
      if (spectra_mvf.eq.False) then
         if (isfilepresent2("obs_ts").and.ee.ge.1.and.spectra_mvf_obs.eq.False) then
            val = new(2,typeof(sdof_obs@spcx))
            val(0) = max(sdof_obs@spcx)
-           val(1) = totype(max(splt1(0,:)),typeof(sdof_obs@spcx))
+          ;val(1) = totype(max(splt1(0,:)),typeof(sdof_obs@spcx))
            mval = max(val)
            delete(val)
         else
            mval = max(splt1(0,:))
         end if
-        if (mval.lt.30) then
-           pres@trYMaxF         = 35. 
+        if (mval.lt.40) then
+           pres@trYMaxF         = 35.
            pres@tmYLMode        = "Explicit"
-           pres@tmYLValues      = 10^fspan(-4,4,9) ;(/0,50,100,150/)
-           pres@tmYLLabels      = 10^fspan(-4,4,9) ;pres@tmYLValues
-           pres@tmYLMinorValues = 10^(/-3,-2.5,-2,-1.5,-1,-0.5,0,0.5,1,1.5,2/) ;ispan(10,140,10)
-        end if
-        if (mval.lt.70) then
+           pres@tmYLValues      := (/0,10,20,30/)
+           pres@tmYLLabels      := pres@tmYLValues
+           pres@tmYLMinorValues := fspan(0,40,9)
+        else if (mval.lt.80) then
            pres@trYMaxF         = 75.
            pres@tmYLMode        = "Explicit"
-           pres@tmYLValues      = 10^fspan(-4,4,9) ;(/0,50,100,150/)
-           pres@tmYLLabels      = 10^fspan(-4,4,9) ;pres@tmYLValues
-           pres@tmYLMinorValues = 10^(/-3,-2.5,-2,-1.5,-1,-0.5,0,0.5,1,1.5,2/) ;ispan(10,140,10)
-        end if
-        if (mval.ge.70.and.mval.lt.145) then
-           pres@trYMaxF         = 150.
-           pres@trYMinF         = 1e-3
+           pres@tmYLValues      := (/0,15,30,45,60,75/)
+           pres@tmYLLabels      := pres@tmYLValues
+           pres@tmYLMinorValues := fspan(0,80,17)
+        else if (mval.lt.150) then
+           pres@trYMaxF         = 145.
            pres@tmYLMode        = "Explicit"
-           pres@tmYLValues      = 10^fspan(-4,4,9) ;(/0,50,100,150/)
-           pres@tmYLLabels      = 10^fspan(-4,4,9) ;pres@tmYLValues
-           pres@tmYLMinorValues = 10^(/-3,-2.5,-2,-1.5,-1,-0.5,0,0.5,1,1.5,2/) ;ispan(10,140,10)
+           pres@tmYLValues      := (/0,30,60,90,120,150/)
+           pres@tmYLLabels      := pres@tmYLValues
+           pres@tmYLMinorValues := fspan(0,150,11)
+        else 
+           pres@trYMaxF        = mval+15.
+           pres@tmYLMode       = "Explicit"
+           pres@tmYLValues     := ispan(0,mval,50)
+           pres@tmYLLabels     := pres@tmYLValues
+           pres@tmYLMinorValues:= fspan(0,mval+15,(mval+15)/25+1)
         end if
-        if (mval.ge.145) then
-           pres@trYMaxF         = mval+15.
-           pres@trYMinF         = 1e-3
-           pres@tmYLMode        = "Explicit"
-           pres@tmYLValues      = 10^fspan(-4,4,9) ;(/0,50,100,150/)
-           pres@tmYLLabels      = 10^fspan(-4,4,9) ;pres@tmYLValues
-           pres@tmYLMinorValues = 10^(/-3,-2.5,-2,-1.5,-1,-0.5,0,0.5,1,1.5,2/) ;ispan(10,140,10)
-        end if
+        end if 
+        end if 
         delete(mval)
      end if
 

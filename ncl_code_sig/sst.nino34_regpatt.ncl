@@ -86,7 +86,7 @@ begin
   wks_nino34  = gsn_open_wks(wks_type,getenv("OUTDIR")+"nino34.vxreg")
   
   if (COLORMAP.eq.0) then
-     gsn_define_colormap(wks_nino34,"cmp_b2r")  
+     gsn_define_colormap(wks_nino34,"MPL_RdBu")  
      gsn_reverse_colormap(wks_nino34)           ; Reverse the color map.
   end if
   if (COLORMAP.eq.1) then

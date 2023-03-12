@@ -189,7 +189,7 @@ begin
      res@gsnFrame     = False
   
      res@cnLevelSelectionMode = "ExplicitLevels"
-     res@cnLevels = fspan(-6,6,13)
+     res@cnLevels = fspan(-3,3,13)
      res@cnLineLabelsOn = False
      res@cnFillOn        = True
      res@cnLinesOn       = False
