@@ -331,7 +331,7 @@ begin
      iod@long_name = "Indian Ocean Dipole Index (monthly)"       
 
      socn = wgt_areaave(sst(:,{-70.:-50.},:),coswgt({-70.:-50.}),1.0,0) 
-     socn@comment_cvdp = "area average domain (-70:-50N, 0:360E)"
+     socn@comment_cvdp = "area average domain (50:70S, 0:360E)"
      copy_VarCoords(nino34,socn)
      socn@units = sst@units
      socn@long_name = "Southern Ocean Index (monthly)"    

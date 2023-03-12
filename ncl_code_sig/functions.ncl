@@ -27,14 +27,17 @@ begin
   Opt@DstGridType    = "0.1x0.1"
   Opt@DstLLCorner    = (/ minlat,   0.25d/)
   Opt@DstURCorner    = (/ maxlat, 359.75d/)
-
   if(dimz(0)/12.ge.50) then ; when data size is large, loop the time demension to avoid memory issue 
-    nsig = dimz(0)/300 + 1 ; separate it to 25-year slices 
+    nsig = dimz(0)/300 + 1; separate it to 25-year slices 
     do ff = 0,nsig-1
       ix0 = ff*300
       ix1 = (ff+1)*300 - 1 
-      if(ix1.gt.dimz(0)) then 
-         ix1 = dimz(0)
+      if(ix0.gt.dimz(0)-1) then
+         ix0 = dimz(0)-1
+         ix1 = dimz(0)-1
+      end if
+      if(ix1.gt.dimz(0)-1) then 
+         ix1 = dimz(0)-1
       end if 
       if(ff.eq.0) then 
         tmp          = ESMF_regrid(karr(ix0:ix1,:,:),Opt)
@@ -46,14 +49,18 @@ begin
         krgd&time    = karr&time 
         krgd&lat     = tmp&lat 
         krgd&lon     = tmp&lon
-        krgd(ix0:ix1,:,:) = (/tmp/)
+        krgd(ix0:ix1,:,:) = tofloat(tmp)
+        delete([/tmp,dmx/])
       else 
-        krgd(ix0:ix1,:,:) = (/ESMF_regrid_with_weights(karr(ix0:ix1,:,:),wgtfile,False)/)
+        krgd(ix0:ix1,:,:) = tofloat(ESMF_regrid_with_weights(karr(ix0:ix1,:,:),wgtfile,False))
       end if
-      delete([/tmp,dmx,ix0,ix1,nsig/])
+      delete([/ix0,ix1/])
     end do 
   else 
     krgd = ESMF_regrid(karr,Opt)
+  end if 
+  if(isvar(nsig)) then 
+    delete(nsig)
   end if 
   delete([/Opt/])
   system("rm -rvf src_SCRIP.nc  dst_SCRIP.nc *.Log "+ wgtfile)
