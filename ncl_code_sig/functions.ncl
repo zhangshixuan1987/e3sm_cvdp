@@ -56,11 +56,9 @@ begin
       end if
       delete([/ix0,ix1/])
     end do 
+    delete([/nsig/])
   else 
     krgd = ESMF_regrid(karr,Opt)
-  end if 
-  if(isvar(nsig)) then 
-    delete(nsig)
   end if 
   delete([/Opt/])
   system("rm -rvf src_SCRIP.nc  dst_SCRIP.nc *.Log "+ wgtfile)
