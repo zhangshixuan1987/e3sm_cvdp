@@ -1462,17 +1462,17 @@ begin
 
      res@tmYLLabelJust = "CenterCenter"               
      res@tmYLLabelDeltaF = 1.3    ;0.05
-     res@cnFillOn = True
-    ;res@gsnSpreadColors = True  
-    ;res@gsnSpreadColorEnd = 19
-     
-     res@lbLabelBarOn = False
-  
-     res@tiMainOn = False
-     res@cnInfoLabelOn = False
-     res@cnLinesOn = True
+     res@cnFillOn        = True
+     res@cnFillMode      = "RasterFill"       ; Raster Mode
      res@cnLevelSelectionMode = "ExplicitLevels"
-     res@cnLevels = fspan(-60,-40,11) 
+     res@cnLevels = fspan(-60,-40,21) 
+    ;res@gsnSpreadColors = True
+    ;res@gsnSpreadColorEnd = 19
+     res@lbLabelBarOn = False
+     res@tiMainOn = False
+
+     res@cnInfoLabelOn = False
+     res@cnLinesOn = False
      carr = new(dimsizes(res@cnLevels),"string")
      carr = "transparent"
      carr(8) = "gray50"
@@ -1481,8 +1481,9 @@ begin
      res@cnLineLabelsOn = False
      res@tmYLLabelFontHeightF = 0.014
      res@tmXBLabelFontHeightF = 0.014
-     res@gsnMajorLonSpacing = 90.
-     res@gsnMinorLonSpacing = 60.
+
+     res@gsnMajorLonSpacing = 60.
+     res@gsnMinorLonSpacing = 30.
      res@tiYAxisOn = False
      if (wks_type.eq."png") then
         res@cnLineThicknessF = 1.

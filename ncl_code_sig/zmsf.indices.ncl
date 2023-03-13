@@ -127,8 +127,6 @@ begin
   
   wks_hc_ts  = gsn_open_wks(wks_type,getenv("OUTDIR")+"hc_ts.timeseries")
 
-  wks_hclat_tlon = gsn_open_wks(wks_type,getenv("OUTDIR")+"hcpos.hov")
-
   wks_hc_p = gsn_open_wks(wks_type,getenv("OUTDIR")+"hc.powspec")
   
   wks_hc_rst = gsn_open_wks(wks_type,getenv("OUTDIR")+"hc.runstddev")
@@ -146,7 +144,6 @@ begin
      gsn_define_colormap(wks_hc_jja,"ncl_default")
      gsn_define_colormap(wks_hc_son,"ncl_default")
      gsn_define_colormap(wks_hc_ann,"ncl_default")
-     gsn_define_colormap(wks_hclat_tlon,"MPL_terrain") 
      gsn_define_colormap(wks_hc_p,"cb_9step")
      gsn_define_colormap(wks_hc_rst,"ncl_default")   
      gsn_define_colormap(wks_hc_mst,"ncl_default")   
@@ -160,7 +157,6 @@ begin
      gsn_define_colormap(wks_hc_jja,"ncl_default")
      gsn_define_colormap(wks_hc_son,"ncl_default")
      gsn_define_colormap(wks_hc_ann,"ncl_default")
-     gsn_define_colormap(wks_hclat_tlon,"MPL_terrain")
      gsn_define_colormap(wks_hc_p,"cb_9step")
      gsn_define_colormap(wks_hc_rst,"ncl_default")   
      gsn_define_colormap(wks_hc_mst,"ncl_default")   
@@ -385,7 +381,7 @@ begin
      hcind_mon&x      = ispan(0,dimsizes(iname)-1,1)
      hcind_mon&time   = hcin_mon&time
      hcind_mon@unit1  = hcin_mon@units
-     hcind_mon@unit2  = "Latitude (degree)"
+     hcind_mon@unit2  = "degree"
      do ff = 0,dimsizes(iname)-1
        if(iname(ff).eq."hcin") then
          hcind_mon(:,ff)  = (/hcin_mon/)
@@ -553,7 +549,7 @@ begin
             if(isStrSubset(iname(hh),"ci").or.isStrSubset(iname(hh),"pi")) then 
                vout@units  = zmsf@units 
             else
-               vout@units  = "Latitude (degree)"
+               vout@units  = "degree"
             end if 
             vout@long_name = hcnam_mon(hh) + " timeseries (" +sea+")"
             vonm = iname(hh)+"_" + seas(ff)
@@ -1125,7 +1121,7 @@ begin
      do hh = 0,11
         hc_mon_sd(hh) = (/ dim_stddev(hc_dt(hh::12)) /)
      end do
-     hc_mon_sd@units = "Latitude (degree)"
+     hc_mon_sd@units = "degree"
      if (OUTPUT_DATA.eq."True") then
         time_mon2 = ispan(0,11,1)
         time_mon2@units = "months since 0000-01-01 00:00:00"

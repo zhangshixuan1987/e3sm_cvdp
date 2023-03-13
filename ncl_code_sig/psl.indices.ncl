@@ -215,24 +215,24 @@ begin
      llone = 360.
 
      sam_p40S = wgt_areaave_Wrap(psl_org(:,{llatn:llatn},{llonw:llone}),coswgt({llatn:llatn}),1.0,0)
-     sam_p40S@comment_cvdp = "domain ("+llats+":"+llatn+"S, "+llonw+":"+llone+"E)"
+     sam_p40S@comment_cvdp = "domain ("+abs(llatn)+"-"+abs(llats)+"S, "+llonw+":"+llone+"E)"
      sam_p40S@units        = psl@units
      sam_p40S@long_name    = "sam psl timeseries at 40S (monthly)"
 
      sam_p65S= wgt_areaave_Wrap(psl_org(:,{llats:llats},{llonw:llone}),coswgt({llats:llats}),1.0,0)
-     sam_p65S@comment_cvdp = "domain ("+llats+":"+llatn+"S, "+llonw+":"+llone+"E)"
+     sam_p65S@comment_cvdp = "domain ("+abs(llatn)+"-"+abs(llats)+"S, "+llonw+":"+llone+"E)"
      sam_p65S@units        = psl@units
      sam_p65S@long_name    = "sam psl timeseries at 65S (monthly)"
 
      samind = dim_standardize(sam_p40S,1) - dim_standardize(sam_p65S,1) 
      copy_VarCoords(sam_p40S,samind)
-     samind@comment_cvdp = "domain ("+llats+":"+llatn+"S, "+llonw+":"+llone+"E)"
+     samind@comment_cvdp = "domain ("+abs(llatn)+"-"+abs(llats)+"S, "+llonw+":"+llone+"E)"
      samind@units = "1"
      samind@long_name = "sam (Mashall) index timeseries (monthly)"
 
      samind_rn = dim_standardize(samind,0)
      copy_VarCoords(samind,samind_rn)
-     samind_rn@comment_cvdp = "domain ("+llats+":"+llatn+"S, "+llonw+":"+llone+"E)"
+     samind_rn@comment_cvdp = "domain ("+abs(llatn)+"-"+abs(llats)+"S, "+llonw+":"+llone+"E)"
      samind_rn@units = "1"
      samind_rn@long_name = "Normalized sam (Mashall) index timeseries (monthly)"
 
@@ -242,32 +242,32 @@ begin
      llone = 298.
 
      asl_rmpsl = wgt_areaave_Wrap(psl(:,{llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0)
-     asl_rmpsl@comment_cvdp  = "domain ("+llats+":"+llatn+"S, "+llonw+":"+llone+"E)"
+     asl_rmpsl@comment_cvdp  = "domain ("+abs(llatn)+"-"+abs(llats)+"S, "+llonw+":"+llone+"E)"
      asl_rmpsl@units  = psl@units
      asl_rmpsl@long_name = "Amundsen Sea Low (ASL) region mean pressure timeseries (monthly)"
 
      asl_clat = asl_rmpsl
-     asl_clat@comment_cvdp  = "domain ("+llats+":"+llatn+"S, "+llonw+":"+llone+"E)"
+     asl_clat@comment_cvdp  = "domain ("+abs(llatn)+"-"+abs(llats)+"S, "+llonw+":"+llone+"E)"
      asl_clat@units  = "degree"
      asl_clat@long_name = "Amundsen Sea Low (ASL) latitude"
 
      asl_clon  = asl_rmpsl
-     asl_clon@comment_cvdp  = "domain ("+llats+":"+llatn+"S, "+llonw+":"+llone+"E)"
+     asl_clon@comment_cvdp  = "domain ("+abs(llatn)+"-"+abs(llats)+"S, "+llonw+":"+llone+"E)"
      asl_clon@units  = "degree"
      asl_clon@long_name = "Amundsen Sea Low (ASL) center longitude"
 
      asl_cpsl  = asl_rmpsl
-     asl_cpsl@comment_cvdp  = "domain ("+llats+":"+llatn+"S, "+llonw+":"+llone+"E)"
+     asl_cpsl@comment_cvdp  = "domain ("+abs(llatn)+"-"+abs(llats)+"S, "+llonw+":"+llone+"E)"
      asl_cpsl@units = psl@units
      asl_cpsl@long_name = "Amundsen Sea Low (ASL) central pressure timeseries (monthly)"
 
      asl_rcpsl = asl_rmpsl
-     asl_rcpsl@comment_cvdp  = "domain ("+llats+":"+llatn+"S, "+llonw+":"+llone+"E)"
+     asl_rcpsl@comment_cvdp  = "domain ("+abs(llatn)+"-"+abs(llats)+"S, "+llonw+":"+llone+"E)"
      asl_rcpsl@units = psl@units
      asl_rcpsl@long_name = "Amundsen Sea Low (ASL) relative central pressure timeseries (monthly)"
 
      aslind = asl_rmpsl
-     aslind@comment_cvdp = "domain ("+llats+":"+llatn+"S, "+llonw+":"+llone+"E)"
+     aslind@comment_cvdp = "domain ("+abs(llatn)+"-"+abs(llats)+"S, "+llonw+":"+llone+"E)"
      aslind@units        = "1"
      aslind@long_name    = "Amundsen Sea Low (ASL) central pressure standardized timeseries (monthly)"
     
@@ -1472,19 +1472,19 @@ begin
      res@tmYLLabels      = yymm(::int_major) 
      res@tmYLMinorValues = yyyyFrac(::int_minor)
 
-     res@tmYLLabelJust = "CenterCenter"               
+     res@tmYLLabelJust = "CenterCenter"
      res@tmYLLabelDeltaF = 1.3    ;0.05
-     res@cnFillOn = True
-    ;res@gsnSpreadColors = True  
-    ;res@gsnSpreadColorEnd = 19
-     
-     res@lbLabelBarOn = False
-  
-     res@tiMainOn = False
-     res@cnInfoLabelOn = False
-     res@cnLinesOn = True
+     res@cnFillOn        = True
+     res@cnFillMode      = "RasterFill"       ; Raster Mode
      res@cnLevelSelectionMode = "ExplicitLevels"
-     res@cnLevels = fspan(-60,-40,11) 
+     res@cnLevels = fspan(-60,-40,21)
+    ;res@gsnSpreadColors = True
+    ;res@gsnSpreadColorEnd = 19
+     res@lbLabelBarOn = False
+     res@tiMainOn = False
+
+     res@cnInfoLabelOn = False
+     res@cnLinesOn = False
      carr = new(dimsizes(res@cnLevels),"string")
      carr = "transparent"
      carr(8) = "gray50"
@@ -1493,8 +1493,8 @@ begin
      res@cnLineLabelsOn = False
      res@tmYLLabelFontHeightF = 0.014
      res@tmXBLabelFontHeightF = 0.014
-     res@gsnMajorLonSpacing = 90.
-     res@gsnMinorLonSpacing = 60.
+     res@gsnMajorLonSpacing = 60.
+     res@gsnMinorLonSpacing = 30.
      res@tiYAxisOn = False
      if (wks_type.eq."png") then
         res@cnLineThicknessF = 1.  
@@ -1507,8 +1507,8 @@ begin
      res@gsnLeftStringFontHeightF = 0.017
      res@gsnRightStringFontHeightF = 0.017
 
-     ;res@cnSmoothingOn = True
-     ;res@cnSmoothingTensionF = -3.0
+    ;res@cnSmoothingOn = True
+    ;res@cnSmoothingTensionF = -3.0
 
      res@gsnLeftString = ""
      res@gsnCenterString= ""
