@@ -13,11 +13,11 @@
                                           ; files are being selected by the package. (See files in namelist_byvar/ directory)
                                           ; Set to False to run the entire package.
 
-  obs               = "True"           ; True = analyze and plot observations (specified in namelist_obs), False = do not
-  scale_timeseries  = "False"          ; True = scale timeseries so that x-axis length is comparable across timeseries, False = do not
-  output_data       = "True"           ; True = output selected calculated data to a netCDF file. Make sure .nc files from previous CVDP
+  obs               = "True"              ; True = analyze and plot observations (specified in namelist_obs), False = do not
+  scale_timeseries  = "False"             ; True = scale timeseries so that x-axis length is comparable across timeseries, False = do not
+  output_data       = "True"              ; True = output selected calculated data to a netCDF file. Make sure .nc files from previous CVDP
                                           ;        runs are not in outdir or they will get added to or modified.  
-  compute_modes_mon = "True"           ; True = compute DJF, MAM, JJA, SON, Annual and Monthly Atmospheric Modes of Variability 
+  compute_modes_mon = "True"              ; True = compute DJF, MAM, JJA, SON, Annual and Monthly Atmospheric Modes of Variability 
                                           ; False = do not compute the Monthly Atmospheric Modes of Variability  (saves computation time)                               
 ;- - - - - - - - - - - - - - - - - -   
   opt_climo         = "Full"              ; Full  = remove climatology based on full record of each simulation,
@@ -141,15 +141,40 @@
 ;-------------------------------
 ; Finalize netCDF files, create metrics tables, and finalize images.
 
-  if (output_data.eq."True") then     ; finalize output nc files   
+  if (output_data.eq."True") then     ; finalize output nc files
      system(envvar_str + " "+ncl_exec+" "+zp+"ncfiles.append.ncl")
-  end if 
+  end if
 
   met_files = systemfunc("ls "+outdir+"metrics.*.txt  2> /dev/null")
-  if (dimsizes(met_files).eq.9) then   ; if all 9 metrics text files are present, create metrics table(s)
+  if (dimsizes(met_files).eq.13) then   ; if all metrics text files are present, create metrics table(s)
      system("   export OUTDIR="+outdir+"; "+ncl_exec+" "+zp+"metrics.ncl")
   end if
-      
+  delete(met_files)
+
+  met_files = systemfunc("ls "+outdir+"regpatt_metrics.psl.sam_psa_*.txt  2> /dev/null")
+  if (dimsizes(met_files).eq.20) then   ; if all metrics text files are present, create metrics table(s)
+     system("   export OUTDIR="+outdir+"; "+ncl_exec+" "+zp+"metrics_sam_psa.ncl")
+  end if
+  delete(met_files)
+
+  met_files = systemfunc("ls "+outdir+"regpatt_metrics.psl.nam_*.txt  2> /dev/null")
+  if (dimsizes(met_files).eq.20) then   ; if all metrics text files are present, create metrics table(s)
+     system("   export OUTDIR="+outdir+"; "+ncl_exec+" "+zp+"metrics_nam.ncl")
+  end if
+  delete(met_files)
+
+  met_files = systemfunc("ls "+outdir+"regpatt_metrics.psl.nao_*.txt  2> /dev/null")
+  if (dimsizes(met_files).eq.20) then   ; if all metrics text files are present, create metrics table(s)
+     system("   export OUTDIR="+outdir+"; "+ncl_exec+" "+zp+"metrics_nao.ncl")
+  end if
+  delete(met_files)
+
+  met_files = systemfunc("ls "+outdir+"regpatt_metrics.sst.nino34_*.txt  2> /dev/null")
+  if (dimsizes(met_files).eq.20) then   ; if all metrics text files are present, create metrics table(s)
+     system("   export OUTDIR="+outdir+"; "+ncl_exec+" "+zp+"metrics_nino34.ncl")
+  end if
+  delete(met_files)
+
   image_finalize(outdir,output_type,max_num_tasks,zp,toint(144*png_scale))    ; trim whitespace, convert to .png (if necessary) and apply watermarks to images
  
   system("cp "+zp+"e3sm-cvdp.png "+outdir)
@@ -183,7 +208,7 @@
   outfiles = (/"ts","trefht","psl","prect","snowdp","moc","maxnum","aice_nh","aice_sh"/)
  ;rm_obsfiles(outfiles)
   delete([/outfiles,outdir,obs,scale_timeseries,output_data,opt_climo,climo_syear,climo_eyear,\
-           png_scale,webpage_title,compute_modes_mon,met_files/])
+           png_scale,webpage_title,compute_modes_mon/])
 
   print("Finished: Climate Variability Diagnostics Package ("+systemfunc("date")+")")
   

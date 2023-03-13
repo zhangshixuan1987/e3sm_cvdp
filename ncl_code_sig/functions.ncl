@@ -16,7 +16,7 @@ begin
  ; ====================================================================
  ; First step: regrid the data to 0.1x0.1 within 70S and 20S region
  ;=====================================================================
-  wgtfile = "wgt_regrid_to_0.1deg.nc"
+  wgtfile = "wgt_regrid_to_0.2deg.nc"
   system("rm -rvf src_SCRIP.nc  dst_SCRIP.nc *.Log "+ wgtfile)
 
   Opt                = True
@@ -24,42 +24,10 @@ begin
   Opt@DstFileName    = "dst_SCRIP.nc"
   Opt@WgtFileName    = wgtfile 
   Opt@ForceOverwrite = True
-  Opt@DstGridType    = "0.1x0.1"
+  Opt@DstGridType    = "0.2x0.2"
   Opt@DstLLCorner    = (/ minlat,   0.25d/)
   Opt@DstURCorner    = (/ maxlat, 359.75d/)
-  if(dimz(0)/12.ge.50) then ; when data size is large, loop the time demension to avoid memory issue 
-    nsig = dimz(0)/300 + 1; separate it to 25-year slices 
-    do ff = 0,nsig-1
-      ix0 = ff*300
-      ix1 = (ff+1)*300 - 1 
-      if(ix0.gt.dimz(0)-1) then
-         ix0 = dimz(0)-1
-         ix1 = dimz(0)-1
-      end if
-      if(ix1.gt.dimz(0)-1) then 
-         ix1 = dimz(0)-1
-      end if 
-      if(ff.eq.0) then 
-        tmp          = ESMF_regrid(karr(ix0:ix1,:,:),Opt)
-        dmx          = dimsizes(tmp)
-        krgd         = new((/dimz(0),dmx(1),dmx(2)/),typeof(tmp))
-        krgd!0       = "time"
-        krgd!1       = "lat"
-        krgd!2       = "lon" 
-        krgd&time    = karr&time 
-        krgd&lat     = tmp&lat 
-        krgd&lon     = tmp&lon
-        krgd(ix0:ix1,:,:) = tofloat(tmp)
-        delete([/tmp,dmx/])
-      else 
-        krgd(ix0:ix1,:,:) = tofloat(ESMF_regrid_with_weights(karr(ix0:ix1,:,:),wgtfile,False))
-      end if
-      delete([/ix0,ix1/])
-    end do 
-    delete([/nsig/])
-  else 
-    krgd = ESMF_regrid(karr,Opt)
-  end if 
+  krgd = ESMF_regrid(karr,Opt)
   delete([/Opt/])
   system("rm -rvf src_SCRIP.nc  dst_SCRIP.nc *.Log "+ wgtfile)
 
