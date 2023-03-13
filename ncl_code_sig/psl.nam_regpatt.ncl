@@ -808,9 +808,9 @@ begin
   panres@gsnPaperOrientation = "portrait"
   panres@gsnPanelLabelBar = True
   panres@gsnPanelYWhiteSpacePercent = 3.0
-  panres@pmLabelBarHeightF = 0.05
+  panres@pmLabelBarHeightF = 0.04
   panres@pmLabelBarWidthF = 0.55
-  panres@pmLabelBarOrthogonalPosF = -0.03
+  panres@pmLabelBarOrthogonalPosF = -0.02
   panres@lbTitleOn = True
   panres@lbBoxLineColor = "gray70"
   if (nsim.le.4) then
