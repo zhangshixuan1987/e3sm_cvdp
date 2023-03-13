@@ -219,7 +219,7 @@ begin
      
 ;==========================================================================================
      res = True
-     res@vpWidthF   = 0.8
+     res@vpWidthF   = 0.95
      res@vpHeightF  = 0.6
 
      if (wks_type.eq."png") then
@@ -265,12 +265,27 @@ begin
      res@cnInfoLabelOn          = False                ; turn off info label
      res@lbLabelBarOn           = False
      res@cnMissingValFillColor  = "White" ;"gray76"               ; black = 1
+
      res@trXMinF         = syear(ee)
      res@trXMaxF         = eyear(ee)
      res@tmXBMode        = "Explicit"
-     res@tmXBValues      = ispan(syear(ee),eyear(ee),5)
-     res@tmXBLabels      = ispan(syear(ee),eyear(ee),5) 
-     res@tmXBMinorValues = ispan(syear(ee),eyear(ee),1) 
+     if((eyear(ee)-syear(ee)+1).le.50) then
+       int_major = 5
+       int_minor = 1
+     else if((eyear(ee)-syear(ee)+1).le.100) then
+       int_major = 10 
+       int_minor = 2
+     else
+       int_major = 20 
+       int_minor = 5 
+     end if
+     end if
+     res@trXMinF         = syear(ee)
+     res@trXMaxF         = eyear(ee)
+     res@tmXBMode        = "Explicit"
+     res@tmXBValues      = ispan(syear(ee),eyear(ee),int_major)
+     res@tmXBLabels      = ispan(syear(ee),eyear(ee),int_major) 
+     res@tmXBMinorValues = ispan(syear(ee),eyear(ee),int_minor) 
 
      res@trYMinF         = -45.0
      res@trYMaxF         =  45.0 
@@ -414,8 +429,17 @@ begin
 
   panres@lbTitleString = "Meridional Stream function (SF) ("+lbunit+") "
 
-  ncol = floattointeger(sqrt(nsim))
-  nrow = (nsim/ncol)+mod(nsim,ncol)  
+  if (nsim.le.3) then
+    ncol = nsim
+    nrow = 1
+  else if (nsim.le.6) then
+    nrow = 2
+    ncol = 3
+  else
+    ncol = floattointeger(sqrt(nsim))
+    nrow = (nsim/ncol)+mod(nsim,ncol)
+  end if
+  end if
   
   panres@txString = "Hovmoller Diagram of Meridional Stream Function (DJF)"
   gsn_panel2(wks_hovmoller_djf,map_djf,(/nrow,ncol/),panres)
