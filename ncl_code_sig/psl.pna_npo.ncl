@@ -1138,7 +1138,7 @@ begin
      res@gsnPolar = "NH"     
      res@mpMinLatF    = 20.
      res@mpCenterLonF = 0.
-     res@cnLevels = (/-5,-4,-3,-2,-1,-0.5,0,0.5,1,2,3,4,5/)
+     res@cnLevels := (/-5,-4,-3,-2,-1,-0.5,0,0.5,1,2,3,4,5/)
 
      res@gsnLeftString = syear(ee)+"-"+eyear(ee)
      res@gsnCenterString = names(ee)
@@ -1154,7 +1154,7 @@ begin
      res2@gsnDraw      = False
      res2@gsnFrame     = False
      res2@cnLevelSelectionMode = "ExplicitLevels"
-     res2@cnLevels = res@cnLevels
+     res2@cnLevels    := res@cnLevels
 
      res2@cnLineLabelsOn = False
      res2@cnFillOn        = True
@@ -1184,7 +1184,7 @@ begin
         delete([/pna_mon/])
      end if
      
-     res@cnLevels = (/-4,-3,-2.5,-2,-1.5,-1,-0.5,0,0.5,1,1.5,2,2.5,3,4/)
+     res@cnLevels := (/-4,-3,-2.5,-2,-1.5,-1,-0.5,0,0.5,1,1.5,2,2.5,3,4/)
      res@gsnRightString = npo_djf@pcvar
      map_npo_djf(ee) = gsn_csm_contour_map_polar(wks_npo,npo_djf,res)
      res@gsnRightString = npo_mam@pcvar
