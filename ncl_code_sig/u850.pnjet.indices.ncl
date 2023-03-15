@@ -1323,49 +1323,53 @@ begin
      end do
 
      arr = new((/3,dimsizes(pnjetloc_mon)/),typeof(pnjetind_mon))
-     xyres61 = xyres6
-     tttt = dtrend_msg(ispan(0,dimsizes(finua_mave(0,:))-1,1),finua_mave(0,:),False,True)
-     arr(0,:) = (/ finua_mave(0,:) /)
-     arr(1,:) = (/ runave_n(finua_mave(0,:), 3, 0, 0) /)
-     arr(2,:) = (/ (ispan(0,dimsizes(finua_mave(0,:))-1,1)*tttt@slope)+tttt@y_intercept /)
-     xyres61@trYMinF = 20.0
-     xyres61@trYMaxF = 70.0 
-     xyres61@tiYAxisString  = "Latitude (degree)"      ; add an axis title
-     xyres61@tiXAxisString  = ""      ; add an axis title
-     xyres61@gsnRightString = "trend: "+ decimalPlaces(tttt@slope*dimsizes(finua_mave(0,:)),2,True)+" "+finua_mave@units+" "+nyr(ee)+"yr~S~-1~N~"
-     xyn6(ee) = gsn_csm_xy(wks_pnjet_ts,fspan(syear(ee),eyear(ee)+.91667,dimsizes(finua_mave(0,:))),arr,xyres61)
-     if(.not.isvar("xdum")) then
-        xdum = new(1000,graphic)
-     end if
-     xyres7@trYMinF = min(finua_mave(:,:))
-     xyres7@trYMaxF = max(finua_mave(:,:))
-     xdum(ee) = gsn_csm_xy(wks_pnjet_ts,fspan(syear(ee),eyear(ee)+.91667,dimsizes(finua_mave(0,:))),finua_mave(1:2,:),xyres7)
-     overlay(xyn6(ee),xdum(ee))
-     delete([/tttt,xyres61/])
+     if(isvar(finua_mave)) then 
+       xyres61 = xyres6
+       tttt = dtrend_msg(ispan(0,dimsizes(finua_mave(0,:))-1,1),finua_mave(0,:),False,True)
+       arr(0,:) = (/ finua_mave(0,:) /)
+       arr(1,:) = (/ runave_n(finua_mave(0,:), 3, 0, 0) /)
+       arr(2,:) = (/ (ispan(0,dimsizes(finua_mave(0,:))-1,1)*tttt@slope)+tttt@y_intercept /)
+       xyres61@trYMinF = 20.0
+       xyres61@trYMaxF = 70.0 
+       xyres61@tiYAxisString  = "Latitude (degree)"      ; add an axis title
+       xyres61@tiXAxisString  = ""      ; add an axis title
+       xyres61@gsnRightString = "trend: "+ decimalPlaces(tttt@slope*dimsizes(finua_mave(0,:)),2,True)+" "+finua_mave@units+" "+nyr(ee)+"yr~S~-1~N~"
+       xyn6(ee) = gsn_csm_xy(wks_pnjet_ts,fspan(syear(ee),eyear(ee)+.91667,dimsizes(finua_mave(0,:))),arr,xyres61)
+       if(.not.isvar("xdum")) then
+          xdum = new(1000,graphic)
+       end if
+       xyres7@trYMinF = min(finua_mave(:,:))
+       xyres7@trYMaxF = max(finua_mave(:,:))
+       xdum(ee) = gsn_csm_xy(wks_pnjet_ts,fspan(syear(ee),eyear(ee)+.91667,dimsizes(finua_mave(0,:))),finua_mave(1:2,:),xyres7)
+       overlay(xyn6(ee),xdum(ee))
+       delete([/tttt,xyres61/])
+     end if 
 
-     xyres62   = xyres6
-     tttt      = avg(finua_tave(0,:))
-     arr0      = new((/3,dimsizes(finua_tave(0,:))/),typeof(finua_tave))
-     arr0(0,:) = (/ finua_tave(0,:) /)
-     arr0(1,:) = (/ runave_n(finua_tave(0,:), 3, 0, 0) /)
-     arr0(2,:) = (/ tttt/)
-     xyres62@trYMinF = 20.0 
-     xyres62@trYMaxF = 70.0 
-     xyres62@trXMinF = tofloat(min(finua_tave&lon))
-     xyres62@trXMaxF = tofloat(max(finua_tave&lon))
-     xyres62@tiYAxisString  = "Latitude (degree)"      ; add an axis title    
-     xyres62@tiXAxisString  = "Longitude (degree)"      ; add an axis title
-     xyres62@gsnRightString = "mean: "+ decimalPlaces(tttt,2,True)+finua_tave@units
-     xyn7(ee) = gsn_csm_xy(wks_pnjet_ts,finua_tave&lon,arr0,xyres62)
-     if(.not.isvar("xdum")) then
-        xdum = new(1000,graphic)
-     end if
-     xyres7@trYMinF = min(finua_tave(:,:))
-     xyres7@trYMaxF = max(finua_tave(:,:))
-     xdum(100+ee) = gsn_csm_xy(wks_pnjet_ts,finua_tave&lon,finua_tave(1:2,:),xyres7)
-     overlay(xyn7(ee),xdum(100+ee))
-     delete([/tttt,xyres62,arr0/])
+     if(isvar(finua_tave)) then
 
+       xyres62   = xyres6
+       tttt      = avg(finua_tave(0,:))
+       arr0      = new((/3,dimsizes(finua_tave(0,:))/),typeof(finua_tave))
+       arr0(0,:) = (/ finua_tave(0,:) /)
+       arr0(1,:) = (/ runave_n(finua_tave(0,:), 3, 0, 0) /)
+       arr0(2,:) = (/ tttt/)
+       xyres62@trYMinF = 20.0 
+       xyres62@trYMaxF = 70.0 
+       xyres62@trXMinF = tofloat(min(finua_tave&lon))
+       xyres62@trXMaxF = tofloat(max(finua_tave&lon))
+       xyres62@tiYAxisString  = "Latitude (degree)"      ; add an axis title    
+       xyres62@tiXAxisString  = "Longitude (degree)"      ; add an axis title
+       xyres62@gsnRightString = "mean: "+ decimalPlaces(tttt,2,True)+finua_tave@units
+       xyn7(ee) = gsn_csm_xy(wks_pnjet_ts,finua_tave&lon,arr0,xyres62)
+       if(.not.isvar("xdum")) then
+          xdum = new(1000,graphic)
+       end if
+       xyres7@trYMinF = min(finua_tave(:,:))
+       xyres7@trYMaxF = max(finua_tave(:,:))
+       xdum(100+ee) = gsn_csm_xy(wks_pnjet_ts,finua_tave&lon,finua_tave(1:2,:),xyres7)
+       overlay(xyn7(ee),xdum(100+ee))
+       delete([/tttt,xyres62,arr0/])
+     end if 
      ;*********************************
      ;plot the jet position normalized index (also mark positive and negative events) 
      ;*********************************

@@ -1197,7 +1197,7 @@ begin
      res@gsnPolar = "NH"     
      res@mpMinLatF    = 20.
      res@mpCenterLonF = 0.
-     res@cnLevels = (/-5,-4,-3,-2,-1,-0.5,0,0.5,1,2,3,4,5/)
+     res@cnLevels := (/-5,-4,-3,-2,-1,-0.5,0,0.5,1,2,3,4,5/)
 
      res@gsnLeftString = syear(ee)+"-"+eyear(ee)
      res@gsnCenterString = names(ee)
@@ -1213,7 +1213,7 @@ begin
      res2@gsnDraw      = False
      res2@gsnFrame     = False
      res2@cnLevelSelectionMode = "ExplicitLevels"
-     res2@cnLevels = res@cnLevels
+     res2@cnLevels    := res@cnLevels
 
      res2@cnLineLabelsOn = False
      res2@cnFillOn        = True

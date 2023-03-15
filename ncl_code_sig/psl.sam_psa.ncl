@@ -1373,7 +1373,7 @@ begin
      res@mpMaxLatF    = -20.
      res@mpCenterLonF = 0.
      
-     res@cnLevels = (/-5,-4,-3,-2,-1,-0.5,0,0.5,1,2,3,4,5/)
+     res@cnLevels := (/-5,-4,-3,-2,-1,-0.5,0,0.5,1,2,3,4,5/)
      res@gsnLeftString = syear(ee)+"-"+eyear(ee)
      res@gsnCenterString = names(ee)
  
@@ -1388,7 +1388,7 @@ begin
      res2@gsnDraw      = False
      res2@gsnFrame     = False
      res2@cnLevelSelectionMode = "ExplicitLevels"
-     res2@cnLevels = res@cnLevels
+     res2@cnLevels    := res@cnLevels
 
      res2@cnLineLabelsOn = False
      res2@cnFillOn        = True
@@ -1458,7 +1458,7 @@ begin
         delete([/sam_mon/])
      end if
      
-     res@cnLevels = (/-4,-3,-2.5,-2,-1.5,-1,-0.5,0,0.5,1,1.5,2,2.5,3,4/)
+     res@cnLevels := (/-4,-3,-2.5,-2,-1.5,-1,-0.5,0,0.5,1,1.5,2,2.5,3,4/)
      res@gsnRightString = psa1_djf@pcvar
      map_psa1_djf(ee) = gsn_csm_contour_map_polar(wks_psa1,psa1_djf,res)
      res@gsnRightString = psa1_mam@pcvar
