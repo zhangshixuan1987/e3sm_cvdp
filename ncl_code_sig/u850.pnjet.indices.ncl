@@ -1323,7 +1323,7 @@ begin
      end do
 
      arr = new((/3,dimsizes(pnjetloc_mon)/),typeof(pnjetind_mon))
-     if(isvar(finua_mave)) then 
+     if(isvar("finua_mave")) then 
        xyres61 = xyres6
        tttt = dtrend_msg(ispan(0,dimsizes(finua_mave(0,:))-1,1),finua_mave(0,:),False,True)
        arr(0,:) = (/ finua_mave(0,:) /)
@@ -1345,8 +1345,7 @@ begin
        delete([/tttt,xyres61/])
      end if 
 
-     if(isvar(finua_tave)) then
-
+     if(isvar("finua_tave")) then
        xyres62   = xyres6
        tttt      = avg(finua_tave(0,:))
        arr0      = new((/3,dimsizes(finua_tave(0,:))/),typeof(finua_tave))

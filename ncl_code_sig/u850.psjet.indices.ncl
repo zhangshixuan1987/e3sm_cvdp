@@ -1322,7 +1322,7 @@ begin
      end do
      end do
 
-     if(isvar(finua_mave)) then
+     if(isvar("finua_mave")) then
 
        arr = new((/3,dimsizes(psjetloc_mon)/),typeof(psjetind_mon))
        xyres61 = xyres6
@@ -1346,7 +1346,7 @@ begin
        delete([/tttt,xyres61/])
      end if 
 
-     if(isvar(finua_tave)) then
+     if(isvar("finua_tave")) then
 
        xyres62   = xyres6
        tttt      = avg(finua_tave(0,:))
