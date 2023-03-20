@@ -121,6 +121,7 @@ begin
   return(blankarr)
   delete([/yS,yE,mS,mE,opttype,blankarr,timeT,time/])
 end
+
 ;===================================================================================================
 ; read in atmospheric/land data from selected files
 ; assign time coordinate variables, check for issues with the array, assign _FillValue (if needed)
@@ -266,6 +267,26 @@ begin
   end if
   if (vn.eq."SF") then
      vname = (/"SF","sf"/)
+  end if
+
+  if (vn.eq."TUQ") then
+     vname = (/"TUQ","VIWVE"/)
+  end if
+
+  if (vn.eq."TVQ") then
+     vname = (/"TVQ","VIWVN"/)
+  end if
+
+  if (vn.eq."TUH") then
+     vname = (/"TUH","VITHEE"/)
+  end if
+
+  if (vn.eq."TVH") then
+     vname = (/"TVH","VITHEN"/)
+  end if
+
+  if (vn.eq."QFLX") then
+     vname = (/"QFLX","IE"/)
   end if
 
   if (ismissing(zpath) ) then
@@ -522,15 +543,21 @@ begin
      smdata = 1
      emdata = 12          
   else
-     timeT =  yyyymm_time(sydata, eydata, "integer")
-     time = timeT({sydata*100+smdata:eydata*100+emdata})  
+     timeT  = yyyymm_time(sydata, eydata, "integer")
+     time   = timeT({sydata*100+smdata:eydata*100+emdata})  
+     timeH2 = yyyymmddhh_time(sydata, eydata, 6,"integer")
+     indxx  = ind((timeH2/10000).ge.(sydata*100+smdata).and.(timeH2/10000).le.(eydata*100+emdata))
+     timeh  = timeH2(indxx)
+     delete(indxx)
      if (iscoord(arr,"time")) then
         delete(arr&time)
      end if
      dimz = dimsizes(arr)
      if (dimz(0).eq.dimsizes(time)) then
         arr&time = time
-     else
+     else if (dimz(0).eq.dimsizes(timeh)) then
+        arr&time = timeh
+     else 
         print("Possible mismatch detected between time specified in file name and file variables, setting array to missing")
         print("File = "+zpath)
         print("Read from file name: "+min(time)+"-"+max(time))        
@@ -545,8 +572,9 @@ begin
         smdata = 1
         emdata = 12 
      end if
+     end if 
      delete(dimz)
-     delete([/time,timeT/])
+     delete([/time,timeT,timeh,timeH2/])
   end if
   delete([/sydata,smdata,eydata,emdata/])
  
@@ -560,16 +588,30 @@ begin
        farr = arr({yearS*100+1:yearE*100+12},:,:)
     end if
   else 
-    if (arr&lat(0).ge.0) then
-       farr = arr({yearS*100+1:yearE*100+12},::-1,:)   ; flip the latitudes
-    else
-       farr = arr({yearS*100+1:yearE*100+12},:,:)
-    end if
+    if(arr&time(0).ge.10000000) then 
+      indxx  = ind((arr&time/10000).ge.(yearS*100+1).and.(arr&time/10000).le.(yearE*100+12))
+      if (arr&lat(0).ge.0) then
+         farr = arr(indxx,::-1,:)   ; flip the latitudes
+      else
+         farr = arr(indxx,:,:)
+      end if
+      delete(indxx)
+    else 
+      if (arr&lat(0).ge.0) then
+         farr = arr({yearS*100+1:yearE*100+12},::-1,:)   ; flip the latitudes
+      else
+         farr = arr({yearS*100+1:yearE*100+12},:,:)
+      end if
+    end if 
   end if 
-  ;  printVarSummary(farr)
-  delete(arr)     
-  
-  mocheck = (/(yearS*100+1)-min(farr&time),(yearE*100+12) - max(farr&time)/)
+ ;  printVarSummary(farr)
+ ; delete(arr)     
+
+  if(farr&time(0).ge.10000000) then
+    mocheck = (/(yearS*100+1)-min(farr&time/10000),(yearE*100+12) - max(farr&time/10000)/)
+  else 
+    mocheck = (/(yearS*100+1)-min(farr&time),(yearE*100+12) - max(farr&time)/)
+  end if 
   if (any(mocheck.ne.0)) then    ; previously: if (mod(dimsizes(farr&time),12).ne.0) then
      if (mocheck(0).ne.0) then
         print("First requested year is incomplete")
@@ -630,7 +672,7 @@ begin
         farr@units = "hPa"
      end if
   end if
-  if (vn.eq."PRECT".or.vn.eq."PRECST") then    ; convert (if necessary) to mm/day
+  if (vn.eq."PRECT".or.vn.eq."PRECST".or.vn.eq."QFLX") then    ; convert (if necessary) to mm/day
      if (farr@units.eq."m/s".or.farr@units.eq."m s-1") then
         farr = farr*86400000.
      end if
@@ -734,14 +776,34 @@ begin
      farr@units = "W/m2"
   end if
 
+  if (vn.eq."TUQ".or.vn.eq."TVQ")then
+     if (farr@units.eq."kg m-1 s-1".or.farr@units.eq."kg/m/s".or.farr@units.eq."kg/m^1/s".or.farr@units.eq."kg/(s*m)".or.farr@units.eq."kg m~S~-1~N~ s~S~-1~N~") then
+        farr = farr*86400.
+     end if
+     farr@units = "mm/day/m"
+  end if
+
   date = farr&time         ; switch time to be CF-conforming
   delete(farr&time)
-  yyyy = date/100
-  mm = date-(yyyy*100)
-  days = (days_in_month(yyyy,mm))/2
-  hms  = days
-  hms = 0   ; hours, minutes, seconds all the same (=0)
-  time = cd_inv_calendar(yyyy,mm,days,hms,hms,hms,"months since "+min(yyyy)+"-01-15 00:00:00",0)
+  if(date(0).ge.10000000) then
+    yyyy = date/1000000
+    mm   = (date-(yyyy*1000000))/10000
+    days = (date-(yyyy*1000000)-mm*10000)/100
+    hh   = (date-(yyyy*1000000)-mm*10000 -days*100)
+    hms  = hh
+    hms  = 0   ; minutes, seconds all the same (=0)
+   ;print(yyyy + " "+mm + " " +days+ " " +hh + " " + hms)
+    time = cd_inv_calendar(yyyy,mm,days,hh,hms,hms,"hours since "+min(yyyy)+"-01-01 00:00:00",0)
+    delete(hh)
+  else 
+    yyyy = date/100
+    mm = date-(yyyy*100)
+    days = (days_in_month(yyyy,mm))/2
+    hms  = days
+    hms = 0   ; hours, minutes, seconds all the same (=0)
+    time = cd_inv_calendar(yyyy,mm,days,hms,hms,hms,"months since "+min(yyyy)+"-01-15 00:00:00",0)
+
+  end if 
   time@long_name = "Time"
   time@standard_name = "time"
   time@actual_range = (/min(time),max(time)/)
