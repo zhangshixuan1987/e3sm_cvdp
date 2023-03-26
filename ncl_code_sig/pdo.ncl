@@ -429,6 +429,12 @@ begin
      res@vpXF = 0.2
      res@vpWidthF = 0.6
   
+     if (wks_type.eq."png") then
+        res@mpGeophysicalLineThicknessF = 2.
+     else
+        res@mpGeophysicalLineThicknessF = 1.
+     end if
+
 ;     res@cnFillMode = "RasterFill"
      res@cnLevelSelectionMode = "ExplicitLevels"
      
@@ -517,20 +523,19 @@ begin
      pres = True
      pres@vpWidthF      = 0.7
      pres@vpHeightF     = 0.5
-     pres@vpXF = 0.07
-     pres@trYMinF = 0.
-     pres@trXMinF = 0.0
-;     pres@trYMaxF = 82.
-     pres@trXMaxF = 0.0832
+     pres@vpXF          = 0.07
+     pres@trYMinF       = 0.
+     pres@trXMinF       = 0.0
+;     pres@trYMaxF      = 82.
+     pres@trXMaxF       = 0.0832
      pres@tiYAxisString = "Power"              ; yaxis
-     pres@xyLineColor   =  "black"         
+     pres@xyLineColor   = "black"         
      pres@gsnFrame      = False
      pres@gsnDraw       = False
   
      pres@tmXBLabelDeltaF = -.8
      pres@tmXTLabelDeltaF = -.8
      pres@pmLegendDisplayMode    = "Never"
-     pres@xyLineThicknesses   = (/3.5,2.,1.,1./) 
      pres@xyDashPatterns      = (/0,0,0,0/)
      pres@xyLineColors        = (/"foreground","red","blue","green"/)      
      pres@xyLabelMode = "custom"
@@ -557,8 +562,48 @@ begin
      pres@tiXAxisFontHeightF = 0.025
      pres@tiYAxisFontHeightF = 0.025
      pres@tiMainFontHeightF = 0.03
-     pres@gsnRightStringOrthogonalPosF = -0.115
+     pres@gsnRightStringOrthogonalPosF = -0.135
      
+     if (spectra_mvf.eq.False) then
+        if (isfilepresent2("obs_ts").and.ee.ge.1.and.spectra_mvf_obs.eq.False) then
+           val = new(2,typeof(sdof_obs@spcx))
+           val(0) = max(sdof_obs@spcx)
+           val(1) = totype(max(splt1(0,:)),typeof(sdof_obs@spcx))
+           mval = max(val)
+           delete(val)
+        else
+           mval = max(splt1(0,:))
+        end if
+        if (mval.lt.40) then
+           pres@trYMaxF         := 40.
+           pres@tmYLMode        := "Explicit"
+           pres@tmYLValues      := (/0,10,20,30,40/)
+           pres@tmYLLabels      := pres@tmYLValues
+           pres@tmYLMinorValues := ispan(0,40,5)
+        else if (mval.lt.80) then
+           pres@trYMaxF         := 80.
+           pres@tmYLMode        := "Explicit"
+           pres@tmYLValues      := (/0,20,40,60,80/)
+           pres@tmYLLabels      := pres@tmYLValues
+           pres@tmYLMinorValues := ispan(0,80,10)
+        else if (mval.lt.150) then
+           pres@trYMaxF         := 150.
+           pres@tmYLMode        := "Explicit"
+           pres@tmYLValues      := (/0,30,60,90,120,150/)
+           pres@tmYLLabels      := pres@tmYLValues
+           pres@tmYLMinorValues := ispan(0,150,10)
+        else
+           pres@trYMaxF         := mval+15.
+           pres@tmYLMode        := "Explicit"
+           pres@tmYLValues      := ispan(0,toint(mval+15),50)
+           pres@tmYLLabels      := pres@tmYLValues
+           pres@tmYLMinorValues := ispan(0,toint(mval+15),25)
+        end if
+        end if
+        end if
+        delete(mval)
+     end if
+
      pres@tiMainOn = False
      pres@gsnCenterString = "Period (years)"
      pres@gsnCenterStringFontHeightF =    pres@tiYAxisFontHeightF
@@ -567,10 +612,8 @@ begin
      pres@gsnLeftString = "" 
      if (wks_type.eq."png") then
         pres@xyLineThicknessF   = 3.5
-        res@mpGeophysicalLineThicknessF = 2.  
      else
         pres@xyLineThicknessF   = 1.5
-        res@mpGeophysicalLineThicknessF = 1.  
      end if
      pres@gsnCenterString = names(ee)
      if (spectra_mvf.eq.False) then

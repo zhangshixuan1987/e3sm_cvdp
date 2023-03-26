@@ -1645,12 +1645,12 @@ begin
      pres@vpWidthF      = 0.7
      pres@vpHeightF     = 0.5
      pres@vpXF          = 0.07
-     pres@trYMinF       = 1e-2
-     pres@trYMaxF       = 5e2
+     pres@trYMinF       = 1e-6
+     pres@trYMaxF       = 1e2
      pres@trYLog        = True
      pres@trXLog        = True
-     pres@trXMinF       = 1e-3
-     pres@trXMaxF       = 1e0
+     pres@trXMinF       = 0.0
+     pres@trXMaxF       = 1e1
      pres@tmYLFormat    = "0*+^e"	; use "e" symbol, don't force 0's (see documentation)
      pres@tmXBFormat    = "0*+^e"  ; use "e" symbol, don't force 0's (see documentation)
      pres@tiYAxisString = "Power"              ; yaxis
@@ -1676,14 +1676,18 @@ begin
      pres@tmXTLabelsOn = True
      pres@tmXUseBottom = False
      pres@tmXTMode   = "Explicit"
-     pres@tmXTValues = (/".00167",".00833",".01667",".02778",".0416",".0832","0.1667","0.3333"/)
-     pres@tmXTLabels = (/"50",    "10",    "5",     "3",     "2",    "1",    "0.5",   "0.25"/)
-    ;pres@tmXBMode   = "Explicit"
+     pres@tmXBMode   = "Explicit"
+     pres@tmXTValues = (/".00167",".00833",".01667",".02778",".0416",".0556",".0832"/)
+     pres@tmXTLabels = (/"50","10","5","3","2","1.5","1"/)
     ;pres@tmXBValues = (/".0",".01",".02",".03",".042",".056",".083"/)
     ;pres@tmXBLabels = pres@tmXBValues
      pres@tmXTLabelFontHeightF = 0.018
      pres@tmXBLabelFontHeightF = 0.018
      pres@tmYLLabelFontHeightF = 0.018
+     pres@tmXBLabels = pres@tmXBValues
+     pres@tmXTLabelFontHeightF = 0.020
+     pres@tmXBLabelFontHeightF = 0.020
+     pres@tmYLLabelFontHeightF = 0.020
      pres@tiYAxisString = "Variance" ;"Power (hPa~S~2~N~ / cycles mo~S~-1~N~)"              ; yaxis
      pres@tiXAxisString = "Frequency (cycles mo~S~-1~N~)"
      pres@tiMainString = ""
@@ -1693,6 +1697,46 @@ begin
      pres@tiYAxisFontHeightF = 0.025
      pres@tiMainFontHeightF = 0.03
      pres@gsnRightStringOrthogonalPosF = -0.135
+     
+     if (spectra_mvf.eq.False) then
+        if (isfilepresent2("obs_ts").and.ee.ge.1.and.spectra_mvf_obs.eq.False) then
+           val = new(2,typeof(sdof_obs@spcx))
+           val(0) = max(sdof_obs@spcx)
+           val(1) = totype(max(splt1(0,:)),typeof(sdof_obs@spcx))
+           mval = max(val)
+           delete(val)
+        else
+           mval = max(splt1(0,:))
+        end if
+        if (mval.lt.40) then
+           pres@trYMaxF         := 40.
+           pres@tmYLMode        := "Explicit"
+           pres@tmYLValues      := (/0,10,20,30,40/)
+           pres@tmYLLabels      := pres@tmYLValues
+           pres@tmYLMinorValues := ispan(0,40,5)
+        else if (mval.lt.80) then
+           pres@trYMaxF         := 80.
+           pres@tmYLMode        := "Explicit"
+           pres@tmYLValues      := (/0,20,40,60,80/)
+           pres@tmYLLabels      := pres@tmYLValues
+           pres@tmYLMinorValues := ispan(0,80,10)
+        else if (mval.lt.150) then
+           pres@trYMaxF         := 150.
+           pres@tmYLMode        := "Explicit"
+           pres@tmYLValues      := (/0,30,60,90,120,150/)
+           pres@tmYLLabels      := pres@tmYLValues
+           pres@tmYLMinorValues := ispan(0,150,10)
+        else
+           pres@trYMaxF         := mval+15.
+           pres@tmYLMode        := "Explicit"
+           pres@tmYLValues      := ispan(0,toint(mval+15),50)
+           pres@tmYLLabels      := pres@tmYLValues
+           pres@tmYLMinorValues := ispan(0,toint(mval+15),25)
+        end if
+        end if
+        end if
+        delete(mval)
+     end if
      
      pres@tiMainOn = False
      pres@gsnCenterString = "Period (years)"

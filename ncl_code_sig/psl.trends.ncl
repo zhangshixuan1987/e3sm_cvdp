@@ -77,6 +77,7 @@ begin
   map_mon = new(nsim,"graphic")  
 
   do ee = 0,nsim-1
+   ; print(paths(ee))
      psl = data_read_in(paths(ee),"PSL",syear(ee),eyear(ee))    ; read in data, orient lats/lons correctly, set time coordinate variable up
      if (isatt(psl,"is_all_missing")) then
         delete(psl)

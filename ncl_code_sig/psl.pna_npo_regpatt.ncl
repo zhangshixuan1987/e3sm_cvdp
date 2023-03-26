@@ -114,41 +114,56 @@ begin
   vxreg_frame  = 1 
 
   do ee = 0,nsim-1
-;    print(paths(ee)+" "+syear(ee)+" "+eyear(ee)) 
-     arr = data_read_in(paths(ee),"PSL",syear(ee),eyear(ee))    ; read in data, orient lats/lons correctly, set time coordinate variable up
-     if (isatt(arr,"is_all_missing")) then
+
+     ;check that regression var and index var contains shared range
+     ;suppose that regression var period <= index var time period
+     if (any(ismissing((/syear(ee),syear_reg(ee),eyear(ee),eyear_reg(ee)/)))) then
+       vxreg_plot_flag = 1
+     else
+       if (syear_reg(ee).ge.syear(ee).and.eyear_reg(ee).le.eyear(ee)) then
+         vxreg_plot_flag = 0
+       else
+         vxreg_plot_flag = 1
+       end if
+     end if
+
+     if (vxreg_plot_flag.eq.0) then 
+
+      ;print(paths(ee)+" "+syear_reg(ee)+" "+eyear_reg(ee)) 
+      arr = data_read_in(paths(ee),"PSL",syear_reg(ee),eyear_reg(ee)) ; read in data, orient lats/lons correctly, set time coordinate variable up
+      if (isatt(arr,"is_all_missing")) then
         delete(arr)
         continue
-     end if 
+      end if 
      
-     if (OPT_CLIMO.eq."Full") then
+      if (OPT_CLIMO.eq."Full") then
         arr = rmMonAnnCycTLL(arr)
-     else
-        check_custom_climo(names(ee),syear(ee),eyear(ee),CLIMO_SYEAR,CLIMO_EYEAR)
+      else
+        check_custom_climo(names(ee),syear_reg(ee),eyear_reg(ee),CLIMO_SYEAR,CLIMO_EYEAR)
         temp_arr = arr
         delete(temp_arr&time)
         temp_arr&time = cd_calendar(arr&time,-1)
         if (CLIMO_SYEAR.lt.0) then
-           climo = clmMonTLL(temp_arr({(eyear(ee)+CLIMO_SYEAR)*100+1:(eyear(ee)+CLIMO_EYEAR)*100+12},:,:))       
+           climo = clmMonTLL(temp_arr({(eyear_reg(ee)+CLIMO_SYEAR)*100+1:(eyear_reg(ee)+CLIMO_EYEAR)*100+12},:,:))       
         else
            climo = clmMonTLL(temp_arr({CLIMO_SYEAR*100+1:CLIMO_EYEAR*100+12},:,:))                 
         end if   
         delete(temp_arr)
         arr   = calcMonAnomTLL(arr,climo) 
         delete(climo)
-     end if
+      end if
 
-     arrT =  runave_n_Wrap(arr,3,0,0)               ; form DJF averages
-     arrT(0,:,:) = (/ dim_avg_n(arr(:1,:,:),0) /)   
-     arr_djf = arrT(0::12,:,:)
-     arr_mam = arrT(3::12,:,:)
-     arr_jja = arrT(6::12,:,:)                       ; form JJA averages
-     arr_son = arrT(9::12,:,:)
-     delete(arrT)
+      arrT =  runave_n_Wrap(arr,3,0,0)               ; form DJF averages
+      arrT(0,:,:) = (/ dim_avg_n(arr(:1,:,:),0) /)   
+      arr_djf = arrT(0::12,:,:)
+      arr_mam = arrT(3::12,:,:)
+      arr_jja = arrT(6::12,:,:)                       ; form JJA averages
+      arr_son = arrT(9::12,:,:)
+      delete(arrT)
      
-     arrV = runave_n_Wrap(arr,12,0,0)
-     arr_ann = arrV(5::12,:,:)
-     delete(arrV)
+      arrV = runave_n_Wrap(arr,12,0,0)
+      arr_ann = arrV(5::12,:,:)
+      delete(arrV)
 ;          
 ;     arr_djf = (/ dtrend_msg_n(ispan(0,dimsizes(arr_djf&time)-1,1),arr_djf,True,False,0) /)
 ;     arr_mam = (/ dtrend_msg_n(ispan(0,dimsizes(arr_mam&time)-1,1),arr_mam,True,False,0) /)
@@ -160,83 +175,71 @@ begin
 ;     arr_ndjfm = (/ dtrend_msg_n(ispan(0,dimsizes(arr_ndjfm&time)-1,1),arr_ndjfm,True,False,0) /)
 ;     
 ;     arr = (/ dtrend_msg_n(ispan(0,dimsizes(arr&time)-1,1),arr,True,False,0) /)
-;---------Regressions coding-------------------------------------------------
-     if (any(ismissing((/syear(ee),syear_reg(ee),eyear(ee),eyear_reg(ee)/)))) then
-        vxreg_plot_flag = 1
-     else
-        if (syear(ee).eq.syear_reg(ee)) then     ; check that the start and end years match for regression variable 
-           if (eyear(ee).eq.eyear_reg(ee)) then
-              vxreg_plot_flag = 0
-           else
-              vxreg_plot_flag = 1
-           end if
-        else
-           vxreg_plot_flag = 1
-        end if
+
      end if 
 
-     if (vxreg_plot_flag.eq.0) then 
-        ; print("Data to be read in: "+paths_reg(ee)+" from "+syear_reg(ee)+":"+eyear_reg(ee))
-        if(vnm.eq."qnet") then
-          vnmi = "Qn"
-        else
-          vnmi = str_upper(vnm)
-        end if
-        vreg = data_read_in(paths_reg(ee),vnmi,syear_reg(ee),eyear_reg(ee))
-        if (isatt(vreg,"is_all_missing")) then
-           vxreg_plot_flag = 1
-           delete(vreg)
-        end if
-        
-        if (vxreg_plot_flag.eq.0) then     ; only continue if both PSL/TS fields are present
-           if(vnm.eq."ts") then 
-             vreg = where(vreg.le.-1.8,-1.8,vreg)
-           end if 
-           if(vnm.eq."trefht") then
-             d = addfile("$NCARG_ROOT/lib/ncarg/data/cdf/landsea.nc","r")    
-             basemap = d->LSMASK
-             lsm = landsea_mask(basemap,vreg&lat,vreg&lon)
-             vreg = mask(vreg,conform(vreg,lsm,(/1,2/)).eq.0,False)
-             delete(lsm)
-           end if 
-           if(lmsk.eq.1) then 
-             d = addfile("$NCARG_ROOT/lib/ncarg/data/cdf/landsea.nc","r")   
-             basemap = d->LSMASK
-             lsm = landsea_mask(basemap,vreg&lat,vreg&lon)
-             vreg = mask(vreg,conform(vreg,lsm,(/1,2/)).ge.1,False)
-             delete(lsm)
-           end if   
-           if (OPT_CLIMO.eq."Full") then
-              vreg = rmMonAnnCycTLL(vreg)
-           else
-              check_custom_climo(names_reg(ee),syear_reg(ee),eyear_reg(ee),CLIMO_SYEAR,CLIMO_EYEAR)
-              temp_arr = vreg
-              delete(temp_arr&time)
-              temp_arr&time = cd_calendar(vreg&time,1)
-              if (CLIMO_SYEAR.lt.0) then
-                 climo = clmMonTLL(temp_arr({(eyear(ee)+CLIMO_SYEAR)*100+1:(eyear(ee)+CLIMO_EYEAR)*100+12},:,:))       
-              else
-                 climo = clmMonTLL(temp_arr({CLIMO_SYEAR*100+1:CLIMO_EYEAR*100+12},:,:))                 
-              end if   
-              delete(temp_arr)
-              vreg   = calcMonAnomTLL(vreg,climo) 
-              delete(climo)
-           end if
-;           vreg = (/ dtrend_msg_n(ispan(0,dimsizes(vreg&time)-1,1),vreg,False,False,0) /)  
-        
-           vregT =  runave_n_Wrap(vreg,3,0,0)               ; form DJF averages
-           vregT(0,:,:) = (/ dim_avg_n(vreg(:1,:,:),0) /)   
-           vreg_djf = vregT(0::12,:,:)
-           vreg_mam = vregT(3::12,:,:)
-           vreg_jja = vregT(6::12,:,:)                       ; form JJA averages
-           vreg_son = vregT(9::12,:,:)
-           delete(vregT)
+;---------Regressions coding-------------------------------------------------
+     ; print("Data to be read in: "+paths_reg(ee)+" from "+syear_reg(ee)+":"+eyear_reg(ee))
+     if(vnm.eq."qnet") then
+       vnmi = "Qn"
+     else
+       vnmi = str_upper(vnm)
+     end if
+     vreg = data_read_in(paths_reg(ee),vnmi,syear_reg(ee),eyear_reg(ee))
+     if (isatt(vreg,"is_all_missing")) then
+        vxreg_plot_flag = 1
+        delete(vreg)
+     end if
      
-           vregV = runave_n_Wrap(vreg,12,0,0)
-           vreg_ann = vregV(5::12,:,:)
-           delete(vregV)
-        end if
-     end if    
+     if (vxreg_plot_flag.eq.0) then     ; only continue if both PSL/TS fields are present
+      if(vnm.eq."ts") then 
+        vreg = where(vreg.le.-1.8,-1.8,vreg)
+      end if 
+      if(vnm.eq."trefht") then
+        d = addfile("$NCARG_ROOT/lib/ncarg/data/cdf/landsea.nc","r")    
+        basemap = d->LSMASK
+        lsm = landsea_mask(basemap,vreg&lat,vreg&lon)
+        vreg = mask(vreg,conform(vreg,lsm,(/1,2/)).eq.0,False)
+        delete(lsm)
+      end if 
+      if(lmsk.eq.1) then 
+        d = addfile("$NCARG_ROOT/lib/ncarg/data/cdf/landsea.nc","r")   
+        basemap = d->LSMASK
+        lsm = landsea_mask(basemap,vreg&lat,vreg&lon)
+        vreg = mask(vreg,conform(vreg,lsm,(/1,2/)).ge.1,False)
+        delete(lsm)
+      end if   
+      if (OPT_CLIMO.eq."Full") then
+         vreg = rmMonAnnCycTLL(vreg)
+      else
+         check_custom_climo(names_reg(ee),syear_reg(ee),eyear_reg(ee),CLIMO_SYEAR,CLIMO_EYEAR)
+         temp_arr = vreg
+         delete(temp_arr&time)
+         temp_arr&time = cd_calendar(vreg&time,1)
+         if (CLIMO_SYEAR.lt.0) then
+            climo = clmMonTLL(temp_arr({(eyear_reg(ee)+CLIMO_SYEAR)*100+1:(eyear_reg(ee)+CLIMO_EYEAR)*100+12},:,:))       
+         else
+            climo = clmMonTLL(temp_arr({CLIMO_SYEAR*100+1:CLIMO_EYEAR*100+12},:,:))                 
+         end if   
+         delete(temp_arr)
+         vreg   = calcMonAnomTLL(vreg,climo) 
+         delete(climo)
+      end if
+;      vreg = (/ dtrend_msg_n(ispan(0,dimsizes(vreg&time)-1,1),vreg,False,False,0) /)  
+     
+      vregT =  runave_n_Wrap(vreg,3,0,0)               ; form DJF averages
+      vregT(0,:,:) = (/ dim_avg_n(vreg(:1,:,:),0) /)   
+      vreg_djf = vregT(0::12,:,:)
+      vreg_mam = vregT(3::12,:,:)
+      vreg_jja = vregT(6::12,:,:)                       ; form JJA averages
+      vreg_son = vregT(9::12,:,:)
+      delete(vregT)
+     
+      vregV = runave_n_Wrap(vreg,12,0,0)
+      vreg_ann = vregV(5::12,:,:)
+      delete(vregV)
+     end if
+    
 ;------------------------------------------------------------------
      arr_djf_CW = SqrtCosWeight(arr_djf)
      arr_mam_CW = SqrtCosWeight(arr_mam)
@@ -321,7 +324,7 @@ begin
      end if
      delete(sig_pcv)    
      pna_pc_djf!0 = "TIME"
-     pna_pc_djf&TIME = ispan(syear(ee),eyear(ee),1)
+     pna_pc_djf&TIME = ispan(syear_reg(ee),eyear_reg(ee),1)
      pna_pc_djf&TIME@units = "YYYY"
      pna_pc_djf&TIME@long_name = "time"     
      
@@ -700,7 +703,7 @@ begin
                  z@climatology = syear_reg(ee)+"-"+eyear_reg(ee)+" climatology removed prior to all calculations (other than means)"
               else
                  if (CLIMO_SYEAR.lt.0) then
-                    z@climatology = (eyear(ee)+CLIMO_SYEAR)+"-"+(eyear(ee)+CLIMO_EYEAR)+" climatology removed prior to all calculations (other than means)"
+                    z@climatology = (eyear_reg(ee)+CLIMO_SYEAR)+"-"+(eyear_reg(ee)+CLIMO_EYEAR)+" climatology removed prior to all calculations (other than means)"
                  else
                     z@climatology = CLIMO_SYEAR+"-"+CLIMO_EYEAR+" climatology removed prior to all calculations (other than means)"
                  end if
@@ -851,7 +854,7 @@ begin
  
      res@cnLevels := (/-0.8,-0.6,-0.4,-0.2,-0.1,0,0.1,0.2,0.4,0.6,0.8/)
      res@cnLevels = res@cnLevels * vrfac
-     res@gsnLeftString = syear(ee)+"-"+eyear(ee)
+     res@gsnLeftString = syear_reg(ee)+"-"+eyear_reg(ee)
      res@gsnCenterString = names(ee)
  
      res2 = True

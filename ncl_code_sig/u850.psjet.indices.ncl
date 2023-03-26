@@ -968,9 +968,12 @@ begin
      delete(psjetT)
 ;-----------------------------------------------------------------------------------------
      iopt = 0                ; psjet power spectra
-     jave = max((/3,(7*nyr(ee))/100/))
+     jave = (7*nyr(ee))/100
      val1 = .95
      val2 = .99
+     if (jave.eq.0) then
+       jave = 1
+     end if
      pct = 0.1 
      spectra_mvf = False        ; missing value flag for psjet
      psjetloc_mon_nm = dim_standardize(psjetloc_mon,0)
@@ -1629,14 +1632,16 @@ begin
      pres@vpWidthF      = 0.7
      pres@vpHeightF     = 0.5
      pres@vpXF          = 0.07
-     pres@trYMinF       = 0.1
-;    pres@trYMaxF       = 82.
+     pres@trYMinF       = 1e-2
+     pres@trYMaxF       = 5e2
      pres@trYLog        = True
      pres@trXLog        = True
-     pres@trXMinF       = 0.01
-     pres@trXMaxF       = 0.3  ;maxx ;0.0832
+     pres@trXMinF       = 1e-3
+     pres@trXMaxF       = 1e0
+     pres@tmYLFormat    = "0*+^e"       ; use "e" symbol, don't force 0's (see documentation)
+     pres@tmXBFormat    = "0*+^e"  ; use "e" symbol, don't force 0's (see documentation)
      pres@tiYAxisString = "Power"              ; yaxis
-     pres@xyLineColor   =  "black"
+     pres@xyLineColor   = "black"
      pres@gsnFrame      = False
      pres@gsnDraw       = False
   
@@ -1657,19 +1662,16 @@ begin
      pres@tmYROn = False
      pres@tmXTLabelsOn = True
      pres@tmXUseBottom = False
-     pres@tmXTMode   = "Explicit"  
-     pres@tmXBMode   = "Explicit"            
-     pres@tmXTLabels = (/50, 40, 30, 25, 20, 15, 10, 8, 5, 3, 2, 1, 0.5, 0.2, 0.1/)
-                      ;(/    "50",    "10",     "5",     "3",    "2",  "1.5",    "1"/)
-     pres@tmXTValues = 1.0 / (12.0*pres@tmXTLabels)
-                      ;(/".00167",".00833",".01667",".02778",".0416",".0556",".0832"/)
-     pres@tmXBValues = (/.01,   .02,  .03, .05,  .08,  0.12, 0.2, 0.3, 0.4, 0.5/)
-                      ;(/    ".0",   ".01",   ".02",   ".03", ".042", ".056", ".083"/)
-     pres@tmXBLabels = pres@tmXBValues
+     pres@tmXTMode   = "Explicit"
+     pres@tmXTValues = (/".00167",".00833",".01667",".02778",".0416",".0832","0.1667","0.3333"/)
+     pres@tmXTLabels = (/"50",    "10",    "5",     "3",     "2",    "1",    "0.5",   "0.25"/)
+    ;pres@tmXBMode   = "Explicit"
+    ;pres@tmXBValues = (/".0",".01",".02",".03",".042",".056",".083"/)
+    ;pres@tmXBLabels = pres@tmXBValues
      pres@tmXTLabelFontHeightF = 0.018
      pres@tmXBLabelFontHeightF = 0.018
      pres@tmYLLabelFontHeightF = 0.018
-     pres@tiYAxisString = "Power (1 / cycles mo~S~-1~N~)"              ; yaxis
+     pres@tiYAxisString = "Variance" ;"Power (1 / cycles mo~S~-1~N~)"    
      pres@tiXAxisString = "Frequency (cycles mo~S~-1~N~)"
      pres@tiMainString = ""
      pres@txFontHeightF = 0.015
@@ -1677,43 +1679,7 @@ begin
      pres@tiXAxisFontHeightF = 0.025
      pres@tiYAxisFontHeightF = 0.025
      pres@tiMainFontHeightF = 0.03
-     pres@gsnRightStringOrthogonalPosF = -0.115
-     
-     if (spectra_mvf.eq.False) then
-        if (isfilepresent2("obs_ts").and.ee.ge.1.and.spectra_mvf_obs.eq.False) then
-           val = new(2,typeof(sdof_obs@spcx))
-           val(0) = max(sdof_obs@spcx)
-           val(1) = totype(max(splt1(0,:)),typeof(sdof_obs@spcx))
-           mval = max(val)
-           delete(val)
-        else
-           mval = max(splt1(0,:))
-        end if
-        if (mval.lt.70) then
-           pres@trYMaxF         = 75.
-           pres@tmYLMode        = "Explicit"
-           pres@tmYLValues      = 10^fspan(-4,4,9) ;(/0,50,100,150/)
-           pres@tmYLLabels      = 10^fspan(-4,4,9) ;pres@tmYLValues
-           pres@tmYLMinorValues = 10^(/-3,-2.5,-2,-1.5,-1,-0.5,0,0.5,1,1.5,2/) ;ispan(10,140,10)
-        end if
-        if (mval.ge.70.and.mval.lt.145) then
-           pres@trYMaxF         = 150.
-           pres@trYMinF         = 0.05
-           pres@tmYLMode        = "Explicit"
-           pres@tmYLValues      = 10^fspan(-4,4,9) ;(/0,50,100,150/)
-           pres@tmYLLabels      = 10^fspan(-4,4,9) ;pres@tmYLValues
-           pres@tmYLMinorValues = 10^(/-3,-2.5,-2,-1.5,-1,-0.5,0,0.5,1,1.5,2/) ;ispan(10,140,10)
-        end if
-        if (mval.ge.145) then
-           pres@trYMaxF         = mval+15.
-           pres@trYMinF         = 0.05
-           pres@tmYLMode        = "Explicit"
-           pres@tmYLValues      = 10^fspan(-4,4,9) ;(/0,50,100,150/)
-           pres@tmYLLabels      = 10^fspan(-4,4,9) ;pres@tmYLValues
-           pres@tmYLMinorValues = 10^(/-3,-2.5,-2,-1.5,-1,-0.5,0,0.5,1,1.5,2/) ;ispan(10,140,10)
-        end if
-        delete(mval)
-     end if
+     pres@gsnRightStringOrthogonalPosF = -0.135
      
      pres@tiMainOn = False
      pres@gsnCenterString = "Period (years)"
@@ -1721,6 +1687,11 @@ begin
      pres@gsnRightStringFontHeightF =    pres@tiYAxisFontHeightF - 0.005
      pres@gsnRightString = syear(ee)+"-"+eyear(ee)+"  "
      pres@gsnLeftString = "" 
+     if (wks_type.eq."png") then
+        pres@xyLineThicknessF   = 3.5
+     else
+        pres@xyLineThicknessF   = 1.5
+     end if
      pres@gsnCenterString = names(ee)
      if (spectra_mvf.eq.False) then
         pspec(ee) = gsn_csm_xy(wks_psjet_p,sdof@frq,splt1,pres) 
