@@ -214,7 +214,8 @@ begin
      llatn = 70.
      llonw = 0.
      llone = 360.
-     finjet = calculate_jet_info(ua(:,{llats:llatn},{llonw:llone}),llats,llatn,llonw,llone)
+     key   = "pnjet"
+     finjet = calculate_jet_info(ua(:,{llats:llatn},{llonw:llone}),llats,llatn,llonw,llone,key)
 
      if (OPT_CLIMO.eq."Full") then
         ua = rmMonAnnCycTLL(ua)

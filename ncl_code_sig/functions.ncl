@@ -2,8 +2,8 @@
 ; calculate jet stream statistics 
 ; 
 undef("calculate_jet_info")
-function calculate_jet_info(karr:numeric,minlat[1]:numeric,maxlat[1]:numeric,minlon[1]:numeric,maxlon[1]:numeric)
-local karr,tmp,minlat,maxlat,minlon,maxlon,krgd,kzon,Opt,m,pcts_s,gg,nmax_ind,wgtfile,dimz,attstring,ix0,ix1,nsig
+function calculate_jet_info(karr:numeric,minlat[1]:numeric,maxlat[1]:numeric,minlon[1]:numeric,maxlon[1]:numeric,key)
+local karr,key,tmp,minlat,maxlat,minlon,maxlon,krgd,kzon,Opt,m,pcts_s,gg,nmax_ind,wgtfile,dimz,attstring,ix0,ix1,nsig
 begin
 
   dimz        = dimsizes(karr)
@@ -13,15 +13,17 @@ begin
   finjet!1    = "time"
   finjet&time = karr&time
 
- ; ====================================================================
+ ;====================================================================
  ; First step: regrid the data to 0.1x0.1 within 70S and 20S region
  ;=====================================================================
-  wgtfile = "wgt_regrid_to_0.2deg.nc"
-  system("rm -rvf src_SCRIP.nc  dst_SCRIP.nc *.Log "+ wgtfile)
+  wgtfile   = key+"_wgt_regrid_to_0.2deg.nc"
+  src_scrip = key+"_src_SCRIP.nc"
+  dst_scrip = key+"_dst_SCRIP.nc"
+  system("rm -rvf *.Log "+ src_scrip+ " " + dst_scrip + " " +wgtfile)
 
   Opt                = True
-  Opt@SrcFileName    = "src_SCRIP.nc"
-  Opt@DstFileName    = "dst_SCRIP.nc"
+  Opt@SrcFileName    = src_scrip
+  Opt@DstFileName    = dst_scrip
   Opt@WgtFileName    = wgtfile 
   Opt@ForceOverwrite = True
   Opt@DstGridType    = "0.2x0.2"
@@ -29,7 +31,7 @@ begin
   Opt@DstURCorner    = (/ maxlat, 359.75d/)
   krgd = ESMF_regrid(karr,Opt)
   delete([/Opt/])
-  system("rm -rvf src_SCRIP.nc  dst_SCRIP.nc *.Log "+ wgtfile)
+  system("rm -rvf *.Log "+ src_scrip+ " " + dst_scrip + " " +wgtfile)
 
   m    = addfile("$NCARG_ROOT/lib/ncarg/data/cdf/landsea.nc","r")   ; mask out land (this is redundant for data that is already masked)
   krgd = mask(krgd,conform(krgd,landsea_mask(m->LSMASK,krgd&lat,krgd&lon),(/1,2/)).ge.1,False)
