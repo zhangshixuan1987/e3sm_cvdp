@@ -1,0 +1,143 @@
+20230302 090520.059 INFO             PET0 Running with ESMF Version 7.1.0r
+20230302 090520.059 INFO             PET0 Finalizing ESMF
+20230302 090520.091 INFO             PET0 Running with ESMF Version 7.1.0r
+20230302 090520.091 INFO             PET0 Finalizing ESMF
+20230302 090520.119 INFO             PET0 Running with ESMF Version 7.1.0r
+20230302 090532.432 ERROR            PET0 ESMCI_Mesh_Regrid_Glue.C:598 c_esmc_regrid_getarea() Internal error: Bad condition  - /glade/p/cisl/vast/haley/src/cheyenne/gnu/7.3.0/esmf-7.1.0r/src/Infrastructure/Mesh/src/ESMCI_MathUtil.C, line:386:Can't compute the area of a polygon containing fewer than 3 corners.
+20230302 090532.432 ERROR            PET0 ESMCI_MeshCap.C:442 MeshCap::regrid_getarea() Internal error: Bad condition  - Internal subroutine call returned Error
+20230302 090532.432 ERROR            PET0 ESMF_Regrid.F90:519 ESMF_RegridGetArea Internal error: Bad condition  - Internal subroutine call returned Error
+20230302 090532.432 ERROR            PET0 ESMF_FieldRegrid.F90:2361 ESMF_FieldRegridGetArea Internal error: Bad condition  - Internal subroutine call returned Error
+20230302 090532.432 ERROR            PET0 ESMF_RegridWeightGen.F90:2659 computeAreaGrid Internal error: Bad condition  - Internal subroutine call returned Error
+20230302 090532.432 ERROR            PET0 ESMF_RegridWeightGen.F90:1513 ESMF_RegridWeightGenFile Internal error: Bad condition  - Internal subroutine call returned Error
+20230302 090532.432 INFO             PET0 Finalizing ESMF
+20230302 090917.898 INFO             PET0 Running with ESMF Version 7.1.0r
+20230302 090917.899 INFO             PET0 Finalizing ESMF
+20230302 090917.933 INFO             PET0 Running with ESMF Version 7.1.0r
+20230302 090917.933 INFO             PET0 Finalizing ESMF
+20230302 090917.968 INFO             PET0 Running with ESMF Version 7.1.0r
+20230302 090931.210 ERROR            PET0 ESMCI_Mesh_Regrid_Glue.C:598 c_esmc_regrid_getarea() Internal error: Bad condition  - /glade/p/cisl/vast/haley/src/cheyenne/gnu/7.3.0/esmf-7.1.0r/src/Infrastructure/Mesh/src/ESMCI_MathUtil.C, line:386:Can't compute the area of a polygon containing fewer than 3 corners.
+20230302 090931.211 ERROR            PET0 ESMCI_MeshCap.C:442 MeshCap::regrid_getarea() Internal error: Bad condition  - Internal subroutine call returned Error
+20230302 090931.211 ERROR            PET0 ESMF_Regrid.F90:519 ESMF_RegridGetArea Internal error: Bad condition  - Internal subroutine call returned Error
+20230302 090931.211 ERROR            PET0 ESMF_FieldRegrid.F90:2361 ESMF_FieldRegridGetArea Internal error: Bad condition  - Internal subroutine call returned Error
+20230302 090931.211 ERROR            PET0 ESMF_RegridWeightGen.F90:2659 computeAreaGrid Internal error: Bad condition  - Internal subroutine call returned Error
+20230302 090931.211 ERROR            PET0 ESMF_RegridWeightGen.F90:1513 ESMF_RegridWeightGenFile Internal error: Bad condition  - Internal subroutine call returned Error
+20230302 090931.211 INFO             PET0 Finalizing ESMF
+20230302 091123.835 INFO             PET0 Running with ESMF Version 7.1.0r
+20230302 091123.835 INFO             PET0 Finalizing ESMF
+20230302 091123.871 INFO             PET0 Running with ESMF Version 7.1.0r
+20230302 091123.871 INFO             PET0 Finalizing ESMF
+20230302 091123.917 INFO             PET0 Running with ESMF Version 7.1.0r
+20230302 091131.999 INFO             PET0 Finalizing ESMF
+20230302 091146.107 INFO             PET0 Running with ESMF Version 7.1.0r
+20230302 091146.107 INFO             PET0 Finalizing ESMF
+20230302 091146.147 INFO             PET0 Running with ESMF Version 7.1.0r
+20230302 091146.147 INFO             PET0 Finalizing ESMF
+20230302 091146.192 INFO             PET0 Running with ESMF Version 7.1.0r
+20230302 091154.054 INFO             PET0 Finalizing ESMF
+20230302 091208.102 INFO             PET0 Running with ESMF Version 7.1.0r
+20230302 091208.102 INFO             PET0 Finalizing ESMF
+20230302 091208.152 INFO             PET0 Running with ESMF Version 7.1.0r
+20230302 091208.152 INFO             PET0 Finalizing ESMF
+20230302 091208.203 INFO             PET0 Running with ESMF Version 7.1.0r
+20230302 091216.249 INFO             PET0 Finalizing ESMF
+20230302 091239.959 INFO             PET0 Running with ESMF Version 7.1.0r
+20230302 091239.959 INFO             PET0 Finalizing ESMF
+20230302 091240.025 INFO             PET0 Running with ESMF Version 7.1.0r
+20230302 091240.025 INFO             PET0 Finalizing ESMF
+20230302 091240.097 INFO             PET0 Running with ESMF Version 7.1.0r
+20230302 091247.835 INFO             PET0 Finalizing ESMF
+20230302 091300.845 INFO             PET0 Running with ESMF Version 7.1.0r
+20230302 091300.846 INFO             PET0 Finalizing ESMF
+20230302 091300.884 INFO             PET0 Running with ESMF Version 7.1.0r
+20230302 091300.884 INFO             PET0 Finalizing ESMF
+20230302 091300.924 INFO             PET0 Running with ESMF Version 7.1.0r
+20230302 091308.999 INFO             PET0 Finalizing ESMF
+20230302 091322.069 INFO             PET0 Running with ESMF Version 7.1.0r
+20230302 091322.069 INFO             PET0 Finalizing ESMF
+20230302 091322.108 INFO             PET0 Running with ESMF Version 7.1.0r
+20230302 091322.108 INFO             PET0 Finalizing ESMF
+20230302 091322.153 INFO             PET0 Running with ESMF Version 7.1.0r
+20230302 091330.013 INFO             PET0 Finalizing ESMF
+20230302 091702.448 INFO             PET0 Running with ESMF Version 7.1.0r
+20230302 091702.448 INFO             PET0 Finalizing ESMF
+20230302 091702.480 INFO             PET0 Running with ESMF Version 7.1.0r
+20230302 091702.480 INFO             PET0 Finalizing ESMF
+20230302 091702.518 INFO             PET0 Running with ESMF Version 7.1.0r
+20230302 091709.831 INFO             PET0 Finalizing ESMF
+20230302 091739.448 INFO             PET0 Running with ESMF Version 7.1.0r
+20230302 091739.448 INFO             PET0 Finalizing ESMF
+20230302 091739.475 INFO             PET0 Running with ESMF Version 7.1.0r
+20230302 091739.475 INFO             PET0 Finalizing ESMF
+20230302 091739.503 INFO             PET0 Running with ESMF Version 7.1.0r
+20230302 091810.497 INFO             PET0 Running with ESMF Version 7.1.0r
+20230302 091810.497 INFO             PET0 Finalizing ESMF
+20230302 091810.524 INFO             PET0 Running with ESMF Version 7.1.0r
+20230302 091810.524 INFO             PET0 Finalizing ESMF
+20230302 091810.552 INFO             PET0 Running with ESMF Version 7.1.0r
+20230302 091817.742 INFO             PET0 Finalizing ESMF
+20230302 092006.445 INFO             PET0 Running with ESMF Version 7.1.0r
+20230302 092006.445 INFO             PET0 Finalizing ESMF
+20230302 092006.476 INFO             PET0 Running with ESMF Version 7.1.0r
+20230302 092006.476 INFO             PET0 Finalizing ESMF
+20230302 092006.507 INFO             PET0 Running with ESMF Version 7.1.0r
+20230302 092049.534 INFO             PET0 Finalizing ESMF
+20230302 092101.983 INFO             PET0 Running with ESMF Version 7.1.0r
+20230302 092101.984 INFO             PET0 Finalizing ESMF
+20230302 092102.024 INFO             PET0 Running with ESMF Version 7.1.0r
+20230302 092102.024 INFO             PET0 Finalizing ESMF
+20230302 092102.071 INFO             PET0 Running with ESMF Version 7.1.0r
+20230302 092148.173 INFO             PET0 Finalizing ESMF
+20230302 092201.296 INFO             PET0 Running with ESMF Version 7.1.0r
+20230302 092201.296 INFO             PET0 Finalizing ESMF
+20230302 092201.357 INFO             PET0 Running with ESMF Version 7.1.0r
+20230302 092201.357 INFO             PET0 Finalizing ESMF
+20230302 092201.420 INFO             PET0 Running with ESMF Version 7.1.0r
+20230302 092246.825 INFO             PET0 Finalizing ESMF
+20230302 092259.749 INFO             PET0 Running with ESMF Version 7.1.0r
+20230302 092259.749 INFO             PET0 Finalizing ESMF
+20230302 092259.805 INFO             PET0 Running with ESMF Version 7.1.0r
+20230302 092259.805 INFO             PET0 Finalizing ESMF
+20230302 092259.861 INFO             PET0 Running with ESMF Version 7.1.0r
+20230302 092343.811 INFO             PET0 Finalizing ESMF
+20230302 092356.638 INFO             PET0 Running with ESMF Version 7.1.0r
+20230302 092356.638 INFO             PET0 Finalizing ESMF
+20230302 092356.688 INFO             PET0 Running with ESMF Version 7.1.0r
+20230302 092356.688 INFO             PET0 Finalizing ESMF
+20230302 092356.739 INFO             PET0 Running with ESMF Version 7.1.0r
+20230302 092442.352 INFO             PET0 Finalizing ESMF
+20230302 092455.833 INFO             PET0 Running with ESMF Version 7.1.0r
+20230302 092455.833 INFO             PET0 Finalizing ESMF
+20230302 092455.888 INFO             PET0 Running with ESMF Version 7.1.0r
+20230302 092455.889 INFO             PET0 Finalizing ESMF
+20230302 092455.950 INFO             PET0 Running with ESMF Version 7.1.0r
+20230302 092543.417 INFO             PET0 Finalizing ESMF
+20230302 092556.478 INFO             PET0 Running with ESMF Version 7.1.0r
+20230302 092556.478 INFO             PET0 Finalizing ESMF
+20230302 092556.525 INFO             PET0 Running with ESMF Version 7.1.0r
+20230302 092556.525 INFO             PET0 Finalizing ESMF
+20230302 092556.576 INFO             PET0 Running with ESMF Version 7.1.0r
+20230302 092642.255 INFO             PET0 Finalizing ESMF
+20230302 092655.548 INFO             PET0 Running with ESMF Version 7.1.0r
+20230302 092655.548 INFO             PET0 Finalizing ESMF
+20230302 092655.607 INFO             PET0 Running with ESMF Version 7.1.0r
+20230302 092655.607 INFO             PET0 Finalizing ESMF
+20230302 092655.664 INFO             PET0 Running with ESMF Version 7.1.0r
+20230302 092743.199 INFO             PET0 Finalizing ESMF
+20230302 092758.098 INFO             PET0 Running with ESMF Version 7.1.0r
+20230302 092758.098 INFO             PET0 Finalizing ESMF
+20230302 092758.163 INFO             PET0 Running with ESMF Version 7.1.0r
+20230302 092758.163 INFO             PET0 Finalizing ESMF
+20230302 092758.226 INFO             PET0 Running with ESMF Version 7.1.0r
+20230302 092844.730 INFO             PET0 Finalizing ESMF
+20230302 092859.640 INFO             PET0 Running with ESMF Version 7.1.0r
+20230302 092859.641 INFO             PET0 Finalizing ESMF
+20230302 092859.695 INFO             PET0 Running with ESMF Version 7.1.0r
+20230302 092859.695 INFO             PET0 Finalizing ESMF
+20230302 092859.752 INFO             PET0 Running with ESMF Version 7.1.0r
+20230302 092945.274 INFO             PET0 Finalizing ESMF
+20230302 092959.989 INFO             PET0 Running with ESMF Version 7.1.0r
+20230302 092959.990 INFO             PET0 Finalizing ESMF
+20230302 093000.052 INFO             PET0 Running with ESMF Version 7.1.0r
+20230302 093000.053 INFO             PET0 Finalizing ESMF
+20230302 093000.105 INFO             PET0 Running with ESMF Version 7.1.0r
+20230302 093047.842 INFO             PET0 Finalizing ESMF

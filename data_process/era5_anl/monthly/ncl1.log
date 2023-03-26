@@ -1,0 +1,1085 @@
+nohup: ignoring input
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en00.OLR.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en00.FLDS.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en00.FLDSC.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en00.LHFLX.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en00.SHFLX.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en00.FLNS.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en00.FLNSC.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en00.FSNS.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en00.FSNSC.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en00.CLDTOT.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en00.PSL.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en00.Z500.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en00.T850.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en00.U850.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en00.V850.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en00.U200.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en00.V200.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en00.PRECT.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en00.PRECST.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en00.TS.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en00.TREFHT.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en00.TMQ.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en00.TGCLDLWP.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en00.TGCLDIWP.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en00.QnRad_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en00.QnTur_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en00.QnTot_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en00.Qn_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en00.SWCRE_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en00.LWCRE_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en00.CRE_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en00.U10.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en00.V10.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en00.S10.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en00.TAUX.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en00.TAUY.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en00.ETH1.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en00.ETH2.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en00.ETH12.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en00.CRE.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en00.SWCRE.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en00.LWCRE.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en01.OLR.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en01.FLDS.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en01.FLDSC.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en01.LHFLX.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en01.SHFLX.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en01.FLNS.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en01.FLNSC.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en01.FSNS.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en01.FSNSC.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en01.CLDTOT.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en01.PSL.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en01.Z500.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en01.T850.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en01.U850.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en01.V850.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en01.U200.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en01.V200.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en01.PRECT.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en01.PRECST.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en01.TS.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en01.TREFHT.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en01.TMQ.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en01.TGCLDLWP.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en01.TGCLDIWP.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en01.QnRad_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en01.QnTur_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en01.QnTot_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en01.Qn_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en01.SWCRE_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en01.LWCRE_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en01.CRE_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en01.U10.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en01.V10.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en01.S10.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en01.TAUX.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en01.TAUY.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en01.ETH1.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en01.ETH2.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en01.ETH12.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en01.CRE.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en01.SWCRE.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en01.LWCRE.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en02.OLR.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en02.FLDS.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en02.FLDSC.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en02.LHFLX.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en02.SHFLX.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en02.FLNS.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en02.FLNSC.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en02.FSNS.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en02.FSNSC.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en02.CLDTOT.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en02.PSL.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en02.Z500.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en02.T850.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en02.U850.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en02.V850.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en02.U200.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en02.V200.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en02.PRECT.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en02.PRECST.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en02.TS.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en02.TREFHT.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en02.TMQ.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en02.TGCLDLWP.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en02.TGCLDIWP.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en02.QnRad_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en02.QnTur_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en02.QnTot_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en02.Qn_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en02.SWCRE_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en02.LWCRE_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en02.CRE_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en02.U10.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en02.V10.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en02.S10.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en02.TAUX.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en02.TAUY.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en02.ETH1.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en02.ETH2.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en02.ETH12.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en02.CRE.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en02.SWCRE.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en02.LWCRE.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en03.OLR.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en03.FLDS.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en03.FLDSC.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en03.LHFLX.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en03.SHFLX.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en03.FLNS.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en03.FLNSC.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en03.FSNS.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en03.FSNSC.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en03.CLDTOT.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en03.PSL.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en03.Z500.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en03.T850.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en03.U850.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en03.V850.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en03.U200.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en03.V200.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en03.PRECT.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en03.PRECST.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en03.TS.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en03.TREFHT.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en03.TMQ.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en03.TGCLDLWP.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en03.TGCLDIWP.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en03.QnRad_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en03.QnTur_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en03.QnTot_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en03.Qn_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en03.SWCRE_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en03.LWCRE_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en03.CRE_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en03.U10.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en03.V10.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en03.S10.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en03.TAUX.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en03.TAUY.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en03.ETH1.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en03.ETH2.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en03.ETH12.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en03.CRE.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en03.SWCRE.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en03.LWCRE.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en04.OLR.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en04.FLDS.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en04.FLDSC.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en04.LHFLX.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en04.SHFLX.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en04.FLNS.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en04.FLNSC.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en04.FSNS.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en04.FSNSC.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en04.CLDTOT.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en04.PSL.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en04.Z500.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en04.T850.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en04.U850.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en04.V850.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en04.U200.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en04.V200.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en04.PRECT.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en04.PRECST.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en04.TS.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en04.TREFHT.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en04.TMQ.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en04.TGCLDLWP.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en04.TGCLDIWP.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en04.QnRad_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en04.QnTur_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en04.QnTot_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en04.Qn_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en04.SWCRE_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en04.LWCRE_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en04.CRE_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en04.U10.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en04.V10.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en04.S10.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en04.TAUX.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en04.TAUY.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en04.ETH1.197901-201812.nc': No such file or directory
+ Copyright (C) 1995-2018 - All Rights Reserved
+ University Corporation for Atmospheric Research
+ NCAR Command Language Version 6.5.0
+ The use of this software is governed by a License Agreement.
+ See http://www.ncl.ucar.edu/ for more details.
+
+
+Variable: fl1 (subsection)
+Type: string
+Total Size: 8 bytes
+            1 values
+Number of Dimensions: 1
+Dimensions and sizes:	[1]
+Coordinates: 
+(0)	/global/cfs/cdirs/e3sm/zhan391/data/ERA5/monthly/ERA5_analysis_monthly_1979-2019_1x1.nc
+(0)	working on variable OLR
+(0)	working on variable FLDS
+(0)	working on variable FLDSC
+(0)	working on variable LHFLX
+(0)	working on variable SHFLX
+(0)	working on variable FLNS
+(0)	working on variable FLNSC
+(0)	working on variable FSNS
+(0)	working on variable FSNSC
+(0)	working on variable CLDTOT
+(0)	working on variable PSL
+(0)	working on variable Z500
+(0)	working on variable T850
+(0)	working on variable U850
+(0)	working on variable V850
+(0)	working on variable U200
+(0)	working on variable V200
+(0)	working on variable PRECT
+(0)	working on variable PRECST
+(0)	working on variable TS
+(0)	working on variable TREFHT
+(0)	working on variable TMQ
+(0)	working on variable TGCLDLWP
+(0)	working on variable TGCLDIWP
+(0)	working on variable FLNS
+(0)	working on variable FLNSC
+(0)	working on variable FSNS
+(0)	working on variable FSNSC
+(0)	working on variable QnRad_SRF
+(0)	working on variable QnTur_SRF
+(0)	working on variable QnTot_SRF
+(0)	working on variable Qn_SRF
+(0)	working on variable SWCRE_SRF
+(0)	working on variable LWCRE_SRF
+(0)	working on variable CRE_SRF
+(0)	working on variable U10
+(0)	working on variable V10
+(0)	working on variable S10
+(0)	working on variable TAUX
+(0)	working on variable TAUY
+(0)	working on variable ETH1
+(0)	working on variable ETH2
+(0)	working on variable ETH12
+(0)	working on variable CRE
+(0)	working on variable SWCRE
+(0)	working on variable LWCRE
+
+
+Variable: fl1 (subsection)
+Type: string
+Total Size: 8 bytes
+            1 values
+Number of Dimensions: 1
+Dimensions and sizes:	[1]
+Coordinates: 
+(0)	/global/cfs/cdirs/e3sm/zhan391/data/ERA5/monthly/ERA5_ens01_monthly_1979-2019_1x1.nc
+(0)	working on variable OLR
+(0)	working on variable FLDS
+(0)	working on variable FLDSC
+(0)	working on variable LHFLX
+(0)	working on variable SHFLX
+(0)	working on variable FLNS
+(0)	working on variable FLNSC
+(0)	working on variable FSNS
+(0)	working on variable FSNSC
+(0)	working on variable CLDTOT
+(0)	working on variable PSL
+(0)	working on variable Z500
+(0)	working on variable T850
+(0)	working on variable U850
+(0)	working on variable V850
+(0)	working on variable U200
+(0)	working on variable V200
+(0)	working on variable PRECT
+(0)	working on variable PRECST
+(0)	working on variable TS
+(0)	working on variable TREFHT
+(0)	working on variable TMQ
+(0)	working on variable TGCLDLWP
+(0)	working on variable TGCLDIWP
+(0)	working on variable FLNS
+(0)	working on variable FLNSC
+(0)	working on variable FSNS
+(0)	working on variable FSNSC
+(0)	working on variable QnRad_SRF
+(0)	working on variable QnTur_SRF
+(0)	working on variable QnTot_SRF
+(0)	working on variable Qn_SRF
+(0)	working on variable SWCRE_SRF
+(0)	working on variable LWCRE_SRF
+(0)	working on variable CRE_SRF
+(0)	working on variable U10
+(0)	working on variable V10
+(0)	working on variable S10
+(0)	working on variable TAUX
+(0)	working on variable TAUY
+(0)	working on variable ETH1
+(0)	working on variable ETH2
+(0)	working on variable ETH12
+(0)	working on variable CRE
+(0)	working on variable SWCRE
+(0)	working on variable LWCRE
+
+
+Variable: fl1 (subsection)
+Type: string
+Total Size: 8 bytes
+            1 values
+Number of Dimensions: 1
+Dimensions and sizes:	[1]
+Coordinates: 
+(0)	/global/cfs/cdirs/e3sm/zhan391/data/ERA5/monthly/ERA5_ens02_monthly_1979-2019_1x1.nc
+(0)	working on variable OLR
+(0)	working on variable FLDS
+(0)	working on variable FLDSC
+(0)	working on variable LHFLX
+(0)	working on variable SHFLX
+(0)	working on variable FLNS
+(0)	working on variable FLNSC
+(0)	working on variable FSNS
+(0)	working on variable FSNSC
+(0)	working on variable CLDTOT
+(0)	working on variable PSL
+(0)	working on variable Z500
+(0)	working on variable T850
+(0)	working on variable U850
+(0)	working on variable V850
+(0)	working on variable U200
+(0)	working on variable V200
+(0)	working on variable PRECT
+(0)	working on variable PRECST
+(0)	working on variable TS
+(0)	working on variable TREFHT
+(0)	working on variable TMQ
+(0)	working on variable TGCLDLWP
+(0)	working on variable TGCLDIWP
+(0)	working on variable FLNS
+(0)	working on variable FLNSC
+(0)	working on variable FSNS
+(0)	working on variable FSNSC
+(0)	working on variable QnRad_SRF
+(0)	working on variable QnTur_SRF
+(0)	working on variable QnTot_SRF
+(0)	working on variable Qn_SRF
+(0)	working on variable SWCRE_SRF
+(0)	working on variable LWCRE_SRF
+(0)	working on variable CRE_SRF
+(0)	working on variable U10
+(0)	working on variable V10
+(0)	working on variable S10
+(0)	working on variable TAUX
+(0)	working on variable TAUY
+(0)	working on variable ETH1
+(0)	working on variable ETH2
+(0)	working on variable ETH12
+(0)	working on variable CRE
+(0)	working on variable SWCRE
+(0)	working on variable LWCRE
+
+
+Variable: fl1 (subsection)
+Type: string
+Total Size: 8 bytes
+            1 values
+Number of Dimensions: 1
+Dimensions and sizes:	[1]
+Coordinates: 
+(0)	/global/cfs/cdirs/e3sm/zhan391/data/ERA5/monthly/ERA5_ens03_monthly_1979-2019_1x1.nc
+(0)	working on variable OLR
+(0)	working on variable FLDS
+(0)	working on variable FLDSC
+(0)	working on variable LHFLX
+(0)	working on variable SHFLX
+(0)	working on variable FLNS
+(0)	working on variable FLNSC
+(0)	working on variable FSNS
+(0)	working on variable FSNSC
+(0)	working on variable CLDTOT
+(0)	working on variable PSL
+(0)	working on variable Z500
+(0)	working on variable T850
+(0)	working on variable U850
+(0)	working on variable V850
+(0)	working on variable U200
+(0)	working on variable V200
+(0)	working on variable PRECT
+(0)	working on variable PRECST
+(0)	working on variable TS
+(0)	working on variable TREFHT
+(0)	working on variable TMQ
+(0)	working on variable TGCLDLWP
+(0)	working on variable TGCLDIWP
+(0)	working on variable FLNS
+(0)	working on variable FLNSC
+(0)	working on variable FSNS
+(0)	working on variable FSNSC
+(0)	working on variable QnRad_SRF
+(0)	working on variable QnTur_SRF
+(0)	working on variable QnTot_SRF
+(0)	working on variable Qn_SRF
+(0)	working on variable SWCRE_SRF
+(0)	working on variable LWCRE_SRF
+(0)	working on variable CRE_SRF
+(0)	working on variable U10
+(0)	working on variable V10
+(0)	working on variable S10
+(0)	working on variable TAUX
+(0)	working on variable TAUY
+(0)	working on variable ETH1
+(0)	working on variable ETH2
+(0)	working on variable ETH12
+(0)	working on variable CRE
+(0)	working on variable SWCRE
+(0)	working on variable LWCRE
+
+
+Variable: fl1 (subsection)
+Type: string
+Total Size: 8 bytes
+            1 values
+Number of Dimensions: 1
+Dimensions and sizes:	[1]
+Coordinates: 
+(0)	/global/cfs/cdirs/e3sm/zhan391/data/ERA5/monthly/ERA5_ens04_monthly_1979-2019_1x1.nc
+(0)	working on variable OLR
+(0)	working on variable FLDS
+(0)	working on variable FLDSC
+(0)	working on variable LHFLX
+(0)	working on variable SHFLX
+(0)	working on variable FLNS
+(0)	working on variable FLNSC
+(0)	working on variable FSNS
+(0)	working on variable FSNSC
+(0)	working on variable CLDTOT
+(0)	working on variable PSL
+(0)	working on variable Z500
+(0)	working on variable T850
+(0)	working on variable U850
+(0)	working on variable V850
+(0)	working on variable U200
+(0)	working on variable V200
+(0)	working on variable PRECT
+(0)	working on variable PRECST
+(0)	working on variable TS
+(0)	working on variable TREFHT
+(0)	working on variable TMQ
+(0)	working on variable TGCLDLWP
+(0)	working on variable TGCLDIWP
+(0)	working on variable FLNS
+(0)	working on variable FLNSC
+(0)	working on variable FSNS
+(0)	working on variable FSNSC
+(0)	working on variable QnRad_SRF
+(0)	working on variable QnTur_SRF
+(0)	working on variable QnTot_SRF
+(0)	working on variable Qn_SRF
+(0)	working on variable SWCRE_SRF
+(0)	working on variable LWCRE_SRF
+(0)	working on variable CRE_SRF
+(0)	working on variable U10
+(0)	working on variable V10
+(0)	working on variable S10
+(0)	working on variable TAUX
+(0)	working on variable TAUY
+(0)	working on variable ETH1
+(0)	working orm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en04.ETH2.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en04.ETH12.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en04.CRE.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en04.SWCRE.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en04.LWCRE.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en05.OLR.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en05.FLDS.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en05.FLDSC.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en05.LHFLX.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en05.SHFLX.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en05.FLNS.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en05.FLNSC.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en05.FSNS.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en05.FSNSC.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en05.CLDTOT.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en05.PSL.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en05.Z500.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en05.T850.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en05.U850.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en05.V850.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en05.U200.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en05.V200.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en05.PRECT.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en05.PRECST.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en05.TS.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en05.TREFHT.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en05.TMQ.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en05.TGCLDLWP.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en05.TGCLDIWP.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en05.QnRad_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en05.QnTur_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en05.QnTot_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en05.Qn_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en05.SWCRE_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en05.LWCRE_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en05.CRE_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en05.U10.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en05.V10.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en05.S10.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en05.TAUX.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en05.TAUY.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en05.ETH1.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en05.ETH2.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en05.ETH12.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en05.CRE.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en05.SWCRE.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en05.LWCRE.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en06.OLR.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en06.FLDS.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en06.FLDSC.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en06.LHFLX.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en06.SHFLX.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en06.FLNS.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en06.FLNSC.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en06.FSNS.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en06.FSNSC.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en06.CLDTOT.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en06.PSL.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en06.Z500.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en06.T850.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en06.U850.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en06.V850.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en06.U200.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en06.V200.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en06.PRECT.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en06.PRECST.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en06.TS.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en06.TREFHT.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en06.TMQ.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en06.TGCLDLWP.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en06.TGCLDIWP.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en06.QnRad_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en06.QnTur_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en06.QnTot_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en06.Qn_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en06.SWCRE_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en06.LWCRE_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en06.CRE_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en06.U10.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en06.V10.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en06.S10.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en06.TAUX.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en06.TAUY.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en06.ETH1.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en06.ETH2.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en06.ETH12.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en06.CRE.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en06.SWCRE.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en06.LWCRE.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en07.OLR.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en07.FLDS.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en07.FLDSC.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en07.LHFLX.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en07.SHFLX.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en07.FLNS.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en07.FLNSC.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en07.FSNS.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en07.FSNSC.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en07.CLDTOT.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en07.PSL.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en07.Z500.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en07.T850.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en07.U850.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en07.V850.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en07.U200.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en07.V200.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en07.PRECT.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en07.PRECST.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en07.TS.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en07.TREFHT.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en07.TMQ.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en07.TGCLDLWP.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en07.TGCLDIWP.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en07.QnRad_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en07.QnTur_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en07.QnTot_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en07.Qn_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en07.SWCRE_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en07.LWCRE_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en07.CRE_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en07.U10.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en07.V10.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en07.S10.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en07.TAUX.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en07.TAUY.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en07.ETH1.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en07.ETH2.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en07.ETH12.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en07.CRE.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en07.SWCRE.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en07.LWCRE.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en08.OLR.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en08.FLDS.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en08.FLDSC.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en08.LHFLX.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en08.SHFLX.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en08.FLNS.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en08.FLNSC.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en08.FSNS.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en08.FSNSC.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en08.CLDTOT.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en08.PSL.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en08.Z500.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en08.T850.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en08.U850.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en08.V850.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en08.U200.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en08.V200.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en08.PRECT.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en08.PRECST.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en08.TS.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en08.TREFHT.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en08.TMQ.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en08.TGCLDLWP.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en08.TGCLDIWP.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en08.QnRad_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en08.QnTur_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en08.QnTot_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en08.Qn_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en08.SWCRE_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en08.LWCRE_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en08.CRE_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en08.U10.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en08.V10.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en08.S10.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en08.TAUX.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en08.TAUY.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en08.ETH1.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en08.ETH2.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en08.ETH12.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en08.CRE.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en08.SWCRE.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en08.LWCRE.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en09.OLR.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en09.FLDS.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en09.FLDSC.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en09.LHFLX.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en09.SHFLX.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en09.FLNS.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en09.FLNSC.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en09.FSNS.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en09.FSNSC.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en09.CLDTOT.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en09.PSL.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en09.Z500.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en09.T850.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en09.U850.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en09.V850.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en09.U200.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en09.V200.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en09.PRECT.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en09.PRECST.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en09.TS.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en09.TREFHT.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en09.TMQ.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en09.TGCLDLWP.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en09.TGCLDIWP.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en09.QnRad_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en09.QnTur_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en09.QnTot_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en09.Qn_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en09.SWCRE_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en09.LWCRE_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en09.CRE_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en09.U10.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en09.V10.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en09.S10.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en09.TAUX.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en09.TAUY.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en09.ETH1.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en09.ETH2.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en09.ETH12.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en09.CRE.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en09.SWCRE.197901-201812.nc': No such file or directory
+n variable ETH2
+(0)	working on variable ETH12
+(0)	working on variable CRE
+(0)	working on variable SWCRE
+(0)	working on variable LWCRE
+
+
+Variable: fl1 (subsection)
+Type: string
+Total Size: 8 bytes
+            1 values
+Number of Dimensions: 1
+Dimensions and sizes:	[1]
+Coordinates: 
+(0)	/global/cfs/cdirs/e3sm/zhan391/data/ERA5/monthly/ERA5_ens05_monthly_1979-2019_1x1.nc
+(0)	working on variable OLR
+(0)	working on variable FLDS
+(0)	working on variable FLDSC
+(0)	working on variable LHFLX
+(0)	working on variable SHFLX
+(0)	working on variable FLNS
+(0)	working on variable FLNSC
+(0)	working on variable FSNS
+(0)	working on variable FSNSC
+(0)	working on variable CLDTOT
+(0)	working on variable PSL
+(0)	working on variable Z500
+(0)	working on variable T850
+(0)	working on variable U850
+(0)	working on variable V850
+(0)	working on variable U200
+(0)	working on variable V200
+(0)	working on variable PRECT
+(0)	working on variable PRECST
+(0)	working on variable TS
+(0)	working on variable TREFHT
+(0)	working on variable TMQ
+(0)	working on variable TGCLDLWP
+(0)	working on variable TGCLDIWP
+(0)	working on variable FLNS
+(0)	working on variable FLNSC
+(0)	working on variable FSNS
+(0)	working on variable FSNSC
+(0)	working on variable QnRad_SRF
+(0)	working on variable QnTur_SRF
+(0)	working on variable QnTot_SRF
+(0)	working on variable Qn_SRF
+(0)	working on variable SWCRE_SRF
+(0)	working on variable LWCRE_SRF
+(0)	working on variable CRE_SRF
+(0)	working on variable U10
+(0)	working on variable V10
+(0)	working on variable S10
+(0)	working on variable TAUX
+(0)	working on variable TAUY
+(0)	working on variable ETH1
+(0)	working on variable ETH2
+(0)	working on variable ETH12
+(0)	working on variable CRE
+(0)	working on variable SWCRE
+(0)	working on variable LWCRE
+
+
+Variable: fl1 (subsection)
+Type: string
+Total Size: 8 bytes
+            1 values
+Number of Dimensions: 1
+Dimensions and sizes:	[1]
+Coordinates: 
+(0)	/global/cfs/cdirs/e3sm/zhan391/data/ERA5/monthly/ERA5_ens06_monthly_1979-2019_1x1.nc
+(0)	working on variable OLR
+(0)	working on variable FLDS
+(0)	working on variable FLDSC
+(0)	working on variable LHFLX
+(0)	working on variable SHFLX
+(0)	working on variable FLNS
+(0)	working on variable FLNSC
+(0)	working on variable FSNS
+(0)	working on variable FSNSC
+(0)	working on variable CLDTOT
+(0)	working on variable PSL
+(0)	working on variable Z500
+(0)	working on variable T850
+(0)	working on variable U850
+(0)	working on variable V850
+(0)	working on variable U200
+(0)	working on variable V200
+(0)	working on variable PRECT
+(0)	working on variable PRECST
+(0)	working on variable TS
+(0)	working on variable TREFHT
+(0)	working on variable TMQ
+(0)	working on variable TGCLDLWP
+(0)	working on variable TGCLDIWP
+(0)	working on variable FLNS
+(0)	working on variable FLNSC
+(0)	working on variable FSNS
+(0)	working on variable FSNSC
+(0)	working on variable QnRad_SRF
+(0)	working on variable QnTur_SRF
+(0)	working on variable QnTot_SRF
+(0)	working on variable Qn_SRF
+(0)	working on variable SWCRE_SRF
+(0)	working on variable LWCRE_SRF
+(0)	working on variable CRE_SRF
+(0)	working on variable U10
+(0)	working on variable V10
+(0)	working on variable S10
+(0)	working on variable TAUX
+(0)	working on variable TAUY
+(0)	working on variable ETH1
+(0)	working on variable ETH2
+(0)	working on variable ETH12
+(0)	working on variable CRE
+(0)	working on variable SWCRE
+(0)	working on variable LWCRE
+
+
+Variable: fl1 (subsection)
+Type: string
+Total Size: 8 bytes
+            1 values
+Number of Dimensions: 1
+Dimensions and sizes:	[1]
+Coordinates: 
+(0)	/global/cfs/cdirs/e3sm/zhan391/data/ERA5/monthly/ERA5_ens07_monthly_1979-2019_1x1.nc
+(0)	working on variable OLR
+(0)	working on variable FLDS
+(0)	working on variable FLDSC
+(0)	working on variable LHFLX
+(0)	working on variable SHFLX
+(0)	working on variable FLNS
+(0)	working on variable FLNSC
+(0)	working on variable FSNS
+(0)	working on variable FSNSC
+(0)	working on variable CLDTOT
+(0)	working on variable PSL
+(0)	working on variable Z500
+(0)	working on variable T850
+(0)	working on variable U850
+(0)	working on variable V850
+(0)	working on variable U200
+(0)	working on variable V200
+(0)	working on variable PRECT
+(0)	working on variable PRECST
+(0)	working on variable TS
+(0)	working on variable TREFHT
+(0)	working on variable TMQ
+(0)	working on variable TGCLDLWP
+(0)	working on variable TGCLDIWP
+(0)	working on variable FLNS
+(0)	working on variable FLNSC
+(0)	working on variable FSNS
+(0)	working on variable FSNSC
+(0)	working on variable QnRad_SRF
+(0)	working on variable QnTur_SRF
+(0)	working on variable QnTot_SRF
+(0)	working on variable Qn_SRF
+(0)	working on variable SWCRE_SRF
+(0)	working on variable LWCRE_SRF
+(0)	working on variable CRE_SRF
+(0)	working on variable U10
+(0)	working on variable V10
+(0)	working on variable S10
+(0)	working on variable TAUX
+(0)	working on variable TAUY
+(0)	working on variable ETH1
+(0)	working on variable ETH2
+(0)	working on variable ETH12
+(0)	working on variable CRE
+(0)	working on variable SWCRE
+(0)	working on variable LWCRE
+
+
+Variable: fl1 (subsection)
+Type: string
+Total Size: 8 bytes
+            1 values
+Number of Dimensions: 1
+Dimensions and sizes:	[1]
+Coordinates: 
+(0)	/global/cfs/cdirs/e3sm/zhan391/data/ERA5/monthly/ERA5_ens08_monthly_1979-2019_1x1.nc
+(0)	working on variable OLR
+(0)	working on variable FLDS
+(0)	working on variable FLDSC
+(0)	working on variable LHFLX
+(0)	working on variable SHFLX
+(0)	working on variable FLNS
+(0)	working on variable FLNSC
+(0)	working on variable FSNS
+(0)	working on variable FSNSC
+(0)	working on variable CLDTOT
+(0)	working on variable PSL
+(0)	working on variable Z500
+(0)	working on variable T850
+(0)	working on variable U850
+(0)	working on variable V850
+(0)	working on variable U200
+(0)	working on variable V200
+(0)	working on variable PRECT
+(0)	working on variable PRECST
+(0)	working on variable TS
+(0)	working on variable TREFHT
+(0)	working on variable TMQ
+(0)	working on variable TGCLDLWP
+(0)	working on variable TGCLDIWP
+(0)	working on variable FLNS
+(0)	working on variable FLNSC
+(0)	working on variable FSNS
+(0)	working on variable FSNSC
+(0)	working on variable QnRad_SRF
+(0)	working on variable QnTur_SRF
+(0)	working on variable QnTot_SRF
+(0)	working on variable Qn_SRF
+(0)	working on variable SWCRE_SRF
+(0)	working on variable LWCRE_SRF
+(0)	working on variable CRE_SRF
+(0)	working on variable U10
+(0)	working on variable V10
+(0)	working on variable S10
+(0)	working on variable TAUX
+(0)	working on variable TAUY
+(0)	working on variable ETH1
+(0)	working on variable ETH2
+(0)	working on variable ETH12
+(0)	working on variable CRE
+(0)	working on variable SWCRE
+(0)	working on variable LWCRE
+
+
+Variable: fl1 (subsection)
+Type: string
+Total Size: 8 bytes
+            1 values
+Number of Dimensions: 1
+Dimensions and sizes:	[1]
+Coordinates: 
+(0)	/global/cfs/cdirs/e3sm/zhan391/data/ERA5/monthly/ERA5_ens09_monthly_1979-2019_1x1.nc
+(0)	working on variable OLR
+(0)	working on variable FLDS
+(0)	working on variable FLDSC
+(0)	working on variable LHFLX
+(0)	working on variable SHFLX
+(0)	working on variable FLNS
+(0)	working on variable FLNSC
+(0)	working on variable FSNS
+(0)	working on variable FSNSC
+(0)	working on variable CLDTOT
+(0)	working on variable PSL
+(0)	working on variable Z500
+(0)	working on variable T850
+(0)	working on variable U850
+(0)	working on variable V850
+(0)	working on variable U200
+(0)	working on variable V200
+(0)	working on variable PRECT
+(0)	working on variable PRECST
+(0)	working on variable TS
+(0)	working on variable TREFHT
+(0)	working on variable TMQ
+(0)	working on variable TGCLDLWP
+(0)	working on variable TGCLDIWP
+(0)	working on variable FLNS
+(0)	working on variable FLNSC
+(0)	working on variable FSNS
+(0)	working on variable FSNSC
+(0)	working on variable QnRad_SRF
+(0)	working on variable QnTur_SRF
+(0)	working on variable QnTot_SRF
+(0)	working on variable Qn_SRF
+(0)	working on variable SWCRE_SRF
+(0)	working on variable LWCRE_SRF
+(0)	working on variable CRE_SRF
+(0)	working on variable U10
+(0)	working on variable V10
+(0)	working on variable S10
+(0)	working on variable TAUX
+(0)	working on variable TAUY
+(0)	working on variable ETH1
+(0)	working on variable ETH2
+(0)	working on variable ETH12
+(0)	working on variable CRE
+(0)	working on variable SWCRE
+(0)	workrm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en09.LWCRE.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en10.OLR.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en10.FLDS.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en10.FLDSC.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en10.LHFLX.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en10.SHFLX.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en10.FLNS.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en10.FLNSC.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en10.FSNS.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en10.FSNSC.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en10.CLDTOT.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en10.PSL.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en10.Z500.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en10.T850.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en10.U850.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en10.V850.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en10.U200.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en10.V200.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en10.PRECT.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en10.PRECST.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en10.TS.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en10.TREFHT.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en10.TMQ.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en10.TGCLDLWP.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en10.TGCLDIWP.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en10.QnRad_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en10.QnTur_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en10.QnTot_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en10.Qn_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en10.SWCRE_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en10.LWCRE_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en10.CRE_SRF.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en10.U10.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en10.V10.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en10.S10.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en10.TAUX.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en10.TAUY.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en10.ETH1.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en10.ETH2.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en10.ETH12.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en10.CRE.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en10.SWCRE.197901-201812.nc': No such file or directory
+rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en10.LWCRE.197901-201812.nc': No such file or directory
+input in flex scanner failed
+ing on variable LWCRE
+
+
+Variable: fl1 (subsection)
+Type: string
+Total Size: 8 bytes
+            1 values
+Number of Dimensions: 1
+Dimensions and sizes:	[1]
+Coordinates: 
+(0)	/global/cfs/cdirs/e3sm/zhan391/data/ERA5/monthly/ERA5_ens10_monthly_1979-2019_1x1.nc
+(0)	working on variable OLR
+(0)	working on variable FLDS
+(0)	working on variable FLDSC
+(0)	working on variable LHFLX
+(0)	working on variable SHFLX
+(0)	working on variable FLNS
+(0)	working on variable FLNSC
+(0)	working on variable FSNS
+(0)	working on variable FSNSC
+(0)	working on variable CLDTOT
+(0)	working on variable PSL
+(0)	working on variable Z500
+(0)	working on variable T850
+(0)	working on variable U850
+(0)	working on variable V850
+(0)	working on variable U200
+(0)	working on variable V200
+(0)	working on variable PRECT
+(0)	working on variable PRECST
+(0)	working on variable TS
+(0)	working on variable TREFHT
+(0)	working on variable TMQ
+(0)	working on variable TGCLDLWP
+(0)	working on variable TGCLDIWP
+(0)	working on variable FLNS
+(0)	working on variable FLNSC
+(0)	working on variable FSNS
+(0)	working on variable FSNSC
+(0)	working on variable QnRad_SRF
+(0)	working on variable QnTur_SRF
+(0)	working on variable QnTot_SRF
+(0)	working on variable Qn_SRF
+(0)	working on variable SWCRE_SRF
+(0)	working on variable LWCRE_SRF
+(0)	working on variable CRE_SRF
+(0)	working on variable U10
+(0)	working on variable V10
+(0)	working on variable S10
+(0)	working on variable TAUX
+(0)	working on variable TAUY
+(0)	working on variable ETH1
+(0)	working on variable ETH2
+(0)	working on variable ETH12
+(0)	working on variable CRE
+(0)	working on variable SWCRE
+(0)	working on variable LWCRE

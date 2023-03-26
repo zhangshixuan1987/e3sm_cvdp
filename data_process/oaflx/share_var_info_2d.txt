@@ -1,0 +1,8 @@
+LHFLX,           W m~S~-2~N~,     1.0,
+SHFLX,           W m~S~-2~N~,     1.0,
+QnTur_SRF,       W m~S~-2~N~,     1.0,
+TS,              K,               1.0,
+TREFHT,          K,               1.0,
+QREFHT,          g kg~S~-1~N~,    1e3,
+EVAP,            mm day~S~-1~N~,  1.0,
+S10,             m s~S~-1~N~,     1.0,

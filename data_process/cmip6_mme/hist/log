@@ -1,0 +1,105 @@
+netcdf siconc_SImon_CAS-ESM2-0_historical_r1i1p1f1_gn_185001-201412 {
+dimensions:
+	time = UNLIMITED ; // (1980 currently)
+	j = 196 ;
+	i = 360 ;
+	bnds = 2 ;
+	strlen = 7 ;
+variables:
+	double time(time) ;
+		time:bounds = "time_bnds" ;
+		time:units = "days since 0001-01-01 00:00:00" ;
+		time:calendar = "365_day" ;
+		time:axis = "T" ;
+		time:long_name = "time" ;
+		time:standard_name = "time" ;
+	double time_bnds(time, bnds) ;
+	int j(j) ;
+		j:units = "1" ;
+		j:long_name = "cell index along second dimension" ;
+	int i(i) ;
+		i:units = "1" ;
+		i:long_name = "cell index along first dimension" ;
+	double latitude(j, i) ;
+		latitude:standard_name = "latitude" ;
+		latitude:long_name = "latitude" ;
+		latitude:units = "degrees_north" ;
+		latitude:missing_value = 1.e+20 ;
+		latitude:_FillValue = 1.e+20 ;
+	double longitude(j, i) ;
+		longitude:standard_name = "longitude" ;
+		longitude:long_name = "longitude" ;
+		longitude:units = "degrees_east" ;
+		longitude:missing_value = 1.e+20 ;
+		longitude:_FillValue = 1.e+20 ;
+	char type(strlen) ;
+		type:long_name = "Sea Ice area type" ;
+		type:standard_name = "area_type" ;
+	float siconc(time, j, i) ;
+		siconc:standard_name = "sea_ice_area_fraction" ;
+		siconc:long_name = "Sea-Ice Area Percentage (Ocean Grid)" ;
+		siconc:comment = "Percentage of grid cell covered by sea ice" ;
+		siconc:units = "%" ;
+		siconc:cell_methods = "area: mean where sea time: mean" ;
+		siconc:cell_measures = "area: areacello" ;
+		siconc:history = "2020-03-11T15:06:44Z altered by CMOR: Treated scalar dimension: \'type\'. 2020-03-11T15:06:44Z altered by CMOR: replaced missing value flag (1e+30) and corresponding data with standard missing value (1e+20)." ;
+		siconc:coordinates = "type latitude longitude" ;
+		siconc:missing_value = 1.e+20f ;
+		siconc:_FillValue = 1.e+20f ;
+
+// global attributes:
+		:Conventions = "CF-1.7 CMIP-6.2" ;
+		:activity_id = "CMIP" ;
+		:branch_method = "Spin-up documentation" ;
+		:branch_time_in_child = 674885. ;
+		:branch_time_in_parent = 28835. ;
+		:contact = "He Zhang(zhanghe@mail.iap.ac.cn)" ;
+		:creation_date = "2020-03-11T15:06:52Z" ;
+		:data_specs_version = "01.00.31" ;
+		:experiment = "all-forcing simulation of the recent past" ;
+		:experiment_id = "historical" ;
+		:external_variables = "areacello" ;
+		:forcing_index = 1 ;
+		:frequency = "mon" ;
+		:further_info_url = "https://furtherinfo.es-doc.org/CMIP6.CAS.CAS-ESM2-0.historical.none.r1i1p1f1" ;
+		:grid = "gs1x1" ;
+		:grid_label = "gn" ;
+		:history = "2020-03-11T15:06:52Z ;rewrote data to be consistent with CMIP for variable siconc found in table SImon." ;
+		:initialization_index = 1 ;
+		:institution = "Chinese Academy of Sciences, Beijing 100029, China" ;
+		:institution_id = "CAS" ;
+		:mip_era = "CMIP6" ;
+		:nominal_resolution = "100 km" ;
+		:parent_activity_id = "CMIP" ;
+		:parent_experiment_id = "piControl" ;
+		:parent_mip_era = "CMIP6" ;
+		:parent_source_id = "CAS-ESM2-0" ;
+		:parent_time_units = "days since 0001-01-01" ;
+		:parent_variant_label = "r1i1p1f1" ;
+		:physics_index = 1 ;
+		:product = "model-output" ;
+		:realization_index = 1 ;
+		:realm = "seaIce" ;
+		:run_variant = "forcing: black carbon aerosol only" ;
+		:source = "CAS-ESM 2.0 (2019): \n",
+			"aerosol: IAP AACM\n",
+			"atmos: IAP AGCM 5.0 (Finite difference dynamical core; 256 x 128 longitude/latitude; 35 levels; top level 2.2 hPa)\n",
+			"atmosChem: IAP AACM\n",
+			"land: CoLM\n",
+			"landIce: none\n",
+			"ocean: LICOM2.0 (LICOM2.0, primarily 1deg; 362 x 196 longitude/latitude; 30 levels; top grid cell 0-10 m)\n",
+			"ocnBgchem: IAP OBGCM\n",
+			"seaIce: CICE4" ;
+		:source_id = "CAS-ESM2-0" ;
+		:source_type = "AOGCM" ;
+		:sub_experiment = "none" ;
+		:sub_experiment_id = "none" ;
+		:table_id = "SImon" ;
+		:table_info = "Creation Date:(07 October 2019) MD5:b9834a2d0728c0da123535a4e4240b5b" ;
+		:title = "CAS-ESM2-0 output prepared for CMIP6" ;
+		:tracking_id = "hdl:21.14100/f3c97eb2-9d58-496b-9d92-29719f48e47a" ;
+		:variable_id = "siconc" ;
+		:variant_label = "r1i1p1f1" ;
+		:license = "CMIP6 model data produced by Chinese Academy of Sciences (CAS) is licensed under a Creative Commons Attribution ShareAlike 4.0 International License (https://creativecommons.org/licenses). Consult https://pcmdi.llnl.gov/CMIP6/TermsOfUse for terms of use governing CMIP6 output, including citation requirements and proper acknowledgment. Further information about this data, including some limitations, can be found via the further_info_url (recorded as a global attribute in this file). The data producers and data providers make no warranty, either express or implied, including, but not limited to, warranties of merchantability and fitness for a particular purpose. All liabilities arising from the supply of the information (including any liability arising in negligence) are excluded to the fullest extent permitted by law." ;
+		:cmor_version = "3.5.0" ;
+}

@@ -1,0 +1,5 @@
+LHFLX,           W m~S~-2~N~,     1.0,
+SHFLX,           W m~S~-2~N~,     1.0,
+TUQ,             W m~S~-2~N~,     1.0,
+TVQ,             W m~S~-2~N~,     1.0,
+QFLX,            W m~S~-2~N~,     1.0,
