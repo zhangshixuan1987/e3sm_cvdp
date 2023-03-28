@@ -566,7 +566,7 @@ begin
      system("mv " + OUTDIR+"table_nao_regpatt_1.png" + " " + OUTDIR+"metrics.table_"+mods(jx)+"_patrms_"+seas(ix)+".png")
      system("rm "+OUTDIR+"table_nao_regpatt.*.png")
      delete(fils)
-     system("rm "+OUTDIR+"table*.png")
+    ;system("rm "+OUTDIR+"table*.png")
   end if
 
  end do 

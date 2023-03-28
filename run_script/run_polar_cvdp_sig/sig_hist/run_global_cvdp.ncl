@@ -4,15 +4,15 @@
 ; to a file named file.out, type: ncl driver.ncl >&! file.out &
 ; 
 ;============================================================================================
-  outnam            = "e3sm_vs_obs"
-  outdir            = "/global/cfs/cdirs/e3sm/zhan391/diag_out/"+outnam+"/"
-  title_lines       = (/"Obs: ERA5,NOAA_NSIDC,HadSST", "Simulation: E3SM AMIP and Coupled Historical"/)
+  topdir            = "/lcrc/group/acme/ac.szhang/acme_scratch"
+  outnam            = "cvdp_e3sm_historical_vs_obs_1985-2014"
+  outdir            = "/lcrc/group/e3sm/public_html/ac.szhang/"+outnam+"/"
+  title_lines       = (/"Reference: ERA5/HadSST/NOAA", "Simulation: E3SM v3dev v2_1 and v2 Couple"/)
   user_gen_namelist = "True"              ; use the user-specified method to process namelist file
   namelists_only    = "False"             ; Set to True to only create the variable namelists. Useful
                                           ; upon running the package for the first time to verify that the correct
                                           ; files are being selected by the package. (See files in namelist_byvar/ directory)
                                           ; Set to False to run the entire package.
-
   obs               = "True"              ; True = analyze and plot observations (specified in namelist_obs), False = do not
   scale_timeseries  = "False"             ; True = scale timeseries so that x-axis length is comparable across timeseries, False = do not
   output_data       = "True"              ; True = output selected calculated data to a netCDF file. Make sure .nc files from previous CVDP
@@ -41,7 +41,7 @@
                                             ; Note: ALL files in outdir will be tarred up and then removed from the outdir directory. 
 
 ;---Advanced Options----------------------------------------------------------------------                                             
-  zp = "/global/cfs/cdirs/e3sm/zhan391/e3sm_cvdp/ncl_code_sig/"    ; directory path of CVDP NCL scripts. (must end in a "/")
+  zp = topdir+"/e3sm_cvdp/ncl_code_sig/"    ; directory path of CVDP NCL scripts. (must end in a "/")
                          ; Examples: "ncl_scripts/" if all code is local, or on CGD or CISL systems: "~asphilli/CESM-diagnostics/CVDP/Release/v4.1.0/ncl_scripts/"
                          ; Regardless of this setting the following files should be in one directory: namelist, driver.ncl, and namelist_obs. 
                          ; If pointing to code in ~asphilli make sure the driver script version #s match between this script and the script in ~asphilli.
@@ -59,12 +59,14 @@
 
   modular_list = "psl.nam_nao,psl.pna_npo,tas.trends_timeseries,"+\
                  "psl.trends,amo,pdo,sst.indices,pr.trends_timeseries,"+\
-                 "psl.sam_psa,u850.pnjet.indices,sst.mean_stddev,psl.mean_stddev,"+\
-                 "pr.mean_stddev,sst.trends_timeseries,tas.mean_stddev,ipo,aice.mean_stddev,"+\
-                 "aice.trends_timeseries,psl.sam_psa_regpatt,sst.nino34_regpatt,"+\
+                 "psl.sam_psa,sst.mean_stddev,psl.mean_stddev,"+\
+                 "u850.pnjet.indices,u200.stjnh.indices,"+\
+                 "u850.psjet.indices,u200.stjsh.indices,"+\
+                 "pr.mean_stddev,sst.trends_timeseries,tas.mean_stddev,ipo,"+\
+                 "psl.sam_psa_regpatt,sst.nino34_regpatt,"+\
                  "psl.pna_npo_regpatt,psl.nao_regpatt,psl.nam_regpatt,psl.indices,"+\
-                 "u850.psjet.indices,zmsf.hovmoller,zmsf.indices,zmsf.trends,zmsf.mean_stddev"
-                ;"amoc,snd.trends,snd.mean_stddev" 
+                 "zmsf.hovmoller,zmsf.indices,zmsf.trends,zmsf.mean_stddev,"+\
+                 "amoc,snd.trends,snd.mean_stddev,aice.mean_stddev,aice.trends_timeseries" 
                 ; When modular = "True" list the CVDP scripts that will be run.
                 ; Example: modular_list = "amoc,amo,pr.trends_timeseries"
                 ; For a list of available scripts see complete_list at line 72. 
@@ -141,13 +143,19 @@
 ;-------------------------------
 ; Finalize netCDF files, create metrics tables, and finalize images.
 
-  if (output_data.eq."True") then     ; finalize output nc files
-     system(envvar_str + " "+ncl_exec+" "+zp+"ncfiles.append.ncl")
-  end if
+;  if (output_data.eq."True") then     ; finalize output nc files
+;     system(envvar_str + " "+ncl_exec+" "+zp+"ncfiles.append.ncl")
+;  end if
 
   met_files = systemfunc("ls "+outdir+"metrics.*.txt  2> /dev/null")
-  if (dimsizes(met_files).eq.13) then   ; if all metrics text files are present, create metrics table(s)
+  if (dimsizes(met_files).eq.15) then   ; if all metrics text files are present, create metrics table(s)
      system("   export OUTDIR="+outdir+"; "+ncl_exec+" "+zp+"metrics.ncl")
+  end if
+  delete(met_files)
+
+  met_files = systemfunc("ls "+outdir+"regpatt_metrics.psl.pna_npo_*.txt  2> /dev/null")
+  if (dimsizes(met_files).eq.20) then   ; if all metrics text files are present, create metrics table(s)
+     system("   export OUTDIR="+outdir+"; "+ncl_exec+" "+zp+"metrics_pna_npo.ncl")
   end if
   delete(met_files)
 

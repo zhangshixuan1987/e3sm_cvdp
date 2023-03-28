@@ -593,9 +593,9 @@ begin
         else
            pres@trYMaxF         := mval+15.
            pres@tmYLMode        := "Explicit"
-           pres@tmYLValues      := ispan(0,mval+15,50)
+           pres@tmYLValues      := ispan(0,toint(mval+15),50)
            pres@tmYLLabels      := pres@tmYLValues
-           pres@tmYLMinorValues := ispan(0,mval+15,25)
+           pres@tmYLMinorValues := ispan(0,toint(mval+15),25)
         end if
         end if
         end if
