@@ -67,68 +67,6 @@ begin
           l_output = False 
         end if 
       end if 
-    else if (vars.eq."Z500") then
-      v3d  = "Z3"
-      fl1  = data_dir+"/"+exp_name(k)+"/"+exp_name(k)+"."+enstr+"."+v3d+"."+time_tag(it)+".nc"
-      f1   = addfile(fl1,"r")
-      xtmp = vinth2p(f1->Z3,f1->hyam,f1->hybm,500.0,f1->PS,1,f1->P0/100.0,1,False)
-      var0 = xtmp(:,0,{latS:latN},{lonW:lonE})
-      var0@_FillValue = -9999.
-      var0       = var0*facmod
-      var0@units = varunt
-      var0@notes = "modified: * " + facmod
-      delete([/v3d,fl1,f1,xtmp/])
-    else if (vars.eq."T850") then
-      v3d  = "T"
-      fl1  = data_dir+"/"+exp_name(k)+"/"+exp_name(k)+"."+enstr+"."+v3d+"."+time_tag(it)+".nc"
-      f1   = addfile(fl1,"r")
-      xtmp = vinth2p(f1->T,f1->hyam,f1->hybm,850.0,f1->PS,1,f1->P0/100.0,1,False)
-      var0 = xtmp(:,0,{latS:latN},{lonW:lonE})
-      var0@_FillValue = -9999.
-      var0       = var0*facmod
-      var0@units = varunt
-      var0@notes = "modified: * " + facmod
-      delete([/v3d,fl1,f1,xtmp/])
-    else if (vars.eq."U850") then
-      v3d  = "U"
-      fl1  = data_dir+"/"+exp_name(k)+"/"+exp_name(k)+"."+enstr+"."+v3d+"."+time_tag(it)+".nc"
-      f1   = addfile(fl1,"r")
-      xtmp = vinth2p(f1->U,f1->hyam,f1->hybm,850.0,f1->PS,1,f1->P0/100.0,1,False)
-      var0 = xtmp(:,0,{latS:latN},{lonW:lonE})
-      delete([/v3d,fl1,f1,xtmp/])
-    else if (vars.eq."V850") then
-      v3d  = "V"
-      fl1  = data_dir+"/"+exp_name(k)+"/"+exp_name(k)+"."+enstr+"."+v3d+"."+time_tag(it)+".nc"
-      f1   = addfile(fl1,"r")
-      xtmp = vinth2p(f1->V,f1->hyam,f1->hybm,850.0,f1->PS,1,f1->P0/100.0,1,False)
-      var0 = xtmp(:,0,{latS:latN},{lonW:lonE})
-      var0@_FillValue = -9999.
-      var0       = var0*facmod
-      var0@units = varunt
-      var0@notes = "modified: * " + facmod
-      delete([/v3d,fl1,f1,xtmp/])
-    else if (vars.eq."U200") then
-      v3d  = "U"
-      fl1  = data_dir+"/"+exp_name(k)+"/"+exp_name(k)+"."+enstr+"."+v3d+"."+time_tag(it)+".nc"
-      f1   = addfile(fl1,"r")
-      xtmp = vinth2p(f1->U,f1->hyam,f1->hybm,200.0,f1->PS,1,f1->P0/100.0,1,False)
-      var0 = xtmp(:,0,{latS:latN},{lonW:lonE})
-      var0@_FillValue = -9999.
-      var0       = var0*facmod
-      var0@units = varunt
-      var0@notes = "modified: * " + facmod
-      delete([/v3d,fl1,f1,xtmp/])
-    else if (vars.eq."V200") then
-      v3d  = "V"
-      fl1  = data_dir+"/"+exp_name(k)+"/"+exp_name(k)+"."+enstr+"."+v3d+"."+time_tag(it)+".nc"
-      f1   = addfile(fl1,"r")
-      xtmp = vinth2p(f1->V,f1->hyam,f1->hybm,200.0,f1->PS,1,f1->P0/100.0,1,False)
-      var0 = xtmp(:,0,{latS:latN},{lonW:lonE})
-      var0@_FillValue = -9999.
-      var0       = var0*facmod
-      var0@units = varunt
-      var0@notes = "modified: * " + facmod
-      delete([/v3d,fl1,f1,xtmp/])
     else if (vars.eq."PRECT") then
       v2d  = (/"PRECC","PRECL"/)
       do iv = 0,dimsizes(v2d)-1 
@@ -530,48 +468,6 @@ begin
       var0@units = varunt
       var0@notes = "modified: * " + facmod
       delete([/v2d,fl1,f1,vsg/])
-    else if (vars.eq."S10") then
-      v2d  = (/"U10","V10"/)
-      vsg  = (/1.0,1.0/)
-      do iv = 0,dimsizes(v2d)-1
-        vin  = v2d(iv)
-        fl1  = data_dir+"/"+exp_name(k)+"/"+exp_name(k)+"."+enstr+"."+vin+"."+time_tag(it)+".nc"
-        f1   = addfile(fl1,"r")
-        if(iv.eq.0) then
-          var0 = f1->$vin$
-          var0 = f1->$vin$* f1->$vin$
-        else
-          var0 = var0 + f1->$vin$ * f1->$vin$ 
-        end if
-      end do
-      var0 = sqrt(var0)
-      var0@_FillValue = -9999.
-      var0       = var0*facmod
-      var0@units = varunt
-      var0@notes = "modified: * " + facmod
-      delete([/v2d,fl1,f1,vsg/])
-    else if (vars.eq."U10") then
-      v3d  = (/"U"/)
-      fl1  = data_dir+"/"+exp_name(k)+"/"+exp_name(k)+"."+enstr+"."+v3d+"."+time_tag(it)+".nc"
-      f1   = addfile(fl1,"r")
-      nlev = dimsizes(f1->lev)
-      var0 = f1->$v3d$(:,nlev-1,:,:)
-      var0@_FillValue = -9999.
-      var0       = var0*facmod
-      var0@units = varunt
-      var0@notes = "modified: * " + facmod
-      delete([/v3d,fl1,f1,nlev/])
-    else if (vars.eq."V10") then
-      v3d  = (/"U"/)
-      fl1  = data_dir+"/"+exp_name(k)+"/"+exp_name(k)+"."+enstr+"."+v3d+"."+time_tag(it)+".nc"
-      f1   = addfile(fl1,"r")
-      nlev = dimsizes(f1->lev)
-      var0 = f1->$v3d$(:,nlev-1,:,:)
-      var0@_FillValue = -9999.
-      var0       = var0*facmod
-      var0@units = varunt
-      var0@notes = "modified: * " + facmod
-      delete([/v3d,fl1,f1,nlev/])
     else if (vars.eq."ETH1".or. vars.eq."ETH2".or.vars.eq."ETH12") then
       v2d   = (/"TAUX","TAUY","TS"/)
       fl0   = data_dir+"/"+exp_name(k)+"/"+exp_name(k)+"."+enstr+"."+v2d(0)+"."+time_tag(it)+".nc"
@@ -649,31 +545,6 @@ begin
       var0@notes = "modified: * " + facmod
       delete([/fcor,cpair,cp_sw,rho_sw,tztmp,txtmp,tytmp,tzclm,txclm,tyclm,tzanm,txanm,tyanm/])
       delete([/v2d,fl0,f0,fl1,f1,fl2,f2/])
-    else if (vars.eq."SF") then
-      v3d  = (/"V"/)
-      fl1  = data_dir+"/"+exp_name(k)+"/"+exp_name(k)+"."+enstr+"."+v3d+"."+time_tag(it)+".nc"
-      f1   = addfile(fl1,"r")
-      lev           = tofloat(plev({50:1000}))
-      lev           = lev * 100.0
-      lev!0         = "lev"
-      lev&lev       = lev
-      lev@units     = "Pa"
-      vmx           = vinth2p(f1->V,f1->hyam,f1->hybm,plev({50:1000}),f1->PS,1,f1->P0/100.0,1,False)
-      vmi           = vmx(:,{50:1000},:,:)
-      psm           = f1->PS
-      vmi&lev       = lev
-      vmi&lev@units = "Pa"
-      if(psm@units.eq."hPa") then
-        psm = psm * 100.0
-        psm@units = "Pa"
-      end if
-      var0 = zonal_mpsi_Wrap(vmi,vmi&lat,lev,psm)
-      var0@_FillValue = -9999.
-      var0       = var0*facmod
-      var0@units = varunt
-      var0@notes = "modified: * " + facmod
-      delete([/v3d,fl1,f1,nlev/])
-      delete([/vmx,vmi,psm/])
     else if (vars.eq."OLR") then
       v2d  = (/"FSNTOA","FLNT","FSNT"/)
       vsg  = (/1.0,1.0,-1.0/)
@@ -692,16 +563,6 @@ begin
       var0@units = varunt
       var0@notes = "modified: * " + facmod
       delete([/v2d,fl1,f1,vsg/])
-    end if 
-    end if
-    end if
-    end if 
-    end if 
-    end if 
-    end if 
-    end if 
-    end if
-    end if
     end if
     end if
     end if

@@ -1,0 +1,92 @@
+nohup: ignoring input
+rm: cannot remove ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.LR.historical/v2_1.LR.historical.en00.SF.197901-201412.nc’: No such file or directory
+rm: cannot remove ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.LR.historical/v2_1.LR.historical.en00.U850.197901-201412.nc’: No such file or directory
+rm: cannot remove ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.LR.historical/v2_1.LR.historical.en00.V850.197901-201412.nc’: No such file or directory
+rm: cannot remove ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.LR.historical/v2_1.LR.historical.en00.U200.197901-201412.nc’: No such file or directory
+rm: cannot remove ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.LR.historical/v2_1.LR.historical.en00.V200.197901-201412.nc’: No such file or directory
+rm: cannot remove ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.LR.historical/v2_1.LR.historical.en00.Z500.197901-201412.nc’: No such file or directory
+rm: cannot remove ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.LR.historical/v2_1.LR.historical.en00.T850.197901-201412.nc’: No such file or directory
+rm: cannot remove ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.LR.historical/v2_1.LR.historical.en01.SF.197901-201412.nc’: No such file or directory
+rm: cannot remove ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.LR.historical/v2_1.LR.historical.en01.U850.197901-201412.nc’: No such file or directory
+rm: cannot remove ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.LR.historical/v2_1.LR.historical.en01.V850.197901-201412.nc’: No such file or directory
+rm: cannot remove ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.LR.historical/v2_1.LR.historical.en01.U200.197901-201412.nc’: No such file or directory
+rm: cannot remove ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.LR.historical/v2_1.LR.historical.en01.V200.197901-201412.nc’: No such file or directory
+rm: cannot remove ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.LR.historical/v2_1.LR.historical.en01.Z500.197901-201412.nc’: No such file or directory
+rm: cannot remove ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.LR.historical/v2_1.LR.historical.en01.T850.197901-201412.nc’: No such file or directory
+rm: cannot remove ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.LR.historical/v2_1.LR.historical.en02.SF.197901-201412.nc’: No such file or directory
+rm: cannot remove ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.LR.historical/v2_1.LR.historical.en02.U850.197901-201412.nc’: No such file or directory
+rm: cannot remove ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.LR.historical/v2_1.LR.historical.en02.V850.197901-201412.nc’: No such file or directory
+rm: cannot remove ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.LR.historical/v2_1.LR.historical.en02.U200.197901-201412.nc’: No such file or directory
+rm: cannot remove ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.LR.historical/v2_1.LR.historical.en02.V200.197901-201412.nc’: No such file or directory
+rm: cannot remove ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.LR.historical/v2_1.LR.historical.en02.Z500.197901-201412.nc’: No such file or directory
+rm: cannot remove ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.LR.historical/v2_1.LR.historical.en02.T850.197901-201412.nc’: No such file or directory
+rm: cannot remove ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.LR.historical/v2_1.LR.historical.en03.SF.197901-201412.nc’: No such file or directory
+rm: cannot remove ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.LR.historical/v2_1.LR.historical.en03.U850.197901-201412.nc’: No such file or directory
+rm: cannot remove ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.LR.historical/v2_1.LR.historical.en03.V850.197901-201412.nc’: No such file or directory
+rm: cannot remove ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.LR.historical/v2_1.LR.historical.en03.U200.197901-201412.nc’: No such file or directory
+rm: cannot remove ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.LR.historical/v2_1.LR.historical.en03.V200.197901-201412.nc’: No such file or directory
+rm: cannot remove ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.LR.historical/v2_1.LR.historical.en03.Z500.197901-201412.nc’: No such file or directory
+rm: cannot remove ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.LR.historical/v2_1.LR.historical.en03.T850.197901-201412.nc’: No such file or directory
+rm: cannot remove ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.LR.historical/v2_1.LR.historical.en04.SF.197901-201412.nc’: No such file or directory
+rm: cannot remove ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.LR.historical/v2_1.LR.historical.en04.U850.197901-201412.nc’: No such file or directory
+rm: cannot remove ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.LR.historical/v2_1.LR.historical.en04.V850.197901-201412.nc’: No such file or directory
+rm: cannot remove ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.LR.historical/v2_1.LR.historical.en04.U200.197901-201412.nc’: No such file or directory
+rm: cannot remove ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.LR.historical/v2_1.LR.historical.en04.V200.197901-201412.nc’: No such file or directory
+rm: cannot remove ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.LR.historical/v2_1.LR.historical.en04.Z500.197901-201412.nc’: No such file or directory
+rm: cannot remove ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.LR.historical/v2_1.LR.historical.en04.T850.197901-201412.nc’: No such file or directory
+input in flex scanner failed
+ Copyright (C) 1995-2019 - All Rights Reserved
+ University Corporation for Atmospheric Research
+ NCAR Command Language Version 6.6.2
+ The use of this software is governed by a License Agreement.
+ See http://www.ncl.ucar.edu/ for more details.
+(0)	working on variable SF
+(0)	working on variable U850
+(0)	working on variable V850
+(0)	working on variable U200
+(0)	working on variable V200
+(0)	working on variable U10
+(0)	working on variable V10
+(0)	working on variable S10
+(0)	working on variable Z500
+(0)	working on variable T850
+(0)	working on variable SF
+(0)	working on variable U850
+(0)	working on variable V850
+(0)	working on variable U200
+(0)	working on variable V200
+(0)	working on variable U10
+(0)	working on variable V10
+(0)	working on variable S10
+(0)	working on variable Z500
+(0)	working on variable T850
+(0)	working on variable SF
+(0)	working on variable U850
+(0)	working on variable V850
+(0)	working on variable U200
+(0)	working on variable V200
+(0)	working on variable U10
+(0)	working on variable V10
+(0)	working on variable S10
+(0)	working on variable Z500
+(0)	working on variable T850
+(0)	working on variable SF
+(0)	working on variable U850
+(0)	working on variable V850
+(0)	working on variable U200
+(0)	working on variable V200
+(0)	working on variable U10
+(0)	working on variable V10
+(0)	working on variable S10
+(0)	working on variable Z500
+(0)	working on variable T850
+(0)	working on variable SF
+(0)	working on variable U850
+(0)	working on variable V850
+(0)	working on variable U200
+(0)	working on variable V200
+(0)	working on variable U10
+(0)	working on variable V10
+(0)	working on variable S10
+(0)	working on variable Z500
+(0)	working on variable T850

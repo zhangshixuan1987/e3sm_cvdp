@@ -21,8 +21,8 @@ set var2d_name = ("U" "V" "T" "Q" "Z3")
 set var2d_list = ( $var2d_name )
 set nvars      = $#var2d_list
 
-set start_year = 600
-set end_year   = 700
+set start_year = 501
+set end_year   = 600
 
 @ nyr = ( $end_year - $start_year + 1 ) / 50
 set time_tag   = `printf "%04d" $start_year`01-`printf "%04d" $end_year`12
@@ -45,7 +45,7 @@ while ( $i <= $ncase )
  set iy = 1
  while ($iy <= $nyr )
 
-  @ yst = $start_year + ( $iy - 1 ) * 50
+  @ yst = $start_year + ( $iy - 1 ) * 50 
   @ yed = $start_year + $iy * 50 - 1
   set time_tag   = `printf "%04d" $yst`01-`printf "%04d" $yed`12
 
@@ -58,6 +58,10 @@ while ( $i <= $ncase )
 
   if( ! -d ${WORK_DIR}/SE_ATM )then
     mkdir -p ${WORK_DIR}/SE_ATM
+  endif
+
+  if( ! -d ${WORK_DIR}/ATM_3D )then
+    mkdir -p ${WORK_DIR}/ATM_3D
   endif
 
   set j = 1
@@ -82,7 +86,7 @@ while ( $i <= $ncase )
    @ ens  = $i - 1
    set ensr = en`printf "%02d" $ens`
    set SE_FILE = ${WORK_DIR}/SE_ATM/${exp_name}.${ensr}.${vou}.${time_tag}.nc
-   set FV_FILE = ${WORK_DIR}/${exp_name}.${ensr}.${vou}.${time_tag}.nc
+   set FV_FILE = ${WORK_DIR}/ATM_3D/${exp_name}.${ensr}.${vou}.${time_tag}.nc
    rm -rvf $FV_FILE ${WORK_DIR}/SE_ATM/tmp_atm_out.nc
    ncremap -i ${SE_FILE} -m ${MAP_FILE} -o ${FV_FILE} 
    rm -rvf ${WORK_DIR}/SE_ATM/tmp_atm_out.nc

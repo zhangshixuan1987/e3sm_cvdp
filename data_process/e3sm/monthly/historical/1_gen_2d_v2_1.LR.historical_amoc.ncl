@@ -24,7 +24,6 @@ begin
   time_tag  = (/"197901-201412"/)
   ystr      = (/197901/)
   yend      = (/201412/)
-
   ntags     = dimsizes(time_tag)
   grid_tag  = "1x1"
 
@@ -83,7 +82,7 @@ begin
     var0@long_name = "Atlantic Meridional Overturning Circulation (AMOC)"
 
     setfileoption("nc", "Format",  "NetCDF4")
-    enstr = "en"+sprinti("%02d",ie)
+    enstr = "en"+sprinti("%02d",k)
     DIR   = out_dir+"/" + out_name
     system("if ! test -d " + DIR +" ; then mkdir " + DIR + " ; fi")
     out_file  = DIR+"/"+out_name+"."+enstr+"."+varnam+"."+time_tag(it)+".nc"

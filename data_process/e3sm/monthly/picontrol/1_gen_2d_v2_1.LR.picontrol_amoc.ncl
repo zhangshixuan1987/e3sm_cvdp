@@ -48,25 +48,43 @@ begin
 
   do it = 0, ntags-1,1
 
-   fl1    = "ts_"+data_tag1(it)+"_climo_"+data_tag2(it)+"/timeseries/moc/mocTimeSeries_"+data_tag1(it)+".nc"
-   fl1    = data_dir+"/" + fl1
-   nens   = dimsizes(fl1)
+  ;fl1    = "ts_"+data_tag1(it)+"_climo_"+data_tag2(it)+"/timeseries/moc/mocTimeSeries_"+data_tag1(it)+".nc"
+  ;fl1    = data_dir+"/" + fl1
+  ;nens   = dimsizes(fl1)
+
+   nens  = 1
+   nyr   = yend/100 - ystr/100  +1
+   fl1   = new(nyr,string)
+   do iy = 0,nyr-1
+     dtag = sprinti("%04d",iy+ystr/100) + "-" + sprinti("%04d",iy+ystr/100)
+     fl1(iy) = data_dir+"/" + "ts_"+data_tag1(it)+"_climo_"+data_tag2(it)+"/timeseries/moc/mocTimeSeries_"+dtag+".nc"
+   end do
 
    do ie = 0,nens-1,1
 
-    print(fl1(ie))
-    f1   = addfile(fl1(ie),"r")
-    lat  = f1->lat
-    lev  = f1->depth
-    time = f1->Time
-    time = time - 1
+   ;print(fl1(ie))
+    f1   = addfiles(fl1,"r")
+    lat  = f1[0]->lat
+    lev  = f1[0]->depth
+    time = f1[:]->Time
 
-    year          = cd_calendar(time, 1)  
-    indy          = ind(year.ge.ystr(it).and.year.le.yend(it))
-    obstime       = time(indy)
-    obstime@units = time@units
+    yymm = yyyymm_time(ystr/100,yend/100,"integer")
+    year = yymm/100
+    month= yymm - (yymm/100)*100
+    day  = month
+    day  = 15
+    hh   = month
+    mn   = month
+    sc   = month
+    hh   = 0
+    mn   = 0
+    sc   = 0
 
-    var0      = tofloat(f1->mocAtlantic(indy,:,:))
+    time_unt = "months since " + ystr+"-01-01  00:00:0.0"
+    obstime  = cd_inv_calendar(year,month,day,hh,mn,sc,time_unt, 0)
+    delete([/yymm,year,month,day,hh,mn,sc,hh,mn,sc/])
+
+    var0      = tofloat(f1[:]->mocAtlantic(:,:,:))
     var0!0    = "time"
     var0!1    = "lev"
     var0!2    = "lat"
@@ -93,7 +111,7 @@ begin
     fout->$vs1$  = var0
     delete([/fout,var0/])
   
-    delete([/time,lat,year,indy,obstime,lev/])
+    delete([/time,lat,obstime,lev/])
 
   end do 
 

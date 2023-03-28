@@ -60,6 +60,10 @@ while ( $i <= $ncase )
     mkdir -p ${WORK_DIR}/SE_ATM
   endif
 
+  if( ! -d ${WORK_DIR}/ATM_3D )then
+    mkdir -p ${WORK_DIR}/ATM_3D
+  endif
+
   set j = 1
   while ( $j <= $nvars ) 
    set var  = $var2d_list[$j]
@@ -82,7 +86,7 @@ while ( $i <= $ncase )
    @ ens  = $i - 1
    set ensr = en`printf "%02d" $ens`
    set SE_FILE = ${WORK_DIR}/SE_ATM/${exp_name}.${ensr}.${vou}.${time_tag}.nc
-   set FV_FILE = ${WORK_DIR}/${exp_name}.${ensr}.${vou}.${time_tag}.nc
+   set FV_FILE = ${WORK_DIR}/ATM_3D/${exp_name}.${ensr}.${vou}.${time_tag}.nc
    rm -rvf $FV_FILE ${WORK_DIR}/SE_ATM/tmp_atm_out.nc
    ncremap -i ${SE_FILE} -m ${MAP_FILE} -o ${FV_FILE} 
    rm -rvf ${WORK_DIR}/SE_ATM/tmp_atm_out.nc
