@@ -683,7 +683,10 @@ begin
      xyres@gsnCenterString = ""
      xyres@trXMinF = syear(ee)-.5
      xyres@trXMaxF = eyear(ee)+1.5
-     
+ 
+     xyres@trYMinF = -1.0
+     xyres@trYMaxF =  1.0
+    
      xyres2 =    xyres
      delete(xyres2@gsnXYBarChart)
      delete(xyres2@gsnAboveYRefLineColor)

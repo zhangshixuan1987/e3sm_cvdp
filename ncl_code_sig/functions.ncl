@@ -749,7 +749,26 @@ begin
      end if
      farr@units = "W/m2"
   end if
-  if (vn.eq."U".or.vn.eq."V".or.vn.eq."U850".or.vn.eq."V850") then
+  if (vn.eq."Z500") then 
+     farr@units = "m"
+  end if
+  if (vn.eq."CLDTOT") then
+     if (farr@units.eq."fraction".or.farr@units.eq."1".or.farr@units.eq."unitless") then
+        farr = farr*100.0
+        farr@units = "%"
+     end if
+     if (farr@units.eq."percent") then 
+        farr@units = "%"
+     end if
+     farr@units = "%"
+     if(farr@units.eq."%".and.max(farr).lt.1) then 
+       farr = farr * 100.0 
+     end if 
+     if(farr@units.eq."%".and.max(farr).gt.1000) then
+       farr = farr / 100.0
+     end if
+  end if
+  if (vn.eq."U200".or.vn.eq."V200".or.vn.eq."U850".or.vn.eq."V850") then
      if (farr@units.eq."m s~S~-1~N~".or.farr@units.eq."m s-1") then
         farr = farr*1.0
         farr@units = "m/s"
@@ -763,14 +782,14 @@ begin
      end if
      farr@units = "m/s"
   end if
-  if (vn.eq."ETH".or.vn.eq."ETH1".or.vn.eq."ETH2".or.vn.eq."ETH12")then 
+  if (vn.eq."ETH".or.vn.eq."ETH1".or.vn.eq."ETH2".or.vn.eq."ETH12") then 
      if (farr@units.eq."W m~S~-2~N~".or.farr@units.eq."W m-2") then
         farr = farr*1.0
         farr@units = "W/m2"
      end if
      farr@units = "W/m2"
   end if
-  if (vn.eq."SHFLX".or.vn.eq."LHFLX")then 
+  if (vn.eq."SHFLX".or.vn.eq."LHFLX".or.vn.eq."HFLX") then 
      if (farr@units.eq."W m~S~-2~N~".or.farr@units.eq."W m-2") then
         farr = farr*1.0
         farr@units = "W/m2"

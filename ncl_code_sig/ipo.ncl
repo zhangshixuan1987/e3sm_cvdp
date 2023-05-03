@@ -664,17 +664,20 @@ begin
      
      xyres@trXMinF = syear(ee)-.5
      xyres@trXMaxF = eyear(ee)+1.5
+
+     xyres@trYMinF = -2.0
+     xyres@trYMaxF =  2.0
      
-;     xyres2 =    xyres
-;     delete(xyres2@gsnXYBarChart)
-;     delete(xyres2@gsnAboveYRefLineColor)
-;     delete(xyres2@gsnBelowYRefLineColor)
-;     xyres2@xyLineColor = "black"
-;     if (wks_type.eq."png") then
-;        xyres2@xyLineThicknessF = 3.5
-;     else
-;        xyres2@xyLineThicknessF = 2.5
-;     end if
+;    xyres2 =    xyres
+;    delete(xyres2@gsnXYBarChart)
+;    delete(xyres2@gsnAboveYRefLineColor)
+;    delete(xyres2@gsnBelowYRefLineColor)
+;    xyres2@xyLineColor = "black"
+;    if (wks_type.eq."png") then
+;       xyres2@xyLineThicknessF = 3.5
+;    else
+;       xyres2@xyLineThicknessF = 2.5
+;    end if
 
      xyres@gsnCenterString = names(ee)
      xyplot(ee) = gsn_csm_xy(wks3,fspan(syear(ee),eyear(ee)+.91667,dimsizes(pc1)),pc1,xyres)   ; use standardized timeseries  

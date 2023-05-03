@@ -199,11 +199,14 @@ begin
   rad=(pi/180.)
 
   do ee = 0,nsim-1
+
      zmsf = data_read_in(paths(ee),"SF",syear(ee),eyear(ee))
      if (isatt(zmsf,"is_all_missing")) then
         delete(zmsf)
         continue
      end if
+
+     TIME = zmsf&time
 
      scale_factor = 1.e9
      zmsf         = zmsf / scale_factor
@@ -617,7 +620,6 @@ begin
        delete([/lsm,basemap/])
        delete(d)
 
-       TIME = psl&time
        yyyymm = cd_calendar(psl&time,-1)  ; convert tas, ts, and ua from CF-conforming time to YYYYMM for coding below
        delete(psl&time)
        psl&time = yyyymm 
@@ -668,8 +670,8 @@ begin
 
              check_custom_climo(names_psl(ee),syear_psl(ee),eyear_psl(ee),CLIMO_SYEAR,CLIMO_EYEAR)
              temp_arr = psl
-             delete(temp_arr&time)
-             temp_arr&time = cd_calendar(psl&time,-1)
+            ;delete(temp_arr&time)
+            ;temp_arr&time = cd_calendar(psl&time,-1)
              if (CLIMO_SYEAR.lt.0) then
                climo = clmMonTLL(temp_arr({(eyear_psl(ee)+CLIMO_SYEAR)*100+1:(eyear_psl(ee)+CLIMO_EYEAR)*100+12},:,:))
              else

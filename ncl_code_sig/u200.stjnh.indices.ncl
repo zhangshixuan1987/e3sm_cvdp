@@ -219,13 +219,17 @@ begin
   rad=(pi/180.)
 
   do ee = 0,nsim-1
+
      ua = data_read_in(paths(ee),"U200",syear(ee),eyear(ee))        ; read in data, orient lats/lons correctly, set time coordinate variable up
      ub = data_read_in(paths_u850(ee),"U850",syear_u850(ee),eyear_u850(ee))    ; read in data, orient lats/lons correctly, set time coordinate variable up
      strs = str_sub_str(paths(ee), "U200", "U850")
+
      if (isatt(ua,"is_all_missing").or.isatt(ub,"is_all_missing").or.(strs.ne.paths_u850(ee))) then
         delete([/ua,ub/])
         continue
      end if
+
+     TIME = ua&time
      
     ;Following Adam et. al. (2018,https://doi.org/10.5194/gmd-11-4339-2018) 
     ;Menzel et. al. (2019,https://doi.org/10.1029/2019GL083345)  
@@ -544,7 +548,6 @@ begin
        delete([/lsm,basemap/])
        delete(d)
 
-       TIME = psl&time
        yyyymm = cd_calendar(psl&time,-1)  ; convert tas, ts, and ua from CF-conforming time to YYYYMM for coding below
        delete(psl&time)
        psl&time = yyyymm 
@@ -595,8 +598,8 @@ begin
 
              check_custom_climo(names_psl(ee),syear_psl(ee),eyear_psl(ee),CLIMO_SYEAR,CLIMO_EYEAR)
              temp_arr = psl
-             delete(temp_arr&time)
-             temp_arr&time = cd_calendar(psl&time,-1)
+            ;delete(temp_arr&time)
+            ;temp_arr&time = cd_calendar(psl&time,-1)
              if (CLIMO_SYEAR.lt.0) then
                climo = clmMonTLL(temp_arr({(eyear_psl(ee)+CLIMO_SYEAR)*100+1:(eyear_psl(ee)+CLIMO_EYEAR)*100+12},:,:))
              else

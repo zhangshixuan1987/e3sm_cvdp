@@ -202,12 +202,15 @@ begin
   rad=(pi/180.)
 
   do ee = 0,nsim-1
+
      ua = data_read_in(paths(ee),"U850",syear(ee),eyear(ee))    ; read in data, orient lats/lons correctly, set time coordinate variable up
      
      if (isatt(ua,"is_all_missing")) then
         delete(ua)
         continue
      end if
+
+     TIME = ua&time
  
      ;calcualte jet info with raw ua field  
      llats = -70. ; SH jet region 
@@ -519,7 +522,6 @@ begin
        delete([/lsm,basemap/])
        delete(d)
 
-       TIME = psl&time
        yyyymm = cd_calendar(psl&time,-1)  ; convert tas, ts, and ua from CF-conforming time to YYYYMM for coding below
        delete(psl&time)
        psl&time = yyyymm 
@@ -569,8 +571,8 @@ begin
              delete(climo)
 
              check_custom_climo(names_psl(ee),syear_psl(ee),eyear_psl(ee),CLIMO_SYEAR,CLIMO_EYEAR)
-             temp_arr = psl
-             delete(temp_arr&time)
+            ;temp_arr = psl
+            ;delete(temp_arr&time)
              temp_arr&time = cd_calendar(psl&time,-1)
              if (CLIMO_SYEAR.lt.0) then
                climo = clmMonTLL(temp_arr({(eyear_psl(ee)+CLIMO_SYEAR)*100+1:(eyear_psl(ee)+CLIMO_EYEAR)*100+12},:,:))
