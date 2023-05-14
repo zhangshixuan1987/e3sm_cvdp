@@ -19,7 +19,11 @@ begin
   CLIMO_EYEAR      = toint(getenv("CLIMO_EYEAR"))
   OUTPUT_TYPE      = getenv("OUTPUT_TYPE") 
   COLORMAP         = getenv("COLORMAP")  
-  
+ 
+  ;;;scale the trend to use the same unit: C 100yr-1
+  TREND_Unit       = "100yr~S~-1~N~"
+  TREND_NY         = 100
+ 
   nsim = numAsciiRow("namelist_byvar/namelist_prect")
   na = asciiread("namelist_byvar/namelist_prect",(/nsim/),"string")
   names = new(nsim,"string")
@@ -151,8 +155,8 @@ begin
      tttt = dtrend_msg_n(ispan(0,dimsizes(ppt&time)-1,1),ppt,False,True,0)
      ppt_trends_mon = ppt(0,:,:)
      ppt_trends_mon = (/ onedtond(tttt@slope, (/dimsizes(ppt&lat),dimsizes(ppt&lon)/) ) /)
-     ppt_trends_mon = ppt_trends_mon*dimsizes(ppt&time)
-     ppt_trends_mon@units = ppt@units+" "+nyr(ee)+"yr~S~-1~N~"
+     ppt_trends_mon = ppt_trends_mon*TREND_NY*12     ;dimsizes(ppt&time)
+     ppt_trends_mon@units = ppt@units+" "+TREND_Unit ;+nyr(ee)+"yr~S~-1~N~"
      delete(tttt)
 
      ppt_seas = runave_n_Wrap(ppt,3,0,0)
@@ -188,10 +192,10 @@ begin
         end if
         delete([/tarr,tttt/])        
      end do
-     ppt_trends_seas = ppt_trends_seas*nyr(ee)
-     ppt_trends_seas@units = ppt_seas@units+" "+nyr(ee)+"yr~S~-1~N~"
-     ppt_trends_ann = ppt_trends_ann*nyr(ee)
-     ppt_trends_ann@units = ppt_ann@units+" "+nyr(ee)+"yr~S~-1~N~"    
+     ppt_trends_seas = ppt_trends_seas*TREND_NY            ;*nyr(ee)
+     ppt_trends_seas@units = ppt_seas@units+" "+TREND_Unit ;+nyr(ee)+"yr~S~-1~N~"
+     ppt_trends_ann = ppt_trends_ann*TREND_NY              ;*nyr(ee)
+     ppt_trends_ann@units = ppt_ann@units+" "+TREND_Unit   ;+nyr(ee)+"yr~S~-1~N~"    
      ppt_aa_seas@units = ppt_seas@units   
      ppt_aa_ann@units = ppt_ann@units     
      delete([/ppt_seas,ppt_ann,coswgt/])    

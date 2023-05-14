@@ -19,7 +19,11 @@ begin
   CLIMO_EYEAR      = toint(getenv("CLIMO_EYEAR"))
   OUTPUT_TYPE      = getenv("OUTPUT_TYPE") 
   COLORMAP         = getenv("COLORMAP")  
-  
+ 
+  ;;;scale the trend to use the same unit: C 100yr-1
+  TREND_Unit       = "100yr~S~-1~N~"
+  TREND_NY         = 100
+ 
   nsim = numAsciiRow("namelist_byvar/namelist_trefht")
   na = asciiread("namelist_byvar/namelist_trefht",(/nsim/),"string")
   names = new(nsim,"string")
@@ -145,8 +149,8 @@ begin
      tttt = dtrend_msg_n(ispan(0,dimsizes(tas&time)-1,1),tas,False,True,0)
      tas_trends_mon = tas(0,:,:)
      tas_trends_mon = (/ onedtond(tttt@slope, (/dimsizes(tas&lat),dimsizes(tas&lon)/) ) /)
-     tas_trends_mon = tas_trends_mon*dimsizes(tas&time)
-     tas_trends_mon@units = tas@units+" "+nyr(ee)+"yr~S~-1~N~"
+     tas_trends_mon = tas_trends_mon*TREND_NY*12     ;*dimsizes(tas&time)
+     tas_trends_mon@units = tas@units+" "+TREND_Unit ;+nyr(ee)+"yr~S~-1~N~"
      delete(tttt)
      
      tas_seas = runave_n_Wrap(tas,3,0,0)
@@ -182,10 +186,10 @@ begin
         end if
         delete([/tarr,tttt/])        
      end do
-     tas_trends_seas = tas_trends_seas*nyr(ee)
-     tas_trends_seas@units = tas_seas@units+" "+nyr(ee)+"yr~S~-1~N~"
-     tas_trends_ann = tas_trends_ann*nyr(ee)
-     tas_trends_ann@units = tas_ann@units+" "+nyr(ee)+"yr~S~-1~N~"         
+     tas_trends_seas = tas_trends_seas*TREND_NY            ;*nyr(ee)
+     tas_trends_seas@units = tas_seas@units+" "+TREND_Unit ;+nyr(ee)+"yr~S~-1~N~"
+     tas_trends_ann = tas_trends_ann*TREND_NY              ;*nyr(ee)
+     tas_trends_ann@units = tas_ann@units+" "+TREND_Unit   ;+nyr(ee)+"yr~S~-1~N~"         
      delete([/tas_seas,tas_ann,coswgt/])
      
      if (isfilepresent2("obs_trefht").and.ee.eq.0) then

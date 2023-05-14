@@ -19,7 +19,11 @@ begin
   CLIMO_EYEAR      = toint(getenv("CLIMO_EYEAR"))
   OUTPUT_TYPE      = getenv("OUTPUT_TYPE") 
   COLORMAP         = getenv("COLORMAP")
-  
+ 
+  ;;;scale the trend to use the same unit: C 100yr-1
+  TREND_Unit       = "100yr~S~-1~N~"
+  TREND_NY         = 100
+ 
   nsim = numAsciiRow("namelist_byvar/namelist_zmsf")
   na = asciiread("namelist_byvar/namelist_zmsf",(/nsim/),"string")
   names = new(nsim,"string")
@@ -105,8 +109,8 @@ begin
      tttt = dtrend_msg_n(ispan(0,dimsizes(zmsf&time)-1,1),zmsf,False,True,0)
      zmsf_trends_mon = zmsf(0,:,:)
      zmsf_trends_mon = (/ onedtond(tttt@slope, (/dimsizes(zmsf&lev),dimsizes(zmsf&lat)/) ) /)
-     zmsf_trends_mon = zmsf_trends_mon*dimsizes(zmsf&time)
-     zmsf_trends_mon@units = zmsf@units+" "+nyr(ee)+"yr~S~-1~N~"
+     zmsf_trends_mon = zmsf_trends_mon*TREND_NY*12     ;*dimsizes(zmsf&time)
+     zmsf_trends_mon@units = zmsf@units+" "+TREND_Unit ;+nyr(ee)+"yr~S~-1~N~"
      delete(tttt)
      
      zmsf_seas = runave_n_Wrap(zmsf,3,0,0)
@@ -133,10 +137,10 @@ begin
         end if
         delete([/tarr,tttt/])
      end do
-     zmsf_trends_seas = zmsf_trends_seas*nyr(ee)
-     zmsf_trends_seas@units = zmsf_seas@units+" "+nyr(ee)+"yr~S~-1~N~"
-     zmsf_trends_ann = zmsf_trends_ann*nyr(ee)
-     zmsf_trends_ann@units = zmsf_ann@units+" "+nyr(ee)+"yr~S~-1~N~"
+     zmsf_trends_seas = zmsf_trends_seas*TREND_NY            ;*nyr(ee)
+     zmsf_trends_seas@units = zmsf_seas@units+" "+TREND_Unit ;+nyr(ee)+"yr~S~-1~N~"
+     zmsf_trends_ann = zmsf_trends_ann*TREND_NY              ;*nyr(ee)
+     zmsf_trends_ann@units = zmsf_ann@units+" "+TREND_Unit   ;+nyr(ee)+"yr~S~-1~N~"
      lbunit = lbunit + " "+nyr(ee)+"yr~S~-1~N~" 
 
      if (OUTPUT_DATA.eq."True") then

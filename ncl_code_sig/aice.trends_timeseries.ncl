@@ -19,7 +19,11 @@ begin
   CLIMO_EYEAR      = toint(getenv("CLIMO_EYEAR"))
   OUTPUT_TYPE      = getenv("OUTPUT_TYPE") 
   COLORMAP         = getenv("COLORMAP")
-  
+ 
+  ;;;scale the trend to use the same unit: C 100yr-1
+  TREND_Unit       = "100yr~S~-1~N~"
+  TREND_NY         = 100
+ 
   nsim = numAsciiRow("namelist_byvar/namelist_aice_nh")
   na = asciiread("namelist_byvar/namelist_aice_nh",(/nsim/),"string")
   names = new(nsim,"string")
@@ -282,8 +286,8 @@ begin
         tttt = dtrend_msg_n(ispan(0,dimsizes(aice_nh&time)-1,1),aice_nh,False,True,0)
         aice_nh_trends_mon = aice_nh(0,:,:)
         aice_nh_trends_mon = (/ onedtond(tttt@slope, (/dim_j,dim_i/) ) /)
-        aice_nh_trends_mon = aice_nh_trends_mon*dimsizes(aice_nh&time)
-        aice_nh_trends_mon@units = aice_nh@units+" "+nyr(ee)+"yr~S~-1~N~"
+        aice_nh_trends_mon = aice_nh_trends_mon*TREND_NY*12     ;*dimsizes(aice_nh&time)
+        aice_nh_trends_mon@units = aice_nh@units+" "+TREND_Unit ;+nyr(ee)+"yr~S~-1~N~"
         delete(tttt)
      
         aice_nh_seas = runave_n_Wrap(aice_nh,3,0,0)
@@ -311,10 +315,10 @@ begin
            end if
            delete([/tarr,tttt/])        
         end do
-        aice_nh_trends_seas = aice_nh_trends_seas*nyr(ee)
-        aice_nh_trends_seas@units = aice_nh_seas@units+" "+nyr(ee)+"yr~S~-1~N~"
-        aice_nh_trends_ann = aice_nh_trends_ann*nyr(ee)
-        aice_nh_trends_ann@units = aice_nh_ann@units+" "+nyr(ee)+"yr~S~-1~N~"         
+        aice_nh_trends_seas = aice_nh_trends_seas*TREND_NY            ;*nyr(ee)
+        aice_nh_trends_seas@units = aice_nh_seas@units+" "+TREND_Unit ;+nyr(ee)+"yr~S~-1~N~"
+        aice_nh_trends_ann = aice_nh_trends_ann*TREND_NY              ;*nyr(ee)
+        aice_nh_trends_ann@units = aice_nh_ann@units+" "+TREND_Unit   ;+nyr(ee)+"yr~S~-1~N~"         
         delete([/aice_nh_seas,aice_nh_ann,dim_j,dim_i,dimZ/])
      end if
 
@@ -439,8 +443,8 @@ begin
         tttt = dtrend_msg_n(ispan(0,dimsizes(aice_sh&time)-1,1),aice_sh,False,True,0)
         aice_sh_trends_mon = aice_sh(0,:,:)
         aice_sh_trends_mon = (/ onedtond(tttt@slope, (/dim_j,dim_i/) ) /)
-        aice_sh_trends_mon = aice_sh_trends_mon*dimsizes(aice_sh&time)
-        aice_sh_trends_mon@units = aice_sh@units+" "+nyr_sh(ee)+"yr~S~-1~N~"
+        aice_sh_trends_mon = aice_sh_trends_mon*TREND_NY*12     ;*dimsizes(aice_sh&time)
+        aice_sh_trends_mon@units = aice_sh@units+" "+TREND_Unit ;+nyr_sh(ee)+"yr~S~-1~N~"
         delete(tttt)
      
         aice_sh_seas = runave_n_Wrap(aice_sh,3,0,0)
@@ -468,10 +472,10 @@ begin
            end if
            delete([/tarr,tttt/])        
         end do
-        aice_sh_trends_seas = aice_sh_trends_seas*nyr_sh(ee)
-        aice_sh_trends_seas@units = aice_sh_seas@units+" "+nyr_sh(ee)+"yr~S~-1~N~"
-        aice_sh_trends_ann = aice_sh_trends_ann*nyr_sh(ee)
-        aice_sh_trends_ann@units = aice_sh_ann@units+" "+nyr_sh(ee)+"yr~S~-1~N~"         
+        aice_sh_trends_seas = aice_sh_trends_seas*TREND_NY            ;*nyr_sh(ee)
+        aice_sh_trends_seas@units = aice_sh_seas@units+" "+TREND_Unit ;+nyr_sh(ee)+"yr~S~-1~N~"
+        aice_sh_trends_ann = aice_sh_trends_ann*TREND_NY              ;*nyr_sh(ee)
+        aice_sh_trends_ann@units = aice_sh_ann@units+" "+TREND_Unit   ;+nyr_sh(ee)+"yr~S~-1~N~"         
         delete([/aice_sh_seas,aice_sh_ann,dim_j,dim_i,dimZ/])
      end if
 

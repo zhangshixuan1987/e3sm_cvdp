@@ -19,7 +19,11 @@ begin
   CLIMO_EYEAR      = toint(getenv("CLIMO_EYEAR"))
   OUTPUT_TYPE      = getenv("OUTPUT_TYPE") 
   COLORMAP         = getenv("COLORMAP")
-  
+ 
+  ;;;scale the trend to use the same unit: C 100yr-1
+  TREND_Unit       = "100yr~S~-1~N~"
+  TREND_NY         = 100
+ 
   nsim = numAsciiRow("namelist_byvar/namelist_psl")
   na = asciiread("namelist_byvar/namelist_psl",(/nsim/),"string")
   names = new(nsim,"string")
@@ -103,8 +107,8 @@ begin
      tttt = dtrend_msg_n(ispan(0,dimsizes(psl&time)-1,1),psl,False,True,0)
      psl_trends_mon = psl(0,:,:)
      psl_trends_mon = (/ onedtond(tttt@slope, (/dimsizes(psl&lat),dimsizes(psl&lon)/) ) /)
-     psl_trends_mon = psl_trends_mon*dimsizes(psl&time)
-     psl_trends_mon@units = psl@units+" "+nyr(ee)+"yr~S~-1~N~"
+     psl_trends_mon = psl_trends_mon*TREND_NY*12     ;*dimsizes(psl&time)
+     psl_trends_mon@units = psl@units+" "+TREND_Unit ;+nyr(ee)+"yr~S~-1~N~"
      delete(tttt)
      
      psl_seas = runave_n_Wrap(psl,3,0,0)
@@ -132,10 +136,10 @@ begin
         end if
         delete([/tarr,tttt/])        
      end do
-     psl_trends_seas = psl_trends_seas*nyr(ee)
-     psl_trends_seas@units = psl_seas@units+" "+nyr(ee)+"yr~S~-1~N~"
-     psl_trends_ann = psl_trends_ann*nyr(ee)
-     psl_trends_ann@units = psl_ann@units+" "+nyr(ee)+"yr~S~-1~N~"         
+     psl_trends_seas = psl_trends_seas*TREND_NY            ;*nyr(ee)
+     psl_trends_seas@units = psl_seas@units+" "+TREND_Unit ;+nyr(ee)+"yr~S~-1~N~"
+     psl_trends_ann = psl_trends_ann*TREND_NY              ;*nyr(ee)
+     psl_trends_ann@units = psl_ann@units+" "+TREND_Unit   ;+nyr(ee)+"yr~S~-1~N~"         
      delete([/psl_seas,psl_ann/])    
      
      

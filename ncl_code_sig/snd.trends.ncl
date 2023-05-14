@@ -19,7 +19,11 @@ begin
   CLIMO_EYEAR      = toint(getenv("CLIMO_EYEAR"))
   OUTPUT_TYPE      = getenv("OUTPUT_TYPE") 
   COLORMAP         = getenv("COLORMAP")
-  
+ 
+  ;;;scale the trend to use the same unit: C 100yr-1
+  TREND_Unit       = "100yr~S~-1~N~"
+  TREND_NY         = 100
+ 
   nsim = numAsciiRow("namelist_byvar/namelist_snowdp")
   na = asciiread("namelist_byvar/namelist_snowdp",(/nsim/),"string")
   names = new(nsim,"string")
@@ -112,8 +116,8 @@ begin
      tttt = dtrend_msg_n(ispan(0,dimsizes(snd&time)-1,1),snd,False,True,0)
      snd_trends_mon = snd(0,:,:)
      snd_trends_mon = (/ onedtond(tttt@slope, (/dimsizes(snd&lat),dimsizes(snd&lon)/) ) /)
-     snd_trends_mon = snd_trends_mon*dimsizes(snd&time)
-     snd_trends_mon@units = snd@units+" "+nyr(ee)+"yr~S~-1~N~"
+     snd_trends_mon = snd_trends_mon*TREND_NY*12     ;*dimsizes(snd&time)
+     snd_trends_mon@units = snd@units+" "+TREND_Unit ;+nyr(ee)+"yr~S~-1~N~"
      delete(tttt)
      
      snd_seas = runave_n_Wrap(snd,3,0,0)
@@ -141,10 +145,10 @@ begin
         end if
         delete([/tarr,tttt/])        
      end do
-     snd_trends_seas = snd_trends_seas*nyr(ee)
-     snd_trends_seas@units = snd_seas@units+" "+nyr(ee)+"yr~S~-1~N~"
-     snd_trends_ann = snd_trends_ann*nyr(ee)
-     snd_trends_ann@units = snd_ann@units+" "+nyr(ee)+"yr~S~-1~N~"         
+     snd_trends_seas = snd_trends_seas*TREND_NY            ;*nyr(ee)
+     snd_trends_seas@units = snd_seas@units+" "+TREND_Unit ;+nyr(ee)+"yr~S~-1~N~"
+     snd_trends_ann = snd_trends_ann*TREND_NY              ;*nyr(ee)
+     snd_trends_ann@units = snd_ann@units+" "+TREND_Unit   ;+nyr(ee)+"yr~S~-1~N~"         
      delete([/snd_seas,snd_ann/])    
      
      

@@ -44,10 +44,6 @@ begin
   titname             = (/"ERA5", "CMIP6 (MME)", "E3SM (Couple)","E3SMv2 (AMIP)"/)
   nmme                = dimsizes(mmename)
 
-  figstr              = (/ "(a)", "(b)",   "(c)",  "(d)"/)
-  figstr              = figstr + " "+titname
-  figstr(0)           = figstr(0)+ " (Obs.)"
-
   nsim = numAsciiRow("namelist_byvar/namelist_psl")
   na = asciiread("namelist_byvar/namelist_psl",(/nsim/),"string")
   names = new(nsim,"string")
