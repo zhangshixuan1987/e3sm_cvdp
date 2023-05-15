@@ -187,8 +187,8 @@ begin
     
 ;     if (.not.ismissing(ipo({35},{160}))) then
 ;        if (ipo({35},{160}).ge.0) then   ; arbitrary attempt to make all plots have the same sign..
-     if (.not.ismissing(ipo({40},{165}))) then
-        if (ipo({40},{165}).ge.0) then   ; arbitrary attempt to make all plots have the same sign..
+     if (.not.all(ismissing(ipo({38:42},{163:167})))) then
+        if (avg(ipo({38:42},{163:167})).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
            ipo = ipo*-1.
            pc1 = pc1*-1.
         end if

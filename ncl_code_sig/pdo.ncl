@@ -175,9 +175,9 @@ begin
         pdo@pcvar = tofloat(sprintf("%4.1f", evecv@pcvar(0)))+"%"
      end if
      delete([/sig_pcv,evecv/])
-    
-     if (.not.ismissing(pdo({37},{200}))) then
-        if (pdo({37},{200}).ge.0) then   ; arbitrary attempt to make all plots have the same sign..
+ 
+     if (.not.all(ismissing(pdo({35:39},{198:202})))) then
+        if (avg(pdo({35:39},{198:202})).ge.0) then  ; arbitrary attempt to make all plots have the same sign..
            pdo = pdo*-1.
            pc1 = pc1*-1.
         end if
