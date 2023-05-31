@@ -18,7 +18,7 @@ begin
   scenario   = "historical" ;"ssp245";"ssp585"
   outdir     = "/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/CMIP6_MME"
   topdir     = "/global/cfs/projectdirs/m3522/cmip6/CMIP6"
-  comdir     = "/global/cfs/cdirs/e3sm/zhan391/e3sm_cvdp/run_script/data_process/cmip6_mme/share_file"
+  comdir     = "/global/cfs/cdirs/e3sm/zhan391/e3sm_cvdp/data_process/cmip6_mme/share_file/"
 
   cmip_var   = (/"va","ps"/)
   ncmp_var   = dimsizes(cmip_var)
@@ -52,9 +52,9 @@ begin
   plev@units = "hPa"
   delete([/fera5,fin/])
 
-  ;xind = ind (model_name.eq."CSIRO/ACCESS-ESM1-5" ) ;CAS/CAS-ESM2-0")
+  xind = ind (model_name.eq."E3SM-Project/E3SM-1-0" ) ;CAS/CAS-ESM2-0")
 
-  do im = 0,nmodel-1,1
+  do im = xind,xind ;0,nmodel-1,1
    
    modnam   = model_name(im)
    tmpnam   = str_split(modnam,"/")
@@ -68,12 +68,19 @@ begin
    delete(tmpnam)
 
    cpath = topdir+"/"+cmipnam+"/" + modnam
-   fdr1  = systemfunc("ls -d " + cpath + "/"+scenario+"/"+exps+"/"+cmip_dnam+"/va/gn/*")
+  ;fdr1  = systemfunc("ls -d " + cpath + "/"+scenario+"/"+exps+"/"+cmip_dnam+"/va/gn/*")
    if(modnam.eq."CAS/CAS-ESM2-0") then 
      fdr1  = systemfunc("ls -d " + cpath + "/"+scenario+"/"+exps+"/"+cmip_dnam+"/va/gn/v20200502")
-   else 
+   else if (modnam.eq."NOAA-GFDL/GFDL-CM4") then 
+     fdr1  = systemfunc("ls -d " + cpath + "/"+scenario+"/"+exps+"/"+cmip_dnam+"/va/gr1/*")   
+   else if (modnam.eq."E3SM-Project/E3SM-1-0") then
+     fdr1  = systemfunc("ls -d " + cpath + "/"+scenario+"/"+exps+"/"+cmip_dnam+"/va/gr/v20190729")
+   else
      fdr1  = systemfunc("ls -d " + cpath + "/"+scenario+"/"+exps+"/"+cmip_dnam+"/va/gn/*")
    end if 
+   end if 
+   end if 
+
    nens  = dimsizes(fdr1) 
 
    ike = 0 
@@ -81,9 +88,15 @@ begin
    do ie = 0,nens-1,1
 
    ;;check if all file is missing
-   fdr0 = str_sub_str(fdr1(ie),"va","ps") 
-   fl0  = systemfunc("ls " + fdr0 +"/*.nc")
    fl1  = systemfunc("ls " + fdr1(ie) +"/*.nc")
+   print(fl1)
+   fdr0 = str_sub_str(fdr1(ie),"va","ps") 
+   if (modnam.eq."E3SM-Project/E3SM-1-0") then
+     fl0  = systemfunc("ls -d " + cpath + "/"+scenario+"/"+exps+"/"+cmip_dnam+"/ps/gr/v20190913/*.nc")
+   else 
+     fl0  = systemfunc("ls " + fdr0 +"/*.nc")
+   end if 
+   print(fl0)
 
    if(all(isfilepresent(fl0)).and.all(isfilepresent(fl1))) then
 

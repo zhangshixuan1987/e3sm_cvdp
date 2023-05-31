@@ -14,15 +14,13 @@ load "$NCARG_ROOT/lib/ncarg/nclscripts/esmf/ESMF_regridding.ncl"
 begin
 
   out_dir   = "/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/"
-  data_dir  = "/global/cfs/cdirs/e3sm/zhan391/data/ERA5/monthly"
-  exp_name  = (/"ERA5"/)
-  out_name  = (/"ERA5"/)
+  data_dir  = "/global/cfs/cdirs/e3sm/zhan391/data/E3SMv2"
+  exp_name  = (/"v2.LR.hist-GHG"/)
   nexps     = dimsizes(exp_name)
-  time_tag  = "1979-2019"
-  grid_tag  = "1x1"
-
   ystr      = 197901
-  yend      = 201812
+  yend      = 201412
+  time_tag  = "1979-2014"
+  grid_tag  = "1x1"
 
   seasons   = (/"MON"/)
   nseas     = dimsizes(seasons)
@@ -44,7 +42,7 @@ begin
 
   do k  = 0,nexps-1,1
 
-   fl1   = systemfunc("ls "+data_dir+"/"+exp_name(k)+"*"+time_tag(k)+"_1x1.nc")
+   fl1        = systemfunc("ls "+data_dir+"/"+exp_name(k)+"/"+exp_name(k)+"*"+time_tag(k)+".nc")
    nens  = dimsizes(fl1)
 
    do ie = 0,nens-1,1
@@ -52,7 +50,7 @@ begin
     print(fl1(ie))
     f1 = addfile(fl1(ie),"r")
 
-    do j = 0,0 ;nvars-1,1
+    do j = 0,nvars-1,1
 
     vars   = varList(j)
     varunt = untList(j)
@@ -72,73 +70,46 @@ begin
     obstime@units = time@units
 
     if(vars.eq."Z500") then
-      xtmp = f1->Z3
-      lev  = xtmp&lev
-      if(max(lev).gt.10000) then
-        indx = ind(lev.eq.50000)
-      else
-        indx = ind(lev.eq.500)
-      end if
-      var0 = xtmp(indy,indx,{latS:latN},{lonW:lonE})
-      delete([/indx,lev/])
+      xtmp = vinth2p(f1->Z3,f1->hyam,f1->hybm,500.0,f1->PS,1,f1->P0/100.0,1,False)
+      var0 = xtmp(indy,0,{latS:latN},{lonW:lonE})
     else if (vars.eq."T850") then
-      xtmp = f1->T
-      lev  = xtmp&lev
-      if(max(lev).gt.10000) then
-        indx = ind(lev.eq.85000)
-      else
-        indx = ind(lev.eq.850)
-      end if
-      var0 = xtmp(indy,indx,{latS:latN},{lonW:lonE})
-      delete([/indx,lev/])
+      xtmp = vinth2p(f1->T,f1->hyam,f1->hybm,850.0,f1->PS,1,f1->P0/100.0,1,False)
+      var0 = xtmp(indy,0,{latS:latN},{lonW:lonE})
     else if (vars.eq."U850") then
-      xtmp = f1->U
-      lev  = xtmp&lev
-      if(max(lev).gt.10000) then
-        indx = ind(lev.eq.85000)
-      else
-        indx = ind(lev.eq.850)
-      end if
-      var0 = xtmp(indy,indx,{latS:latN},{lonW:lonE})
-      delete([/indx,lev/])
+      xtmp = vinth2p(f1->U,f1->hyam,f1->hybm,850.0,f1->PS,1,f1->P0/100.0,1,False)
+      var0 = xtmp(indy,0,{latS:latN},{lonW:lonE})
     else if (vars.eq."V850") then
-      xtmp = f1->V
-      lev  = xtmp&lev
-      if(max(lev).gt.10000) then
-        indx = ind(lev.eq.85000)
-      else
-        indx = ind(lev.eq.850)
-      end if
-      var0 = xtmp(indy,indx,{latS:latN},{lonW:lonE})
-      delete([/indx,lev/])
+      xtmp = vinth2p(f1->V,f1->hyam,f1->hybm,850.0,f1->PS,1,f1->P0/100.0,1,False)
+      var0 = xtmp(indy,0,{latS:latN},{lonW:lonE})
     else if (vars.eq."U200") then
-      xtmp = f1->U
-      lev  = xtmp&lev
-      if(max(lev).gt.10000) then
-        indx = ind(lev.eq.20000)
-      else
-        indx = ind(lev.eq.200)
-      end if
-      var0 = xtmp(indy,indx,{latS:latN},{lonW:lonE})
-      delete([/indx,lev/])
+      xtmp = vinth2p(f1->U,f1->hyam,f1->hybm,200.0,f1->PS,1,f1->P0/100.0,1,False)
+      var0 = xtmp(indy,0,{latS:latN},{lonW:lonE})
     else if (vars.eq."V200") then
-      xtmp = f1->V
-      lev  = xtmp&lev
-      if(max(lev).gt.10000) then
-        indx = ind(lev.eq.20000)
-      else
-        indx = ind(lev.eq.200)
-      end if
-      var0 = xtmp(indy,indx,{latS:latN},{lonW:lonE})
-      delete([/indx,lev/])
-    else if(vars.eq."SST") then
-      xtmp = f1->SST
+      xtmp = vinth2p(f1->V,f1->hyam,f1->hybm,200.0,f1->PS,1,f1->P0/100.0,1,False)
+      var0 = xtmp(indy,0,{latS:latN},{lonW:lonE})
+    else if (vars.eq."PRECT") then
+      xtmp = f1->PRECC
+      xtmp = xtmp + f1->PRECL
       var0 = xtmp(indy,{latS:latN},{lonW:lonE})
-      var0@_FillValue = -9999.
-      var0 = where(var0.le.273.15, var0@_FillValue, var0)
-      var0       = var0 - 273.15
+    else if (vars.eq."PRECST") then
+      xtmp = f1->PRECSC
+      xtmp = xtmp + f1->PRECSL
+      var0 = xtmp(indy,{latS:latN},{lonW:lonE})
     else if (vars.eq."OLR") then
-      xtmp = f1->FLUT
+      xtmp = f1->FSNTOA 
+      xtmp = f1->FSNTOA - f1->FSNT + f1->FLNT
+      var0 = xtmp(indy,{latS:latN},{lonW:lonE})
+    else if (vars.eq."FNET") then
+      xtmp = f1->FSNT
+      xtmp = f1->FSNT - f1->FLNT
+      var0 = xtmp(indy,{latS:latN},{lonW:lonE})
+    else if (vars.eq."SWCF_SRF") then
+      xtmp = f1->FSNS
+      xtmp = xtmp - f1->FSNSC
+      var0 = xtmp(indy,{latS:latN},{lonW:lonE})
+    else if (vars.eq."LWCF_SRF") then
+      xtmp = f1->FLNSC
+      xtmp = xtmp - f1->FLNS
       var0 = xtmp(indy,{latS:latN},{lonW:lonE})
     else if (vars.eq."CRE_SRF") then
       xtmp = f1->FLNSC
@@ -206,21 +177,37 @@ begin
       xtmp = f1->FSNTOA
       xtmp = f1->FSNTOA - f1->FLUT
       var0 = xtmp(indy,{latS:latN},{lonW:lonE})
-    else if (vars.eq."FNET") then
-      xtmp = f1->FSNTOA
-      xtmp = f1->FSNTOA - f1->FLNTOA
-      var0 = xtmp(indy,{latS:latN},{lonW:lonE})
-    else if(vars.eq."Qn_SRF") then
-      beta = f1->FSDS
-      beta = where((f1->FSDS).eq.0,beta@_FillValue,beta)
-      beta = (f1->FSDS - f1->FSNS)/beta
+    else if(vars.eq."FSUS")then
       xtmp = f1->FSDS
-      xtmp = (1.0 - beta) * f1->FSDS         \
-             + f1->FLDS - (f1->FLDS + f1->FLNS) \
-             - f1->SHFLX  \
-             - f1->LHFLX
+      xtmp = f1->FSDS - f1->FSNS
       var0 = xtmp(indy,{latS:latN},{lonW:lonE})
-      var0@long_name = "Net surface total fluxes"
+    else if(vars.eq."FSUSC")then
+      xtmp = f1->FSDSC
+      xtmp = f1->FSDSC - f1->FSNSC
+      var0 = xtmp(indy,{latS:latN},{lonW:lonE})
+    else if(vars.eq."FLUS")then
+      xtmp = f1->FLDS
+      xtmp = f1->FLDS + f1->FLNS
+      var0 = xtmp(indy,{latS:latN},{lonW:lonE})
+    else if(vars.eq."FLUSC")then
+      xtmp = f1->FLDS
+      xtmp = f1->FLDS + f1->FLNS
+      var0 = xtmp(indy,{latS:latN},{lonW:lonE})
+    else if(vars.eq."FLDSC")then
+      xtmp = f1->FLDS
+      xtmp = f1->FLDS + f1->FLNS - f1->FLNSC
+      var0 = xtmp(indy,{latS:latN},{lonW:lonE})
+    else if (vars.eq."S10") then
+      xtmp = f1->U10
+      var0 = xtmp(indy,{latS:latN},{lonW:lonE})
+    else if (vars.eq."U10") then
+      nlev = dimsizes(f1->lev)
+      xtmp = f1->U(:,nlev-1,:,:)
+      var0 = xtmp(indy,{latS:latN},{lonW:lonE})
+    else if (vars.eq."V10") then
+      nlev = dimsizes(f1->lev)
+      xtmp = f1->V(:,nlev-1,:,:)
+      var0 = xtmp(indy,{latS:latN},{lonW:lonE})
     else if (vars.eq."ETH1".or. vars.eq."ETH2".or.vars.eq."ETH12") then
       fcor  = coriolis_param(tofloat(f1->lat)); coriolis parm (1/s)
       cpair = 1005.0   ; heat capacity of air (J/kg/K)
@@ -236,21 +223,21 @@ begin
       txclm = clmMonTLL (txtmp)
       tyclm = clmMonTLL (tytmp)
       tzanm = calcMonAnomTLL(tztmp,tzclm)
-      txanm = calcMonAnomTLL(txtmp,txclm)
+      txanm = calcMonAnomTLL(txtmp,txclm) 
       tyanm = calcMonAnomTLL(tytmp,tyclm)
-      if(vars.eq."ETH12") then
+      if(vars.eq."ETH12") then       
         gradLatLon = grad_latlon_cfd (tztmp, tztmp&lat, tztmp&lon, True, False)
-        dzdy  = tofloat(gradLatLon[0])    ; for clarity; explicitly extract variables from returned 'list'
+        dzdy  = tofloat(gradLatLon[0])    ; for clarity; explicitly extract variables from returned 'list' 
         dzdx  = tofloat(gradLatLon[1])
-        xtmp  = tztmp
+        xtmp  = tztmp 
         xtmp  = -cp_sw/conform(tztmp,fcor,1) * (dzdx*tytmp - dzdy*txtmp)
-        xtmp@long_name = "Full Ekman heat transport (ETH) anomaly"
+        xtmp@long_name = "Full Ekman heat transport (ETH) anomaly" 
         xtmp@units     = "W m~S~-2~N~"
         delete([/gradLatLon,dzdy,dzdx/])
-      end if
+      end if 
       if(vars.eq."ETH1") then
         gradLatLon = grad_latlon_cfd (tzclm, tzclm&lat, tzclm&lon, True, False)
-        dzdy  = tofloat(gradLatLon[0])    ; for clarity; explicitly extract variables from returned 'list'
+        dzdy  = tofloat(gradLatLon[0])    ; for clarity; explicitly extract variables from returned 'list'     
         dzdx  = tofloat(gradLatLon[1])
         dimx  = dimsizes(tztmp)
         ny    = dimx(0)/12
@@ -261,8 +248,8 @@ begin
           iy2 = (iy+1)*12-1
           xtmp(iy1:iy2,:,:) = ytmp(iy1:iy2,:,:) \
                               *(dzdx(:,:,:)*tyanm(iy1:iy2,:,:) - dzdy(:,:,:)*txanm(iy1:iy2,:,:))
-        end do
-        xtmp@long_name = "ETH anomaly: anomalous winds acting on clim SST gradient"
+        end do 
+        xtmp@long_name = "ETH anomaly: anomalous winds acting on clim SST gradient" 
         xtmp@units     = "W m~S~-2~N~"
         delete([/dimx,ny,gradLatLon,dzdy,dzdx,ytmp/])
       end if
@@ -287,56 +274,71 @@ begin
       var0 = xtmp(indy,{latS:latN},{lonW:lonE})
       delete([/fcor,cpair,cp_sw,rho_sw,tztmp,txtmp,tytmp,tzclm,txclm,tyclm,tzanm,txanm,tyanm/])
     else if (vars.eq."VP470") then
-     lev = f1->lev
-     if(max(lev).gt.10000) then
-       lev       = lev / 100.0
-       lev@units = "hPa"
-       lev&lev   = lev
-     end if
-     wgt_dp   = dpres_plevel_Wrap(lev, f1->PS/100.0, min(lev), 0)
+     hypres    = pres_hybrid_ccm(f1->PS,f1->P0,f1->hyam,f1->hybm)
+     wgt_dp   = dpres_hybrid_ccm(f1->PS,f1->P0,f1->hyam,f1->hybm)
      sfvp     = uv2sfvpF(f1->U,f1->V)
      vp       = f1->U
      vp       = (/sfvp(1,:,:,:,:)/)
-     vp&lev   = lev
      vp@units = "kg s~S~-1~N~"
-     xtmp     = dim_avg_wgt_n_Wrap(vp(:,{700:400},:,:),wgt_dp(:,{700:400},:,:),1,1)
+     vp@_FillValue = -9999.0
+     print(num(ismissing(vp))) 
+     vp       = where(hypres.ge.40000.and.hypres.le.70000,vp,0)
+     wgt_dp   = where(hypres.ge.40000.and.hypres.le.70000,wgt_dp,0)
+     print(num(ismissing(vp))) 
+     xtmp     = wgt_vertical_n(vp, wgt_dp, 0, 1)
      var0     = xtmp(indy,{latS:latN},{lonW:lonE})
-     delete([/wgt_dp,lev,sfvp,vp/])
+     delete([/hypres,wgt_dp,sfvp,vp/])
+
     else if (vars.eq."VP920") then
-     lev = f1->lev
-     if(max(lev).gt.10000) then
-       lev       = lev / 100.0
-       lev@units = "hPa"
-       lev&lev   = lev
-     end if
-     wgt_dp   = dpres_plevel_Wrap(lev, f1->PS/100.0, min(lev), 0)
+     hypres    = pres_hybrid_ccm(f1->PS,f1->P0,f1->hyam,f1->hybm)
+     wgt_dp   = dpres_hybrid_ccm(f1->PS,f1->P0,f1->hyam,f1->hybm)
      sfvp     = uv2sfvpF(f1->U,f1->V)
      vp       = f1->U
      vp       = (/sfvp(1,:,:,:,:)/)
-     vp&lev   = lev
      vp@units = "kg s~S~-1~N~"
-     xtmp     = dim_avg_wgt_n_Wrap(vp(:,{900:200},:,:),wgt_dp(:,{900:200},:,:),1,1)
+     vp@_FillValue = -9999.0
+     print(num(ismissing(vp))) 
+     vp       = where(hypres.ge.20000.and.hypres.le.90000,vp,0)
+     wgt_dp   = where(hypres.ge.20000.and.hypres.le.90000,wgt_dp,0)
+     print(num(ismissing(vp))) 
+     xtmp     = wgt_vertical_n(vp, wgt_dp, 0, 1)
      var0     = xtmp(indy,{latS:latN},{lonW:lonE})
-     delete([/wgt_dp,lev,sfvp,vp/])
+     delete([/hypres,wgt_dp,sfvp,vp/])
+
+    else if (vars.eq."SF470") then
+     hypres    = pres_hybrid_ccm(f1->PS,f1->P0,f1->hyam,f1->hybm)
+     wgt_dp   = dpres_hybrid_ccm(f1->PS,f1->P0,f1->hyam,f1->hybm)
+     sfvp     = uv2sfvpF(f1->U,f1->V)
+     sf       = f1->U
+     sf       = (/sfvp(0,:,:,:,:)/)
+     sf@units = "kg s~S~-1~N~"
+     sf@_FillValue = -9999.0
+     print(num(ismissing(sf))) 
+     sf       = where(hypres.ge.40000.and.hypres.le.70000,sf,0)
+     wgt_dp   = where(hypres.ge.40000.and.hypres.le.70000,wgt_dp,0)
+     print(num(ismissing(sf))) 
+     xtmp     = wgt_vertical_n(sf, wgt_dp, 0, 1)
+     var0     = xtmp(indy,{latS:latN},{lonW:lonE})
+     delete([/hypres,wgt_dp,sfvp,sf/])
+
+    else if (vars.eq."SF920") then
+     hypres   = pres_hybrid_ccm(f1->PS,f1->P0,f1->hyam,f1->hybm)
+     wgt_dp   = dpres_hybrid_ccm(f1->PS,f1->P0,f1->hyam,f1->hybm)
+     sfvp     = uv2sfvpF(f1->U,f1->V)
+     sf       = f1->U
+     sf       = (/sfvp(0,:,:,:,:)/)
+     sf@units = "kg s~S~-1~N~"
+     sf@_FillValue = -9999.0
+     print(num(ismissing(sf))) 
+     sf       = where(hypres.ge.20000.and.hypres.le.90000,sf,0)
+     wgt_dp   = where(hypres.ge.20000.and.hypres.le.90000,wgt_dp,0)
+     print(num(ismissing(sf))) 
+     xtmp     = wgt_vertical_n(sf, wgt_dp, 0, 1)
+     var0     = xtmp(indy,{latS:latN},{lonW:lonE})
+     delete([/hypres,wgt_dp,sfvp,sf/])
     else
       xtmp = f1->$vars$
       var0 = xtmp(indy,{latS:latN},{lonW:lonE})
-    end if 
-    end if 
-    end if
-    end if 
-    end if
-    end if
-    end if
-    end if 
-    end if 
-    end if 
-    end if 
-    end if
-    end if
-    end if
-    end if
-    end if
     end if
     end if
     end if
@@ -344,6 +346,34 @@ begin
     end if
     end if 
     end if 
+    end if 
+    end if 
+    end if 
+    end if
+    end if
+    end if
+    end if
+    end if
+    end if
+    end if
+    end if
+    end if
+    end if
+    end if
+    end if
+    end if
+    end if
+    end if 
+    end if 
+    end if 
+    end if 
+    end if 
+    end if 
+    end if
+    end if
+    end if
+    end if
+    end if
     end if 
     end if 
 
@@ -352,16 +382,14 @@ begin
     var0@units = varunt
     delete(var0&time)
     var0&time  = obstime
-    delete([/xtmp,time,year,indy/])
+    delete([/time,year,indy,xtmp/])
 
    ;printVarSummary(var0)
    ;printMinMax(var0, True)
 
     setfileoption("nc", "Format",  "NetCDF4")
     enstr     = "en"+sprinti("%02d",ie)
-    DIR = out_dir+"/" + out_name
-    system("if ! test -d " + DIR +" ; then mkdir " + DIR + " ; fi")
-    out_file  = DIR+"/"+out_name(k)+"."+enstr+"."+vars+"."+ystr+"-"+yend+".nc"
+    out_file  = out_dir+"/"+exp_name(k)+"/"+exp_name(k)+"."+enstr+"."+vars+"."+ystr+"-"+yend+".nc"
     system("rm " + out_file)
     fout = addfile(out_file,"cw")
     vs1 = vars

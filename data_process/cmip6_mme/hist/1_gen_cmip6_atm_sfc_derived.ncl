@@ -114,7 +114,7 @@ begin
       end if 
     end do 
 
-    do iv = 0,0 ;nvars-1,1
+    do iv = 0,2 ;nvars-1,1
 
      varnam = varList(iv)
      varout = varList(iv)
@@ -123,6 +123,29 @@ begin
        if(isvar("rlut")) then
         var0 = rlut
         var0@long_name = "TOA outgoing longwave radiative fluxes (SW) at full-sky (downward - upward)"
+       end if
+     end if
+
+     if (varnam.eq."FNET") then
+       if(isvar("rtmt")) then
+        var0 = rtmt
+        var0@long_name = "TOA net downward radiative fluxes at full-sky (downward - upward)"
+       end if
+     end if
+
+     if (varnam.eq."FSNTOA") then
+       if(isvar("rsdt").and.isvar("rsut")) then
+        var0 = rsdt
+        var0 = (rsdt - rsut)
+        var0@long_name = "Net TOA shortwave radiative fluxes (SW) at full-sky (downward - upward)"
+       end if
+     end if
+
+     if (varnam.eq."FSNTOAC") then
+       if(isvar("rsdt").and.isvar("rsutcs")) then
+        var0 = rsdt
+        var0 = (rsdt - rsutcs)
+        var0@long_name = "Net TOA shortwave radiative fluxes (SW) at clear-sky (downward - upward)"
        end if
      end if
 
@@ -194,7 +217,7 @@ begin
        if( isvar("rsut") .and. isvar("rsdt") .and. isvar("rsutcs") \
            .and. isvar("rlut") .and. isvar("rlutcs")) then 
          var0 = rsut 
-         var0 = rsut - (rsdt - rsutcs) + (rlut - rlutcs) 
+         var0 = (rsdt - rsut) - (rsdt - rsutcs) + rlutcs - rlut 
          var0@long_name = "TOA cloud radiative effects  (upward - downward)" 
        end if 
      end if
@@ -209,8 +232,8 @@ begin
 
      if (varnam.eq."LWCRE") then
        if (isvar("rlut").and.isvar("rlutcs")) then
-         var0 = rlut
-         var0 = rlut - rlutcs
+         var0 = rlutcs
+         var0 = rlutcs - rlut
          var0@long_name = "TOA cloud radiative effects (LW)"
        end if 
      end if 

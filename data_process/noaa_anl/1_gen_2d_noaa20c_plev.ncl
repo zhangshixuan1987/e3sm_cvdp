@@ -97,12 +97,12 @@ begin
     indy          = ind(year.ge.ystr.and.year.le.yend)
     obstime       = time(indy)
     obstime@units = time@units
-
+    print(pout)
     xtmp = f1->$varnam$
     if(max(lev).gt.10000) then
-      indx = ind(lev.eq.50000)
+      indx = ind(lev.eq.pout*100)
     else
-      indx = ind(lev.eq.500)
+      indx = ind(lev.eq.pout)
     end if
 
     var0 = xtmp(indy,indx,{latS:latN},{lonW:lonE})

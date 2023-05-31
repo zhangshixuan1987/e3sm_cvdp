@@ -51,7 +51,7 @@ begin
     print(fl1(ie))
     f1 = addfile(fl1(ie),"r")
 
-    do j = 0,8 ;nvars-1,1
+    do j = 0,0 ;nvars-1,1
 
     vars   = varList(j)
     varunt = untList(j)
@@ -100,6 +100,10 @@ begin
       xtmp = f1->FSNTOA 
       xtmp = f1->FSNTOA - f1->FSNT + f1->FLNT 
       var0 = xtmp(indy,{latS:latN},{lonW:lonE}) 
+    else if (vars.eq."FNET") then
+      xtmp = f1->FSNT 
+      xtmp = f1->FSNT - f1->FLNT 
+      var0 = xtmp(indy,{latS:latN},{lonW:lonE})
     else if (vars.eq."SWCF_SRF") then
       xtmp = f1->FSNS
       xtmp = xtmp - f1->FSNSC
@@ -334,6 +338,7 @@ begin
       xtmp = f1->$vars$
       var0 = xtmp(indy,{latS:latN},{lonW:lonE})
     end if
+    end if 
     end if
     end if
     end if

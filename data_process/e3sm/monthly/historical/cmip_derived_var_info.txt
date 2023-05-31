@@ -1,3 +1,6 @@
+FNET,            W m~S~-2~N~,     1.0,
+FSNTOA,          W m~S~-2~N~,     1.0,
+FSNTOAC,         W m~S~-2~N~,     1.0,
 OLR,             W m~S~-2~N~,     1.0,
 FLDSC,           W m~S~-2~N~,     1.0,
 FLNS,            W m~S~-2~N~,     1.0,

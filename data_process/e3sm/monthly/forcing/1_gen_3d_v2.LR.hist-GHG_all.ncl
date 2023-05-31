@@ -13,6 +13,7 @@ load "$NCARG_ROOT/lib/ncarg/nclscripts/esmf/ESMF_regridding.ncl"
 
 begin
 
+  out_dir   = "/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/"
   data_dir  = "/global/cfs/cdirs/e3sm/zhan391/data/E3SMv2"
   exp_name  = (/"v2.LR.hist-GHG"/)
   nexps     = dimsizes(exp_name)
@@ -31,10 +32,19 @@ begin
   lonW       =  0.0
   lonE       = 360.0
 
-  varList   = (/"PSL",       "PRECT",  "TS","TREFHT" /)
-  facList   = (/  1.0,        8.64e7,   1.0,     1.0 /)
-  untList   = (/ "Pa", "mm day~S~-1",   "K",     "K" /)
-  nvars     = dimsizes(varList)
+  fili    = "./share_var_info_3d.txt"
+  dstr    = asciiread(fili, -1, "string")
+  delim   = ","
+  varList = str_squeeze(str_get_field(dstr, 1, delim))
+  untList = str_squeeze(str_get_field(dstr, 2, delim))
+  facList = stringtofloat(str_get_field(dstr, 3, delim))
+  nvars = dimsizes(varList)
+
+  ;;get pressure level;;;;
+  fera5 = "/global/cfs/cdirs/e3sm/zhan391/data/ERA5/monthly/ERA5_ens01_monthly_1979-2019_1x1.nc"
+  fin   = addfile (fera5,"r")
+  plev  = fin->lev
+  delete([/fera5,fin/])
 
   do k  = 0,nexps-1,1
 
@@ -60,30 +70,43 @@ begin
     time = f1->time
     time = time - 1
 
-    year          = cd_calendar(time, 1)
+    year          = cd_calendar(time, 1) 
     indy          = ind(year.ge.ystr.and.year.le.yend)
     obstime       = time(indy)
     obstime@units = time@units
-    if(vars.eq."PRECT") then
-      xtmp        = f1->PRECC
-      xtmp        = xtmp + f1->PRECL
-    else
-      xtmp          = f1->$vars$
-    end if
-    var0          = xtmp(:,{latS:latN},{lonW:lonE})
-    var0@_FillValue = -9999.
-    var0       = var0*facmod
-    var0@units = varunt
-    delete(var0&time)
-    var0&time  = obstime
-    delete([/time,year,indy,xtmp/])
 
-    printVarSummary(var0)
-    printMinMax(var0, True)
+    if(vars.eq."Z3") then
+      xtmp = vinth2p(f1->Z3,f1->hyam,f1->hybm,plev,f1->PS,1,f1->P0/100.0,1,False)
+      var0 = clmMonTLLL(xtmp(indy,:,{latS:latN},{lonW:lonE})) 
+    else if (vars.eq."T") then
+      xtmp = vinth2p(f1->T,f1->hyam,f1->hybm,plev,f1->PS,1,f1->P0/100.0,1,False)
+      var0 = clmMonTLLL(xtmp(indy,:,{latS:latN},{lonW:lonE}))
+    else if (vars.eq."U") then
+      xtmp = vinth2p(f1->U,f1->hyam,f1->hybm,plev,f1->PS,1,f1->P0/100.0,1,False)
+      var0 = clmMonTLLL(xtmp(indy,:,{latS:latN},{lonW:lonE}))
+    else if (vars.eq."Q") then
+      xtmp = vinth2p(f1->Q,f1->hyam,f1->hybm,plev,f1->PS,1,f1->P0/100.0,1,False)
+      var0 = clmMonTLLL(xtmp(indy,:,{latS:latN},{lonW:lonE}))
+    else if (vars.eq."V") then
+      xtmp = vinth2p(f1->V,f1->hyam,f1->hybm,plev,f1->PS,1,f1->P0/100.0,1,False)
+      var0 = clmMonTLLL(xtmp(indy,:,{latS:latN},{lonW:lonE}))
+    else
+      print("variables does not exist ")
+      exit 
+    end if
+    end if 
+    end if 
+    end if 
+    end if 
+
+    var0@_FillValue = -9999.
+    var0            = var0*facmod
+    var0@units      = varunt
+    delete([/time,year,indy,xtmp/])
 
     setfileoption("nc", "Format",  "NetCDF4")
     enstr     = "en"+sprinti("%02d",ie)
-    out_file  = exp_name(k)+"."+enstr+"."+vars+"."+ystr+"-"+yend+".nc"
+    out_file  = out_dir+exp_name(k)+"."+enstr+"."+vars+"."+ystr+"-"+yend+".nc"
     system("rm " + out_file)
     fout = addfile(out_file,"cw")
     vs1 = vars

@@ -12,7 +12,7 @@ begin
   cmipnam    = (/"CMIP"/)
   exps       = "r1i1p1f1"
   scenario   = "historical" ;"ssp245";"ssp585"
-  outdir     = "/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/CMIP6_MME"
+  outdir     = "/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD/CMIP6_MME_LTM"
   topdir     = "/global/cfs/projectdirs/m3522/cmip6/CMIP6"
   comdir     = "/global/cfs/cdirs/e3sm/zhan391/e3sm_cvdp/data_process/cmip6_mme/share_file"
 
@@ -23,27 +23,14 @@ begin
   delete([/model_dirs/])
   ;print(model_name)
 
-  var_lev    = "sfc"
-  cmip_vnam  = (/"psl",  "ts", "tas",   "pr",   "prc",  \
-                 "prsn", "ps", "prw",   "huss", "tauu", \
-                 "tauv", "clt", "hfls", "hfss", "evspsbl",\
-                 "clivi", "clwvi", "sfcWind", "uas", "vas",\ 
-                 "rlut","rlutcs","rlds","rldscs","rsds", \
-                 "rsdscs", "rsus", "rsuscs","rlus","rsdt",\
-                 "rsut","rsutcs","rtmt"/)
-  e3sm_vnam  = (/"PSL",   "TS", "TREFHT","PRECT","PRECC", \
-                 "PRECST","PS", "TMQ",   "QREFHT","TAUX", \
-                 "TAUY", "CLDTOT","LHFLX", "SHFLX", "QFLX",\
-                 "TGCLDIWP", "TGCLDCWP", "S10", "U10", "V10", \
-                 "rlut","FLUTC","FLDS","rldscs","FSDS", \
-                 "FSDSC","rsus","rsuscs","rlus","SOLIN",\
-                 "FSUTOA","FSUTOAC","rtmt"/) 
-  cmip_dnam  = cmip_vnam
-  cmip_dnam  = "Amon"
+  var_lev    = "ocnsfc"
+  cmip_vnam  = (/"tos","siconc"/)
+  e3sm_vnam  = (/"SST","SICONC"/)
+  cmip_dnam  = (/"Omon","SImon"/)
   nvars      = dimsizes(cmip_vnam)
 
  ;time range for climo forcing 
-  csym       = 197901
+  csym       = 191501
   ceym       = 201412
   nyrs       = ceym/100 - csym/100 + 1
   nmon       = nyrs * 12
@@ -55,7 +42,7 @@ begin
 
   ;do im = 0,nmodel-1,1
 
-    do iv = 15,16 ;0,nvars-1,1
+    do iv = 0,nvars-1,1
 
      varnam   = cmip_vnam(iv)
      varout   = e3sm_vnam(iv)

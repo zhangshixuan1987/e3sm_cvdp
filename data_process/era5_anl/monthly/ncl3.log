@@ -1,13 +1,0 @@
-nohup: ignoring input
-rm: cannot remove '/global/cfs/cdirs/e3sm/zhan391/data/CVDP_RGD//ERA5/ERA5.en00.TCO.197901-201812.nc': No such file or directory
- Copyright (C) 1995-2018 - All Rights Reserved
- University Corporation for Atmospheric Research
- NCAR Command Language Version 6.5.0
- The use of this software is governed by a License Agreement.
- See http://www.ncl.ucar.edu/ for more details.
-(0)	working on variable TCO
-fatal:Subscript out of range, error in subscript #0
-fatal:An error occurred reading out_name
-fatal:["Execute.c":8637]:Execute: Error occurred at or near line 124 in file 1_gen_2d_era5_ozone.ncl
-
-input in flex scanner failed

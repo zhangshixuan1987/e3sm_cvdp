@@ -214,9 +214,15 @@ begin
     else if (vars.eq."OLR") then
       xtmp = f1->FLUT
       var0 = xtmp(indy,{latS:latN},{lonW:lonE})
+    else if (vars.eq."FNET") then
+      xtmp = f1->FSNTOA
+      xtmp = xtmp - f1->FLNTOA
+      var0 = xtmp(indy,{latS:latN},{lonW:lonE})
+      var0@long_name = "TOA net radiative fluxes (positive down)"
     else 
       xtmp = f1->$vars$
       var0 = xtmp(indy,{latS:latN},{lonW:lonE})
+    end if 
     end if 
     end if
     end if

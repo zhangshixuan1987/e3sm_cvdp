@@ -123,6 +123,29 @@ begin
        end if
      end if
 
+     if (varnam.eq."FNET") then
+       if(isvar("rtmt")) then
+        var0 = rtmt
+        var0@long_name = "TOA net downward radiative fluxes at full-sky (downward - upward)"
+       end if
+     end if
+
+     if (varnam.eq."FSNTOA") then
+       if(isvar("rsdt").and.isvar("rsut")) then
+        var0 = rsdt
+        var0 = (rsdt - rsut)
+        var0@long_name = "Net TOA shortwave radiative fluxes (SW) at full-sky (downward - upward)"
+       end if
+     end if
+
+     if (varnam.eq."FSNTOAC") then
+       if(isvar("rsdt").and.isvar("rsutcs")) then
+        var0 = rsdt
+        var0 = (rsdt - rsutcs)
+        var0@long_name = "Net TOA shortwave radiative fluxes (SW) at clear-sky (downward - upward)"
+       end if
+     end if
+
      if (varnam.eq."FSNS") then
        if(isvar("rsds").and.isvar("rsus")) then
         var0 = rsds 
