@@ -20,15 +20,16 @@ exp_name = (/"v3.LR.piControl"/)
 nexps    = dimsizes(exp_name)
 nens     = 1
 
-ystr     = 1
-yend     = 200 
-time_tag = (/sprinti("%04d01",ystr)+"-"+sprinti("%04d12",yend)/)
-grid_tag = "1x1"
+ystr      = 101
+yend      = 250
+time_tag  = (/sprinti("%04d01",ystr)+"-"+sprinti("%04d12",yend)/)
+ntags     = dimsizes(time_tag)
+grid_tag  = "1x1"
 
 nsegs    = (yend - ystr + 1)/50
 segs_tag = new(nsegs,string)
 do i = 0,nsegs-1
- segs_tag(i) = (/sprinti("%04d01",i*50+1)+"-"+sprinti("%04d12",(i+1)*50)/)
+ segs_tag(i) = (/sprinti("%04d01",i*50+ystr)+"-"+sprinti("%04d12",(i+1)*50+ystr-1)/)
 end do 
 
 ;define reons for eof analysis
@@ -66,10 +67,12 @@ do k  = 0,nexps-1,1
    enstr  = "en"+sprinti("%02d",ie)
    print("working on variable "+ vars)
 
+  ;system("rm -rvf "+ data_dir+"/"+exp_name(k)+"/"+exp_name(k)+"."+enstr+"."+vars+"."+time_tag+".nc")
+
    do it = 0,nsegs-1,1 ; loop each slice data, then combine to the required period 
 
     fl0      = data_dir+"/"+exp_name(k)+"/"+exp_name(k)+"."+enstr+"."+vars+"."+time_tag+".nc"
-    fl1      = data_dir+"/"+exp_name(k)+"/"+exp_name(k)+"."+enstr+"."+vars+"."+segs_tag(it)+".nc"
+    fl1      = data_dir+"/"+exp_name(k)+"/ATM_3D/"+exp_name(k)+"."+enstr+"."+vars+"."+segs_tag(it)+".nc"
     l_output = True 
     if (isfilepresent(fl0)) then
        l_output = False ; file already generated 
@@ -88,7 +91,7 @@ do k  = 0,nexps-1,1
       end if 
     else if (vars.eq."Z500") then
       v3d  = "Z3"
-      fl1  = data_dir+"/"+exp_name(k)+"/"+exp_name(k)+"."+enstr+"."+v3d+"."+segs_tag(it)+".nc"
+      fl1  = data_dir+"/"+exp_name(k)+"/ATM_3D/"+exp_name(k)+"."+enstr+"."+v3d+"."+segs_tag(it)+".nc"
       f1   = addfile(fl1,"r")
       xtmp = vinth2p(f1->Z3,f1->hyam,f1->hybm,500.0,f1->PS,1,f1->P0/100.0,1,False)
       var0 = xtmp(:,0,{latS:latN},{lonW:lonE})
@@ -99,7 +102,7 @@ do k  = 0,nexps-1,1
       delete([/v3d,fl1,f1,xtmp/])
     else if (vars.eq."T850") then
       v3d  = "T"
-      fl1  = data_dir+"/"+exp_name(k)+"/"+exp_name(k)+"."+enstr+"."+v3d+"."+segs_tag(it)+".nc"
+      fl1  = data_dir+"/"+exp_name(k)+"/ATM_3D/"+exp_name(k)+"."+enstr+"."+v3d+"."+segs_tag(it)+".nc"
       f1   = addfile(fl1,"r")
       xtmp = vinth2p(f1->T,f1->hyam,f1->hybm,850.0,f1->PS,1,f1->P0/100.0,1,False)
       var0 = xtmp(:,0,{latS:latN},{lonW:lonE})
@@ -110,7 +113,7 @@ do k  = 0,nexps-1,1
       delete([/v3d,fl1,f1,xtmp/])
     else if (vars.eq."U850") then
       v3d  = "U"
-      fl1  = data_dir+"/"+exp_name(k)+"/"+exp_name(k)+"."+enstr+"."+v3d+"."+segs_tag(it)+".nc"
+      fl1  = data_dir+"/"+exp_name(k)+"/ATM_3D/"+exp_name(k)+"."+enstr+"."+v3d+"."+segs_tag(it)+".nc"
       f1   = addfile(fl1,"r")
       xtmp = vinth2p(f1->U,f1->hyam,f1->hybm,850.0,f1->PS,1,f1->P0/100.0,1,False)
       var0 = xtmp(:,0,{latS:latN},{lonW:lonE})
@@ -121,7 +124,7 @@ do k  = 0,nexps-1,1
       delete([/v3d,fl1,f1,xtmp/])
     else if (vars.eq."V850") then
       v3d  = "V"
-      fl1  = data_dir+"/"+exp_name(k)+"/"+exp_name(k)+"."+enstr+"."+v3d+"."+segs_tag(it)+".nc"
+      fl1  = data_dir+"/"+exp_name(k)+"/ATM_3D/"+exp_name(k)+"."+enstr+"."+v3d+"."+segs_tag(it)+".nc"
       f1   = addfile(fl1,"r")
       xtmp = vinth2p(f1->V,f1->hyam,f1->hybm,850.0,f1->PS,1,f1->P0/100.0,1,False)
       var0 = xtmp(:,0,{latS:latN},{lonW:lonE})
@@ -132,7 +135,7 @@ do k  = 0,nexps-1,1
       delete([/v3d,fl1,f1,xtmp/])
     else if (vars.eq."U200") then
       v3d  = "U"
-      fl1  = data_dir+"/"+exp_name(k)+"/"+exp_name(k)+"."+enstr+"."+v3d+"."+segs_tag(it)+".nc"
+      fl1  = data_dir+"/"+exp_name(k)+"/ATM_3D/"+exp_name(k)+"."+enstr+"."+v3d+"."+segs_tag(it)+".nc"
       f1   = addfile(fl1,"r")
       xtmp = vinth2p(f1->U,f1->hyam,f1->hybm,200.0,f1->PS,1,f1->P0/100.0,1,False)
       var0 = xtmp(:,0,{latS:latN},{lonW:lonE})
@@ -143,7 +146,7 @@ do k  = 0,nexps-1,1
       delete([/v3d,fl1,f1,xtmp/])
     else if (vars.eq."V200") then
       v3d  = "V"
-      fl1  = data_dir+"/"+exp_name(k)+"/"+exp_name(k)+"."+enstr+"."+v3d+"."+segs_tag(it)+".nc"
+      fl1  = data_dir+"/"+exp_name(k)+"/ATM_3D/"+exp_name(k)+"."+enstr+"."+v3d+"."+segs_tag(it)+".nc"
       f1   = addfile(fl1,"r")
       xtmp = vinth2p(f1->V,f1->hyam,f1->hybm,200.0,f1->PS,1,f1->P0/100.0,1,False)
       var0 = xtmp(:,0,{latS:latN},{lonW:lonE})
@@ -156,7 +159,7 @@ do k  = 0,nexps-1,1
       v3d  = (/"U","V"/)
       do iv = 0,dimsizes(v3d)-1
         vin  = v3d(iv)
-        fl1  = data_dir+"/"+exp_name(k)+"/"+exp_name(k)+"."+enstr+"."+vin+"."+segs_tag(it)+".nc"
+        fl1  = data_dir+"/"+exp_name(k)+"/ATM_3D/"+exp_name(k)+"."+enstr+"."+vin+"."+segs_tag(it)+".nc"
         f1   = addfile(fl1,"r")
         nlev = dimsizes(f1->lev)
         if(iv.eq.0) then
@@ -174,7 +177,7 @@ do k  = 0,nexps-1,1
       delete([/v3d,fl1,f1/])
     else if (vars.eq."U10") then
       v3d  = (/"U"/)
-      fl1  = data_dir+"/"+exp_name(k)+"/"+exp_name(k)+"."+enstr+"."+v3d+"."+segs_tag(it)+".nc"
+      fl1  = data_dir+"/"+exp_name(k)+"/ATM_3D/"+exp_name(k)+"."+enstr+"."+v3d+"."+segs_tag(it)+".nc"
       f1   = addfile(fl1,"r")
       nlev = dimsizes(f1->lev)
       var0 = f1->$v3d$(:,nlev-1,:,:)
@@ -185,7 +188,7 @@ do k  = 0,nexps-1,1
       delete([/v3d,fl1,f1,nlev/])
     else if (vars.eq."V10") then
       v3d  = (/"V"/)
-      fl1  = data_dir+"/"+exp_name(k)+"/"+exp_name(k)+"."+enstr+"."+v3d+"."+segs_tag(it)+".nc"
+      fl1  = data_dir+"/"+exp_name(k)+"/ATM_3D/"+exp_name(k)+"."+enstr+"."+v3d+"."+segs_tag(it)+".nc"
       f1   = addfile(fl1,"r")
       nlev = dimsizes(f1->lev)
       var0 = f1->$v3d$(:,nlev-1,:,:)
@@ -196,7 +199,7 @@ do k  = 0,nexps-1,1
       delete([/v3d,fl1,f1,nlev/])
     else if (vars.eq."SF") then
       v3d  = (/"V"/)
-      fl1  = data_dir+"/"+exp_name(k)+"/"+exp_name(k)+"."+enstr+"."+v3d+"."+segs_tag(it)+".nc"
+      fl1  = data_dir+"/"+exp_name(k)+"/ATM_3D/"+exp_name(k)+"."+enstr+"."+v3d+"."+segs_tag(it)+".nc"
       f1   = addfile(fl1,"r")
       lev           = tofloat(plev({50:1000}))
       lev           = lev * 100.0

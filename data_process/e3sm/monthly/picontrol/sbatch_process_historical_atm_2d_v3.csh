@@ -21,8 +21,8 @@ set var2d_name = ( "LANDFRAC" "OCNFRAC" "ICEFRAC" "PS" "PSL" "PHIS" "U10" "LWCF"
 set var2d_list = ( $var2d_name )
 set nvars      = $#var2d_list
 
-set start_year = 1
-set end_year   = 200
+set start_year = 101
+set end_year   = 250
 set time_tag   = `printf "%04d" $start_year`01-`printf "%04d" $end_year`12
 
 #location of work directory 

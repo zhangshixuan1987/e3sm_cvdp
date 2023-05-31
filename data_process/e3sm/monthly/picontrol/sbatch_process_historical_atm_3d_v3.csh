@@ -20,8 +20,8 @@ set var2d_name = ("U" "V" "T" "Q" "Z3")
 set var2d_list = ( $var2d_name )
 set nvars      = $#var2d_list
 
-set start_year = 1
-set end_year   = 200
+set start_year = 101
+set end_year   = 250
 
 @ nyr = ( $end_year - $start_year + 1 ) / 50
 

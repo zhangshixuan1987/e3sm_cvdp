@@ -20,7 +20,7 @@ begin
   nexps     = dimsizes(exp_name)
 
   nens      = 1
-  time_tag  = "197901-201412"
+  time_tag  = "191501-201412"
   ntags     = dimsizes(time_tag)
   grid_tag  = "1x1"
 

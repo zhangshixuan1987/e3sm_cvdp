@@ -27,7 +27,7 @@ set var2d_desc = ("Fraction of ground covered by snow" \
 set var2d_list = ("FSNO" "SNOWDP" "SNOW" "SOILWATER_10CM")
 set nvars      = $#var2d_list
 
-set start_year = 1979
+set start_year = 1915
 set end_year   = 2014
 set time_tag   = `printf "%04d" $start_year`01-`printf "%04d" $end_year`12
 @ ym1 = $start_year - 1
@@ -51,7 +51,7 @@ while ( $i <= $ncase )
 
  set CASE_NAME  = $model_case[$i]
  set iy = $start_year
- set RUN_FILE_DIR = /lcrc/group/e3sm/ac.xzheng/E3SMv3_dev/${CASE_NAME}/archive/lnd/hist
+ set RUN_FILE_DIR = /lcrc/group/e3sm/ac.xzheng/E3SMv3_dev/${CASE_NAME}/archive/lnd/hist_backup
 
  set eam_files = 
  while ($iy <= $end_year)

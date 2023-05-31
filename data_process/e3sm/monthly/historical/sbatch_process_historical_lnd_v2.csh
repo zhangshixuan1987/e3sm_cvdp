@@ -13,7 +13,7 @@ cd $jobdir
 module load  intel-parallel-studio/cluster.2017.4-wyg4gfu intel-parallel-studio/cluster.2017.4-wyg4gfu  intel-mpi/2017.3-dfphq6k intel/17.0.4-74uvhji  intel-mpi/2017.3-dfphq6k nco/4.7.4-x4y66ep netcdf/4.6.1-c2mecde 
 
 set exp_name   = v2.LR.historical
-set model_case = (v2.LR.historical_0101 v2.LR.historical_0151 v2.LR.historical_0201 v2.LR.historical_0251 v2.LR.historical_0301)
+set model_case = (v2.LR.historical_0201)
 set ncase = $#model_case
 
 set var2d_name = ("SNFRAC" "SNOWDP" "SNOW"   "SOILWATER")
@@ -26,7 +26,7 @@ set var2d_desc = ("Fraction of ground covered by snow" \
 set var2d_list = ("FSNO" "SNOWDP" "SNOW" "SOILWATER_10CM")
 set nvars      = $#var2d_list
 
-set start_year = 1979
+set start_year = 1915
 set end_year   = 2014
 set time_tag   = `printf "%04d" $start_year`01-`printf "%04d" $end_year`12
 @ ym1 = $start_year - 1

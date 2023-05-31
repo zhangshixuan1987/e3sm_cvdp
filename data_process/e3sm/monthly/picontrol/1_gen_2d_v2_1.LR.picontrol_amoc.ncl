@@ -22,9 +22,9 @@ begin
   data_tag1 = (/"0001-0500"/)
   data_tag2 = (/"0451-0500"/)
 
-  time_tag  = (/"000101-020012"/)
-  ystr      = (/000101/)
-  yend      = (/020012/)
+  time_tag  = (/"010101-025012"/)
+  ystr      = (/010101/)
+  yend      = (/025012/)
 
   ntags     = dimsizes(time_tag)
   grid_tag  = "1x1"

@@ -32,6 +32,10 @@ set RUN_FILE_DIR = /lcrc/group/e3sm/ac.forsyth2/E3SMv2/${CASE_NAME}/archive/atm/
 set MAP_FILE   = /lcrc/group/acme/ac.szhang/acme_scratch/data/regrid_maps/map_ne30pg2_to_cmip6_180x360_aave.20200201.nc
 
 set var2d_list1 =("TOZ" "U010" "U001" "OMEGA500")  
+                  #("LHFLX" "SHFLX" "QREFHT" "TUQ"  \
+                  # "TVQ" "TS" "Z500" "U850" "V850" \
+                  # "PS" "PRECT" "TREFHT" "TREFHTMN" "TREFHTMX") 
+                  #"Z500","U850","V850","U250","T250","TREFHT","TREFHTMN","TREFHTMX","TS","TVQ","TUQ","OMEGA500","CLDTOT","FLNT","FSNT","FLNS","FLUT","FSNS","FLDS","FSDS","LHFLX","SHFLX","QREFHT","OMEGA500","PRECT","PS","UBOT","VBOT","TOZ","TMQ","TGCLDLWP","TGCLDIWP","TGCLDCWP")
 set nvar1 = $#var2d_list1
 
 echo $nvar1

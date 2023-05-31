@@ -16,17 +16,22 @@ begin
 out_dir  = "/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD"
 data_dir = "/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD"
 
-exp_name = (/"v3.LR.historical"/)
-nexps    = dimsizes(exp_name)
+exp_name  = (/"v3.LR.historical"/)
+nexps     = dimsizes(exp_name)
 
-nens     = 1
-ystr     = 1979
-yend     = 2014
+nens      = 1
+ystr      = 1915
+yend      = 2014
 time_tag = (/sprinti("%04d01",ystr)+"-"+sprinti("%04d12",yend)/)
-grid_tag = "1x1"
+ntags     = dimsizes(time_tag)
+grid_tag  = "1x1"
 
-segs_tag = (/sprinti("%04d01",ystr)+"-"+sprinti("%04d12",yend)/)
-nsegs    = dimsizes(segs_tag)
+nsegs    = (yend - ystr + 1)/50
+segs_tag = new(nsegs,string)
+do i = 0,nsegs-1
+ segs_tag(i) = (/sprinti("%04d01",i*50+ystr)+"-"+sprinti("%04d12",(i+1)*50+ystr-1)/)
+end do 
+;print(segs_tag)
 
 ;define reons for eof analysis
 latS     = -90.  ;negative for southern hemisphere
@@ -66,7 +71,7 @@ do k  = 0,nexps-1,1
    do it = 0,nsegs-1,1 ; loop each slice data, then combine to the required period 
 
     fl0      = data_dir+"/"+exp_name(k)+"/"+exp_name(k)+"."+enstr+"."+vars+"."+time_tag+".nc"
-    fl1      = data_dir+"/"+exp_name(k)+"/"+exp_name(k)+"."+enstr+"."+vars+"."+segs_tag(it)+".nc"
+    fl1      = data_dir+"/"+exp_name(k)+"/ATM_3D/"+exp_name(k)+"."+enstr+"."+vars+"."+segs_tag(it)+".nc"
     l_output = True 
     if (isfilepresent(fl0)) then
        l_output = False ; file already generated 
@@ -85,76 +90,70 @@ do k  = 0,nexps-1,1
       end if 
     else if (vars.eq."Z500") then
       v3d  = "Z3"
-      pnew = 500.0
       fl1  = data_dir+"/"+exp_name(k)+"/ATM_3D/"+exp_name(k)+"."+enstr+"."+v3d+"."+segs_tag(it)+".nc"
       f1   = addfile(fl1,"r")
-      xtmp = vinth2p(f1->$v3d$,f1->hyam,f1->hybm,pnew,f1->PS,1,f1->P0/100.0,1,False)
+      xtmp = vinth2p(f1->Z3,f1->hyam,f1->hybm,500.0,f1->PS,1,f1->P0/100.0,1,False)
       var0 = xtmp(:,0,{latS:latN},{lonW:lonE})
       var0@_FillValue = -9999.
       var0       = var0*facmod
       var0@units = varunt
       var0@notes = "modified: * " + facmod
-      delete([/v3d,fl1,f1,xtmp,pnew/])
+      delete([/v3d,fl1,f1,xtmp/])
     else if (vars.eq."T850") then
       v3d  = "T"
-      pnew = 850.0
       fl1  = data_dir+"/"+exp_name(k)+"/ATM_3D/"+exp_name(k)+"."+enstr+"."+v3d+"."+segs_tag(it)+".nc"
       f1   = addfile(fl1,"r")
-      xtmp = vinth2p(f1->$v3d$,f1->hyam,f1->hybm,pnew,f1->PS,1,f1->P0/100.0,1,False)
+      xtmp = vinth2p(f1->T,f1->hyam,f1->hybm,850.0,f1->PS,1,f1->P0/100.0,1,False)
       var0 = xtmp(:,0,{latS:latN},{lonW:lonE})
       var0@_FillValue = -9999.
       var0       = var0*facmod
       var0@units = varunt
       var0@notes = "modified: * " + facmod
-      delete([/v3d,fl1,f1,xtmp,pnew/])
+      delete([/v3d,fl1,f1,xtmp/])
     else if (vars.eq."U850") then
       v3d  = "U"
-      pnew = 850.0
       fl1  = data_dir+"/"+exp_name(k)+"/ATM_3D/"+exp_name(k)+"."+enstr+"."+v3d+"."+segs_tag(it)+".nc"
       f1   = addfile(fl1,"r")
-      xtmp = vinth2p(f1->$v3d$,f1->hyam,f1->hybm,pnew,f1->PS,1,f1->P0/100.0,1,False)
+      xtmp = vinth2p(f1->U,f1->hyam,f1->hybm,850.0,f1->PS,1,f1->P0/100.0,1,False)
       var0 = xtmp(:,0,{latS:latN},{lonW:lonE})
       var0@_FillValue = -9999.
       var0       = var0*facmod
       var0@units = varunt
       var0@notes = "modified: * " + facmod
-      delete([/v3d,fl1,f1,xtmp,pnew/])
+      delete([/v3d,fl1,f1,xtmp/])
     else if (vars.eq."V850") then
       v3d  = "V"
-      pnew = 850.0
       fl1  = data_dir+"/"+exp_name(k)+"/ATM_3D/"+exp_name(k)+"."+enstr+"."+v3d+"."+segs_tag(it)+".nc"
       f1   = addfile(fl1,"r")
-      xtmp = vinth2p(f1->$v3d$,f1->hyam,f1->hybm,pnew,f1->PS,1,f1->P0/100.0,1,False)
+      xtmp = vinth2p(f1->V,f1->hyam,f1->hybm,850.0,f1->PS,1,f1->P0/100.0,1,False)
       var0 = xtmp(:,0,{latS:latN},{lonW:lonE})
       var0@_FillValue = -9999.
       var0       = var0*facmod
       var0@units = varunt
       var0@notes = "modified: * " + facmod
-      delete([/v3d,fl1,f1,xtmp,pnew/])
+      delete([/v3d,fl1,f1,xtmp/])
     else if (vars.eq."U200") then
       v3d  = "U"
-      pnew = 200.0
       fl1  = data_dir+"/"+exp_name(k)+"/ATM_3D/"+exp_name(k)+"."+enstr+"."+v3d+"."+segs_tag(it)+".nc"
       f1   = addfile(fl1,"r")
-      xtmp = vinth2p(f1->$v3d$,f1->hyam,f1->hybm,pnew,f1->PS,1,f1->P0/100.0,1,False)
+      xtmp = vinth2p(f1->U,f1->hyam,f1->hybm,200.0,f1->PS,1,f1->P0/100.0,1,False)
       var0 = xtmp(:,0,{latS:latN},{lonW:lonE})
       var0@_FillValue = -9999.
       var0       = var0*facmod
       var0@units = varunt
       var0@notes = "modified: * " + facmod
-      delete([/v3d,fl1,f1,xtmp,pnew/])
+      delete([/v3d,fl1,f1,xtmp/])
     else if (vars.eq."V200") then
       v3d  = "V"
-      pnew = 200.0
       fl1  = data_dir+"/"+exp_name(k)+"/ATM_3D/"+exp_name(k)+"."+enstr+"."+v3d+"."+segs_tag(it)+".nc"
       f1   = addfile(fl1,"r")
-      xtmp = vinth2p(f1->$v3d$,f1->hyam,f1->hybm,pnew,f1->PS,1,f1->P0/100.0,1,False)
+      xtmp = vinth2p(f1->V,f1->hyam,f1->hybm,200.0,f1->PS,1,f1->P0/100.0,1,False)
       var0 = xtmp(:,0,{latS:latN},{lonW:lonE})
       var0@_FillValue = -9999.
       var0       = var0*facmod
       var0@units = varunt
       var0@notes = "modified: * " + facmod
-      delete([/v3d,fl1,f1,xtmp,pnew/])
+      delete([/v3d,fl1,f1,xtmp/])
     else if (vars.eq."S10") then
       v3d  = (/"U","V"/)
       do iv = 0,dimsizes(v3d)-1

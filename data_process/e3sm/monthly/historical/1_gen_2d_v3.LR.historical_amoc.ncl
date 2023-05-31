@@ -20,9 +20,11 @@ begin
   data_tag1 = (/"1850-2014"/)
   data_tag2 = (/"1985-2014"/)
 
-  time_tag  = (/"197901-201412"/)
-  ystr      = (/197901/)
-  yend      = (/201412/)
+  time_tag  = (/"191501-201412"/)
+  ystr      = (/191309/);(/191501/)
+  yend      = (/201308/);(/201412/)
+ ;ystr      = (/191501/)
+ ;yend      = (/201412/)
 
   ntags     = dimsizes(time_tag)
   grid_tag  = "1x1"
@@ -64,6 +66,7 @@ begin
     indy          = ind(year.ge.ystr(it).and.year.le.yend(it))
     obstime       = time(indy)
     obstime@units = time@units
+   ;print(cd_calendar(obstime,-1))
 
     var0 = tofloat(f1->mocAtlantic(indy,:,:))
     var0!0 = "time"

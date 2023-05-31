@@ -27,8 +27,8 @@ set var2d_list = ("timeMonthly_avg_seaSurfaceTemperature" \
                   "timeMonthly_avg_iceVolumeCell") 
 set nvars      = $#var2d_list
 
-set start_year = 1
-set end_year   = 200
+set start_year = 101
+set end_year   = 250
 set time_tag   = `printf "%04d" $start_year`01-`printf "%04d" $end_year`12
 @ ym1 = $start_year - 1
 set time_unt   = "months since `printf "%04d" $ym1`-12-15 00:00:0.0"

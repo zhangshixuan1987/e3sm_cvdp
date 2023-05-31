@@ -20,9 +20,10 @@ begin
   nexps     = dimsizes(exp_name)
   nens      = 1
 
-  time_tag  = (/"000101-020012"/)
+  ystr      = 101
+  yend      = 250
+  time_tag  = (/sprinti("%04d01",ystr)+"-"+sprinti("%04d12",yend)/)
   ntags     = dimsizes(time_tag)
-
   grid_tag  = "1x1"
 
  ;define regions for eof analysis
