@@ -210,18 +210,6 @@ begin
   if (vn.eq."IWP") then
      vname = (/"TGCLDIWP","tgcldiwp"/)
   end if
-  if (vn.eq."SF470") then
-     vname = (/"SF470","sf470"/)
-  end if
-  if (vn.eq."SF920") then
-     vname = (/"SF920","sf920"/)
-  end if
-  if (vn.eq."VP470") then
-     vname = (/"VP470","vp470"/)
-  end if
-  if (vn.eq."VP920") then
-     vname = (/"VP920","vp920"/)
-  end if
   if (vn.eq."ETH") then
      vname = (/"ETH12","ETH","eth12","eth"/)
   end if
@@ -649,159 +637,248 @@ begin
   end if 
  
   if (vn.eq."SF") then      ; units check
+    if(isatt(farr,"units")) then
      if (farr@units.eq."kg s~S~-1~N~".or.farr@units.eq."kg s-1".or.farr@units.eq."kg s^-1") then
         farr@units = "kg/s"
-     else
-       print("warning: unit of " + vn + " seems to be incorrect, please check ..." )
-       exit
-     end if
+     end if 
+    else
+      print("warning: unit of " + vn + " seems to be incorrect, please check ..." )
+      exit
+    end if
   end if
  
   if (vn.eq."TREFHT".or.vn.eq."TS") then      ; units check
-     if (farr@units.eq."K".or.farr@units.eq."Kelvin".or.farr@units.eq."deg_k".or.farr@units.eq."deg_K") then   
+    if(isatt(farr,"units")) then
+      if (farr@units.eq."K".or.farr@units.eq."Kelvin".or.farr@units.eq."deg_k".or.farr@units.eq."deg_K") then   
         if (max(farr).ge.100) then    ; data sets can be anomalies with units of K, so check for range before subtracting
            farr = farr-273.15
         end if
         farr@units = "C"
-     end if
-     if (farr@units.eq."degrees_C".or.farr@units.eq."degrees C".or.farr@units.eq."degree_C".or.farr@units.eq."degree C") then
+      end if
+      if (farr@units.eq."degrees_C".or.farr@units.eq."degrees C".or.farr@units.eq."degree_C".or.farr@units.eq."degree C") then
         farr@units = "C"
-     end if
+      end if
+    else
+      if (max(farr).ge.100) then
+        farr = farr-273.15
+      end if 
+      farr@units = "C"
+    end if 
   end if
   if (vn.eq."PSL") then
+    if(isatt(farr,"units")) then
      if (farr@units.eq."Pa".or.farr@units.eq."Pascals".or.farr@units.eq."Pascal") then
         farr = farr/100.
         farr@units = "hPa"
      end if
+    else
+      if(max(PSL).ge.1e5) then 
+        farr = farr/100.
+        farr@units = "hPa"
+      else
+        farr@units = "hPa"
+      end if 
+    end if 
   end if
   if (vn.eq."PRECT".or.vn.eq."PRECST".or.vn.eq."QFLX") then    ; convert (if necessary) to mm/day
-     if (farr@units.eq."m/s".or.farr@units.eq."m s-1") then
-        farr = farr*86400000.
-     end if
-     if (farr@units.eq."kg m-2 s-1".or.farr@units.eq."kg/m2/s".or.farr@units.eq."kg/m^2/s".or.farr@units.eq."kg/(s*m2)".or.farr@units.eq."mm/s") then
-        farr = farr*86400.
-     end if
-     if (farr@units.eq."m".or.farr@units.eq."m/month".or.farr@units.eq."cm".or.farr@units.eq."cm/month".or.farr@units.eq."mm".or.farr@units.eq."mm/month") then    
-        yr = toint(farr&time)/100
-        mo = toint(farr&time - (yr*100))
-        days = days_in_month(yr,mo)
-        do gg = 0,dimsizes(farr&time)-1
-		         farr(gg,:,:) = (/ farr(gg,:,:) / days(gg) /)
-	       end do
-        if (farr@units.eq."cm".or.farr@units.eq."cm/month") then
-           farr = farr*10.   ; convert from cm/day to mm/day
-        end if        
-        if (farr@units.eq."m".or.farr@units.eq."m/month") then
-           farr = farr*1000.   ; convert from m/day to mm/day
-        end if   
-     end if  
-     if (farr@units.eq."m/day".or.farr@units.eq."m day-1") then
-        farr = farr*1000.
-     end if
-     farr@units = "mm/day" 
+    if(isatt(farr,"units")) then
+      if (farr@units.eq."m/s".or.farr@units.eq."m s-1") then
+         farr = farr*86400000.
+         farr@units = "mm/day"
+      end if
+      if (farr@units.eq."kg m-2 s-1".or.farr@units.eq."kg/m2/s".or.farr@units.eq."kg/m^2/s".or.farr@units.eq."kg/(s*m2)".or.farr@units.eq."mm/s") then
+         farr = farr*86400.
+         farr@units = "mm/day"
+      end if
+      if (farr@units.eq."m".or.farr@units.eq."m/month".or.farr@units.eq."cm".or.farr@units.eq."cm/month".or.farr@units.eq."mm".or.farr@units.eq."mm/month") then    
+         yr = toint(farr&time)/100
+         mo = toint(farr&time - (yr*100))
+         days = days_in_month(yr,mo)
+         do gg = 0,dimsizes(farr&time)-1
+ 		         farr(gg,:,:) = (/ farr(gg,:,:) / days(gg) /)
+ 	       end do
+         if (farr@units.eq."cm".or.farr@units.eq."cm/month") then
+            farr = farr*10.   ; convert from cm/day to mm/day
+         end if        
+         if (farr@units.eq."m".or.farr@units.eq."m/month") then
+            farr = farr*1000.   ; convert from m/day to mm/day
+         end if 
+         farr@units = "mm/day"  
+      end if  
+      if (farr@units.eq."m/day".or.farr@units.eq."m day-1") then
+         farr = farr*1000.
+         farr@units = "mm/day"
+      end if
+    else
+      farr@units = "mm/day"
+    end if 
   end if    
   if (vn.eq."SNOWDP") then
-     if (.not.isatt(farr,"is_all_missing")) then
+     if(isatt(farr,"units")) then
         if (farr@units.ne."m".and.farr@units.ne."meters") then
            print("Warning: SNOWDP/snd units may not be in meters. listed units = "+farr@units)
         end if
+     else 
+       farr@units = "m"
      end if
   end if
   if (vn.eq."TH850") then
+    if(isatt(farr,"units")) then
      if (farr@units.eq."degrees_C".or.farr@units.eq."degrees C".or.farr@units.eq."degree_C".or.farr@units.eq."degree C") then
         farr = farr + 273.15
         farr@units = "K"
      end if
+    else
+     farr@units = "K"
+    end if 
   end if
   if (vn.eq."TAUX".or.vn.eq."TAUY") then
-     if (farr@units.eq."N m~S~-2~N~".or.farr@units.eq."N m-2") then 
+    if(isatt(farr,"units")) then
+      if (farr@units.eq."N m~S~-2~N~".or.farr@units.eq."N m-2") then
         farr = farr*1.0
         farr@units = "N/m2"
-     end if
-     farr = farr * 1e2  
-     farr@units = "10~S~-2~N~ N/m2"
+      end if
+    else
+     farr@units = "N/m2"
+    end if
+    farr = farr * 1e2  
+    farr@units = "10~S~-2~N~ N/m2"
   end if
   if (vn.eq."FLDS".or.vn.eq."FLDSC".or.vn.eq."FLNS".or.vn.eq."FLNSC") then
-     if (farr@units.eq."W m~S~-2~N~".or.farr@units.eq."W m-2") then 
+    if(isatt(farr,"units")) then
+      if (farr@units.eq."W m~S~-2~N~".or.farr@units.eq."W m-2") then
         farr = farr*1.0
         farr@units = "W/m2"
-     end if
+      end if
+    else
      farr@units = "W/m2"
+    end if
   end if
   if (vn.eq."OLR".or.vn.eq."FLUT".or.vn.eq."FLUTC") then
-     if (farr@units.eq."W m~S~-2~N~".or.farr@units.eq."W m-2") then
+    if(isatt(farr,"units")) then
+      if (farr@units.eq."W m~S~-2~N~".or.farr@units.eq."W m-2") then
         farr = farr*1.0
         farr@units = "W/m2"
-     end if
+      end if
+    else
      farr@units = "W/m2"
+    end if
   end if
   if (vn.eq."SWCRE".or.vn.eq."LWCRE".or.vn.eq."SWCF".or.vn.eq."LWCF") then
-     if (farr@units.eq."W m~S~-2~N~".or.farr@units.eq."W m-2") then 
+    if(isatt(farr,"units")) then
+      if (farr@units.eq."W m~S~-2~N~".or.farr@units.eq."W m-2") then
         farr = farr*1.0
         farr@units = "W/m2"
-     end if
+      end if
+    else
      farr@units = "W/m2"
+    end if
   end if
   if (vn.eq."Qn".or.vn.eq."Qn_SRF".or.vn.eq."QnRad") then
-     if (farr@units.eq."W m~S~-2~N~".or.farr@units.eq."W m-2") then
+    if(isatt(farr,"units")) then
+      if (farr@units.eq."W m~S~-2~N~".or.farr@units.eq."W m-2") then
         farr = farr*1.0
         farr@units = "W/m2"
-     end if
+      end if
+    else 
      farr@units = "W/m2"
+    end if 
   end if
   if (vn.eq."Z500") then 
+    if(isatt(farr,"units")) then
+      if (farr@units.eq."km") then
+        farr = farr*1000.0
+        farr@units = "m" 
+      end if 
+      if (farr@units.eq."gpm") then
+        farr@units = "m"
+      end if 
+    else 
      farr@units = "m"
+    end if 
   end if
   if (vn.eq."CLDTOT") then
-     if (farr@units.eq."fraction".or.farr@units.eq."1".or.farr@units.eq."unitless") then
-        farr = farr*100.0
+     if(isatt(farr,"units")) then
+       if (farr@units.eq."fraction".or.farr@units.eq."1".or.farr@units.eq."unitless") then
+         farr = farr*100.0
+         farr@units = "%"
+       else if (farr@units.eq."percent") then 
+         farr@units = "%"
+       else   
         farr@units = "%"
-     end if
-     if (farr@units.eq."percent") then 
-        farr@units = "%"
-     end if
-     farr@units = "%"
+       end if
+       end if 
+     else 
+       farr@units = "%"
+     end if  
      if(farr@units.eq."%".and.max(farr).lt.1) then 
-       farr = farr * 100.0 
+      farr = farr * 100.0 
      end if 
      if(farr@units.eq."%".and.max(farr).gt.1000) then
        farr = farr / 100.0
      end if
   end if
   if (vn.eq."U200".or.vn.eq."V200".or.vn.eq."U850".or.vn.eq."V850") then
-     if (farr@units.eq."m s~S~-1~N~".or.farr@units.eq."m s-1") then
-        farr = farr*1.0
-        farr@units = "m/s"
-     end if
-     farr@units = "m/s"
+     if(isatt(farr,"units")) then
+       if (farr@units.eq."m s~S~-1~N~".or.farr@units.eq."m s-1") then
+          farr = farr*1.0
+          farr@units = "m/s"
+       end if
+     else 
+       farr@units = "m/s"
+     end if 
   end if
   if (vn.eq."U10".or.vn.eq."V10".or.vn.eq."S10")then 
-     if (farr@units.eq."m s~S~-1~N~".or.farr@units.eq."m s-1") then
-        farr = farr*1.0
-        farr@units = "m/s"
+     if(isatt(farr,"units")) then
+       if (farr@units.eq."m s~S~-1~N~".or.farr@units.eq."m s-1") then
+          farr = farr*1.0
+          farr@units = "m/s"
+       end if
+     else
+       farr@units = "m/s"
      end if
-     farr@units = "m/s"
   end if
   if (vn.eq."ETH".or.vn.eq."ETH1".or.vn.eq."ETH2".or.vn.eq."ETH12") then 
-     if (farr@units.eq."W m~S~-2~N~".or.farr@units.eq."W m-2") then
-        farr = farr*1.0
-        farr@units = "W/m2"
+     if(isatt(farr,"units")) then
+       if (farr@units.eq."W m~S~-2~N~".or.farr@units.eq."W m-2") then
+         farr = farr*1.0
+         farr@units = "W/m2"
+       end if
+     else
+       farr@units = "W/m2"
      end if
-     farr@units = "W/m2"
   end if
   if (vn.eq."SHFLX".or.vn.eq."LHFLX".or.vn.eq."HFLX") then 
-     if (farr@units.eq."W m~S~-2~N~".or.farr@units.eq."W m-2") then
-        farr = farr*1.0
-        farr@units = "W/m2"
-     end if
-     farr@units = "W/m2"
+     if(isatt(farr,"units")) then
+       if (farr@units.eq."W m~S~-2~N~".or.farr@units.eq."W m-2") then
+          farr = farr*1.0
+          farr@units = "W/m2"
+       end if
+     else
+      farr@units = "W/m2"
+     end if 
   end if
 
   if (vn.eq."TUQ".or.vn.eq."TVQ")then
-     if (farr@units.eq."kg m-1 s-1".or.farr@units.eq."kg/m/s".or.farr@units.eq."kg/m^1/s".or.farr@units.eq."kg/(s*m)".or.farr@units.eq."kg m~S~-1~N~ s~S~-1~N~") then
-        farr = farr*86400.
+     if(isatt(farr,"units")) then
+       if (farr@units.eq."kg m-1 s-1".or.farr@units.eq."kg/m/s".or.farr@units.eq."kg/m^1/s".or.farr@units.eq."kg/(s*m)".or.farr@units.eq."kg m~S~-1~N~ s~S~-1~N~") then
+         farr = farr*86400.
+         farr@units = "mm/day/m"
+       end if
+     else 
+       farr@units = "mm/day/m"
+     end if 
+  end if
+
+  if (vn.eq."IWP".or.vn.eq."LWP")then
+     if(isatt(farr,"units")) then
+       if (farr@units.eq."kg m-2".or.farr@units.eq."kg/m2".or.farr@units.eq."kg/m^2".or.farr@units.eq."kg/(m2)".or.farr@units.eq."kg m~S~-2~N~") then
+         farr = farr*1000.
+         farr@units = "kg/m2"
+       end if
+     else
+       farr@units = "kg/m2"
      end if
-     farr@units = "mm/day/m"
   end if
 
   date = farr&time         ; switch time to be CF-conforming
