@@ -44,6 +44,9 @@ begin
   paths = new(nsim,"string")
   syear = new(nsim,"integer",-999)
   eyear = new(nsim,"integer",-999)
+  names_EM = new(nsim,"string")
+  names_EM = names_EM@_FillValue
+  EM_num   = new(nsim,integer)
     
   delim = "|"
   do gg = 0,nsim-1
@@ -51,11 +54,29 @@ begin
      paths(gg) = str_strip(str_get_field(na(gg),2,delim))
      syear(gg) = stringtointeger(str_strip(str_get_field(na(gg),3,delim)))
      eyear(gg) = stringtointeger(str_strip(str_get_field(na(gg),4,delim)))
+     names_EM(gg) = str_strip(str_get_field(na(gg),5,delim))
+     temp := str_split(names_EM(gg),"-")
+     EM_num(gg) = toint(temp(0))
   end do
   
-  delete([/na,delim/])
+  delete([/na,delim,temp/])
+
+  test_int = toint(names_EM)
+  if (any(ismissing(test_int))) then
+     print("A model simulation has not been assigned to an ensemble, make sure within namelist that each row ends with a  | 1-$Ensemble Name (ex. | 2-CESM1 Control)")
+     print("See documentation. Alter namelist and rerun.")
+     exit
+  end if
+
+  do gg = 1,max(EM_num)    ; check that every member of an ensemble span the same number of years, and if not, reset the years to a common span (if possible)
+     wind := ind(EM_num.eq.gg)
+     yspan := eyear(wind) - syear(wind)
+     if (min(yspan).ne.max(yspan)) then
+        print("namelist.ncl: Each member of an ensemble must span the same number of years. Resetting "+names_EM(wind(0))+" ensemble to common year span of "+min(yspan)+" years.")
+        eyear(wind) = syear(wind)+min(yspan)
+     end if
+  end do
   
-    
   do gg = 0,nsim-1         ; if path ends in .nc remove it.
 ;     print(paths(gg))      ;  (It will get appended to the end of the path automatically when searching below.)
      paths(gg) = str_sub_str(paths(gg),".nc","")
@@ -92,9 +113,31 @@ begin
      syearBT = where(syearBT.eq."",syearBT@_FillValue,syearBT)
      eyearBT = where(eyearBT.eq."",eyearBT@_FillValue,eyearBT)
      
-     maxnumobs = max((/dimsizes(ind(vnamesB.eq."TS")),dimsizes(ind(vnamesB.eq."PSL")),dimsizes(ind(vnamesB.eq."TREFHT")), \
-                       dimsizes(ind(vnamesB.eq."PRECT")),dimsizes(ind(vnamesB.eq."MOC")),dimsizes(ind(vnamesB.eq."SNOWDP")), \
-                      dimsizes(ind(vnamesB.eq."aice_nh")),dimsizes(ind(vnamesB.eq."aice_sh"))/))
+     maxnumobs = max((/dimsizes(ind(vnamesB.eq."T")),dimsizes(ind(vnamesB.eq."Q")),\
+                       dimsizes(ind(vnamesB.eq."U")),dimsizes(ind(vnamesB.eq."V")),\
+                       dimsizes(ind(vnamesB.eq."TS")),dimsizes(ind(vnamesB.eq."PSL")),\
+                       dimsizes(ind(vnamesB.eq."PRECT")),dimsizes(ind(vnamesB.eq."Z500")),\
+                       dimsizes(ind(vnamesB.eq."CLDTOT")),dimsizes(ind(vnamesB.eq."PRECST")),\
+                       dimsizes(ind(vnamesB.eq."LWP")),dimsizes(ind(vnamesB.eq."IWP")),\
+                       dimsizes(ind(vnamesB.eq."U200")),dimsizes(ind(vnamesB.eq."V200")),\
+                       dimsizes(ind(vnamesB.eq."Qn_SRF")),dimsizes(ind(vnamesB.eq."QnRad")), \
+                       dimsizes(ind(vnamesB.eq."FLDS")),dimsizes(ind(vnamesB.eq."FLDSC")),\
+                       dimsizes(ind(vnamesB.eq."FLNS")),dimsizes(ind(vnamesB.eq."FLNSC")),\
+                       dimsizes(ind(vnamesB.eq."FSNS")),dimsizes(ind(vnamesB.eq."FSNSC")),\
+                       dimsizes(ind(vnamesB.eq."SWCRE")),dimsizes(ind(vnamesB.eq."LWCRE")),\
+                       dimsizes(ind(vnamesB.eq."SHFLX")),dimsizes(ind(vnamesB.eq."LHFLX")),\
+                       dimsizes(ind(vnamesB.eq."SF920")),dimsizes(ind(vnamesB.eq."VP920")),\
+                       dimsizes(ind(vnamesB.eq."SF470")),dimsizes(ind(vnamesB.eq."VP470")),\
+                       dimsizes(ind(vnamesB.eq."HFLX")),dimsizes(ind(vnamesB.eq."ETH1")),\
+                       dimsizes(ind(vnamesB.eq."ETH2")),dimsizes(ind(vnamesB.eq."ETH")),\
+                       dimsizes(ind(vnamesB.eq."U850")),dimsizes(ind(vnamesB.eq."V850")),\
+                       dimsizes(ind(vnamesB.eq."U10")),dimsizes(ind(vnamesB.eq."V10")),\
+                       dimsizes(ind(vnamesB.eq."TAUX")),dimsizes(ind(vnamesB.eq."TAUY")),\
+                       dimsizes(ind(vnamesB.eq."TREFHT")), dimsizes(ind(vnamesB.eq."OMEGA500")),\
+                       dimsizes(ind(vnamesB.eq."TH850")),dimsizes(ind(vnamesB.eq."SF")), \
+                       dimsizes(ind(vnamesB.eq."MOC")),dimsizes(ind(vnamesB.eq."SNOWDP")), \
+                       dimsizes(ind(vnamesB.eq."SICONC")),dimsizes(ind(vnamesB.eq."ETH12")),\
+                       dimsizes(ind(vnamesB.eq."aice_nh")),dimsizes(ind(vnamesB.eq."aice_sh"))/))
      syearB = stringtointeger(syearBT)
      eyearB = stringtointeger(eyearBT)
      
@@ -121,13 +164,13 @@ begin
      if (.not.ismissing(ts_i(0))) then
         incr = dimsizes(ts_i)
         do gg = 0,incr-1
-           namelist_ts(gg) = namesB(ts_i(gg))+" | "+pathsB(ts_i(gg))+" | "+syearB(ts_i(gg))+" | "+eyearB(ts_i(gg))  
+           namelist_ts(gg) = namesB(ts_i(gg))+" | "+pathsB(ts_i(gg))+" | "+syearB(ts_i(gg))+" | "+eyearB(ts_i(gg))  +" | 0-Observations"
         end do
         if (incr.lt.maxnumobs) then     ; fill in the missing obs rows with the first obs file, altering the name slightly for .nc write-outs
            if (.not.ismissing(namelist_ts(0))) then
               nmiss = ind(ismissing(namelist_ts(:maxnumobs-1)))
               do hh = nmiss(0),nmiss(dimsizes(nmiss)-1)
-                 namelist_ts(hh) = namesB(ts_i(0))+"_"+hh+" | "+pathsB(ts_i(0))+" | "+syearB(ts_i(0))+" | "+eyearB(ts_i(0))
+                 namelist_ts(hh) = namesB(ts_i(0))+"_"+hh+" | "+pathsB(ts_i(0))+" | "+syearB(ts_i(0))+" | "+eyearB(ts_i(0)) +" | 0-Observations"
               end do
               delete(nmiss)
            end if
@@ -147,7 +190,7 @@ begin
 
   do gg = 0,nsim-1
      do hh = 0,dimsizes(sstr)-1
-        namelist_ts(gg+maxnumobs) =  names(gg)+" | missing | "+syear(gg)+" | "+eyear(gg)  ; set to missing as default
+        namelist_ts(gg+maxnumobs) =  names(gg)+" | missing | "+syear(gg)+" | "+eyear(gg)  +" | "+names_EM(gg) ; set to missing as default
         fsst := systemfunc("bash -c 'ls "+paths(gg)+"*."+sstr(hh)+".*.nc 2> /dev/null'")   ; /dev/null suppresses all standard error output
         if (.not.ismissing(fsst(0))) then
            if (dimsizes(fsst).eq.1) then
@@ -155,7 +198,7 @@ begin
            else
               fsst@path = paths(gg)+"*."+sstr(hh)+".*.nc"
            end if
-           namelist_ts(gg+maxnumobs) =  names(gg)+" | "+fsst@path+" | "+syear(gg)+" | "+eyear(gg)
+           namelist_ts(gg+maxnumobs) =  names(gg)+" | "+fsst@path+" | "+syear(gg)+" | "+eyear(gg) +" | "+names_EM(gg)
            break
         else  ; try different method to find files
            tpath := str_sub_str(paths(gg),"/*/","/"+sstr(hh)+"/") 
@@ -163,7 +206,7 @@ begin
            fsst2 := systemfunc("bash -c 'ls "+tpath+"*.nc 2> /dev/null'")
            if (.not.ismissing(fsst2(0))) then
               if (str_match_bool(fsst2(0),sstr(hh))) then
-                 namelist_ts(gg+maxnumobs) =  names(gg)+" | "+tpath+"*.nc | "+syear(gg)+" | "+eyear(gg)
+                 namelist_ts(gg+maxnumobs) =  names(gg)+" | "+tpath+"*.nc | "+syear(gg)+" | "+eyear(gg) +" | "+names_EM(gg)
                  break
               end if
            end if
@@ -178,13 +221,13 @@ begin
      if (.not.ismissing(psl_i(0))) then
         incr = dimsizes(psl_i)
         do gg = 0,incr-1
-           namelist_psl(gg) = namesB(psl_i(gg))+" | "+pathsB(psl_i(gg))+" | "+syearB(psl_i(gg))+" | "+eyearB(psl_i(gg))  
+           namelist_psl(gg) = namesB(psl_i(gg))+" | "+pathsB(psl_i(gg))+" | "+syearB(psl_i(gg))+" | "+eyearB(psl_i(gg)) +" | 0-Observations" 
         end do
         if (incr.lt.maxnumobs) then     ; fill in the missing obs rows with the first obs file, altering the name slightly for .nc write-outs
            if (.not.ismissing(namelist_psl(0))) then
               nmiss = ind(ismissing(namelist_psl(:maxnumobs-1)))
               do hh = nmiss(0),nmiss(dimsizes(nmiss)-1)
-                 namelist_psl(hh) = namesB(psl_i(0))+"_"+hh+" | "+pathsB(psl_i(0))+" | "+syearB(psl_i(0))+" | "+eyearB(psl_i(0))
+                 namelist_psl(hh) = namesB(psl_i(0))+"_"+hh+" | "+pathsB(psl_i(0))+" | "+syearB(psl_i(0))+" | "+eyearB(psl_i(0)) +" | 0-Observations"
               end do
               delete(nmiss)
            end if
@@ -204,7 +247,7 @@ begin
 
   do gg = 0,nsim-1
      do hh = 0,dimsizes(sstr)-1
-        namelist_psl(gg+maxnumobs) =  names(gg)+" | missing | "+syear(gg)+" | "+eyear(gg)     ; set to missing as default
+        namelist_psl(gg+maxnumobs) =  names(gg)+" | missing | "+syear(gg)+" | "+eyear(gg) +" | "+names_EM(gg)    ; set to missing as default
         fsst := systemfunc("bash -c 'ls "+paths(gg)+"*."+sstr(hh)+".*.nc 2> /dev/null'")   ; /dev/null suppresses all standard error output
         if (.not.ismissing(fsst(0))) then
            if (dimsizes(fsst).eq.1) then
@@ -212,7 +255,7 @@ begin
            else
               fsst@path = paths(gg)+"*."+sstr(hh)+".*.nc"
            end if
-           namelist_psl(gg+maxnumobs) =  names(gg)+" | "+fsst@path+" | "+syear(gg)+" | "+eyear(gg)
+           namelist_psl(gg+maxnumobs) =  names(gg)+" | "+fsst@path+" | "+syear(gg)+" | "+eyear(gg) +" | "+names_EM(gg)
            break
         else  ; try different method to find files
            tpath := str_sub_str(paths(gg),"/*/","/"+sstr(hh)+"/") 
@@ -220,7 +263,7 @@ begin
            fsst2 := systemfunc("bash -c 'ls "+tpath+"*.nc 2> /dev/null'")
            if (.not.ismissing(fsst2(0))) then
               if (str_match_bool(fsst2(0),sstr(hh))) then
-                 namelist_psl(gg+maxnumobs) =  names(gg)+" | "+tpath+"*.nc | "+syear(gg)+" | "+eyear(gg)
+                 namelist_psl(gg+maxnumobs) =  names(gg)+" | "+tpath+"*.nc | "+syear(gg)+" | "+eyear(gg) +" | "+names_EM(gg)
                  break
               end if
            end if
@@ -235,13 +278,13 @@ begin
      if (.not.ismissing(trefht_i(0))) then
         incr = dimsizes(trefht_i)
         do gg = 0,incr-1
-           namelist_trefht(gg) = namesB(trefht_i(gg))+" | "+pathsB(trefht_i(gg))+" | "+syearB(trefht_i(gg))+" | "+eyearB(trefht_i(gg)) 
+           namelist_trefht(gg) = namesB(trefht_i(gg))+" | "+pathsB(trefht_i(gg))+" | "+syearB(trefht_i(gg))+" | "+eyearB(trefht_i(gg)) +" | 0-Observations" 
         end do
         if (incr.lt.maxnumobs) then     ; fill in the missing obs rows with the first obs file, altering the name slightly for .nc write-outs
            if (.not.ismissing(namelist_trefht(0))) then
               nmiss = ind(ismissing(namelist_trefht(:maxnumobs-1)))
               do hh = nmiss(0),nmiss(dimsizes(nmiss)-1)
-                 namelist_trefht(hh) = namesB(trefht_i(0))+"_"+hh+" | "+pathsB(trefht_i(0))+" | "+syearB(trefht_i(0))+" | "+eyearB(trefht_i(0))
+                 namelist_trefht(hh) = namesB(trefht_i(0))+"_"+hh+" | "+pathsB(trefht_i(0))+" | "+syearB(trefht_i(0))+" | "+eyearB(trefht_i(0)) +" | 0-Observations"
               end do
               delete(nmiss)
            end if
@@ -261,7 +304,7 @@ begin
 
   do gg = 0,nsim-1
      do hh = 0,dimsizes(sstr)-1
-        namelist_trefht(gg+maxnumobs) =  names(gg)+" | missing | "+syear(gg)+" | "+eyear(gg)  ; set to missing as default
+        namelist_trefht(gg+maxnumobs) =  names(gg)+" | missing | "+syear(gg)+" | "+eyear(gg)  +" | "+names_EM(gg) ; set to missing as default
         fsst := systemfunc("bash -c 'ls "+paths(gg)+"*."+sstr(hh)+".*.nc 2> /dev/null'")   ; /dev/null suppresses all standard error output
         if (.not.ismissing(fsst(0))) then
            if (dimsizes(fsst).eq.1) then
@@ -269,7 +312,7 @@ begin
            else
               fsst@path = paths(gg)+"*."+sstr(hh)+".*.nc"
            end if
-           namelist_trefht(gg+maxnumobs) =  names(gg)+" | "+fsst@path+" | "+syear(gg)+" | "+eyear(gg)
+           namelist_trefht(gg+maxnumobs) =  names(gg)+" | "+fsst@path+" | "+syear(gg)+" | "+eyear(gg) +" | "+names_EM(gg)
            break
         else  ; try different method to find files
            tpath := str_sub_str(paths(gg),"/*/","/"+sstr(hh)+"/") 
@@ -277,7 +320,7 @@ begin
            fsst2 := systemfunc("bash -c 'ls "+tpath+"*.nc 2> /dev/null'")
            if (.not.ismissing(fsst2(0))) then    
               if (str_match_bool(fsst2(0),sstr(hh))) then
-                 namelist_trefht(gg+maxnumobs) =  names(gg)+" | "+tpath+"*.nc | "+syear(gg)+" | "+eyear(gg)
+                 namelist_trefht(gg+maxnumobs) =  names(gg)+" | "+tpath+"*.nc | "+syear(gg)+" | "+eyear(gg) +" | "+names_EM(gg)
                  break
               end if
            end if
@@ -292,13 +335,13 @@ begin
      if (.not.ismissing(prect_i(0))) then
         incr = dimsizes(prect_i)
         do gg = 0,incr-1
-           namelist_prect(gg) = namesB(prect_i(gg))+" | "+pathsB(prect_i(gg))+" | "+syearB(prect_i(gg))+" | "+eyearB(prect_i(gg)) 
+           namelist_prect(gg) = namesB(prect_i(gg))+" | "+pathsB(prect_i(gg))+" | "+syearB(prect_i(gg))+" | "+eyearB(prect_i(gg)) +" | 0-Observations"
         end do
         if (incr.lt.maxnumobs) then     ; fill in the missing obs rows with the first obs file, altering the name slightly for .nc write-ouprect
            if (.not.ismissing(namelist_prect(0))) then
               nmiss = ind(ismissing(namelist_prect(:maxnumobs-1)))
               do hh = nmiss(0),nmiss(dimsizes(nmiss)-1)
-                 namelist_prect(hh) = namesB(prect_i(0))+"_"+hh+" | "+pathsB(prect_i(0))+" | "+syearB(prect_i(0))+" | "+eyearB(prect_i(0))
+                 namelist_prect(hh) = namesB(prect_i(0))+"_"+hh+" | "+pathsB(prect_i(0))+" | "+syearB(prect_i(0))+" | "+eyearB(prect_i(0)) +" | 0-Observations"
               end do
               delete(nmiss)
            end if
@@ -318,7 +361,7 @@ begin
 
   do gg = 0,nsim-1
      do hh = 0,dimsizes(sstr)-1
-        namelist_prect(gg+maxnumobs) =  names(gg)+" | missing | "+syear(gg)+" | "+eyear(gg)  ; set to missing as default
+        namelist_prect(gg+maxnumobs) =  names(gg)+" | missing | "+syear(gg)+" | "+eyear(gg)  +" | "+names_EM(gg) ; set to missing as default
         fsst := systemfunc("bash -c 'ls "+paths(gg)+"*."+sstr(hh)+".*.nc 2> /dev/null'")   ; /dev/null suppresses all standard error output
         if (.not.ismissing(fsst(0))) then
            if (sstr(hh).eq."PRECC") then   ; add PRECL to search string
@@ -334,7 +377,7 @@ begin
                  fsst@path = paths(gg)+"*."+sstr(hh)+".*.nc"
               end if
            end if
-           namelist_prect(gg+maxnumobs) =  names(gg)+" | "+fsst@path+" | "+syear(gg)+" | "+eyear(gg)
+           namelist_prect(gg+maxnumobs) =  names(gg)+" | "+fsst@path+" | "+syear(gg)+" | "+eyear(gg) +" | "+names_EM(gg)
            break
         else    ; if files have not been found, try the following
            if (sstr(hh).eq."PRECC") then
@@ -350,7 +393,7 @@ begin
                  x = addfile(fsst2(0),"r")
                  if (isfilevar(x,sstr(hh))) then
                     delete(x)
-                    namelist_prect(gg+maxnumobs) =  names(gg)+" | "+tpath+"*.nc | "+syear(gg)+" | "+eyear(gg)
+                    namelist_prect(gg+maxnumobs) =  names(gg)+" | "+tpath+"*.nc | "+syear(gg)+" | "+eyear(gg) +" | "+names_EM(gg)
                     break
                  else
                     delete(x)
@@ -369,13 +412,13 @@ begin
      if (.not.ismissing(snowdp_i(0))) then
         incr = dimsizes(snowdp_i)
         do gg = 0,incr-1
-           namelist_snowdp(gg) = namesB(snowdp_i(gg))+" | "+pathsB(snowdp_i(gg))+" | "+syearB(snowdp_i(gg))+" | "+eyearB(snowdp_i(gg)) 
+           namelist_snowdp(gg) = namesB(snowdp_i(gg))+" | "+pathsB(snowdp_i(gg))+" | "+syearB(snowdp_i(gg))+" | "+eyearB(snowdp_i(gg)) +" | 0-Observations"
         end do
         if (incr.lt.maxnumobs) then     ; fill in the missing obs rows with the first obs file, altering the name slightly for .nc write-outs
            if (.not.ismissing(namelist_snowdp(0))) then
               nmiss = ind(ismissing(namelist_snowdp(:maxnumobs-1)))
               do hh = nmiss(0),nmiss(dimsizes(nmiss)-1)
-                 namelist_snowdp(hh) = namesB(snowdp_i(0))+"_"+hh+" | "+pathsB(snowdp_i(0))+" | "+syearB(snowdp_i(0))+" | "+eyearB(snowdp_i(0))
+                 namelist_snowdp(hh) = namesB(snowdp_i(0))+"_"+hh+" | "+pathsB(snowdp_i(0))+" | "+syearB(snowdp_i(0))+" | "+eyearB(snowdp_i(0)) +" | 0-Observations"
               end do
               delete(nmiss)
            end if
@@ -391,7 +434,7 @@ begin
 
   do gg = 0,nsim-1
      do hh = 0,dimsizes(sstr)-1
-        namelist_snowdp(gg+maxnumobs) =  names(gg)+" | missing | "+syear(gg)+" | "+eyear(gg)     ; set to missing as default
+        namelist_snowdp(gg+maxnumobs) =  names(gg)+" | missing | "+syear(gg)+" | "+eyear(gg) +" | "+names_EM(gg)    ; set to missing as default
         fsst := systemfunc("bash -c 'ls "+paths(gg)+"*."+sstr(hh)+".*.nc 2> /dev/null'")   ; /dev/null suppresses all standard error output
         if (.not.ismissing(fsst(0))) then
            if (dimsizes(fsst).eq.1) then
@@ -399,7 +442,7 @@ begin
            else
               fsst@path = paths(gg)+"*."+sstr(hh)+".*.nc"
            end if
-           namelist_snowdp(gg+maxnumobs) =  names(gg)+" | "+fsst@path+" | "+syear(gg)+" | "+eyear(gg)
+           namelist_snowdp(gg+maxnumobs) =  names(gg)+" | "+fsst@path+" | "+syear(gg)+" | "+eyear(gg) +" | "+names_EM(gg)
            break
         else  ; try different method to find files
            tpath := str_sub_str(paths(gg),"/*/","/"+sstr(hh)+"/") 
@@ -407,7 +450,7 @@ begin
            fsst2 := systemfunc("bash -c 'ls "+tpath+"*.nc 2> /dev/null'")
            if (.not.ismissing(fsst2(0))) then
               if (str_match_bool(fsst2(0),sstr(hh))) then
-                 namelist_snowdp(gg+maxnumobs) =  names(gg)+" | "+tpath+"*.nc | "+syear(gg)+" | "+eyear(gg)
+                 namelist_snowdp(gg+maxnumobs) =  names(gg)+" | "+tpath+"*.nc | "+syear(gg)+" | "+eyear(gg) +" | "+names_EM(gg)
                  break
               end if
            end if
@@ -422,13 +465,13 @@ begin
      if (.not.ismissing(moc_i(0))) then
         incr = dimsizes(moc_i)
         do gg = 0,incr-1
-           namelist_moc(gg) = namesB(moc_i(gg))+" | "+pathsB(moc_i(gg))+" | "+syearB(moc_i(gg))+" | "+eyearB(moc_i(gg)) 
+           namelist_moc(gg) = namesB(moc_i(gg))+" | "+pathsB(moc_i(gg))+" | "+syearB(moc_i(gg))+" | "+eyearB(moc_i(gg)) +" | 0-Observations"
         end do
         if (incr.lt.maxnumobs) then     ; fill in the missing obs rows with the first obs file, altering the name slightly for .nc write-outs
            if (.not.ismissing(namelist_moc(0))) then
               nmiss = ind(ismissing(namelist_moc(:maxnumobs-1)))
               do hh = nmiss(0),nmiss(dimsizes(nmiss)-1)
-                 namelist_moc(hh) = namesB(moc_i(0))+"_"+hh+" | "+pathsB(moc_i(0))+" | "+syearB(moc_i(0))+" | "+eyearB(moc_i(0))
+                 namelist_moc(hh) = namesB(moc_i(0))+"_"+hh+" | "+pathsB(moc_i(0))+" | "+syearB(moc_i(0))+" | "+eyearB(moc_i(0)) +" | 0-Observations"
               end do
               delete(nmiss)
            end if
@@ -448,7 +491,7 @@ begin
 
   do gg = 0,nsim-1
      do hh = 0,dimsizes(sstr)-1
-        namelist_moc(gg+maxnumobs) =  names(gg)+" | missing | "+syear(gg)+" | "+eyear(gg)  ; set to missing as default
+        namelist_moc(gg+maxnumobs) =  names(gg)+" | missing | "+syear(gg)+" | "+eyear(gg) +" | "+names_EM(gg) ; set to missing as default
         fsst := systemfunc("bash -c 'ls "+paths(gg)+"*."+sstr(hh)+".*.nc 2> /dev/null'")   ; /dev/null suppresses all standard error output
         if (.not.ismissing(fsst(0))) then
            if (dimsizes(fsst).eq.1) then
@@ -456,7 +499,7 @@ begin
            else
               fsst@path = paths(gg)+"*."+sstr(hh)+".*.nc"
            end if
-           namelist_moc(gg+maxnumobs) =  names(gg)+" | "+fsst@path+" | "+syear(gg)+" | "+eyear(gg)
+           namelist_moc(gg+maxnumobs) =  names(gg)+" | "+fsst@path+" | "+syear(gg)+" | "+eyear(gg) +" | "+names_EM(gg)
            break
         else  ; try different method to find files
            tpath := str_sub_str(paths(gg),"/*/","/"+sstr(hh)+"/") 
@@ -464,7 +507,7 @@ begin
            fsst2 := systemfunc("bash -c 'ls "+tpath+"*.nc 2> /dev/null'")
            if (.not.ismissing(fsst2(0))) then
               if (str_match_bool(fsst2(0),sstr(hh))) then
-                 namelist_moc(gg+maxnumobs) =  names(gg)+" | "+tpath+"*.nc | "+syear(gg)+" | "+eyear(gg)
+                 namelist_moc(gg+maxnumobs) =  names(gg)+" | "+tpath+"*.nc | "+syear(gg)+" | "+eyear(gg) +" | "+names_EM(gg)
                  break
               end if
            end if
@@ -476,17 +519,17 @@ begin
 ;------- aice_nh section----------------------------  
   namelist_aice_nh = new(nsim+maxnumobs,string)
   if (obsflag) then
-     aice_nh_i = ind(vnamesB.eq."aice_nh".or.vnamesB.eq."AICE_NH")
+     aice_nh_i = ind(vnamesB.eq."aice_nh".or.vnamesB.eq."AICE_NH".or.vnamesB.eq."SICONC")
      if (.not.ismissing(aice_nh_i(0))) then
         incr = dimsizes(aice_nh_i)
         do gg = 0,incr-1
-           namelist_aice_nh(gg) = namesB(aice_nh_i(gg))+" | "+pathsB(aice_nh_i(gg))+" | "+syearB(aice_nh_i(gg))+" | "+eyearB(aice_nh_i(gg)) 
+           namelist_aice_nh(gg) = namesB(aice_nh_i(gg))+" | "+pathsB(aice_nh_i(gg))+" | "+syearB(aice_nh_i(gg))+" | "+eyearB(aice_nh_i(gg)) +" | 0-Observations"
         end do
         if (incr.lt.maxnumobs) then     ; fill in the missing obs rows with the first obs file, altering the name slightly for .nc write-outs
            if (.not.ismissing(namelist_aice_nh(0))) then
               nmiss = ind(ismissing(namelist_aice_nh(:maxnumobs-1)))
               do hh = nmiss(0),nmiss(dimsizes(nmiss)-1)
-                 namelist_aice_nh(hh) = namesB(aice_nh_i(0))+"_"+hh+" | "+pathsB(aice_nh_i(0))+" | "+syearB(aice_nh_i(0))+" | "+eyearB(aice_nh_i(0))
+                 namelist_aice_nh(hh) = namesB(aice_nh_i(0))+"_"+hh+" | "+pathsB(aice_nh_i(0))+" | "+syearB(aice_nh_i(0))+" | "+eyearB(aice_nh_i(0)) +" | 0-Observations"
               end do
               delete(nmiss)
            end if
@@ -498,15 +541,15 @@ begin
   end if 
 
   if (case_sens.eq."True") then
-     tstring1 = "aice_nh,aice,siconc,sic,CN"   ; list in order of likelihood/preference: CESM name, CMIP name, other
+     tstring1 = "aice_nh,aice,siconc,sic,CN,SICONC,SIC"   ; list in order of likelihood/preference: CESM name, CMIP name, other
   else                                         ; aice_nh (CESM1 nomenclature used in some data) should be checked before aice 
-     tstring1 = "aice_nh,aice,siconc,sic,CN"
+     tstring1 = "aice_nh,aice,siconc,sic,CN,SICONC,SIC"
   end if
   sstr := str_split(tstring1,",")
 
   do gg = 0,nsim-1
      do hh = 0,dimsizes(sstr)-1
-        namelist_aice_nh(gg+maxnumobs) =  names(gg)+" | missing | "+syear(gg)+" | "+eyear(gg) ; set to missing as default
+        namelist_aice_nh(gg+maxnumobs) =  names(gg)+" | missing | "+syear(gg)+" | "+eyear(gg) +" | "+names_EM(gg) ; set to missing as default
         fsst := systemfunc("bash -c 'ls "+paths(gg)+"*."+sstr(hh)+".*.nc 2> /dev/null'")   ; /dev/null suppresses all standard error output
         if (.not.ismissing(fsst(0))) then
            if (dimsizes(fsst).eq.1) then
@@ -514,7 +557,7 @@ begin
            else
               fsst@path = paths(gg)+"*."+sstr(hh)+".*.nc"
            end if
-           namelist_aice_nh(gg+maxnumobs) =  names(gg)+" | "+fsst@path+" | "+syear(gg)+" | "+eyear(gg)
+           namelist_aice_nh(gg+maxnumobs) =  names(gg)+" | "+fsst@path+" | "+syear(gg)+" | "+eyear(gg) +" | "+names_EM(gg)
            break
         else  ; try different method to find files
            tpath := str_sub_str(paths(gg),"/*/","/"+sstr(hh)+"/") 
@@ -522,7 +565,7 @@ begin
            fsst2 := systemfunc("bash -c 'ls "+tpath+"*.nc 2> /dev/null'")
            if (.not.ismissing(fsst2(0))) then
               if (str_match_bool(fsst2(0),sstr(hh))) then
-                 namelist_aice_nh(gg+maxnumobs) =  names(gg)+" | "+tpath+"*.nc | "+syear(gg)+" | "+eyear(gg)
+                 namelist_aice_nh(gg+maxnumobs) =  names(gg)+" | "+tpath+"*.nc | "+syear(gg)+" | "+eyear(gg) +" | "+names_EM(gg)
                  break
               end if
            end if
@@ -533,17 +576,17 @@ begin
 ;------- aice_sh section----------------------------  
   namelist_aice_sh = new(nsim+maxnumobs,string)
   if (obsflag) then
-     aice_sh_i = ind(vnamesB.eq."aice_sh".or.vnamesB.eq."AICE_SH")
+     aice_sh_i = ind(vnamesB.eq."aice_sh".or.vnamesB.eq."AICE_SH".or.vnamesB.eq."SICONC")
      if (.not.ismissing(aice_sh_i(0))) then
         incr = dimsizes(aice_sh_i)
         do gg = 0,incr-1
-           namelist_aice_sh(gg) = namesB(aice_sh_i(gg))+" | "+pathsB(aice_sh_i(gg))+" | "+syearB(aice_sh_i(gg))+" | "+eyearB(aice_sh_i(gg)) 
+           namelist_aice_sh(gg) = namesB(aice_sh_i(gg))+" | "+pathsB(aice_sh_i(gg))+" | "+syearB(aice_sh_i(gg))+" | "+eyearB(aice_sh_i(gg)) +" | 0-Observations"
         end do
         if (incr.lt.maxnumobs) then     ; fill in the missing obs rows with the first obs file, altering the name slightly for .nc write-outs
            if (.not.ismissing(namelist_aice_sh(0))) then
               nmiss = ind(ismissing(namelist_aice_sh(:maxnumobs-1)))
               do hh = nmiss(0),nmiss(dimsizes(nmiss)-1)
-                 namelist_aice_sh(hh) = namesB(aice_sh_i(0))+"_"+hh+" | "+pathsB(aice_sh_i(0))+" | "+syearB(aice_sh_i(0))+" | "+eyearB(aice_sh_i(0))
+                 namelist_aice_sh(hh) = namesB(aice_sh_i(0))+"_"+hh+" | "+pathsB(aice_sh_i(0))+" | "+syearB(aice_sh_i(0))+" | "+eyearB(aice_sh_i(0)) +" | 0-Observations"
               end do
               delete(nmiss)
            end if
@@ -555,15 +598,15 @@ begin
   end if 
 
   if (case_sens.eq."True") then
-     tstring1 = "aice_sh,aice,siconc,sic,CN"   ; list in order of likelihood/preference: CESM name, CMIP name, other
+     tstring1 = "aice_sh,aice,siconc,sic,CN,SICONC,SIC"   ; list in order of likelihood/preference: CESM name, CMIP name, other
   else                                         ; aice_sh (CESM1 nomenclature used in some data) should be checked before aice 
-     tstring1 = "aice_sh,aice,siconc,sic,CN"
+     tstring1 = "aice_sh,aice,siconc,sic,CN,SICONC,SIC"
   end if
   sstr := str_split(tstring1,",")
 
   do gg = 0,nsim-1
      do hh = 0,dimsizes(sstr)-1
-        namelist_aice_sh(gg+maxnumobs) =  names(gg)+" | missing | "+syear(gg)+" | "+eyear(gg) ; set to missing as default
+        namelist_aice_sh(gg+maxnumobs) =  names(gg)+" | missing | "+syear(gg)+" | "+eyear(gg) +" | "+names_EM(gg) ; set to missing as default
         fsst := systemfunc("bash -c 'ls "+paths(gg)+"*."+sstr(hh)+".*.nc 2> /dev/null'")   ; /dev/null suppresses all standard error output
         if (.not.ismissing(fsst(0))) then
            if (dimsizes(fsst).eq.1) then
@@ -571,7 +614,7 @@ begin
            else
               fsst@path = paths(gg)+"*."+sstr(hh)+".*.nc"
            end if
-           namelist_aice_sh(gg+maxnumobs) =  names(gg)+" | "+fsst@path+" | "+syear(gg)+" | "+eyear(gg)
+           namelist_aice_sh(gg+maxnumobs) =  names(gg)+" | "+fsst@path+" | "+syear(gg)+" | "+eyear(gg) +" | "+names_EM(gg)
            break
         else  ; try different method to find files
            tpath := str_sub_str(paths(gg),"/*/","/"+sstr(hh)+"/") 
@@ -579,7 +622,7 @@ begin
            fsst2 := systemfunc("bash -c 'ls "+tpath+"*.nc 2> /dev/null'")
            if (.not.ismissing(fsst2(0))) then
               if (str_match_bool(fsst2(0),sstr(hh))) then
-                 namelist_aice_sh(gg+maxnumobs) =  names(gg)+" | "+tpath+"*.nc | "+syear(gg)+" | "+eyear(gg)
+                 namelist_aice_sh(gg+maxnumobs) =  names(gg)+" | "+tpath+"*.nc | "+syear(gg)+" | "+eyear(gg) +" | "+names_EM(gg)
                  break
               end if
            end if
@@ -587,6 +630,75 @@ begin
      end do
   end do    
   asciiwrite("namelist_byvar/namelist_aice_sh",namelist_aice_sh) 
+
+;----- Other diagnostic varibales section---------------
+ varlist = (/"SHFLX","LHFLX","U10","V10","U850","V850","TAUX","TAUY",\
+            "Qn_SRF","OLR","FLDS","FLDSC","FLNS","SWCRE","LWCRE", \
+            "ETH12", "T850", "CLDTOT","Z500","U200","V200","SF"/)
+ vartags = (/"shflx","lhflx","u10","v10","u850","v850","taux","tauy",\
+             "qnet","olr","flds","fldsc","flns","swcre","lwcre",\
+             "eth","th850","cldtot","z500","u200","v200","zmsf"/)
+
+ do ii = 0,dimsizes(varlist)-1,1
+  vnm = varlist(ii)
+  vtg = vartags(ii)
+  namelist_xs = new(nsim+maxnumobs,string)
+  if (obsflag) then
+     xs_i = ind(vnamesB.eq.vnm)
+     if (.not.ismissing(xs_i(0))) then
+        incr = dimsizes(xs_i)
+        do gg = 0,incr-1
+           namelist_xs(gg) = namesB(xs_i(gg))+" | "+pathsB(xs_i(gg))+" | "+syearB(xs_i(gg))+" | "+eyearB(xs_i(gg)) +" | 0-Observations"
+        end do
+        if (incr.lt.maxnumobs) then     ; fill in the missing obs rows with the first obs file, altering the name slightly for .nc write-outs
+           if (.not.ismissing(namelist_xs(0))) then
+              nmiss = ind(ismissing(namelist_xs(:maxnumobs-1)))
+              do hh = nmiss(0),nmiss(dimsizes(nmiss)-1)
+                 namelist_xs(hh) = namesB(xs_i(0))+"_"+hh+" | "+pathsB(xs_i(0))+" | "+syearB(xs_i(0))+" | "+eyearB(xs_i(0)) +" | 0-Observations"
+              end do
+              delete(nmiss)
+           end if
+        end if
+        asciiwrite("obs_"+vtg,namelist_xs(0))
+        delete(incr)
+     end if
+     delete(xs_i)
+  end if
+
+  if (case_sens.eq."True") then
+     tstring1 = str_upper(vnm)+","+str_lower(vnm); list in order of likelihood/preference: CESM name, CMIP name, other
+  else
+     tstring1 = vnm+","+str_lower(vnm)
+  end if
+  sstr := str_split(tstring1,",")
+
+  do gg = 0,nsim-1
+     do hh = 0,dimsizes(sstr)-1
+        namelist_xs(gg+maxnumobs) =  names(gg)+" | missing | "+syear(gg)+" | "+eyear(gg) +" | "+names_EM(gg) ; set to missing as default
+        fsst := systemfunc("bash -c 'ls "+paths(gg)+"*."+sstr(hh)+".*.nc 2> /dev/null'")   ; /dev/null suppresses all standard error output
+        if (.not.ismissing(fsst(0))) then
+           if (dimsizes(fsst).eq.1) then
+              fsst@path = fsst
+           else
+              fsst@path = paths(gg)+"*."+sstr(hh)+".*.nc"
+           end if
+           namelist_xs(gg+maxnumobs) =  names(gg)+" | "+fsst@path+" | "+syear(gg)+" | "+eyear(gg) +" | "+names_EM(gg)
+           break
+        else  ; try different method to find files
+           tpath := str_sub_str(paths(gg),"/*/","/"+sstr(hh)+"/")
+           tpath = str_sub_str(tpath,"/*_","/"+sstr(hh)+"_")
+           fsst2 := systemfunc("bash -c 'ls "+tpath+"*.nc 2> /dev/null'")
+           if (.not.ismissing(fsst2(0))) then
+              if (str_match_bool(fsst2(0),sstr(hh))) then
+                 namelist_xs(gg+maxnumobs) =  names(gg)+" | "+tpath+"*.nc | "+syear(gg)+" | "+eyear(gg) +" | "+names_EM(gg)
+                 break
+              end if
+           end if
+        end if
+     end do
+  end do
+  asciiwrite("namelist_byvar/namelist_"+vtg,namelist_xs)
+ end do 
 ;----------------------------------------------------------------------------
   if (obsflag) then
      delete([/vnamesB,namesB,pathsB,syearB,eyearB/])

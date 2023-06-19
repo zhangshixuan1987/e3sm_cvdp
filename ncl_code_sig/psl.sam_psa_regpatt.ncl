@@ -43,20 +43,21 @@ begin
   rad=(pi/180.)
  
  regvars = (/"psl","sst","trefht","prect","u10","v10","taux","tauy","shflx","lhflx", "eth", \
-             "swcre","olr","cldtot","u850","v850","th850","z500","u200","v200"/)
+             "swcre","olr","cldtot","u850","v850","th850","z500","u200","v200","aice_nh","aice_sh"/)
  landmsk = (/    0,    1,       0,      0,    0,    0,     0,     0,   0,   0,     1, \
-                   0,      0,       0,     0,     0,      0,     0,     0,   0 /)
+                 0,      0,       0,     0,     0,      0,     0,     0,   0,      1, 1/)
  varfacs = (/3.0,   1.0,     1.0,    1.0,  1.0,  1.0,   2.0,   2.0, 5.0, 10.0,  5.0, \
-                  5.0, 5.0,     5.0,  2.0,    2.0,  1.0,   15.0,   5.0,   2.5/)
+                 5.0, 5.0,     5.0,  2.0,    2.0,  1.0,   15.0,   5.0,   2.5, 5.0, 5.0/)
  nsvars  = dimsizes(regvars)
 
  do ss = 0, nsvars-1,1
   ;---------Regressions coding-------------------------------------------------
-  if(regvars(ss).eq."sst") then 
+  if(regvars(ss).eq."sst") then
     vnm   = "ts"
-  else 
+  else
     vnm   = regvars(ss)
-  end if 
+  end if
+
   lmsk  = landmsk(ss)
   vrfac = varfacs(ss)
   nsim_reg = numAsciiRow("namelist_byvar/namelist_"+vnm)
@@ -190,15 +191,23 @@ begin
 
 ;---------Regressions coding-------------------------------------------------
      ; print("Data to be read in: "+paths_reg(ee)+" from "+syear_reg(ee)+":"+eyear_reg(ee))
-     if(vnm.eq."qnet") then
-       vnmi = "Qn"
+     if(vnm.eq."aice_sh".or.vnm.eq."aice_nh") then
+       vnmi = vnm
+       vreg = data_read_in_ice(paths_reg(ee),vnmi,syear_reg(ee),eyear_reg(ee))
+       if (isatt(vreg,"lat2d")) then
+         vreg@is_all_missing = True
+       else
+         vreg!1 = "lat"
+         vreg!2 = "lon"
+       end if
      else
        vnmi = str_upper(vnm)
+       vreg = data_read_in(paths_reg(ee),vnmi,syear_reg(ee),eyear_reg(ee))
      end if
-     vreg = data_read_in(paths_reg(ee),vnmi,syear_reg(ee),eyear_reg(ee))
+
      if (isatt(vreg,"is_all_missing")) then
-        vxreg_plot_flag = 1
-        delete(vreg)
+       vxreg_plot_flag = 1
+       delete(vreg)
      end if
         
      if (vxreg_plot_flag.eq.0) then     ; only continue if both PSL/TS fields are present
@@ -1483,11 +1492,7 @@ begin
   end if
   
   if (vxreg_frame.eq.0) then
-     if(vnm.eq."qnet") then
-       txt0 = "Qnet"
-     else
-       txt0 = str_upper(vnm)
-     end if
+     txt0 = str_upper(vnm)
      panres@lbTitleString = txt0 + " [" + lbunitstr +"]"
      panres@txString = "SAM Regressions (DJF)" 
      gsn_panel2(wks_sam,reg_sam_djf,(/nrow,ncol/),panres)
@@ -1513,11 +1518,7 @@ begin
   end if
   
   if (vxreg_frame.eq.0) then
-     if(vnm.eq."qnet") then
-       txt0 = "Qnet"
-     else
-       txt0 = str_upper(vnm)
-     end if
+     txt0 = str_upper(vnm)
      panres@lbTitleString = txt0 + " [" + lbunitstr +"]"
      panres@txString = "PSA1 Regressions (DJF)" 
      gsn_panel2(wks_psa1,reg_psa1_djf,(/nrow,ncol/),panres)
@@ -1543,11 +1544,7 @@ begin
   end if
 
   if (vxreg_frame.eq.0) then
-     if(vnm.eq."qnet") then
-       txt0 = "Qnet"
-     else
-       txt0 = str_upper(vnm)
-     end if
+     txt0 = str_upper(vnm)
      panres@lbTitleString = txt0 + " [" + lbunitstr +"]"
      panres@txString = "PSA2 Regressions (DJF)" 
      gsn_panel2(wks_psa2,reg_psa2_djf,(/nrow,ncol/),panres)

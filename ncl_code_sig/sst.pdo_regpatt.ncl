@@ -1,4 +1,4 @@
-; Calculates nino34 indices as well as nino34 index 
+; Calculates pdo indices as well as pdo index 
 ; timeseries onto selected quantities (see reg_var)
 ;
 ; Variables used: sst and selected quantities 
@@ -10,7 +10,7 @@ load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/shea_util.ncl"
 load "$CVDP_SCRIPTS/functions.ncl"
 
 begin
-  print("Starting: sst.nino34_regpatt.ncl")
+  print("Starting: sst.pdo_regpatt.ncl")
   
   SCALE_TIMESERIES = getenv("SCALE_TIMESERIES")  
   OUTPUT_DATA      = getenv("OUTPUT_DATA")  
@@ -52,11 +52,11 @@ begin
 
  do ss = 0, nsvars-1,1
   ;---------Regressions coding-------------------------------------------------
-  if(regvars(ss).eq."sst") then 
+  if(regvars(ss).eq."sst") then
     vnm   = "ts"
-  else 
+  else
     vnm   = regvars(ss)
-  end if 
+  end if
 
   lmsk  = landmsk(ss)
   vrfac = varfacs(ss)
@@ -84,22 +84,22 @@ begin
      wks_type@wkHeight = 1500*PNG_SCALE
   end if
   
-  wks_nino34  = gsn_open_wks(wks_type,getenv("OUTDIR")+"nino34.vxreg")
+  wks_pdo  = gsn_open_wks(wks_type,getenv("OUTDIR")+"pdo.vxreg")
   
   if (COLORMAP.eq.0) then
-     gsn_define_colormap(wks_nino34,"MPL_RdBu")  
-     gsn_reverse_colormap(wks_nino34)           ; Reverse the color map.
+     gsn_define_colormap(wks_pdo,"MPL_RdBu")  
+     gsn_reverse_colormap(wks_pdo)           ; Reverse the color map.
   end if
   if (COLORMAP.eq.1) then
-     gsn_define_colormap(wks_nino34,"NCV_jaisnd")  
+     gsn_define_colormap(wks_pdo,"NCV_jaisnd")  
   end if
   
-  reg_nino34_djf = new(nsim,"graphic")  
-  reg_nino34_mam = new(nsim,"graphic")  
-  reg_nino34_jja = new(nsim,"graphic")  
-  reg_nino34_son = new(nsim,"graphic")  
-  reg_nino34_ann = new(nsim,"graphic")  
-  reg_nino34_mon = new(nsim,"graphic")  
+  reg_pdo_djf = new(nsim,"graphic")  
+  reg_pdo_mam = new(nsim,"graphic")  
+  reg_pdo_jja = new(nsim,"graphic")  
+  reg_pdo_son = new(nsim,"graphic")  
+  reg_pdo_ann = new(nsim,"graphic")  
+  reg_pdo_mon = new(nsim,"graphic")  
   
   vxreg_frame    = 1 
 
@@ -150,6 +150,25 @@ begin
         delete(climo)
       end if
 
+      ;apply low pass filtering 
+      fca    = 1./157.
+      fcb    = 0.
+      ihp    = 0
+      nsigma = 1
+      nwgt   = 217
+      wgt    = new(nwgt,float)
+      wgt    = filwgts_lancos(nwgt,ihp,fca,fcb,nsigma)   ; create low pass filter
+      arr    = wgt_runave_n_Wrap(arr,wgt,1,0)   ; apply low pass filter
+      delete([/fca,fcb,ihp,nsigma,nwgt,wgt/])
+
+      coswgt=cos(rad*arr&lat)
+      coswgt!0 = "lat"
+      coswgt&lat= arr&lat
+      do ff = 0,dimsizes(arr&time)-1
+         arr(ff,:,:) = (/ arr(ff,:,:) - wgt_areaave(arr(ff,{-60:70},:),coswgt({-60.:70.}),1.0,0) /)
+      end do
+      delete(coswgt)
+
       arrT =  runave_n_Wrap(arr,3,0,0)               ; form DJF averages
       arrT(0,:,:) = (/ dim_avg_n(arr(:1,:,:),0) /)   
       arr_djf = arrT(0::12,:,:)
@@ -175,7 +194,7 @@ begin
      end if 
 
 ;---------Regressions coding-------------------------------------------------
-     ; print("Data to be read in: "+paths_reg(ee)+" from "+syear_reg(ee)+":"+eyear_reg(ee))
+    ;print("Data to be read in: "+paths_reg(ee)+" from "+syear_reg(ee)+":"+eyear_reg(ee))
      if(vnm.eq."aice_sh".or.vnm.eq."aice_nh") then
        vnmi = vnm
        vreg = data_read_in_ice(paths_reg(ee),vnmi,syear_reg(ee),eyear_reg(ee))
@@ -244,255 +263,261 @@ begin
        delete(vregV)
      end if 
    
-;----------nino34 definition----------------------------------------------------------------------
-     coswgt      = cos(rad*arr_djf&lat)
-     coswgt!0    = "lat"
-     coswgt&lat  = arr_djf&lat
-     llats       = -5. ; nino3.4
-     llatn       = 5.
-     llonw       = 190.
-     llone       = 240.
+;----------pdo definition----------------------------------------------------------------------
+     coswgt     =cos(rad*arr_djf&lat)
+     coswgt!0   = "lat"
+     coswgt&lat = arr_djf&lat
+     llats =  20.     ; nino3.4
+     llatn =  70.
+     llonw = 110.
+     llone = 260.
 
      ;use a regional mean SSTA to make sign consistent for all simulation if possible
-     llats1 = -5.0
-     llatn1 =  5.0
-     llonw1 =  210.0
-     llone1 =  270.0
+     llats1 =  35.0
+     llatn1 =  39.0
+     llonw1 =  198.0
+     llone1 =  202.0
 
-;----------nino34 calculations----------------------------------------------------------------------
-     pcts = wgt_areaave_Wrap(arr_djf(:,{llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0) 
-     nino34_pc_djf = dim_standardize(pcts,0)
-     nino34_djf    = arr_djf(0,:,:)
-     nino34_djf    = (/ regCoef(nino34_pc_djf,arr_djf(lat|:,lon|:,time|:)) /)
-     
+;----------pdo calculations----------------------------------------------------------------------
+     sst_CW = arr_djf
+     sst_CW = SqrtCosWeight(arr_djf)
+     evecv  = eofunc(sst_CW({lat|llats:llatn},{lon|llonw:llone},time|:),2,75)
+     pcts   = eofunc_ts(sst_CW({lat|llats:llatn},{lon|llonw:llone},time|:),evecv,False)
+     pdo_pc_djf  = dim_standardize(pcts(0,:),0)
+     pdo_djf     = arr_djf(0,:,:)
+     pdo_djf     = (/ regCoef(pdo_pc_djf,arr_djf(lat|:,lon|:,time|:)) /)
+     delete([/pcts,sst_CW,evecv/])
      if (vxreg_plot_flag.eq.0) then
-        rc        = regCoef_n(nino34_pc_djf, vreg_djf, 0, 0) ; rc(nlat,mlon)
+        rc        = regCoef_n(pdo_pc_djf, vreg_djf, 0, 0) ; rc(nlat,mlon)
         tval      = onedtond(rc@tval , dimsizes(rc))
         df        = onedtond(rc@nptxy, dimsizes(rc)) - 2
         b         = tval    
         b         = 0.5
-        nino34_vreg_djf  = vreg_djf(0,:,:)
-        nino34_prob_djf  = vreg_djf(0,:,:)
-        nino34_vreg_djf  = (/ rc /) 
-        nino34_prob_djf  = (/(1-betainc(df/(df+tval^2),df/2.0,b))*100.0/)
-        nino34_prob_djf  = where(ismissing(nino34_vreg_djf),nino34_vreg_djf@_FillValue,nino34_prob_djf)
-        nino34_vreg_djf@units = vreg_djf@units +" (per std dev)"
+        pdo_vreg_djf  = vreg_djf(0,:,:)
+        pdo_prob_djf  = vreg_djf(0,:,:)
+        pdo_vreg_djf  = (/ rc /) 
+        pdo_prob_djf  = (/(1-betainc(df/(df+tval^2),df/2.0,b))*100.0/)
+        pdo_prob_djf  = where(ismissing(pdo_vreg_djf),pdo_vreg_djf@_FillValue,pdo_prob_djf)
+        pdo_vreg_djf@units = vreg_djf@units +" (per std dev)"
         delete([/rc,tval,df,b,vreg_djf/]) 
      end if     
-
-     if (.not.all(ismissing(nino34_djf({llats1:llatn1},{llonw1:llone1})))) then
-       if (avg(nino34_djf({llats1:llatn1},{llonw1:llone1})).le.0) then
-           nino34_djf = nino34_djf*-1.
-           nino34_pc_djf = nino34_pc_djf*-1.
+     if (.not.all(ismissing(pdo_djf({llats1:llatn1},{llonw1:llone1})))) then
+       if (avg(pdo_djf({llats1:llatn1},{llonw1:llone1})).ge.0) then
+           pdo_djf = pdo_djf*-1.
+           pdo_pc_djf = pdo_pc_djf*-1.
            if (vxreg_plot_flag.eq.0) then
-              nino34_vreg_djf = nino34_vreg_djf*-1.
+              pdo_vreg_djf = pdo_vreg_djf*-1.
            end if 
        end if 
      end if
-     
      rc    = arr_djf(0,:,:) 
-     rc    = (/escorc_n(nino34_pc_djf,arr_djf,0,0)/)
+     rc    = (/escorc_n(pdo_pc_djf,arr_djf,0,0)/)
      rc    = rc*rc*100.0
      pcvar = wgt_areaave_Wrap(rc({llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0)
-     nino34_djf@pcvar = tofloat(sprintf("%4.1f", pcvar))+"%"
+     pdo_djf@pcvar = tofloat(sprintf("%4.1f", pcvar))+"%"
      delete([/pcvar,rc/])    
-     nino34_pc_djf!0 = "TIME"
-     nino34_pc_djf&TIME = ispan(syear_reg(ee),eyear_reg(ee),1)
-     nino34_pc_djf&TIME@units = "YYYY"
-     nino34_pc_djf&TIME@long_name = "time"     
-     delete([/pcts/])
+     pdo_pc_djf!0 = "TIME"
+     pdo_pc_djf&TIME = ispan(syear_reg(ee),eyear_reg(ee),1)
+     pdo_pc_djf&TIME@units = "YYYY"
+     pdo_pc_djf&TIME@long_name = "time"     
  
-     pcts = wgt_areaave_Wrap(arr_mam(:,{llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0)
-     nino34_pc_mam = dim_standardize(pcts,0)
-     nino34_mam = arr_mam(0,:,:)
-     nino34_mam = (/ regCoef(nino34_pc_mam,arr_mam(lat|:,lon|:,time|:)) /)
+     sst_CW = arr_mam
+     sst_CW = SqrtCosWeight(arr_mam)
+     evecv  = eofunc(sst_CW({lat|llats:llatn},{lon|llonw:llone},time|:),2,75)
+     pcts   = eofunc_ts(sst_CW({lat|llats:llatn},{lon|llonw:llone},time|:),evecv,False)
+     pdo_pc_mam  = dim_standardize(pcts(0,:),0)
+     pdo_mam     = arr_mam(0,:,:)
+     pdo_mam     = (/ regCoef(pdo_pc_mam,arr_mam(lat|:,lon|:,time|:)) /)
+     delete([/pcts,sst_CW,evecv/])
      if (vxreg_plot_flag.eq.0) then
-        rc        = regCoef_n(nino34_pc_mam, vreg_mam, 0, 0) ; rc(nlat,mlon)
+        rc        = regCoef_n(pdo_pc_mam, vreg_mam, 0, 0) ; rc(nlat,mlon)
         tval      = onedtond(rc@tval , dimsizes(rc))
         df        = onedtond(rc@nptxy, dimsizes(rc)) - 2
         b         = tval
         b         = 0.5
-        nino34_vreg_mam  = vreg_mam(0,:,:)
-        nino34_prob_mam  = vreg_mam(0,:,:)
-        nino34_vreg_mam  = (/ rc /)
-        nino34_prob_mam  = (/(1-betainc(df/(df+tval^2),df/2.0,b))*100.0/) 
-        nino34_prob_mam  = where(ismissing(nino34_vreg_mam),nino34_vreg_mam@_FillValue,nino34_prob_mam)
-        nino34_vreg_mam@units = vreg_mam@units +"(per std dev)"
+        pdo_vreg_mam  = vreg_mam(0,:,:)
+        pdo_prob_mam  = vreg_mam(0,:,:)
+        pdo_vreg_mam  = (/ rc /)
+        pdo_prob_mam  = (/(1-betainc(df/(df+tval^2),df/2.0,b))*100.0/) 
+        pdo_prob_mam  = where(ismissing(pdo_vreg_mam),pdo_vreg_mam@_FillValue,pdo_prob_mam)
+        pdo_vreg_mam@units = vreg_mam@units +"(per std dev)"
         delete([/rc,tval,df,b,vreg_mam/])
      end if
-
-     if (.not.all(ismissing(nino34_mam({llats1:llatn1},{llonw1:llone1})))) then
-       if (avg(nino34_mam({llats1:llatn1},{llonw1:llone1})).le.0) then
-           nino34_mam = nino34_mam*-1.
-           nino34_pc_mam = nino34_pc_mam*-1.
+     if (.not.all(ismissing(pdo_mam({llats1:llatn1},{llonw1:llone1})))) then
+       if (avg(pdo_mam({llats1:llatn1},{llonw1:llone1})).ge.0) then
+           pdo_mam = pdo_mam*-1.
+           pdo_pc_mam = pdo_pc_mam*-1.
            if (vxreg_plot_flag.eq.0) then
-              nino34_vreg_mam = nino34_vreg_mam*-1.
+              pdo_vreg_mam = pdo_vreg_mam*-1.
            end if 
        end if 
      end if
-
      rc    = arr_djf(0,:,:)
-     rc    = (/escorc_n(nino34_pc_mam,arr_mam,0,0)/)
+     rc    = (/escorc_n(pdo_pc_mam,arr_mam,0,0)/)
      rc    = rc*rc*100.0
      pcvar = wgt_areaave_Wrap(rc({llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0)
-     nino34_mam@pcvar = tofloat(sprintf("%4.1f", pcvar))+"%"
+     pdo_mam@pcvar = tofloat(sprintf("%4.1f", pcvar))+"%"
      delete([/pcvar,rc/])
-     copy_VarCoords(nino34_pc_djf,nino34_pc_mam) 
-     delete([/pcts/])
+     copy_VarCoords(pdo_pc_djf,pdo_pc_mam) 
      
-     pcts = wgt_areaave_Wrap(arr_jja(:,{llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0)
-     nino34_pc_jja = dim_standardize(pcts,0)
-     nino34_jja = arr_jja(0,:,:)
-     nino34_jja = (/ regCoef(nino34_pc_jja,arr_jja(lat|:,lon|:,time|:)) /)
+     sst_CW = arr_jja
+     sst_CW = SqrtCosWeight(arr_jja)
+     evecv  = eofunc(sst_CW({lat|llats:llatn},{lon|llonw:llone},time|:),2,75)
+     pcts   = eofunc_ts(sst_CW({lat|llats:llatn},{lon|llonw:llone},time|:),evecv,False)
+     pdo_pc_jja  = dim_standardize(pcts(0,:),0)
+     pdo_jja     = arr_jja(0,:,:)
+     pdo_jja     = (/ regCoef(pdo_pc_jja,arr_jja(lat|:,lon|:,time|:)) /)
+     delete([/pcts,sst_CW,evecv/])
      if (vxreg_plot_flag.eq.0) then
-        rc        = regCoef_n(nino34_pc_jja, vreg_jja, 0, 0) ; rc(nlat,mlon)
+        rc        = regCoef_n(pdo_pc_jja, vreg_jja, 0, 0) ; rc(nlat,mlon)
         tval      = onedtond(rc@tval , dimsizes(rc))
         df        = onedtond(rc@nptxy, dimsizes(rc)) - 2
         b         = tval
         b         = 0.5
-        nino34_vreg_jja  = vreg_jja(0,:,:)
-        nino34_prob_jja  = vreg_jja(0,:,:)
-        nino34_vreg_jja  = (/ rc /)
-        nino34_prob_jja  = (/(1-betainc(df/(df+tval^2),df/2.0,b))*100.0/) 
-        nino34_prob_jja  = where(ismissing(nino34_vreg_jja),nino34_vreg_jja@_FillValue,nino34_prob_jja)
-        nino34_vreg_jja@units = vreg_jja@units +"(per std dev)"
+        pdo_vreg_jja  = vreg_jja(0,:,:)
+        pdo_prob_jja  = vreg_jja(0,:,:)
+        pdo_vreg_jja  = (/ rc /)
+        pdo_prob_jja  = (/(1-betainc(df/(df+tval^2),df/2.0,b))*100.0/) 
+        pdo_prob_jja  = where(ismissing(pdo_vreg_jja),pdo_vreg_jja@_FillValue,pdo_prob_jja)
+        pdo_vreg_jja@units = vreg_jja@units +"(per std dev)"
         delete([/rc,tval,df,b,vreg_jja/])
      end if
-
-     if (.not.all(ismissing(nino34_jja({llats1:llatn1},{llonw1:llone1})))) then
-       if (avg(nino34_jja({llats1:llatn1},{llonw1:llone1})).le.0) then
-           nino34_jja = nino34_jja*-1.
-           nino34_pc_jja = nino34_pc_jja*-1.
+     if (.not.all(ismissing(pdo_jja({llats1:llatn1},{llonw1:llone1})))) then
+       if (avg(pdo_jja({llats1:llatn1},{llonw1:llone1})).ge.0) then
+           pdo_jja = pdo_jja*-1.
+           pdo_pc_jja = pdo_pc_jja*-1.
            if (vxreg_plot_flag.eq.0) then
-              nino34_vreg_jja = nino34_vreg_jja*-1.
+              pdo_vreg_jja = pdo_vreg_jja*-1.
            end if 
        end if 
      end if
-
      rc    = arr_jja(0,:,:)
-     rc    = (/escorc_n(nino34_pc_jja,arr_jja,0,0)/)
+     rc    = (/escorc_n(pdo_pc_jja,arr_jja,0,0)/)
      rc    = rc*rc*100.0
      pcvar = wgt_areaave_Wrap(rc({llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0)
-     nino34_jja@pcvar = tofloat(sprintf("%4.1f", pcvar))+"%"
+     pdo_jja@pcvar = tofloat(sprintf("%4.1f", pcvar))+"%"
      delete([/pcvar,rc/])
-     copy_VarCoords(nino34_pc_djf,nino34_pc_jja) 
-     delete([/pcts/])
+     copy_VarCoords(pdo_pc_djf,pdo_pc_jja) 
  
-     pcts = wgt_areaave_Wrap(arr_son(:,{llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0)
-     nino34_pc_son = dim_standardize(pcts,0)
-     nino34_son = arr_son(0,:,:)
-     nino34_son = (/ regCoef(nino34_pc_son,arr_son(lat|:,lon|:,time|:)) /)
+     sst_CW = arr_son
+     sst_CW = SqrtCosWeight(arr_son)
+     evecv  = eofunc(sst_CW({lat|llats:llatn},{lon|llonw:llone},time|:),2,75)
+     pcts   = eofunc_ts(sst_CW({lat|llats:llatn},{lon|llonw:llone},time|:),evecv,False)
+     pdo_pc_son  = dim_standardize(pcts(0,:),0)
+     pdo_son     = arr_son(0,:,:)
+     pdo_son     = (/ regCoef(pdo_pc_son,arr_son(lat|:,lon|:,time|:)) /)
+     delete([/pcts,sst_CW,evecv/])
      if (vxreg_plot_flag.eq.0) then
-        rc        = regCoef_n(nino34_pc_son, vreg_son, 0, 0) ; rc(nlat,mlon)
+        rc        = regCoef_n(pdo_pc_son, vreg_son, 0, 0) ; rc(nlat,mlon)
         tval      = onedtond(rc@tval , dimsizes(rc))
         df        = onedtond(rc@nptxy, dimsizes(rc)) - 2
         b         = tval
         b         = 0.5
-        nino34_vreg_son  = vreg_son(0,:,:)
-        nino34_prob_son  = vreg_son(0,:,:)
-        nino34_vreg_son  = (/ rc /)
-        nino34_prob_son  = (/(1-betainc(df/(df+tval^2),df/2.0,b))*100.0/) 
-        nino34_prob_son  = where(ismissing(nino34_vreg_son),nino34_vreg_son@_FillValue,nino34_prob_son)
-        nino34_vreg_son@units = vreg_son@units +"(per std dev)"
+        pdo_vreg_son  = vreg_son(0,:,:)
+        pdo_prob_son  = vreg_son(0,:,:)
+        pdo_vreg_son  = (/ rc /)
+        pdo_prob_son  = (/(1-betainc(df/(df+tval^2),df/2.0,b))*100.0/) 
+        pdo_prob_son  = where(ismissing(pdo_vreg_son),pdo_vreg_son@_FillValue,pdo_prob_son)
+        pdo_vreg_son@units = vreg_son@units +"(per std dev)"
         delete([/rc,tval,df,b,vreg_son/])
      end if
-
-     if (.not.all(ismissing(nino34_son({llats1:llatn1},{llonw1:llone1})))) then
-       if (avg(nino34_son({llats1:llatn1},{llonw1:llone1})).le.0) then
-           nino34_son = nino34_son*-1.
-           nino34_pc_son = nino34_pc_son*-1.
+     if (.not.all(ismissing(pdo_son({llats1:llatn1},{llonw1:llone1})))) then
+       if (avg(pdo_son({llats1:llatn1},{llonw1:llone1})).ge.0) then
+           pdo_son = pdo_son*-1.
+           pdo_pc_son = pdo_pc_son*-1.
            if (vxreg_plot_flag.eq.0) then
-              nino34_vreg_son = nino34_vreg_son*-1.
+              pdo_vreg_son = pdo_vreg_son*-1.
            end if 
        end if 
      end if
-
      rc    = arr_son(0,:,:)
-     rc    = (/escorc_n(nino34_pc_son,arr_son,0,0)/)
+     rc    = (/escorc_n(pdo_pc_son,arr_son,0,0)/)
      rc    = rc*rc*100.0
      pcvar = wgt_areaave_Wrap(rc({llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0)
-     nino34_son@pcvar = tofloat(sprintf("%4.1f", pcvar))+"%"
+     pdo_son@pcvar = tofloat(sprintf("%4.1f", pcvar))+"%"
      delete([/pcvar,rc/])
-     copy_VarCoords(nino34_pc_djf,nino34_pc_son) 
-     delete([/pcts/])
+     copy_VarCoords(pdo_pc_djf,pdo_pc_son) 
 
-     pcts = wgt_areaave_Wrap(arr_ann(:,{llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0)
-     nino34_pc_ann = dim_standardize(pcts,0)
-     nino34_ann = arr_ann(0,:,:)
-     nino34_ann = (/ regCoef(nino34_pc_ann,arr_ann(lat|:,lon|:,time|:)) /)
+     sst_CW = arr_ann
+     sst_CW = SqrtCosWeight(arr_ann)
+     evecv  = eofunc(sst_CW({lat|llats:llatn},{lon|llonw:llone},time|:),2,75)
+     pcts   = eofunc_ts(sst_CW({lat|llats:llatn},{lon|llonw:llone},time|:),evecv,False)
+     pdo_pc_ann  = dim_standardize(pcts(0,:),0)
+     pdo_ann     = arr_ann(0,:,:)
+     pdo_ann     = (/ regCoef(pdo_pc_ann,arr_ann(lat|:,lon|:,time|:)) /)
+     delete([/pcts,sst_CW,evecv/])
      if (vxreg_plot_flag.eq.0) then
-        rc        = regCoef_n(nino34_pc_ann, vreg_ann, 0, 0) ; rc(nlat,mlon)
+        rc        = regCoef_n(pdo_pc_ann, vreg_ann, 0, 0) ; rc(nlat,mlon)
         tval      = onedtond(rc@tval , dimsizes(rc))
         df        = onedtond(rc@nptxy, dimsizes(rc)) - 2
         b         = tval
         b         = 0.5
-        nino34_vreg_ann  = vreg_ann(0,:,:)
-        nino34_prob_ann  = vreg_ann(0,:,:)
-        nino34_vreg_ann  = (/ rc /)
-        nino34_prob_ann  = (/(1-betainc(df/(df+tval^2),df/2.0,b))*100.0/) 
-        nino34_prob_ann  = where(ismissing(nino34_vreg_ann),nino34_vreg_ann@_FillValue,nino34_prob_ann)
-        nino34_vreg_ann@units = vreg_ann@units +"(per std dev)"
+        pdo_vreg_ann  = vreg_ann(0,:,:)
+        pdo_prob_ann  = vreg_ann(0,:,:)
+        pdo_vreg_ann  = (/ rc /)
+        pdo_prob_ann  = (/(1-betainc(df/(df+tval^2),df/2.0,b))*100.0/) 
+        pdo_prob_ann  = where(ismissing(pdo_vreg_ann),pdo_vreg_ann@_FillValue,pdo_prob_ann)
+        pdo_vreg_ann@units = vreg_ann@units +"(per std dev)"
         delete([/rc,tval,df,b,vreg_ann/])
      end if
-
-     if (.not.all(ismissing(nino34_ann({llats1:llatn1},{llonw1:llone1})))) then
-       if (avg(nino34_ann({llats1:llatn1},{llonw1:llone1})).le.0) then
-           nino34_ann = nino34_ann*-1.
-           nino34_pc_ann = nino34_pc_ann*-1.
+     if (.not.all(ismissing(pdo_ann({llats1:llatn1},{llonw1:llone1})))) then
+       if (avg(pdo_ann({llats1:llatn1},{llonw1:llone1})).ge.0) then
+           pdo_ann = pdo_ann*-1.
+           pdo_pc_ann = pdo_pc_ann*-1.
            if (vxreg_plot_flag.eq.0) then
-              nino34_vreg_ann = nino34_vreg_ann*-1.
+              pdo_vreg_ann = pdo_vreg_ann*-1.
            end if 
        end if 
      end if
-
      rc    = arr_ann(0,:,:)
-     rc    = (/escorc_n(nino34_pc_ann,arr_ann,0,0)/)
+     rc    = (/escorc_n(pdo_pc_ann,arr_ann,0,0)/)
      rc    = rc*rc*100.0
      pcvar = wgt_areaave_Wrap(rc({llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0)
-     nino34_ann@pcvar = tofloat(sprintf("%4.1f", pcvar))+"%"
+     pdo_ann@pcvar = tofloat(sprintf("%4.1f", pcvar))+"%"
      delete([/pcvar,rc/])
-     copy_VarCoords(nino34_pc_djf,nino34_pc_ann) 
-     delete([/pcts/])
+     copy_VarCoords(pdo_pc_djf,pdo_pc_ann) 
      
      if (COMPUTE_MODES_MON.eq."True") then     
-        pcts = wgt_areaave_Wrap(arr(:,{llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0)
-        nino34_pc_mon = dim_standardize(pcts,0)
-        nino34_mon = arr(0,:,:)
-        nino34_mon = (/ regCoef(nino34_pc_mon,arr(lat|:,lon|:,time|:)) /)
+        sst_CW = arr
+        sst_CW = SqrtCosWeight(arr)
+        evecv  = eofunc(sst_CW({lat|llats:llatn},{lon|llonw:llone},time|:),2,75)
+        pcts   = eofunc_ts(sst_CW({lat|llats:llatn},{lon|llonw:llone},time|:),evecv,False)
+        pdo_pc_mon  = dim_standardize(pcts(0,:),0)
+        pdo_mon     = arr(0,:,:)
+        pdo_mon     = (/ regCoef(pdo_pc_mon,arr(lat|:,lon|:,time|:)) /)
+        delete([/pcts,sst_CW,evecv/])
         if (vxreg_plot_flag.eq.0) then
-           rc           = regCoef_n(nino34_pc_mon, vreg, 0, 0) ; rc(nlat,mlon)
+           rc           = regCoef_n(pdo_pc_mon, vreg, 0, 0) ; rc(nlat,mlon)
            tval         = onedtond(rc@tval , dimsizes(rc))
            df           = onedtond(rc@nptxy, dimsizes(rc)) - 2
            b            = tval
            b            = 0.5
-           nino34_vreg_mon  = vreg(0,:,:)
-           nino34_prob_mon  = vreg(0,:,:)
-           nino34_vreg_mon  = (/ rc /)
-           nino34_prob_mon  = (/(1-betainc(df/(df+tval^2),df/2.0,b))*100.0/) 
-           nino34_prob_mon  = where(ismissing(nino34_vreg_mon),nino34_vreg_mon@_FillValue,nino34_prob_mon)
-           nino34_vreg_mon@units = vreg@units +"(per std dev)"
+           pdo_vreg_mon  = vreg(0,:,:)
+           pdo_prob_mon  = vreg(0,:,:)
+           pdo_vreg_mon  = (/ rc /)
+           pdo_prob_mon  = (/(1-betainc(df/(df+tval^2),df/2.0,b))*100.0/) 
+           pdo_prob_mon  = where(ismissing(pdo_vreg_mon),pdo_vreg_mon@_FillValue,pdo_prob_mon)
+           pdo_vreg_mon@units = vreg@units +"(per std dev)"
            delete([/rc,tval,df,b,vreg/])
         end if
-
-        if (.not.all(ismissing(nino34_mon({llats1:llatn1},{llonw1:llone1})))) then
-          if (avg(nino34_mon({llats1:llatn1},{llonw1:llone1})).le.0) then
-              nino34_mon = nino34_mon*-1.
-              nino34_pc_mon = nino34_pc_mon*-1.
+        if (.not.all(ismissing(pdo_mon({llats1:llatn1},{llonw1:llone1})))) then
+          if (avg(pdo_mon({llats1:llatn1},{llonw1:llone1})).ge.0) then
+              pdo_mon = pdo_mon*-1.
+              pdo_pc_mon = pdo_pc_mon*-1.
               if (vxreg_plot_flag.eq.0) then
-                 nino34_vreg_mon = nino34_vreg_mon*-1.
+                 pdo_vreg_mon = pdo_vreg_mon*-1.
               end if
           end if
         end if
-
         rc    = arr(0,:,:)
-        rc    = (/escorc_n(nino34_pc_mon,arr,0,0)/)
+        rc    = (/escorc_n(pdo_pc_mon,arr,0,0)/)
         rc    = rc*rc*100.0
         pcvar = wgt_areaave_Wrap(rc({llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0)
-        nino34_mon@pcvar = tofloat(sprintf("%4.1f", pcvar))+"%"
+        pdo_mon@pcvar = tofloat(sprintf("%4.1f", pcvar))+"%"
         delete([/pcvar,rc/])
-        nino34_pc_mon!0 = "time"
-        nino34_pc_mon&time = arr&time   
-        delete([/pcts,arr/])
+        pdo_pc_mon!0 = "time"
+        pdo_pc_mon&time = arr&time   
+        delete([/arr/])
      end if
      delete([/arr_djf,arr_mam,arr_jja,arr_son,arr_ann/])
 
@@ -514,7 +539,7 @@ begin
            do gg = 0,dimsizes(bc)-1
               modname = str_sub_str(modname,bc(gg),"_")
            end do
-           fn = getenv("OUTDIR")+modname+".cvdp_data.sst.nino34."+vnm+"."+syear_reg(ee)+"-"+eyear_reg(ee)+".nc"
+           fn = getenv("OUTDIR")+modname+".cvdp_data.sst.pdo."+vnm+"."+syear_reg(ee)+"-"+eyear_reg(ee)+".nc"
            if (.not.isfilepresent2(fn)) then
               z = addfile(fn,"c")
               z@source = "NCAR Climate Analysis Section's Climate Variability Diagnostics Package v"+getenv("VERSION")
@@ -533,61 +558,61 @@ begin
               z = addfile(fn,"w")
            end if
 
-           z->nino34_timeseries_djf = set_varAtts(nino34_pc_djf,"ENSO (Nino34) normalized principal component timeseries (DJF)","1","")
-           z->nino34_timeseries_mam = set_varAtts(nino34_pc_mam,"ENSO (Nino34) normalized principal component timeseries (MAM)","1","")
-           z->nino34_timeseries_jja = set_varAtts(nino34_pc_jja,"ENSO (Nino34) normalized principal component timeseries (JJA)","1","")
-           z->nino34_timeseries_son = set_varAtts(nino34_pc_son,"ENSO (Nino34) normalized principal component timeseries (SON)","1","")
-           z->nino34_timeseries_ann = set_varAtts(nino34_pc_ann,"ENSO (Nino34) normalized principal component timeseries (annual)","1","")
-           vout = "nino34_"+vnm+"_regression_djf"
+           z->pdo_timeseries_djf = set_varAtts(pdo_pc_djf,"ENSO (Nino34) normalized principal component timeseries (DJF)","1","")
+           z->pdo_timeseries_mam = set_varAtts(pdo_pc_mam,"ENSO (Nino34) normalized principal component timeseries (MAM)","1","")
+           z->pdo_timeseries_jja = set_varAtts(pdo_pc_jja,"ENSO (Nino34) normalized principal component timeseries (JJA)","1","")
+           z->pdo_timeseries_son = set_varAtts(pdo_pc_son,"ENSO (Nino34) normalized principal component timeseries (SON)","1","")
+           z->pdo_timeseries_ann = set_varAtts(pdo_pc_ann,"ENSO (Nino34) normalized principal component timeseries (annual)","1","")
+           vout = "pdo_"+vnm+"_regression_djf"
            vosr = vnm+" regression onto ENSO (Nino34) principal component timeseries (DJF)"
-           z->$vout$ = set_varAtts(nino34_vreg_djf,vosr,"","") 
-           vout = "nino34_"+vnm+"_regression_mam"
+           z->$vout$ = set_varAtts(pdo_vreg_djf,vosr,"","") 
+           vout = "pdo_"+vnm+"_regression_mam"
            vosr = vnm+" regression onto ENSO (Nino34) principal component timeseries (MAM)"
-           z->$vout$ = set_varAtts(nino34_vreg_mam,vosr,"","")  
-           vout = "nino34_"+vnm+"_regression_jja"
+           z->$vout$ = set_varAtts(pdo_vreg_mam,vosr,"","")  
+           vout = "pdo_"+vnm+"_regression_jja"
            vosr = vnm+" regression onto ENSO (Nino34) principal component timeseries (JJA)"
-           z->$vout$ = set_varAtts(nino34_vreg_jja,vosr,"","")  
-           vout = "nino34_"+vnm+"_regression_son"
+           z->$vout$ = set_varAtts(pdo_vreg_jja,vosr,"","")  
+           vout = "pdo_"+vnm+"_regression_son"
            vosr = vnm+" regression onto ENSO (Nino34) principal component timeseries (SON)"
-           z->$vout$ = set_varAtts(nino34_vreg_son,vosr,"","")  
-           vout = "nino34_"+vnm+"_regression_ann"
+           z->$vout$ = set_varAtts(pdo_vreg_son,vosr,"","")  
+           vout = "pdo_"+vnm+"_regression_ann"
            vosr = vnm+" regression onto ENSO (Nino34) principal component timeseries (annual)"
-           z->$vout$ = set_varAtts(nino34_vreg_ann,vosr,"","")  
+           z->$vout$ = set_varAtts(pdo_vreg_ann,vosr,"","")  
 
-           vout = "nino34_"+vnm+"_regprob_djf"
+           vout = "pdo_"+vnm+"_regprob_djf"
            vosr = vnm+" ENSO (Nino34) regression t-test probility(DJF)"
-           z->$vout$ = set_varAtts(nino34_prob_djf,vosr,"","")
-           vout = "nino34_"+vnm+"_regprob_mam"
+           z->$vout$ = set_varAtts(pdo_prob_djf,vosr,"","")
+           vout = "pdo_"+vnm+"_regprob_mam"
            vosr = vnm+" ENSO (Nino34) regression t-test probility(MAM)"
-           z->$vout$ = set_varAtts(nino34_prob_mam,vosr,"","")
-           vout = "nino34_"+vnm+"_regprob_jja"
+           z->$vout$ = set_varAtts(pdo_prob_mam,vosr,"","")
+           vout = "pdo_"+vnm+"_regprob_jja"
            vosr = vnm+" ENSO (Nino34) regression t-test probility(JJA)"
-           z->$vout$ = set_varAtts(nino34_prob_jja,vosr,"","")
-           vout = "nino34_"+vnm+"_regprob_son"
+           z->$vout$ = set_varAtts(pdo_prob_jja,vosr,"","")
+           vout = "pdo_"+vnm+"_regprob_son"
            vosr = vnm+" ENSO (Nino34) regression t-test probility(SON)"
-           z->$vout$ = set_varAtts(nino34_prob_son,vosr,"","")
-           vout = "nino34_"+vnm+"_regprob_ann"
+           z->$vout$ = set_varAtts(pdo_prob_son,vosr,"","")
+           vout = "pdo_"+vnm+"_regprob_ann"
            vosr = vnm+" ENSO (Nino34) regression t-test probility(annual)"
-           z->$vout$ = set_varAtts(nino34_prob_ann,vosr,"","")
+           z->$vout$ = set_varAtts(pdo_prob_ann,vosr,"","")
 
            if (COMPUTE_MODES_MON.eq."True") then   
 
-              z->nino34_timeseries_mon  = set_varAtts(nino34_pc_mon,"ENSO (Nino34) principal component timeseries (monthly)","","")
+              z->pdo_timeseries_mon  = set_varAtts(pdo_pc_mon,"ENSO (Nino34) principal component timeseries (monthly)","","")
 
-              vout = "nino34_"+vnm+"_regression_mon"
+              vout = "pdo_"+vnm+"_regression_mon"
               vosr = vnm+" regression onto ENSO (Nino34) principal component timeseries (monthly)"
-              z->$vout$ = set_varAtts(nino34_vreg_mon,vosr,"","")
+              z->$vout$ = set_varAtts(pdo_vreg_mon,vosr,"","")
 
-              vout = "nino34_"+vnm+"_regprob_mon"
+              vout = "pdo_"+vnm+"_regprob_mon"
               vosr = vnm+" ENSO (Nino34) regression t-test probility(monthly)"
-              z->$vout$ = set_varAtts(nino34_prob_mon,vosr,"","")
+              z->$vout$ = set_varAtts(pdo_prob_mon,vosr,"","")
 
            end if
            delete(z)
            delete([/modname,fn/])
         end if
      end if     
-     delete([/nino34_pc_djf,nino34_pc_jja,nino34_pc_mam,nino34_pc_son,nino34_pc_ann,nino34_pc_mon/])
+     delete([/pdo_pc_djf,pdo_pc_jja,pdo_pc_mam,pdo_pc_son,pdo_pc_ann,pdo_pc_mon/])
 
 ;========================================================================
      res = True
@@ -656,76 +681,76 @@ begin
      opt@gsnShadeFillDotSizeF  = 0.002
     
      if (isfilepresent2("obs_ts").and.ee.eq.0) then    ; for pattern correlation table. Save entire lat/lon array
-        patcor_vreg_nino34_djf = new((/nsim,dimsizes(nino34_vreg_djf&lat),dimsizes(nino34_vreg_djf&lon)/),typeof(nino34_vreg_djf))
-        patcor_vreg_nino34_djf!1 = "lat"
-        patcor_vreg_nino34_djf&lat = nino34_vreg_djf&lat
-        patcor_vreg_nino34_djf!2 = "lon"
-        patcor_vreg_nino34_djf&lon = nino34_vreg_djf&lon
-        patcor_vreg_nino34_mam = patcor_vreg_nino34_djf
-        patcor_vreg_nino34_jja = patcor_vreg_nino34_djf
-        patcor_vreg_nino34_son = patcor_vreg_nino34_djf
-        patcor_vreg_nino34_ann = patcor_vreg_nino34_djf
-        patcor_vreg_nino34_djf(ee,:,:) = (/ nino34_vreg_djf /)
-        patcor_vreg_nino34_mam(ee,:,:) = (/ nino34_vreg_mam /)
-        patcor_vreg_nino34_jja(ee,:,:) = (/ nino34_vreg_jja /)
-        patcor_vreg_nino34_son(ee,:,:) = (/ nino34_vreg_son /)
-        patcor_vreg_nino34_ann(ee,:,:) = (/ nino34_vreg_ann /)
+        patcor_vreg_pdo_djf = new((/nsim,dimsizes(pdo_vreg_djf&lat),dimsizes(pdo_vreg_djf&lon)/),typeof(pdo_vreg_djf))
+        patcor_vreg_pdo_djf!1 = "lat"
+        patcor_vreg_pdo_djf&lat = pdo_vreg_djf&lat
+        patcor_vreg_pdo_djf!2 = "lon"
+        patcor_vreg_pdo_djf&lon = pdo_vreg_djf&lon
+        patcor_vreg_pdo_mam = patcor_vreg_pdo_djf
+        patcor_vreg_pdo_jja = patcor_vreg_pdo_djf
+        patcor_vreg_pdo_son = patcor_vreg_pdo_djf
+        patcor_vreg_pdo_ann = patcor_vreg_pdo_djf
+        patcor_vreg_pdo_djf(ee,:,:) = (/ pdo_vreg_djf /)
+        patcor_vreg_pdo_mam(ee,:,:) = (/ pdo_vreg_mam /)
+        patcor_vreg_pdo_jja(ee,:,:) = (/ pdo_vreg_jja /)
+        patcor_vreg_pdo_son(ee,:,:) = (/ pdo_vreg_son /)
+        patcor_vreg_pdo_ann(ee,:,:) = (/ pdo_vreg_ann /)
         if (COMPUTE_MODES_MON.eq."True") then
-          patcor_vreg_nino34_mon = patcor_vreg_nino34_djf
-          patcor_vreg_nino34_mon(ee,:,:) = (/ nino34_vreg_mon /)
+          patcor_vreg_pdo_mon = patcor_vreg_pdo_djf
+          patcor_vreg_pdo_mon(ee,:,:) = (/ pdo_vreg_mon /)
         end if 
      end if
-     if (isfilepresent2("obs_ts").and.ee.ge.1.and.isvar("patcor_vreg_nino34_djf")) then       
-        patcor_vreg_nino34_djf(ee,:,:) = (/ totype(linint2(nino34_vreg_djf&lon,nino34_vreg_djf&lat,nino34_vreg_djf,True,patcor_vreg_nino34_djf&lon,patcor_vreg_nino34_djf&lat,0),typeof(patcor_vreg_nino34_djf)) /)
-        patcor_vreg_nino34_mam(ee,:,:) = (/ totype(linint2(nino34_vreg_mam&lon,nino34_vreg_mam&lat,nino34_vreg_mam,True,patcor_vreg_nino34_mam&lon,patcor_vreg_nino34_mam&lat,0),typeof(patcor_vreg_nino34_mam)) /)
-        patcor_vreg_nino34_jja(ee,:,:) = (/ totype(linint2(nino34_vreg_jja&lon,nino34_vreg_jja&lat,nino34_vreg_jja,True,patcor_vreg_nino34_jja&lon,patcor_vreg_nino34_jja&lat,0),typeof(patcor_vreg_nino34_jja)) /)
-        patcor_vreg_nino34_son(ee,:,:) = (/ totype(linint2(nino34_vreg_son&lon,nino34_vreg_son&lat,nino34_vreg_son,True,patcor_vreg_nino34_son&lon,patcor_vreg_nino34_son&lat,0),typeof(patcor_vreg_nino34_son)) /)
-        patcor_vreg_nino34_ann(ee,:,:) = (/ totype(linint2(nino34_vreg_ann&lon,nino34_vreg_ann&lat,nino34_vreg_ann,True,patcor_vreg_nino34_ann&lon,patcor_vreg_nino34_ann&lat,0),typeof(patcor_vreg_nino34_ann)) /)
+     if (isfilepresent2("obs_ts").and.ee.ge.1.and.isvar("patcor_vreg_pdo_djf")) then       
+        patcor_vreg_pdo_djf(ee,:,:) = (/ totype(linint2(pdo_vreg_djf&lon,pdo_vreg_djf&lat,pdo_vreg_djf,True,patcor_vreg_pdo_djf&lon,patcor_vreg_pdo_djf&lat,0),typeof(patcor_vreg_pdo_djf)) /)
+        patcor_vreg_pdo_mam(ee,:,:) = (/ totype(linint2(pdo_vreg_mam&lon,pdo_vreg_mam&lat,pdo_vreg_mam,True,patcor_vreg_pdo_mam&lon,patcor_vreg_pdo_mam&lat,0),typeof(patcor_vreg_pdo_mam)) /)
+        patcor_vreg_pdo_jja(ee,:,:) = (/ totype(linint2(pdo_vreg_jja&lon,pdo_vreg_jja&lat,pdo_vreg_jja,True,patcor_vreg_pdo_jja&lon,patcor_vreg_pdo_jja&lat,0),typeof(patcor_vreg_pdo_jja)) /)
+        patcor_vreg_pdo_son(ee,:,:) = (/ totype(linint2(pdo_vreg_son&lon,pdo_vreg_son&lat,pdo_vreg_son,True,patcor_vreg_pdo_son&lon,patcor_vreg_pdo_son&lat,0),typeof(patcor_vreg_pdo_son)) /)
+        patcor_vreg_pdo_ann(ee,:,:) = (/ totype(linint2(pdo_vreg_ann&lon,pdo_vreg_ann&lat,pdo_vreg_ann,True,patcor_vreg_pdo_ann&lon,patcor_vreg_pdo_ann&lat,0),typeof(patcor_vreg_pdo_ann)) /)
         if (COMPUTE_MODES_MON.eq."True") then
-          patcor_vreg_nino34_mon(ee,:,:) = (/ totype(linint2(nino34_vreg_mon&lon,nino34_vreg_mon&lat,nino34_vreg_mon,True,patcor_vreg_nino34_mon&lon,patcor_vreg_nino34_mon&lat,0),typeof(patcor_vreg_nino34_mon)) /)
+          patcor_vreg_pdo_mon(ee,:,:) = (/ totype(linint2(pdo_vreg_mon&lon,pdo_vreg_mon&lat,pdo_vreg_mon,True,patcor_vreg_pdo_mon&lon,patcor_vreg_pdo_mon&lat,0),typeof(patcor_vreg_pdo_mon)) /)
         end if 
      end if
       
      if (vxreg_plot_flag.eq.0) then
         res@gsnCenterString = names_reg(ee)
         res@gsnRightString = ""
-        lbunitstr = nino34_vreg_djf@units
-        res@gsnRightString = nino34_djf@pcvar
-        reg_nino34_djf(ee) = gsn_csm_contour_map(wks_nino34,nino34_vreg_djf,res)
-        res@gsnRightString = nino34_mam@pcvar
-        reg_nino34_mam(ee) = gsn_csm_contour_map(wks_nino34,nino34_vreg_mam,res)
-        res@gsnRightString = nino34_jja@pcvar
-        reg_nino34_jja(ee) = gsn_csm_contour_map(wks_nino34,nino34_vreg_jja,res)
-        res@gsnRightString = nino34_son@pcvar
-        reg_nino34_son(ee) = gsn_csm_contour_map(wks_nino34,nino34_vreg_son,res)
-        res@gsnRightString = nino34_ann@pcvar
-        reg_nino34_ann(ee) = gsn_csm_contour_map(wks_nino34,nino34_vreg_ann,res)     
-        delete([/nino34_vreg_djf,nino34_vreg_mam,nino34_vreg_jja,nino34_vreg_son,nino34_vreg_ann/])
-        o_djf = gsn_csm_contour(wks_nino34,nino34_prob_djf,res2)
+        lbunitstr = pdo_vreg_djf@units
+        res@gsnRightString = pdo_djf@pcvar
+        reg_pdo_djf(ee) = gsn_csm_contour_map(wks_pdo,pdo_vreg_djf,res)
+        res@gsnRightString = pdo_mam@pcvar
+        reg_pdo_mam(ee) = gsn_csm_contour_map(wks_pdo,pdo_vreg_mam,res)
+        res@gsnRightString = pdo_jja@pcvar
+        reg_pdo_jja(ee) = gsn_csm_contour_map(wks_pdo,pdo_vreg_jja,res)
+        res@gsnRightString = pdo_son@pcvar
+        reg_pdo_son(ee) = gsn_csm_contour_map(wks_pdo,pdo_vreg_son,res)
+        res@gsnRightString = pdo_ann@pcvar
+        reg_pdo_ann(ee) = gsn_csm_contour_map(wks_pdo,pdo_vreg_ann,res)     
+        delete([/pdo_vreg_djf,pdo_vreg_mam,pdo_vreg_jja,pdo_vreg_son,pdo_vreg_ann/])
+        o_djf = gsn_csm_contour(wks_pdo,pdo_prob_djf,res2)
         o_djf = gsn_contour_shade(o_djf,-999,95,opt) 
-        o_mam = gsn_csm_contour(wks_nino34,nino34_prob_mam,res2)
+        o_mam = gsn_csm_contour(wks_pdo,pdo_prob_mam,res2)
         o_mam = gsn_contour_shade(o_mam,-999,95,opt) 
-        o_jja = gsn_csm_contour(wks_nino34,nino34_prob_jja,res2)
+        o_jja = gsn_csm_contour(wks_pdo,pdo_prob_jja,res2)
         o_jja = gsn_contour_shade(o_jja,-999,95,opt)
-        o_son = gsn_csm_contour(wks_nino34,nino34_prob_son,res2)
+        o_son = gsn_csm_contour(wks_pdo,pdo_prob_son,res2)
         o_son = gsn_contour_shade(o_son,-999,95,opt)
-        o_ann = gsn_csm_contour(wks_nino34,nino34_prob_ann,res2)
+        o_ann = gsn_csm_contour(wks_pdo,pdo_prob_ann,res2)
         o_ann = gsn_contour_shade(o_ann,-999,95,opt)
-        delete([/nino34_prob_djf,nino34_prob_mam,nino34_prob_jja,nino34_prob_son,nino34_prob_ann/])
-        overlay(reg_nino34_djf(ee),o_djf)
-        overlay(reg_nino34_mam(ee),o_mam)
-        overlay(reg_nino34_jja(ee),o_jja)
-        overlay(reg_nino34_son(ee),o_son)
-        overlay(reg_nino34_ann(ee),o_ann)
+        delete([/pdo_prob_djf,pdo_prob_mam,pdo_prob_jja,pdo_prob_son,pdo_prob_ann/])
+        overlay(reg_pdo_djf(ee),o_djf)
+        overlay(reg_pdo_mam(ee),o_mam)
+        overlay(reg_pdo_jja(ee),o_jja)
+        overlay(reg_pdo_son(ee),o_son)
+        overlay(reg_pdo_ann(ee),o_ann)
         delete([/o_djf,o_mam,o_jja,o_son,o_ann/])
         if (COMPUTE_MODES_MON.eq."True") then 
-           res@gsnRightString = nino34_mon@pcvar                   
-           reg_nino34_mon(ee) = gsn_csm_contour_map(wks_nino34,nino34_vreg_mon,res)
-           delete([/nino34_vreg_mon/])
-           o_mon = gsn_csm_contour(wks_nino34,nino34_prob_mon,res2)
+           res@gsnRightString = pdo_mon@pcvar                   
+           reg_pdo_mon(ee) = gsn_csm_contour_map(wks_pdo,pdo_vreg_mon,res)
+           delete([/pdo_vreg_mon/])
+           o_mon = gsn_csm_contour(wks_pdo,pdo_prob_mon,res2)
            o_mon = gsn_contour_shade(o_mon,-999,95,opt)
-           overlay(reg_nino34_mon(ee),o_mon)
-           delete([/o_mon,nino34_prob_mon/])
+           overlay(reg_pdo_mon(ee),o_mon)
+           delete([/o_mon,pdo_prob_mon/])
         end if
      
      end if
@@ -740,8 +765,8 @@ begin
      delete(clim_eyear)
   end if
 
-  if (isvar("patcor_vreg_nino34_djf")) then    ; for pattern correlation table
-    mods = (/"nino34"/)
+  if (isvar("patcor_vreg_pdo_djf")) then    ; for pattern correlation table
+    mods = (/"pdo"/)
     if (COMPUTE_MODES_MON.eq."True") then
       seas = (/"djf","mam","jja","son","ann","mon"/)
     else
@@ -750,23 +775,23 @@ begin
     do kk = 0,dimsizes(seas)-1
      do ll = 0,dimsizes(mods)-1
       vreg_nam  = "patcor_vreg_"+mods(ll)+"_"+seas(kk)
-      if(vreg_nam.eq."patcor_vreg_nino34_djf") then
-        patcor_vreg = patcor_vreg_nino34_djf
+      if(vreg_nam.eq."patcor_vreg_pdo_djf") then
+        patcor_vreg = patcor_vreg_pdo_djf
       end if
-      if(vreg_nam.eq."patcor_vreg_nino34_mam") then
-        patcor_vreg = patcor_vreg_nino34_mam
+      if(vreg_nam.eq."patcor_vreg_pdo_mam") then
+        patcor_vreg = patcor_vreg_pdo_mam
       end if
-      if(vreg_nam.eq."patcor_vreg_nino34_jja") then
-        patcor_vreg = patcor_vreg_nino34_jja
+      if(vreg_nam.eq."patcor_vreg_pdo_jja") then
+        patcor_vreg = patcor_vreg_pdo_jja
       end if
-      if(vreg_nam.eq."patcor_vreg_nino34_son") then
-        patcor_vreg = patcor_vreg_nino34_son
+      if(vreg_nam.eq."patcor_vreg_pdo_son") then
+        patcor_vreg = patcor_vreg_pdo_son
       end if
-      if(vreg_nam.eq."patcor_vreg_nino34_ann") then
-        patcor_vreg = patcor_vreg_nino34_ann
+      if(vreg_nam.eq."patcor_vreg_pdo_ann") then
+        patcor_vreg = patcor_vreg_pdo_ann
       end if
-      if(vreg_nam.eq."patcor_vreg_nino34_mon") then
-        patcor_vreg = patcor_vreg_nino34_mon
+      if(vreg_nam.eq."patcor_vreg_pdo_mon") then
+        patcor_vreg = patcor_vreg_pdo_mon
       end if
       clat = cos(0.01745329*patcor_vreg&lat)
       clat!0 = "lat"
@@ -797,7 +822,7 @@ begin
          format3 = "%4.2f"
          line3 = line3+" "+ntb
          line4 = line4+" "+ntc
-         if (all(ismissing(patcor_vreg_nino34_djf(hh,:,:)))) then
+         if (all(ismissing(patcor_vreg_pdo_djf(hh,:,:)))) then
             finpr = finpr+sprintf(format2,9.99)+"/"+sprintf(format3,9.99)
          else
             finpr = finpr+sprintf(format2,(pattern_cor(patcor_vreg(0,:,:),patcor_vreg(hh,:,:),clat(:),0)))+"/"+sprintf(format3,(wgt_arearmse(patcor_vreg(0,:,:),patcor_vreg(hh,:,:),clat(:),1.0,0)))
@@ -808,21 +833,21 @@ begin
         print("Metrics table warning: Not creating regpatt_metrics.table as size of comparison results in a invalid ascii row size.")
      else
         if(kk.eq.0.and.ll.eq.0) then
-          write_table(getenv("OUTDIR")+"regpatt_metrics.sst.nino34_"+vnm+".txt","w",[/header/],"%s")
-          write_table(getenv("OUTDIR")+"regpatt_metrics.sst.nino34_"+vnm+".txt","a",[/line3/],"%s")
-          write_table(getenv("OUTDIR")+"regpatt_metrics.sst.nino34_"+vnm+".txt","a",[/line4/],"%s")
-          write_table(getenv("OUTDIR")+"regpatt_metrics.sst.nino34_"+vnm+".txt","a",[/finpr/],"%s")
+          write_table(getenv("OUTDIR")+"regpatt_metrics.sst.pdo_"+vnm+".txt","w",[/header/],"%s")
+          write_table(getenv("OUTDIR")+"regpatt_metrics.sst.pdo_"+vnm+".txt","a",[/line3/],"%s")
+          write_table(getenv("OUTDIR")+"regpatt_metrics.sst.pdo_"+vnm+".txt","a",[/line4/],"%s")
+          write_table(getenv("OUTDIR")+"regpatt_metrics.sst.pdo_"+vnm+".txt","a",[/finpr/],"%s")
         else
-          write_table(getenv("OUTDIR")+"regpatt_metrics.sst.nino34_"+vnm+".txt","a",[/finpr/],"%s")
+          write_table(getenv("OUTDIR")+"regpatt_metrics.sst.pdo_"+vnm+".txt","a",[/finpr/],"%s")
         end if
      end if
      delete([/line3,line4,format2,format3,nchar,ntc,clat,dimY,ntb,header/])
      end do
     end do
     delete([/mods,seas/])
-    delete([/patcor_vreg_nino34_djf,patcor_vreg_nino34_mam,patcor_vreg_nino34_jja,patcor_vreg_nino34_son,patcor_vreg_nino34_ann/])
+    delete([/patcor_vreg_pdo_djf,patcor_vreg_pdo_mam,patcor_vreg_pdo_jja,patcor_vreg_pdo_son,patcor_vreg_pdo_ann/])
     if (COMPUTE_MODES_MON.eq."True") then
-      delete([/patcor_vreg_nino34_mon/])
+      delete([/patcor_vreg_pdo_mon/])
     end if
   end if 
  
@@ -870,52 +895,52 @@ begin
      txt0 = str_upper(vnm)
      panres@lbTitleString = txt0 + " [" + lbunitstr +"]"  
      panres@txString = "ENSO (Nino34) Regressions (DJF)" 
-     gsn_panel2(wks_nino34,reg_nino34_djf,(/nrow,ncol/),panres)
-     delete(reg_nino34_djf)
+     gsn_panel2(wks_pdo,reg_pdo_djf,(/nrow,ncol/),panres)
+     delete(reg_pdo_djf)
      panres@txString = "ENSO (Nino34) Regressions (MAM)"
-     gsn_panel2(wks_nino34,reg_nino34_mam,(/nrow,ncol/),panres)
-     delete(reg_nino34_mam)
+     gsn_panel2(wks_pdo,reg_pdo_mam,(/nrow,ncol/),panres)
+     delete(reg_pdo_mam)
      panres@txString = "ENSO (Nino34) Regressions (JJA)"
-     gsn_panel2(wks_nino34,reg_nino34_jja,(/nrow,ncol/),panres)
-     delete(reg_nino34_jja)
+     gsn_panel2(wks_pdo,reg_pdo_jja,(/nrow,ncol/),panres)
+     delete(reg_pdo_jja)
      panres@txString = "ENSO (Nino34) Regressions (SON)"
-     gsn_panel2(wks_nino34,reg_nino34_son,(/nrow,ncol/),panres)
-     delete(reg_nino34_son)
+     gsn_panel2(wks_pdo,reg_pdo_son,(/nrow,ncol/),panres)
+     delete(reg_pdo_son)
      panres@txString = "ENSO (Nino34) Regressions (Annual)"
-     gsn_panel2(wks_nino34,reg_nino34_ann,(/nrow,ncol/),panres)
-     delete(reg_nino34_ann)
+     gsn_panel2(wks_pdo,reg_pdo_ann,(/nrow,ncol/),panres)
+     delete(reg_pdo_ann)
      if (COMPUTE_MODES_MON.eq."True") then    
         panres@txString = "ENSO (Nino34) Regressions (Monthly)"
-        gsn_panel2(wks_nino34,reg_nino34_mon,(/nrow,ncol/),panres)
-        delete(reg_nino34_mon)
+        gsn_panel2(wks_pdo,reg_pdo_mon,(/nrow,ncol/),panres)
+        delete(reg_pdo_mon)
      end if
-     delete(wks_nino34)
+     delete(wks_pdo)
   end if
   
 ;--------------------------------------------------------------------------------------------------
   OUTDIR = getenv("OUTDIR") 
   if (wks_type.eq."png") then       
      if (vxreg_frame.eq.0) then
-        system("mv "+OUTDIR+"nino34.vxreg.000001.png "+OUTDIR+"nino34."+vnm+"reg.djf.png")
-        system("mv "+OUTDIR+"nino34.vxreg.000002.png "+OUTDIR+"nino34."+vnm+"reg.mam.png")
-        system("mv "+OUTDIR+"nino34.vxreg.000003.png "+OUTDIR+"nino34."+vnm+"reg.jja.png")
-        system("mv "+OUTDIR+"nino34.vxreg.000004.png "+OUTDIR+"nino34."+vnm+"reg.son.png")
-        system("mv "+OUTDIR+"nino34.vxreg.000005.png "+OUTDIR+"nino34."+vnm+"reg.ann.png")
+        system("mv "+OUTDIR+"pdo.vxreg.000001.png "+OUTDIR+"pdo."+vnm+"reg.djf.png")
+        system("mv "+OUTDIR+"pdo.vxreg.000002.png "+OUTDIR+"pdo."+vnm+"reg.mam.png")
+        system("mv "+OUTDIR+"pdo.vxreg.000003.png "+OUTDIR+"pdo."+vnm+"reg.jja.png")
+        system("mv "+OUTDIR+"pdo.vxreg.000004.png "+OUTDIR+"pdo."+vnm+"reg.son.png")
+        system("mv "+OUTDIR+"pdo.vxreg.000005.png "+OUTDIR+"pdo."+vnm+"reg.ann.png")
         if (COMPUTE_MODES_MON.eq."True") then
-          system("mv "+OUTDIR+"nino34.vxreg.000006.png "+OUTDIR+"nino34."+vnm+"reg.mon.png")   
+          system("mv "+OUTDIR+"pdo.vxreg.000006.png "+OUTDIR+"pdo."+vnm+"reg.mon.png")   
         end if 
      end if
 
   else     
-     system("psplit "+OUTDIR+"nino34.vxreg.ps "+OUTDIR+"vx_sp")
+     system("psplit "+OUTDIR+"pdo.vxreg.ps "+OUTDIR+"vx_sp")
      if (vxreg_frame.eq.0) then
-        system("mv "+OUTDIR+"vx_sp0001.ps "+OUTDIR+"nino34."+vnm+"reg.djf.ps") 
-        system("mv "+OUTDIR+"vx_sp0002.ps "+OUTDIR+"nino34."+vnm+"reg.mam.ps") 
-        system("mv "+OUTDIR+"vx_sp0003.ps "+OUTDIR+"nino34."+vnm+"reg.jja.ps") 
-        system("mv "+OUTDIR+"vx_sp0004.ps "+OUTDIR+"nino34."+vnm+"reg.son.ps") 
-        system("mv "+OUTDIR+"vx_sp0005.ps "+OUTDIR+"nino34."+vnm+"reg.ann.ps")
+        system("mv "+OUTDIR+"vx_sp0001.ps "+OUTDIR+"pdo."+vnm+"reg.djf.ps") 
+        system("mv "+OUTDIR+"vx_sp0002.ps "+OUTDIR+"pdo."+vnm+"reg.mam.ps") 
+        system("mv "+OUTDIR+"vx_sp0003.ps "+OUTDIR+"pdo."+vnm+"reg.jja.ps") 
+        system("mv "+OUTDIR+"vx_sp0004.ps "+OUTDIR+"pdo."+vnm+"reg.son.ps") 
+        system("mv "+OUTDIR+"vx_sp0005.ps "+OUTDIR+"pdo."+vnm+"reg.ann.ps")
         if (COMPUTE_MODES_MON.eq."True") then
-           system("mv "+OUTDIR+"vx_sp0006.ps "+OUTDIR+"nino34."+vnm+"reg.mon.ps") 
+           system("mv "+OUTDIR+"vx_sp0006.ps "+OUTDIR+"pdo."+vnm+"reg.mon.ps") 
         end if
      end if
 
@@ -924,6 +949,6 @@ begin
   delete([/vnm,lmsk,nsim_reg,names_reg,paths_reg,syear_reg,syear_reg,eyear_reg,nyr_reg,vrfac/])
  end do 
     
- print("Finished: sst.nino34_regpatt.ncl")
+ print("Finished: sst.pdo_regpatt.ncl")
 
 end  

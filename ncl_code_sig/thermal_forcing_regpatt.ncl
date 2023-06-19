@@ -10,7 +10,7 @@ load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/shea_util.ncl"
 load "$CVDP_SCRIPTS/functions.ncl"
 
 begin
-  print("Starting: psl.nam_regpatt.ncl")
+  print("Starting: thermal_forcing_regpatt.ncl")
   
   SCALE_TIMESERIES = getenv("SCALE_TIMESERIES")  
   OUTPUT_DATA      = getenv("OUTPUT_DATA")  
@@ -914,6 +914,6 @@ begin
   delete([/vnm,lmsk,nsim_reg,names_reg,paths_reg,syear_reg,syear_reg,eyear_reg,nyr_reg,vrfac/])
  end do 
     
- print("Finished: psl.nam_regpatt.ncl")
+ print("Finished: thermal_forcing_regpatt.ncl")
 
 end  

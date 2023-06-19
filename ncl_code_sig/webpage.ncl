@@ -634,7 +634,7 @@ begin
 ;----------------------------------------------------------------------------
 ;--   Create calculation description webpage
 ;----------------------------------------------------------------------------
-  txt = new(1500,"string")
+  txt = new(5000,"string")
   quote = str_get_dq()
   
   txt(0) = "<html><head><title>Climate Variability Diagnostics Package</title>"
@@ -772,7 +772,7 @@ begin
 ;--   Create metrics webpage
 ;----------------------------------------------------------------------------
   if (isfilepresent2(OUTDIR+"metrics.txt")) then
-     txt = new(1500,"string")  
+     txt = new(5000,"string")  
      quote = str_get_dq()
   
      txt(0) = "<html><head><title>Climate Variability Diagnostics Package</title>"
@@ -814,7 +814,7 @@ begin
      delete([/txt,txt2,tt/])
   end if 
   if (isfilepresent2(OUTDIR+"metrics.table_1.gif")) then  ; create sorted metrics table pages
-     txt = new(1500,"string")  
+     txt = new(5000,"string")  
      quote = str_get_dq()
   
      txt(0) = "<html><head><title>Climate Variability Diagnostics Package</title>"

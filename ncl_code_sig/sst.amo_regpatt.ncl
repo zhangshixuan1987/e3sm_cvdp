@@ -1,4 +1,4 @@
-; Calculates nino34 indices as well as nino34 index 
+; Calculates amo indices as well as amo index 
 ; timeseries onto selected quantities (see reg_var)
 ;
 ; Variables used: sst and selected quantities 
@@ -10,7 +10,7 @@ load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/shea_util.ncl"
 load "$CVDP_SCRIPTS/functions.ncl"
 
 begin
-  print("Starting: sst.nino34_regpatt.ncl")
+  print("Starting: sst.amo_regpatt.ncl")
   
   SCALE_TIMESERIES = getenv("SCALE_TIMESERIES")  
   OUTPUT_DATA      = getenv("OUTPUT_DATA")  
@@ -52,11 +52,11 @@ begin
 
  do ss = 0, nsvars-1,1
   ;---------Regressions coding-------------------------------------------------
-  if(regvars(ss).eq."sst") then 
+  if(regvars(ss).eq."sst") then
     vnm   = "ts"
-  else 
+  else
     vnm   = regvars(ss)
-  end if 
+  end if
 
   lmsk  = landmsk(ss)
   vrfac = varfacs(ss)
@@ -84,24 +84,36 @@ begin
      wks_type@wkHeight = 1500*PNG_SCALE
   end if
   
-  wks_nino34  = gsn_open_wks(wks_type,getenv("OUTDIR")+"nino34.vxreg")
+  wks_amo  = gsn_open_wks(wks_type,getenv("OUTDIR")+"amo.vxreg")
   
   if (COLORMAP.eq.0) then
-     gsn_define_colormap(wks_nino34,"MPL_RdBu")  
-     gsn_reverse_colormap(wks_nino34)           ; Reverse the color map.
+     gsn_define_colormap(wks_amo,"MPL_RdBu")  
+     gsn_reverse_colormap(wks_amo)           ; Reverse the color map.
   end if
   if (COLORMAP.eq.1) then
-     gsn_define_colormap(wks_nino34,"NCV_jaisnd")  
+     gsn_define_colormap(wks_amo,"NCV_jaisnd")  
   end if
   
-  reg_nino34_djf = new(nsim,"graphic")  
-  reg_nino34_mam = new(nsim,"graphic")  
-  reg_nino34_jja = new(nsim,"graphic")  
-  reg_nino34_son = new(nsim,"graphic")  
-  reg_nino34_ann = new(nsim,"graphic")  
-  reg_nino34_mon = new(nsim,"graphic")  
+  reg_amo_djf = new(nsim,"graphic")  
+  reg_amo_mam = new(nsim,"graphic")  
+  reg_amo_jja = new(nsim,"graphic")  
+  reg_amo_son = new(nsim,"graphic")  
+  reg_amo_ann = new(nsim,"graphic")  
+  reg_amo_mon = new(nsim,"graphic")  
   
   vxreg_frame    = 1 
+
+;----------amo definition----------------------------------------------------------------------
+  llats  = 0. ; nino3.4
+  llatn  = 60.
+  llonw  = -80.
+  llone  =   0.
+
+  ;use a regional mean SSTA to make sign consistent for all simulation if possible
+  llats1 = 15.0
+  llatn1 = 30.0
+  llonw1 = -60.0
+  llone1 = -20.0
 
   do ee = 0,nsim-1
 
@@ -133,22 +145,35 @@ begin
       delete([/lsm,basemap/])
       delete(d)
     
+      sstT = lonFlip(arr)   ; orient longitudes from -180:180 (set to 0:360 in data_read_in function)
       if (OPT_CLIMO.eq."Full") then
-        arr = rmMonAnnCycTLL(arr)
+        sstT = rmMonAnnCycTLL(sstT)
       else
-        check_custom_climo(names(ee),syear_reg(ee),eyear_reg(ee),CLIMO_SYEAR,CLIMO_EYEAR)
-        temp_arr = arr
+        check_custom_climo(names(ee),syear(ee),eyear(ee),CLIMO_SYEAR,CLIMO_EYEAR)
+        temp_arr = sstT
         delete(temp_arr&time)
-        temp_arr&time = cd_calendar(arr&time,-1)
+        temp_arr&time = cd_calendar(sstT&time,-1)
         if (CLIMO_SYEAR.lt.0) then
-           climo = clmMonTLL(temp_arr({(eyear_reg(ee)+CLIMO_SYEAR)*100+1:(eyear_reg(ee)+CLIMO_EYEAR)*100+12},:,:))       
+           climo = clmMonTLL(temp_arr({(eyear(ee)+CLIMO_SYEAR)*100+1:(eyear(ee)+CLIMO_EYEAR)*100+12},:,:))
         else
-           climo = clmMonTLL(temp_arr({CLIMO_SYEAR*100+1:CLIMO_EYEAR*100+12},:,:))                 
-        end if   
+           climo = clmMonTLL(temp_arr({CLIMO_SYEAR*100+1:CLIMO_EYEAR*100+12},:,:))
+        end if
         delete(temp_arr)
-        arr   = calcMonAnomTLL(arr,climo) 
+        sstT   = calcMonAnomTLL(sstT,climo)
         delete(climo)
       end if
+      coswgt      = cos(rad*sstT&lat)
+      coswgt!0    = "lat"
+      coswgt&lat  = sstT&lat
+      natl_aa     = wgt_areaave(sstT(:,{llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0)
+      global_aa   = wgt_areaave(sstT(:,{-60:60},:),coswgt({-60.:60.}),1.0,0)
+      sstT        = (/ sstT - conform(sstT, global_aa, 0) /)  ; remove global mean from each timestep of SST anomalies prior to regressions
+      delete(arr) 
+      arr         = runave_n_Wrap(sstT,121,1,0)
+      finarr      = runave(natl_aa - global_aa,121,1)
+      finarr!0    = "time"
+      finarr&time = sstT&time
+      delete([/sstT,coswgt/])
 
       arrT =  runave_n_Wrap(arr,3,0,0)               ; form DJF averages
       arrT(0,:,:) = (/ dim_avg_n(arr(:1,:,:),0) /)   
@@ -230,7 +255,13 @@ begin
           delete(climo)
        end if
 ;      vreg = (/ dtrend_msg_n(ispan(0,dimsizes(vreg&time)-1,1),vreg,False,False,0) /)  
-    
+
+      ;apply filtering 
+       vreg0 = runave_n_Wrap(vreg,121,0,0)
+       delete(vreg)
+       vreg  = vreg0 
+       delete(vreg0)
+
        vregT =  runave_n_Wrap(vreg,3,0,0)               ; form DJF averages
        vregT(0,:,:) = (/ dim_avg_n(vreg(:1,:,:),0) /)   
        vreg_djf = vregT(0::12,:,:)
@@ -244,257 +275,275 @@ begin
        delete(vregV)
      end if 
    
-;----------nino34 definition----------------------------------------------------------------------
-     coswgt      = cos(rad*arr_djf&lat)
-     coswgt!0    = "lat"
-     coswgt&lat  = arr_djf&lat
-     llats       = -5. ; nino3.4
-     llatn       = 5.
-     llonw       = 190.
-     llone       = 240.
-
-     ;use a regional mean SSTA to make sign consistent for all simulation if possible
-     llats1 = -5.0
-     llatn1 =  5.0
-     llonw1 =  210.0
-     llone1 =  270.0
-
-;----------nino34 calculations----------------------------------------------------------------------
-     pcts = wgt_areaave_Wrap(arr_djf(:,{llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0) 
-     nino34_pc_djf = dim_standardize(pcts,0)
-     nino34_djf    = arr_djf(0,:,:)
-     nino34_djf    = (/ regCoef(nino34_pc_djf,arr_djf(lat|:,lon|:,time|:)) /)
-     
+;----------amo calculations----------------------------------------------------------------------
+     coswgt       = cos(rad*arr&lat)
+     coswgt!0     = "lat"
+     coswgt&lat   = arr&lat
+     global_mm    = runave_n_Wrap(global_aa,3,0,0) ; form DJF averages
+     global_mm(0) = (/dim_avg_n(global_mm(:1),0) /)
+     global_djf   = global_mm(0::12)
+     pcts         = runave_n_Wrap(finarr,3,0,0) ; form DJF averages
+     pcts(0)      = (/dim_avg_n(finarr(:1),0) /)
+     pcts1        = pcts(0::12)
+     amo_pc_djf   = dim_standardize(pcts1,0)
+     arr_djf      = (/ arr_djf - conform(arr_djf, global_djf, 0) /)  ; remove global mean from each timestep of SST anomalies prior to regressions
+     amo_djf      = arr_djf(0,:,:)
+     amo_djf      = (/ regCoef(amo_pc_djf,arr_djf(lat|:,lon|:,time|:)) /)
+     do gg = 0,2
+        amo_djf = (/ smth9(amo_djf,0.5,0.25,True) /)
+     end do
+     delete([/pcts,pcts1,global_mm,global_djf/])
      if (vxreg_plot_flag.eq.0) then
-        rc        = regCoef_n(nino34_pc_djf, vreg_djf, 0, 0) ; rc(nlat,mlon)
+        rc        = regCoef_n(amo_pc_djf, vreg_djf, 0, 0) ; rc(nlat,mlon)
         tval      = onedtond(rc@tval , dimsizes(rc))
         df        = onedtond(rc@nptxy, dimsizes(rc)) - 2
         b         = tval    
         b         = 0.5
-        nino34_vreg_djf  = vreg_djf(0,:,:)
-        nino34_prob_djf  = vreg_djf(0,:,:)
-        nino34_vreg_djf  = (/ rc /) 
-        nino34_prob_djf  = (/(1-betainc(df/(df+tval^2),df/2.0,b))*100.0/)
-        nino34_prob_djf  = where(ismissing(nino34_vreg_djf),nino34_vreg_djf@_FillValue,nino34_prob_djf)
-        nino34_vreg_djf@units = vreg_djf@units +" (per std dev)"
+        amo_vreg_djf  = vreg_djf(0,:,:)
+        amo_prob_djf  = vreg_djf(0,:,:)
+        amo_vreg_djf  = (/ rc /) 
+        amo_prob_djf  = (/(1-betainc(df/(df+tval^2),df/2.0,b))*100.0/)
+        amo_prob_djf  = where(ismissing(amo_vreg_djf),amo_vreg_djf@_FillValue,amo_prob_djf)
+        amo_vreg_djf@units = vreg_djf@units +" (per std dev)"
         delete([/rc,tval,df,b,vreg_djf/]) 
      end if     
-
-     if (.not.all(ismissing(nino34_djf({llats1:llatn1},{llonw1:llone1})))) then
-       if (avg(nino34_djf({llats1:llatn1},{llonw1:llone1})).le.0) then
-           nino34_djf = nino34_djf*-1.
-           nino34_pc_djf = nino34_pc_djf*-1.
+     if (.not.all(ismissing(amo_djf({llats1:llatn1},{llonw1:llone1})))) then
+       if (avg(amo_djf({llats1:llatn1},{llonw1:llone1})).le.0) then
+           amo_djf = amo_djf*-1.
+           amo_pc_djf = amo_pc_djf*-1.
            if (vxreg_plot_flag.eq.0) then
-              nino34_vreg_djf = nino34_vreg_djf*-1.
+              amo_vreg_djf = amo_vreg_djf*-1.
            end if 
        end if 
      end if
-     
      rc    = arr_djf(0,:,:) 
-     rc    = (/escorc_n(nino34_pc_djf,arr_djf,0,0)/)
+     rc    = (/escorc_n(amo_pc_djf,arr_djf,0,0)/)
      rc    = rc*rc*100.0
      pcvar = wgt_areaave_Wrap(rc({llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0)
-     nino34_djf@pcvar = tofloat(sprintf("%4.1f", pcvar))+"%"
+     amo_djf@pcvar = tofloat(sprintf("%4.1f", pcvar))+"%"
      delete([/pcvar,rc/])    
-     nino34_pc_djf!0 = "TIME"
-     nino34_pc_djf&TIME = ispan(syear_reg(ee),eyear_reg(ee),1)
-     nino34_pc_djf&TIME@units = "YYYY"
-     nino34_pc_djf&TIME@long_name = "time"     
-     delete([/pcts/])
+     amo_pc_djf!0 = "TIME"
+     amo_pc_djf&TIME = ispan(syear_reg(ee),eyear_reg(ee),1)
+     amo_pc_djf&TIME@units = "YYYY"
+     amo_pc_djf&TIME@long_name = "time"     
  
-     pcts = wgt_areaave_Wrap(arr_mam(:,{llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0)
-     nino34_pc_mam = dim_standardize(pcts,0)
-     nino34_mam = arr_mam(0,:,:)
-     nino34_mam = (/ regCoef(nino34_pc_mam,arr_mam(lat|:,lon|:,time|:)) /)
+     global_mm    = runave_n_Wrap(global_aa,3,0,0) ; form DJF averages
+     global_mam   = global_mm(3::12)
+     pcts         = runave_n_Wrap(finarr,3,0,0)               ; form DJF averages
+     pcts1        = pcts(3::12)
+     amo_pc_mam   = dim_standardize(pcts1,0)
+     arr_mam      = (/ arr_mam - conform(arr_mam, global_mam, 0) /)  ; remove global mean from each timestep of SST anomalies prior to regressions
+     amo_mam      = arr_mam(0,:,:)
+     amo_mam      = (/ regCoef(amo_pc_mam,arr_mam(lat|:,lon|:,time|:)) /)
+     do gg = 0,2
+        amo_mam = (/ smth9(amo_mam,0.5,0.25,True) /)
+     end do
+     delete([/pcts,pcts1,global_mm,global_mam/])
      if (vxreg_plot_flag.eq.0) then
-        rc        = regCoef_n(nino34_pc_mam, vreg_mam, 0, 0) ; rc(nlat,mlon)
+        rc        = regCoef_n(amo_pc_mam, vreg_mam, 0, 0) ; rc(nlat,mlon)
         tval      = onedtond(rc@tval , dimsizes(rc))
         df        = onedtond(rc@nptxy, dimsizes(rc)) - 2
         b         = tval
         b         = 0.5
-        nino34_vreg_mam  = vreg_mam(0,:,:)
-        nino34_prob_mam  = vreg_mam(0,:,:)
-        nino34_vreg_mam  = (/ rc /)
-        nino34_prob_mam  = (/(1-betainc(df/(df+tval^2),df/2.0,b))*100.0/) 
-        nino34_prob_mam  = where(ismissing(nino34_vreg_mam),nino34_vreg_mam@_FillValue,nino34_prob_mam)
-        nino34_vreg_mam@units = vreg_mam@units +"(per std dev)"
+        amo_vreg_mam  = vreg_mam(0,:,:)
+        amo_prob_mam  = vreg_mam(0,:,:)
+        amo_vreg_mam  = (/ rc /)
+        amo_prob_mam  = (/(1-betainc(df/(df+tval^2),df/2.0,b))*100.0/) 
+        amo_prob_mam  = where(ismissing(amo_vreg_mam),amo_vreg_mam@_FillValue,amo_prob_mam)
+        amo_vreg_mam@units = vreg_mam@units +"(per std dev)"
         delete([/rc,tval,df,b,vreg_mam/])
      end if
-
-     if (.not.all(ismissing(nino34_mam({llats1:llatn1},{llonw1:llone1})))) then
-       if (avg(nino34_mam({llats1:llatn1},{llonw1:llone1})).le.0) then
-           nino34_mam = nino34_mam*-1.
-           nino34_pc_mam = nino34_pc_mam*-1.
+     if (.not.all(ismissing(amo_mam({llats1:llatn1},{llonw1:llone1})))) then
+       if (avg(amo_mam({llats1:llatn1},{llonw1:llone1})).le.0) then
+           amo_mam = amo_mam*-1.
+           amo_pc_mam = amo_pc_mam*-1.
            if (vxreg_plot_flag.eq.0) then
-              nino34_vreg_mam = nino34_vreg_mam*-1.
+              amo_vreg_mam = amo_vreg_mam*-1.
            end if 
        end if 
      end if
-
      rc    = arr_djf(0,:,:)
-     rc    = (/escorc_n(nino34_pc_mam,arr_mam,0,0)/)
+     rc    = (/escorc_n(amo_pc_mam,arr_mam,0,0)/)
      rc    = rc*rc*100.0
      pcvar = wgt_areaave_Wrap(rc({llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0)
-     nino34_mam@pcvar = tofloat(sprintf("%4.1f", pcvar))+"%"
+     amo_mam@pcvar = tofloat(sprintf("%4.1f", pcvar))+"%"
      delete([/pcvar,rc/])
-     copy_VarCoords(nino34_pc_djf,nino34_pc_mam) 
-     delete([/pcts/])
-     
-     pcts = wgt_areaave_Wrap(arr_jja(:,{llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0)
-     nino34_pc_jja = dim_standardize(pcts,0)
-     nino34_jja = arr_jja(0,:,:)
-     nino34_jja = (/ regCoef(nino34_pc_jja,arr_jja(lat|:,lon|:,time|:)) /)
+     copy_VarCoords(amo_pc_djf,amo_pc_mam) 
+
+     global_mm    = runave_n_Wrap(global_aa,3,0,0) ; form DJF averages
+     global_jja   = global_mm(6::12)     
+     pcts         = runave_n_Wrap(finarr,3,0,0)               ; form DJF averages
+     pcts1        = pcts(6::12)
+     amo_pc_jja   = dim_standardize(pcts1,0)
+     arr_jja      = (/ arr_jja - conform(arr_jja, global_jja, 0) /)  ; remove global mean from each timestep of SST anomalies prior to regressions
+     amo_jja      = arr_jja(0,:,:)
+     amo_jja      = (/ regCoef(amo_pc_jja,arr_jja(lat|:,lon|:,time|:)) /)
+     do gg = 0,2
+        amo_jja = (/ smth9(amo_jja,0.5,0.25,True) /)
+     end do
+     delete([/pcts,pcts1,global_mm,global_jja/])
      if (vxreg_plot_flag.eq.0) then
-        rc        = regCoef_n(nino34_pc_jja, vreg_jja, 0, 0) ; rc(nlat,mlon)
+        rc        = regCoef_n(amo_pc_jja, vreg_jja, 0, 0) ; rc(nlat,mlon)
         tval      = onedtond(rc@tval , dimsizes(rc))
         df        = onedtond(rc@nptxy, dimsizes(rc)) - 2
         b         = tval
         b         = 0.5
-        nino34_vreg_jja  = vreg_jja(0,:,:)
-        nino34_prob_jja  = vreg_jja(0,:,:)
-        nino34_vreg_jja  = (/ rc /)
-        nino34_prob_jja  = (/(1-betainc(df/(df+tval^2),df/2.0,b))*100.0/) 
-        nino34_prob_jja  = where(ismissing(nino34_vreg_jja),nino34_vreg_jja@_FillValue,nino34_prob_jja)
-        nino34_vreg_jja@units = vreg_jja@units +"(per std dev)"
+        amo_vreg_jja  = vreg_jja(0,:,:)
+        amo_prob_jja  = vreg_jja(0,:,:)
+        amo_vreg_jja  = (/ rc /)
+        amo_prob_jja  = (/(1-betainc(df/(df+tval^2),df/2.0,b))*100.0/) 
+        amo_prob_jja  = where(ismissing(amo_vreg_jja),amo_vreg_jja@_FillValue,amo_prob_jja)
+        amo_vreg_jja@units = vreg_jja@units +"(per std dev)"
         delete([/rc,tval,df,b,vreg_jja/])
      end if
-
-     if (.not.all(ismissing(nino34_jja({llats1:llatn1},{llonw1:llone1})))) then
-       if (avg(nino34_jja({llats1:llatn1},{llonw1:llone1})).le.0) then
-           nino34_jja = nino34_jja*-1.
-           nino34_pc_jja = nino34_pc_jja*-1.
+     if (.not.all(ismissing(amo_jja({llats1:llatn1},{llonw1:llone1})))) then
+       if (avg(amo_jja({llats1:llatn1},{llonw1:llone1})).le.0) then
+           amo_jja = amo_jja*-1.
+           amo_pc_jja = amo_pc_jja*-1.
            if (vxreg_plot_flag.eq.0) then
-              nino34_vreg_jja = nino34_vreg_jja*-1.
+              amo_vreg_jja = amo_vreg_jja*-1.
            end if 
        end if 
      end if
-
      rc    = arr_jja(0,:,:)
-     rc    = (/escorc_n(nino34_pc_jja,arr_jja,0,0)/)
+     rc    = (/escorc_n(amo_pc_jja,arr_jja,0,0)/)
      rc    = rc*rc*100.0
      pcvar = wgt_areaave_Wrap(rc({llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0)
-     nino34_jja@pcvar = tofloat(sprintf("%4.1f", pcvar))+"%"
+     amo_jja@pcvar = tofloat(sprintf("%4.1f", pcvar))+"%"
      delete([/pcvar,rc/])
-     copy_VarCoords(nino34_pc_djf,nino34_pc_jja) 
-     delete([/pcts/])
+     copy_VarCoords(amo_pc_djf,amo_pc_jja) 
  
-     pcts = wgt_areaave_Wrap(arr_son(:,{llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0)
-     nino34_pc_son = dim_standardize(pcts,0)
-     nino34_son = arr_son(0,:,:)
-     nino34_son = (/ regCoef(nino34_pc_son,arr_son(lat|:,lon|:,time|:)) /)
+     global_mm  = runave_n_Wrap(global_aa,3,0,0) ; form DJF averages
+     global_son = global_mm(9::12)
+     pcts       = runave_n_Wrap(finarr,3,0,0)               ; form DJF averages
+     pcts1      = pcts(9::12)
+     amo_pc_son = dim_standardize(pcts1,0)
+     arr_son    = (/ arr_son - conform(arr_son, global_son, 0) /)  ; remove global mean from each timestep of SST anomalies prior to regressions
+     amo_son    = arr_son(0,:,:)
+     amo_son    = (/ regCoef(amo_pc_son,arr_son(lat|:,lon|:,time|:)) /)
+     do gg = 0,2
+        amo_son = (/ smth9(amo_son,0.5,0.25,True) /)
+     end do
+     delete([/pcts,pcts1,global_mm,global_son/])
      if (vxreg_plot_flag.eq.0) then
-        rc        = regCoef_n(nino34_pc_son, vreg_son, 0, 0) ; rc(nlat,mlon)
+        rc        = regCoef_n(amo_pc_son, vreg_son, 0, 0) ; rc(nlat,mlon)
         tval      = onedtond(rc@tval , dimsizes(rc))
         df        = onedtond(rc@nptxy, dimsizes(rc)) - 2
         b         = tval
         b         = 0.5
-        nino34_vreg_son  = vreg_son(0,:,:)
-        nino34_prob_son  = vreg_son(0,:,:)
-        nino34_vreg_son  = (/ rc /)
-        nino34_prob_son  = (/(1-betainc(df/(df+tval^2),df/2.0,b))*100.0/) 
-        nino34_prob_son  = where(ismissing(nino34_vreg_son),nino34_vreg_son@_FillValue,nino34_prob_son)
-        nino34_vreg_son@units = vreg_son@units +"(per std dev)"
+        amo_vreg_son  = vreg_son(0,:,:)
+        amo_prob_son  = vreg_son(0,:,:)
+        amo_vreg_son  = (/ rc /)
+        amo_prob_son  = (/(1-betainc(df/(df+tval^2),df/2.0,b))*100.0/) 
+        amo_prob_son  = where(ismissing(amo_vreg_son),amo_vreg_son@_FillValue,amo_prob_son)
+        amo_vreg_son@units = vreg_son@units +"(per std dev)"
         delete([/rc,tval,df,b,vreg_son/])
      end if
-
-     if (.not.all(ismissing(nino34_son({llats1:llatn1},{llonw1:llone1})))) then
-       if (avg(nino34_son({llats1:llatn1},{llonw1:llone1})).le.0) then
-           nino34_son = nino34_son*-1.
-           nino34_pc_son = nino34_pc_son*-1.
+     if (.not.all(ismissing(amo_son({llats1:llatn1},{llonw1:llone1})))) then
+       if (avg(amo_son({llats1:llatn1},{llonw1:llone1})).le.0) then
+           amo_son = amo_son*-1.
+           amo_pc_son = amo_pc_son*-1.
            if (vxreg_plot_flag.eq.0) then
-              nino34_vreg_son = nino34_vreg_son*-1.
+              amo_vreg_son = amo_vreg_son*-1.
            end if 
        end if 
      end if
-
      rc    = arr_son(0,:,:)
-     rc    = (/escorc_n(nino34_pc_son,arr_son,0,0)/)
+     rc    = (/escorc_n(amo_pc_son,arr_son,0,0)/)
      rc    = rc*rc*100.0
      pcvar = wgt_areaave_Wrap(rc({llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0)
-     nino34_son@pcvar = tofloat(sprintf("%4.1f", pcvar))+"%"
+     amo_son@pcvar = tofloat(sprintf("%4.1f", pcvar))+"%"
      delete([/pcvar,rc/])
-     copy_VarCoords(nino34_pc_djf,nino34_pc_son) 
-     delete([/pcts/])
+     copy_VarCoords(amo_pc_djf,amo_pc_son) 
 
-     pcts = wgt_areaave_Wrap(arr_ann(:,{llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0)
-     nino34_pc_ann = dim_standardize(pcts,0)
-     nino34_ann = arr_ann(0,:,:)
-     nino34_ann = (/ regCoef(nino34_pc_ann,arr_ann(lat|:,lon|:,time|:)) /)
+     global_mm  = runave_n_Wrap(global_aa,12,0,0) ; form DJF averages
+     global_ann = global_mm(5::12)
+     pcts       = runave_n_Wrap(finarr,12,0,0)               ; form DJF averages
+     pcts1      = pcts(5::12)
+     amo_pc_ann = dim_standardize(pcts1,0)
+     arr_ann    = (/ arr_ann - conform(arr_ann, global_ann, 0) /)  ; remove global mean from each timestep of SST anomalies prior to regressions
+     amo_ann    = arr_ann(0,:,:)
+     amo_ann    = (/ regCoef(amo_pc_ann,arr_ann(lat|:,lon|:,time|:)) /)
+     do gg = 0,2
+        amo_ann = (/ smth9(amo_ann,0.5,0.25,True) /)
+     end do
+     delete([/pcts,pcts1,global_mm,global_ann/])
      if (vxreg_plot_flag.eq.0) then
-        rc        = regCoef_n(nino34_pc_ann, vreg_ann, 0, 0) ; rc(nlat,mlon)
+        rc        = regCoef_n(amo_pc_ann, vreg_ann, 0, 0) ; rc(nlat,mlon)
         tval      = onedtond(rc@tval , dimsizes(rc))
         df        = onedtond(rc@nptxy, dimsizes(rc)) - 2
         b         = tval
         b         = 0.5
-        nino34_vreg_ann  = vreg_ann(0,:,:)
-        nino34_prob_ann  = vreg_ann(0,:,:)
-        nino34_vreg_ann  = (/ rc /)
-        nino34_prob_ann  = (/(1-betainc(df/(df+tval^2),df/2.0,b))*100.0/) 
-        nino34_prob_ann  = where(ismissing(nino34_vreg_ann),nino34_vreg_ann@_FillValue,nino34_prob_ann)
-        nino34_vreg_ann@units = vreg_ann@units +"(per std dev)"
+        amo_vreg_ann  = vreg_ann(0,:,:)
+        amo_prob_ann  = vreg_ann(0,:,:)
+        amo_vreg_ann  = (/ rc /)
+        amo_prob_ann  = (/(1-betainc(df/(df+tval^2),df/2.0,b))*100.0/) 
+        amo_prob_ann  = where(ismissing(amo_vreg_ann),amo_vreg_ann@_FillValue,amo_prob_ann)
+        amo_vreg_ann@units = vreg_ann@units +"(per std dev)"
         delete([/rc,tval,df,b,vreg_ann/])
      end if
-
-     if (.not.all(ismissing(nino34_ann({llats1:llatn1},{llonw1:llone1})))) then
-       if (avg(nino34_ann({llats1:llatn1},{llonw1:llone1})).le.0) then
-           nino34_ann = nino34_ann*-1.
-           nino34_pc_ann = nino34_pc_ann*-1.
+     if (.not.all(ismissing(amo_ann({llats1:llatn1},{llonw1:llone1})))) then
+       if (avg(amo_ann({llats1:llatn1},{llonw1:llone1})).le.0) then
+           amo_ann = amo_ann*-1.
+           amo_pc_ann = amo_pc_ann*-1.
            if (vxreg_plot_flag.eq.0) then
-              nino34_vreg_ann = nino34_vreg_ann*-1.
+              amo_vreg_ann = amo_vreg_ann*-1.
            end if 
        end if 
      end if
-
      rc    = arr_ann(0,:,:)
-     rc    = (/escorc_n(nino34_pc_ann,arr_ann,0,0)/)
+     rc    = (/escorc_n(amo_pc_ann,arr_ann,0,0)/)
      rc    = rc*rc*100.0
      pcvar = wgt_areaave_Wrap(rc({llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0)
-     nino34_ann@pcvar = tofloat(sprintf("%4.1f", pcvar))+"%"
+     amo_ann@pcvar = tofloat(sprintf("%4.1f", pcvar))+"%"
      delete([/pcvar,rc/])
-     copy_VarCoords(nino34_pc_djf,nino34_pc_ann) 
-     delete([/pcts/])
+     copy_VarCoords(amo_pc_djf,amo_pc_ann) 
      
-     if (COMPUTE_MODES_MON.eq."True") then     
-        pcts = wgt_areaave_Wrap(arr(:,{llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0)
-        nino34_pc_mon = dim_standardize(pcts,0)
-        nino34_mon = arr(0,:,:)
-        nino34_mon = (/ regCoef(nino34_pc_mon,arr(lat|:,lon|:,time|:)) /)
+     if (COMPUTE_MODES_MON.eq."True") then 
+        pcts       = natl_aa - global_aa 
+        pcts1      = runave(pcts,121,0)       
+        amo_pc_mon = dim_standardize(pcts1,0)
+        arr        = (/ arr - conform(arr, global_aa, 0) /)  ; remove global mean from each timestep of SST anomalies prior to regressions
+        amo_mon    = arr(0,:,:)
+        amo_mon    = (/ regCoef(amo_pc_mon,arr(lat|:,lon|:,time|:)) /)
+        do gg = 0,2
+          amo_mon = (/ smth9(amo_mon,0.5,0.25,True) /)
+        end do
+        delete([/natl_aa,global_aa,pcts,pcts1/])
         if (vxreg_plot_flag.eq.0) then
-           rc           = regCoef_n(nino34_pc_mon, vreg, 0, 0) ; rc(nlat,mlon)
+           rc           = regCoef_n(amo_pc_mon, vreg, 0, 0) ; rc(nlat,mlon)
            tval         = onedtond(rc@tval , dimsizes(rc))
            df           = onedtond(rc@nptxy, dimsizes(rc)) - 2
            b            = tval
            b            = 0.5
-           nino34_vreg_mon  = vreg(0,:,:)
-           nino34_prob_mon  = vreg(0,:,:)
-           nino34_vreg_mon  = (/ rc /)
-           nino34_prob_mon  = (/(1-betainc(df/(df+tval^2),df/2.0,b))*100.0/) 
-           nino34_prob_mon  = where(ismissing(nino34_vreg_mon),nino34_vreg_mon@_FillValue,nino34_prob_mon)
-           nino34_vreg_mon@units = vreg@units +"(per std dev)"
+           amo_vreg_mon  = vreg(0,:,:)
+           amo_prob_mon  = vreg(0,:,:)
+           amo_vreg_mon  = (/ rc /)
+           amo_prob_mon  = (/(1-betainc(df/(df+tval^2),df/2.0,b))*100.0/) 
+           amo_prob_mon  = where(ismissing(amo_vreg_mon),amo_vreg_mon@_FillValue,amo_prob_mon)
+           amo_vreg_mon@units = vreg@units +"(per std dev)"
            delete([/rc,tval,df,b,vreg/])
         end if
-
-        if (.not.all(ismissing(nino34_mon({llats1:llatn1},{llonw1:llone1})))) then
-          if (avg(nino34_mon({llats1:llatn1},{llonw1:llone1})).le.0) then
-              nino34_mon = nino34_mon*-1.
-              nino34_pc_mon = nino34_pc_mon*-1.
+        if (.not.all(ismissing(amo_mon({llats1:llatn1},{llonw1:llone1})))) then
+          if (avg(amo_mon({llats1:llatn1},{llonw1:llone1})).le.0) then
+              amo_mon = amo_mon*-1.
+              amo_pc_mon = amo_pc_mon*-1.
               if (vxreg_plot_flag.eq.0) then
-                 nino34_vreg_mon = nino34_vreg_mon*-1.
+                 amo_vreg_mon = amo_vreg_mon*-1.
               end if
           end if
         end if
-
         rc    = arr(0,:,:)
-        rc    = (/escorc_n(nino34_pc_mon,arr,0,0)/)
+        rc    = (/escorc_n(amo_pc_mon,arr,0,0)/)
         rc    = rc*rc*100.0
         pcvar = wgt_areaave_Wrap(rc({llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0)
-        nino34_mon@pcvar = tofloat(sprintf("%4.1f", pcvar))+"%"
+        amo_mon@pcvar = tofloat(sprintf("%4.1f", pcvar))+"%"
         delete([/pcvar,rc/])
-        nino34_pc_mon!0 = "time"
-        nino34_pc_mon&time = arr&time   
-        delete([/pcts,arr/])
+        amo_pc_mon!0 = "time"
+        amo_pc_mon&time = arr&time   
+        delete([/arr/])
      end if
-     delete([/arr_djf,arr_mam,arr_jja,arr_son,arr_ann/])
+     delete([/arr_djf,arr_mam,arr_jja,arr_son,arr_ann,finarr/])
 
      if (isvar("arr")) then
         delete(arr)
@@ -514,7 +563,7 @@ begin
            do gg = 0,dimsizes(bc)-1
               modname = str_sub_str(modname,bc(gg),"_")
            end do
-           fn = getenv("OUTDIR")+modname+".cvdp_data.sst.nino34."+vnm+"."+syear_reg(ee)+"-"+eyear_reg(ee)+".nc"
+           fn = getenv("OUTDIR")+modname+".cvdp_data.sst.amo."+vnm+"."+syear_reg(ee)+"-"+eyear_reg(ee)+".nc"
            if (.not.isfilepresent2(fn)) then
               z = addfile(fn,"c")
               z@source = "NCAR Climate Analysis Section's Climate Variability Diagnostics Package v"+getenv("VERSION")
@@ -533,61 +582,61 @@ begin
               z = addfile(fn,"w")
            end if
 
-           z->nino34_timeseries_djf = set_varAtts(nino34_pc_djf,"ENSO (Nino34) normalized principal component timeseries (DJF)","1","")
-           z->nino34_timeseries_mam = set_varAtts(nino34_pc_mam,"ENSO (Nino34) normalized principal component timeseries (MAM)","1","")
-           z->nino34_timeseries_jja = set_varAtts(nino34_pc_jja,"ENSO (Nino34) normalized principal component timeseries (JJA)","1","")
-           z->nino34_timeseries_son = set_varAtts(nino34_pc_son,"ENSO (Nino34) normalized principal component timeseries (SON)","1","")
-           z->nino34_timeseries_ann = set_varAtts(nino34_pc_ann,"ENSO (Nino34) normalized principal component timeseries (annual)","1","")
-           vout = "nino34_"+vnm+"_regression_djf"
+           z->amo_timeseries_djf = set_varAtts(amo_pc_djf,"ENSO (Nino34) normalized principal component timeseries (DJF)","1","")
+           z->amo_timeseries_mam = set_varAtts(amo_pc_mam,"ENSO (Nino34) normalized principal component timeseries (MAM)","1","")
+           z->amo_timeseries_jja = set_varAtts(amo_pc_jja,"ENSO (Nino34) normalized principal component timeseries (JJA)","1","")
+           z->amo_timeseries_son = set_varAtts(amo_pc_son,"ENSO (Nino34) normalized principal component timeseries (SON)","1","")
+           z->amo_timeseries_ann = set_varAtts(amo_pc_ann,"ENSO (Nino34) normalized principal component timeseries (annual)","1","")
+           vout = "amo_"+vnm+"_regression_djf"
            vosr = vnm+" regression onto ENSO (Nino34) principal component timeseries (DJF)"
-           z->$vout$ = set_varAtts(nino34_vreg_djf,vosr,"","") 
-           vout = "nino34_"+vnm+"_regression_mam"
+           z->$vout$ = set_varAtts(amo_vreg_djf,vosr,"","") 
+           vout = "amo_"+vnm+"_regression_mam"
            vosr = vnm+" regression onto ENSO (Nino34) principal component timeseries (MAM)"
-           z->$vout$ = set_varAtts(nino34_vreg_mam,vosr,"","")  
-           vout = "nino34_"+vnm+"_regression_jja"
+           z->$vout$ = set_varAtts(amo_vreg_mam,vosr,"","")  
+           vout = "amo_"+vnm+"_regression_jja"
            vosr = vnm+" regression onto ENSO (Nino34) principal component timeseries (JJA)"
-           z->$vout$ = set_varAtts(nino34_vreg_jja,vosr,"","")  
-           vout = "nino34_"+vnm+"_regression_son"
+           z->$vout$ = set_varAtts(amo_vreg_jja,vosr,"","")  
+           vout = "amo_"+vnm+"_regression_son"
            vosr = vnm+" regression onto ENSO (Nino34) principal component timeseries (SON)"
-           z->$vout$ = set_varAtts(nino34_vreg_son,vosr,"","")  
-           vout = "nino34_"+vnm+"_regression_ann"
+           z->$vout$ = set_varAtts(amo_vreg_son,vosr,"","")  
+           vout = "amo_"+vnm+"_regression_ann"
            vosr = vnm+" regression onto ENSO (Nino34) principal component timeseries (annual)"
-           z->$vout$ = set_varAtts(nino34_vreg_ann,vosr,"","")  
+           z->$vout$ = set_varAtts(amo_vreg_ann,vosr,"","")  
 
-           vout = "nino34_"+vnm+"_regprob_djf"
+           vout = "amo_"+vnm+"_regprob_djf"
            vosr = vnm+" ENSO (Nino34) regression t-test probility(DJF)"
-           z->$vout$ = set_varAtts(nino34_prob_djf,vosr,"","")
-           vout = "nino34_"+vnm+"_regprob_mam"
+           z->$vout$ = set_varAtts(amo_prob_djf,vosr,"","")
+           vout = "amo_"+vnm+"_regprob_mam"
            vosr = vnm+" ENSO (Nino34) regression t-test probility(MAM)"
-           z->$vout$ = set_varAtts(nino34_prob_mam,vosr,"","")
-           vout = "nino34_"+vnm+"_regprob_jja"
+           z->$vout$ = set_varAtts(amo_prob_mam,vosr,"","")
+           vout = "amo_"+vnm+"_regprob_jja"
            vosr = vnm+" ENSO (Nino34) regression t-test probility(JJA)"
-           z->$vout$ = set_varAtts(nino34_prob_jja,vosr,"","")
-           vout = "nino34_"+vnm+"_regprob_son"
+           z->$vout$ = set_varAtts(amo_prob_jja,vosr,"","")
+           vout = "amo_"+vnm+"_regprob_son"
            vosr = vnm+" ENSO (Nino34) regression t-test probility(SON)"
-           z->$vout$ = set_varAtts(nino34_prob_son,vosr,"","")
-           vout = "nino34_"+vnm+"_regprob_ann"
+           z->$vout$ = set_varAtts(amo_prob_son,vosr,"","")
+           vout = "amo_"+vnm+"_regprob_ann"
            vosr = vnm+" ENSO (Nino34) regression t-test probility(annual)"
-           z->$vout$ = set_varAtts(nino34_prob_ann,vosr,"","")
+           z->$vout$ = set_varAtts(amo_prob_ann,vosr,"","")
 
            if (COMPUTE_MODES_MON.eq."True") then   
 
-              z->nino34_timeseries_mon  = set_varAtts(nino34_pc_mon,"ENSO (Nino34) principal component timeseries (monthly)","","")
+              z->amo_timeseries_mon  = set_varAtts(amo_pc_mon,"ENSO (Nino34) principal component timeseries (monthly)","","")
 
-              vout = "nino34_"+vnm+"_regression_mon"
+              vout = "amo_"+vnm+"_regression_mon"
               vosr = vnm+" regression onto ENSO (Nino34) principal component timeseries (monthly)"
-              z->$vout$ = set_varAtts(nino34_vreg_mon,vosr,"","")
+              z->$vout$ = set_varAtts(amo_vreg_mon,vosr,"","")
 
-              vout = "nino34_"+vnm+"_regprob_mon"
+              vout = "amo_"+vnm+"_regprob_mon"
               vosr = vnm+" ENSO (Nino34) regression t-test probility(monthly)"
-              z->$vout$ = set_varAtts(nino34_prob_mon,vosr,"","")
+              z->$vout$ = set_varAtts(amo_prob_mon,vosr,"","")
 
            end if
            delete(z)
            delete([/modname,fn/])
         end if
      end if     
-     delete([/nino34_pc_djf,nino34_pc_jja,nino34_pc_mam,nino34_pc_son,nino34_pc_ann,nino34_pc_mon/])
+     delete([/amo_pc_djf,amo_pc_jja,amo_pc_mam,amo_pc_son,amo_pc_ann,amo_pc_mon/])
 
 ;========================================================================
      res = True
@@ -656,76 +705,76 @@ begin
      opt@gsnShadeFillDotSizeF  = 0.002
     
      if (isfilepresent2("obs_ts").and.ee.eq.0) then    ; for pattern correlation table. Save entire lat/lon array
-        patcor_vreg_nino34_djf = new((/nsim,dimsizes(nino34_vreg_djf&lat),dimsizes(nino34_vreg_djf&lon)/),typeof(nino34_vreg_djf))
-        patcor_vreg_nino34_djf!1 = "lat"
-        patcor_vreg_nino34_djf&lat = nino34_vreg_djf&lat
-        patcor_vreg_nino34_djf!2 = "lon"
-        patcor_vreg_nino34_djf&lon = nino34_vreg_djf&lon
-        patcor_vreg_nino34_mam = patcor_vreg_nino34_djf
-        patcor_vreg_nino34_jja = patcor_vreg_nino34_djf
-        patcor_vreg_nino34_son = patcor_vreg_nino34_djf
-        patcor_vreg_nino34_ann = patcor_vreg_nino34_djf
-        patcor_vreg_nino34_djf(ee,:,:) = (/ nino34_vreg_djf /)
-        patcor_vreg_nino34_mam(ee,:,:) = (/ nino34_vreg_mam /)
-        patcor_vreg_nino34_jja(ee,:,:) = (/ nino34_vreg_jja /)
-        patcor_vreg_nino34_son(ee,:,:) = (/ nino34_vreg_son /)
-        patcor_vreg_nino34_ann(ee,:,:) = (/ nino34_vreg_ann /)
+        patcor_vreg_amo_djf = new((/nsim,dimsizes(amo_vreg_djf&lat),dimsizes(amo_vreg_djf&lon)/),typeof(amo_vreg_djf))
+        patcor_vreg_amo_djf!1 = "lat"
+        patcor_vreg_amo_djf&lat = amo_vreg_djf&lat
+        patcor_vreg_amo_djf!2 = "lon"
+        patcor_vreg_amo_djf&lon = amo_vreg_djf&lon
+        patcor_vreg_amo_mam = patcor_vreg_amo_djf
+        patcor_vreg_amo_jja = patcor_vreg_amo_djf
+        patcor_vreg_amo_son = patcor_vreg_amo_djf
+        patcor_vreg_amo_ann = patcor_vreg_amo_djf
+        patcor_vreg_amo_djf(ee,:,:) = (/ amo_vreg_djf /)
+        patcor_vreg_amo_mam(ee,:,:) = (/ amo_vreg_mam /)
+        patcor_vreg_amo_jja(ee,:,:) = (/ amo_vreg_jja /)
+        patcor_vreg_amo_son(ee,:,:) = (/ amo_vreg_son /)
+        patcor_vreg_amo_ann(ee,:,:) = (/ amo_vreg_ann /)
         if (COMPUTE_MODES_MON.eq."True") then
-          patcor_vreg_nino34_mon = patcor_vreg_nino34_djf
-          patcor_vreg_nino34_mon(ee,:,:) = (/ nino34_vreg_mon /)
+          patcor_vreg_amo_mon = patcor_vreg_amo_djf
+          patcor_vreg_amo_mon(ee,:,:) = (/ amo_vreg_mon /)
         end if 
      end if
-     if (isfilepresent2("obs_ts").and.ee.ge.1.and.isvar("patcor_vreg_nino34_djf")) then       
-        patcor_vreg_nino34_djf(ee,:,:) = (/ totype(linint2(nino34_vreg_djf&lon,nino34_vreg_djf&lat,nino34_vreg_djf,True,patcor_vreg_nino34_djf&lon,patcor_vreg_nino34_djf&lat,0),typeof(patcor_vreg_nino34_djf)) /)
-        patcor_vreg_nino34_mam(ee,:,:) = (/ totype(linint2(nino34_vreg_mam&lon,nino34_vreg_mam&lat,nino34_vreg_mam,True,patcor_vreg_nino34_mam&lon,patcor_vreg_nino34_mam&lat,0),typeof(patcor_vreg_nino34_mam)) /)
-        patcor_vreg_nino34_jja(ee,:,:) = (/ totype(linint2(nino34_vreg_jja&lon,nino34_vreg_jja&lat,nino34_vreg_jja,True,patcor_vreg_nino34_jja&lon,patcor_vreg_nino34_jja&lat,0),typeof(patcor_vreg_nino34_jja)) /)
-        patcor_vreg_nino34_son(ee,:,:) = (/ totype(linint2(nino34_vreg_son&lon,nino34_vreg_son&lat,nino34_vreg_son,True,patcor_vreg_nino34_son&lon,patcor_vreg_nino34_son&lat,0),typeof(patcor_vreg_nino34_son)) /)
-        patcor_vreg_nino34_ann(ee,:,:) = (/ totype(linint2(nino34_vreg_ann&lon,nino34_vreg_ann&lat,nino34_vreg_ann,True,patcor_vreg_nino34_ann&lon,patcor_vreg_nino34_ann&lat,0),typeof(patcor_vreg_nino34_ann)) /)
+     if (isfilepresent2("obs_ts").and.ee.ge.1.and.isvar("patcor_vreg_amo_djf")) then       
+        patcor_vreg_amo_djf(ee,:,:) = (/ totype(linint2(amo_vreg_djf&lon,amo_vreg_djf&lat,amo_vreg_djf,True,patcor_vreg_amo_djf&lon,patcor_vreg_amo_djf&lat,0),typeof(patcor_vreg_amo_djf)) /)
+        patcor_vreg_amo_mam(ee,:,:) = (/ totype(linint2(amo_vreg_mam&lon,amo_vreg_mam&lat,amo_vreg_mam,True,patcor_vreg_amo_mam&lon,patcor_vreg_amo_mam&lat,0),typeof(patcor_vreg_amo_mam)) /)
+        patcor_vreg_amo_jja(ee,:,:) = (/ totype(linint2(amo_vreg_jja&lon,amo_vreg_jja&lat,amo_vreg_jja,True,patcor_vreg_amo_jja&lon,patcor_vreg_amo_jja&lat,0),typeof(patcor_vreg_amo_jja)) /)
+        patcor_vreg_amo_son(ee,:,:) = (/ totype(linint2(amo_vreg_son&lon,amo_vreg_son&lat,amo_vreg_son,True,patcor_vreg_amo_son&lon,patcor_vreg_amo_son&lat,0),typeof(patcor_vreg_amo_son)) /)
+        patcor_vreg_amo_ann(ee,:,:) = (/ totype(linint2(amo_vreg_ann&lon,amo_vreg_ann&lat,amo_vreg_ann,True,patcor_vreg_amo_ann&lon,patcor_vreg_amo_ann&lat,0),typeof(patcor_vreg_amo_ann)) /)
         if (COMPUTE_MODES_MON.eq."True") then
-          patcor_vreg_nino34_mon(ee,:,:) = (/ totype(linint2(nino34_vreg_mon&lon,nino34_vreg_mon&lat,nino34_vreg_mon,True,patcor_vreg_nino34_mon&lon,patcor_vreg_nino34_mon&lat,0),typeof(patcor_vreg_nino34_mon)) /)
+          patcor_vreg_amo_mon(ee,:,:) = (/ totype(linint2(amo_vreg_mon&lon,amo_vreg_mon&lat,amo_vreg_mon,True,patcor_vreg_amo_mon&lon,patcor_vreg_amo_mon&lat,0),typeof(patcor_vreg_amo_mon)) /)
         end if 
      end if
       
      if (vxreg_plot_flag.eq.0) then
         res@gsnCenterString = names_reg(ee)
         res@gsnRightString = ""
-        lbunitstr = nino34_vreg_djf@units
-        res@gsnRightString = nino34_djf@pcvar
-        reg_nino34_djf(ee) = gsn_csm_contour_map(wks_nino34,nino34_vreg_djf,res)
-        res@gsnRightString = nino34_mam@pcvar
-        reg_nino34_mam(ee) = gsn_csm_contour_map(wks_nino34,nino34_vreg_mam,res)
-        res@gsnRightString = nino34_jja@pcvar
-        reg_nino34_jja(ee) = gsn_csm_contour_map(wks_nino34,nino34_vreg_jja,res)
-        res@gsnRightString = nino34_son@pcvar
-        reg_nino34_son(ee) = gsn_csm_contour_map(wks_nino34,nino34_vreg_son,res)
-        res@gsnRightString = nino34_ann@pcvar
-        reg_nino34_ann(ee) = gsn_csm_contour_map(wks_nino34,nino34_vreg_ann,res)     
-        delete([/nino34_vreg_djf,nino34_vreg_mam,nino34_vreg_jja,nino34_vreg_son,nino34_vreg_ann/])
-        o_djf = gsn_csm_contour(wks_nino34,nino34_prob_djf,res2)
+        lbunitstr = amo_vreg_djf@units
+        res@gsnRightString = amo_djf@pcvar
+        reg_amo_djf(ee) = gsn_csm_contour_map(wks_amo,amo_vreg_djf,res)
+        res@gsnRightString = amo_mam@pcvar
+        reg_amo_mam(ee) = gsn_csm_contour_map(wks_amo,amo_vreg_mam,res)
+        res@gsnRightString = amo_jja@pcvar
+        reg_amo_jja(ee) = gsn_csm_contour_map(wks_amo,amo_vreg_jja,res)
+        res@gsnRightString = amo_son@pcvar
+        reg_amo_son(ee) = gsn_csm_contour_map(wks_amo,amo_vreg_son,res)
+        res@gsnRightString = amo_ann@pcvar
+        reg_amo_ann(ee) = gsn_csm_contour_map(wks_amo,amo_vreg_ann,res)     
+        delete([/amo_vreg_djf,amo_vreg_mam,amo_vreg_jja,amo_vreg_son,amo_vreg_ann/])
+        o_djf = gsn_csm_contour(wks_amo,amo_prob_djf,res2)
         o_djf = gsn_contour_shade(o_djf,-999,95,opt) 
-        o_mam = gsn_csm_contour(wks_nino34,nino34_prob_mam,res2)
+        o_mam = gsn_csm_contour(wks_amo,amo_prob_mam,res2)
         o_mam = gsn_contour_shade(o_mam,-999,95,opt) 
-        o_jja = gsn_csm_contour(wks_nino34,nino34_prob_jja,res2)
+        o_jja = gsn_csm_contour(wks_amo,amo_prob_jja,res2)
         o_jja = gsn_contour_shade(o_jja,-999,95,opt)
-        o_son = gsn_csm_contour(wks_nino34,nino34_prob_son,res2)
+        o_son = gsn_csm_contour(wks_amo,amo_prob_son,res2)
         o_son = gsn_contour_shade(o_son,-999,95,opt)
-        o_ann = gsn_csm_contour(wks_nino34,nino34_prob_ann,res2)
+        o_ann = gsn_csm_contour(wks_amo,amo_prob_ann,res2)
         o_ann = gsn_contour_shade(o_ann,-999,95,opt)
-        delete([/nino34_prob_djf,nino34_prob_mam,nino34_prob_jja,nino34_prob_son,nino34_prob_ann/])
-        overlay(reg_nino34_djf(ee),o_djf)
-        overlay(reg_nino34_mam(ee),o_mam)
-        overlay(reg_nino34_jja(ee),o_jja)
-        overlay(reg_nino34_son(ee),o_son)
-        overlay(reg_nino34_ann(ee),o_ann)
+        delete([/amo_prob_djf,amo_prob_mam,amo_prob_jja,amo_prob_son,amo_prob_ann/])
+        overlay(reg_amo_djf(ee),o_djf)
+        overlay(reg_amo_mam(ee),o_mam)
+        overlay(reg_amo_jja(ee),o_jja)
+        overlay(reg_amo_son(ee),o_son)
+        overlay(reg_amo_ann(ee),o_ann)
         delete([/o_djf,o_mam,o_jja,o_son,o_ann/])
         if (COMPUTE_MODES_MON.eq."True") then 
-           res@gsnRightString = nino34_mon@pcvar                   
-           reg_nino34_mon(ee) = gsn_csm_contour_map(wks_nino34,nino34_vreg_mon,res)
-           delete([/nino34_vreg_mon/])
-           o_mon = gsn_csm_contour(wks_nino34,nino34_prob_mon,res2)
+           res@gsnRightString = amo_mon@pcvar                   
+           reg_amo_mon(ee) = gsn_csm_contour_map(wks_amo,amo_vreg_mon,res)
+           delete([/amo_vreg_mon/])
+           o_mon = gsn_csm_contour(wks_amo,amo_prob_mon,res2)
            o_mon = gsn_contour_shade(o_mon,-999,95,opt)
-           overlay(reg_nino34_mon(ee),o_mon)
-           delete([/o_mon,nino34_prob_mon/])
+           overlay(reg_amo_mon(ee),o_mon)
+           delete([/o_mon,amo_prob_mon/])
         end if
      
      end if
@@ -740,8 +789,8 @@ begin
      delete(clim_eyear)
   end if
 
-  if (isvar("patcor_vreg_nino34_djf")) then    ; for pattern correlation table
-    mods = (/"nino34"/)
+  if (isvar("patcor_vreg_amo_djf")) then    ; for pattern correlation table
+    mods = (/"amo"/)
     if (COMPUTE_MODES_MON.eq."True") then
       seas = (/"djf","mam","jja","son","ann","mon"/)
     else
@@ -750,23 +799,23 @@ begin
     do kk = 0,dimsizes(seas)-1
      do ll = 0,dimsizes(mods)-1
       vreg_nam  = "patcor_vreg_"+mods(ll)+"_"+seas(kk)
-      if(vreg_nam.eq."patcor_vreg_nino34_djf") then
-        patcor_vreg = patcor_vreg_nino34_djf
+      if(vreg_nam.eq."patcor_vreg_amo_djf") then
+        patcor_vreg = patcor_vreg_amo_djf
       end if
-      if(vreg_nam.eq."patcor_vreg_nino34_mam") then
-        patcor_vreg = patcor_vreg_nino34_mam
+      if(vreg_nam.eq."patcor_vreg_amo_mam") then
+        patcor_vreg = patcor_vreg_amo_mam
       end if
-      if(vreg_nam.eq."patcor_vreg_nino34_jja") then
-        patcor_vreg = patcor_vreg_nino34_jja
+      if(vreg_nam.eq."patcor_vreg_amo_jja") then
+        patcor_vreg = patcor_vreg_amo_jja
       end if
-      if(vreg_nam.eq."patcor_vreg_nino34_son") then
-        patcor_vreg = patcor_vreg_nino34_son
+      if(vreg_nam.eq."patcor_vreg_amo_son") then
+        patcor_vreg = patcor_vreg_amo_son
       end if
-      if(vreg_nam.eq."patcor_vreg_nino34_ann") then
-        patcor_vreg = patcor_vreg_nino34_ann
+      if(vreg_nam.eq."patcor_vreg_amo_ann") then
+        patcor_vreg = patcor_vreg_amo_ann
       end if
-      if(vreg_nam.eq."patcor_vreg_nino34_mon") then
-        patcor_vreg = patcor_vreg_nino34_mon
+      if(vreg_nam.eq."patcor_vreg_amo_mon") then
+        patcor_vreg = patcor_vreg_amo_mon
       end if
       clat = cos(0.01745329*patcor_vreg&lat)
       clat!0 = "lat"
@@ -797,7 +846,7 @@ begin
          format3 = "%4.2f"
          line3 = line3+" "+ntb
          line4 = line4+" "+ntc
-         if (all(ismissing(patcor_vreg_nino34_djf(hh,:,:)))) then
+         if (all(ismissing(patcor_vreg_amo_djf(hh,:,:)))) then
             finpr = finpr+sprintf(format2,9.99)+"/"+sprintf(format3,9.99)
          else
             finpr = finpr+sprintf(format2,(pattern_cor(patcor_vreg(0,:,:),patcor_vreg(hh,:,:),clat(:),0)))+"/"+sprintf(format3,(wgt_arearmse(patcor_vreg(0,:,:),patcor_vreg(hh,:,:),clat(:),1.0,0)))
@@ -808,21 +857,21 @@ begin
         print("Metrics table warning: Not creating regpatt_metrics.table as size of comparison results in a invalid ascii row size.")
      else
         if(kk.eq.0.and.ll.eq.0) then
-          write_table(getenv("OUTDIR")+"regpatt_metrics.sst.nino34_"+vnm+".txt","w",[/header/],"%s")
-          write_table(getenv("OUTDIR")+"regpatt_metrics.sst.nino34_"+vnm+".txt","a",[/line3/],"%s")
-          write_table(getenv("OUTDIR")+"regpatt_metrics.sst.nino34_"+vnm+".txt","a",[/line4/],"%s")
-          write_table(getenv("OUTDIR")+"regpatt_metrics.sst.nino34_"+vnm+".txt","a",[/finpr/],"%s")
+          write_table(getenv("OUTDIR")+"regpatt_metrics.sst.amo_"+vnm+".txt","w",[/header/],"%s")
+          write_table(getenv("OUTDIR")+"regpatt_metrics.sst.amo_"+vnm+".txt","a",[/line3/],"%s")
+          write_table(getenv("OUTDIR")+"regpatt_metrics.sst.amo_"+vnm+".txt","a",[/line4/],"%s")
+          write_table(getenv("OUTDIR")+"regpatt_metrics.sst.amo_"+vnm+".txt","a",[/finpr/],"%s")
         else
-          write_table(getenv("OUTDIR")+"regpatt_metrics.sst.nino34_"+vnm+".txt","a",[/finpr/],"%s")
+          write_table(getenv("OUTDIR")+"regpatt_metrics.sst.amo_"+vnm+".txt","a",[/finpr/],"%s")
         end if
      end if
      delete([/line3,line4,format2,format3,nchar,ntc,clat,dimY,ntb,header/])
      end do
     end do
     delete([/mods,seas/])
-    delete([/patcor_vreg_nino34_djf,patcor_vreg_nino34_mam,patcor_vreg_nino34_jja,patcor_vreg_nino34_son,patcor_vreg_nino34_ann/])
+    delete([/patcor_vreg_amo_djf,patcor_vreg_amo_mam,patcor_vreg_amo_jja,patcor_vreg_amo_son,patcor_vreg_amo_ann/])
     if (COMPUTE_MODES_MON.eq."True") then
-      delete([/patcor_vreg_nino34_mon/])
+      delete([/patcor_vreg_amo_mon/])
     end if
   end if 
  
@@ -870,52 +919,52 @@ begin
      txt0 = str_upper(vnm)
      panres@lbTitleString = txt0 + " [" + lbunitstr +"]"  
      panres@txString = "ENSO (Nino34) Regressions (DJF)" 
-     gsn_panel2(wks_nino34,reg_nino34_djf,(/nrow,ncol/),panres)
-     delete(reg_nino34_djf)
+     gsn_panel2(wks_amo,reg_amo_djf,(/nrow,ncol/),panres)
+     delete(reg_amo_djf)
      panres@txString = "ENSO (Nino34) Regressions (MAM)"
-     gsn_panel2(wks_nino34,reg_nino34_mam,(/nrow,ncol/),panres)
-     delete(reg_nino34_mam)
+     gsn_panel2(wks_amo,reg_amo_mam,(/nrow,ncol/),panres)
+     delete(reg_amo_mam)
      panres@txString = "ENSO (Nino34) Regressions (JJA)"
-     gsn_panel2(wks_nino34,reg_nino34_jja,(/nrow,ncol/),panres)
-     delete(reg_nino34_jja)
+     gsn_panel2(wks_amo,reg_amo_jja,(/nrow,ncol/),panres)
+     delete(reg_amo_jja)
      panres@txString = "ENSO (Nino34) Regressions (SON)"
-     gsn_panel2(wks_nino34,reg_nino34_son,(/nrow,ncol/),panres)
-     delete(reg_nino34_son)
+     gsn_panel2(wks_amo,reg_amo_son,(/nrow,ncol/),panres)
+     delete(reg_amo_son)
      panres@txString = "ENSO (Nino34) Regressions (Annual)"
-     gsn_panel2(wks_nino34,reg_nino34_ann,(/nrow,ncol/),panres)
-     delete(reg_nino34_ann)
+     gsn_panel2(wks_amo,reg_amo_ann,(/nrow,ncol/),panres)
+     delete(reg_amo_ann)
      if (COMPUTE_MODES_MON.eq."True") then    
         panres@txString = "ENSO (Nino34) Regressions (Monthly)"
-        gsn_panel2(wks_nino34,reg_nino34_mon,(/nrow,ncol/),panres)
-        delete(reg_nino34_mon)
+        gsn_panel2(wks_amo,reg_amo_mon,(/nrow,ncol/),panres)
+        delete(reg_amo_mon)
      end if
-     delete(wks_nino34)
+     delete(wks_amo)
   end if
   
 ;--------------------------------------------------------------------------------------------------
   OUTDIR = getenv("OUTDIR") 
   if (wks_type.eq."png") then       
      if (vxreg_frame.eq.0) then
-        system("mv "+OUTDIR+"nino34.vxreg.000001.png "+OUTDIR+"nino34."+vnm+"reg.djf.png")
-        system("mv "+OUTDIR+"nino34.vxreg.000002.png "+OUTDIR+"nino34."+vnm+"reg.mam.png")
-        system("mv "+OUTDIR+"nino34.vxreg.000003.png "+OUTDIR+"nino34."+vnm+"reg.jja.png")
-        system("mv "+OUTDIR+"nino34.vxreg.000004.png "+OUTDIR+"nino34."+vnm+"reg.son.png")
-        system("mv "+OUTDIR+"nino34.vxreg.000005.png "+OUTDIR+"nino34."+vnm+"reg.ann.png")
+        system("mv "+OUTDIR+"amo.vxreg.000001.png "+OUTDIR+"amo."+vnm+"reg.djf.png")
+        system("mv "+OUTDIR+"amo.vxreg.000002.png "+OUTDIR+"amo."+vnm+"reg.mam.png")
+        system("mv "+OUTDIR+"amo.vxreg.000003.png "+OUTDIR+"amo."+vnm+"reg.jja.png")
+        system("mv "+OUTDIR+"amo.vxreg.000004.png "+OUTDIR+"amo."+vnm+"reg.son.png")
+        system("mv "+OUTDIR+"amo.vxreg.000005.png "+OUTDIR+"amo."+vnm+"reg.ann.png")
         if (COMPUTE_MODES_MON.eq."True") then
-          system("mv "+OUTDIR+"nino34.vxreg.000006.png "+OUTDIR+"nino34."+vnm+"reg.mon.png")   
+          system("mv "+OUTDIR+"amo.vxreg.000006.png "+OUTDIR+"amo."+vnm+"reg.mon.png")   
         end if 
      end if
 
   else     
-     system("psplit "+OUTDIR+"nino34.vxreg.ps "+OUTDIR+"vx_sp")
+     system("psplit "+OUTDIR+"amo.vxreg.ps "+OUTDIR+"vx_sp")
      if (vxreg_frame.eq.0) then
-        system("mv "+OUTDIR+"vx_sp0001.ps "+OUTDIR+"nino34."+vnm+"reg.djf.ps") 
-        system("mv "+OUTDIR+"vx_sp0002.ps "+OUTDIR+"nino34."+vnm+"reg.mam.ps") 
-        system("mv "+OUTDIR+"vx_sp0003.ps "+OUTDIR+"nino34."+vnm+"reg.jja.ps") 
-        system("mv "+OUTDIR+"vx_sp0004.ps "+OUTDIR+"nino34."+vnm+"reg.son.ps") 
-        system("mv "+OUTDIR+"vx_sp0005.ps "+OUTDIR+"nino34."+vnm+"reg.ann.ps")
+        system("mv "+OUTDIR+"vx_sp0001.ps "+OUTDIR+"amo."+vnm+"reg.djf.ps") 
+        system("mv "+OUTDIR+"vx_sp0002.ps "+OUTDIR+"amo."+vnm+"reg.mam.ps") 
+        system("mv "+OUTDIR+"vx_sp0003.ps "+OUTDIR+"amo."+vnm+"reg.jja.ps") 
+        system("mv "+OUTDIR+"vx_sp0004.ps "+OUTDIR+"amo."+vnm+"reg.son.ps") 
+        system("mv "+OUTDIR+"vx_sp0005.ps "+OUTDIR+"amo."+vnm+"reg.ann.ps")
         if (COMPUTE_MODES_MON.eq."True") then
-           system("mv "+OUTDIR+"vx_sp0006.ps "+OUTDIR+"nino34."+vnm+"reg.mon.ps") 
+           system("mv "+OUTDIR+"vx_sp0006.ps "+OUTDIR+"amo."+vnm+"reg.mon.ps") 
         end if
      end if
 
@@ -924,6 +973,6 @@ begin
   delete([/vnm,lmsk,nsim_reg,names_reg,paths_reg,syear_reg,syear_reg,eyear_reg,nyr_reg,vrfac/])
  end do 
     
- print("Finished: sst.nino34_regpatt.ncl")
+ print("Finished: sst.amo_regpatt.ncl")
 
 end  

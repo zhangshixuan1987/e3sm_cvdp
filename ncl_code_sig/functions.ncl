@@ -117,7 +117,30 @@ begin
      blankarr&lev@units = "m"
      blankarr&lev@positive = "down"
   end if
-
+  if (opttype.eq."lat_lon") then
+     blankarr = new((/90,180/),"float",1.e20)
+     blankarr!0 = "lat"
+     blankarr&lat = fspan(-89,89,90)
+     blankarr!1 = "lon"
+     blankarr&lon = fspan(0,358,180)
+     blankarr&lat@units = "degrees_north"
+     blankarr&lon@units = "degrees_east"
+  end if
+  if (opttype.eq."time_lev_lat_lon") then
+     blankarr = new((/dimsizes(time),41,90,180/),"float",1.e20)
+     blankarr!0 = "time"    ; time coordinate variable assigned below
+     blankarr&time = time
+     blankarr!1 = "lev"
+     blankarr&lev =fspan(0,5000,41)
+     blankarr!2 = "lat"
+     blankarr&lat = fspan(-89,89,90)
+     blankarr!3 = "lon"
+     blankarr&lon = fspan(0,358,180)
+     blankarr&lat@units = "degrees_north"
+     blankarr&lon@units = "degrees_east"
+     blankarr&lev@units = "m"
+     blankarr&lev@positive = "down"
+  end if
   blankarr@units = ""
   blankarr@is_all_missing = True
   return(blankarr)
@@ -1236,7 +1259,8 @@ begin
               else
                  arr = c[:]->$vname(ii)$
               end if
-              if (isatt(arr,"coordinates")) then
+              if (vname(ii).ne."SICONC".and.vname(ii).ne."siconc") then 
+               if (isatt(arr,"coordinates")) then
                  strarr = str_split(arr@coordinates," ")
                  if (any(strarr.eq."lon")) then      ; IPCC longitude 2D coordinate
                     arr@lon2d = c[0]->lon
@@ -1253,7 +1277,8 @@ begin
                  delete(strarr)
 ;              else
 ;                 print("2D coordinates for ice data are not detected")
-              end if  
+               end if  
+              end if 
               dir_name = str_split(tfiles(0),"/")
               if (dimsizes(dir_name).ge.8) then
                  dir_name_new = "/"+str_join(dir_name(:4),"/")+"/fx/areacello/"+dir_name(7)+"/r0i0p0/*.nc"
@@ -1855,3 +1880,171 @@ begin
    end do
 end
 
+undef("add_labelbar_mt")
+procedure add_labelbar_mt(wks,plot,colors,labels)
+local vph, vpw, nboxes, lbres, lbid, amres, annoid
+begin
+  getvalues plot                      ; Get plot size for use in
+    "vpHeightF" : vph                 ; creating labelbar.
+    "vpWidthF"  : vpw
+  end getvalues
+
+  nboxes = dimsizes(colors)
+
+  lbres                    = True          ; labelbar only resources
+  lbres@lbAutoManage       = False          ; Necessary to control sizes
+  lbres@vpWidthF           = 0.15 * vpw    ; labelbar width
+  if (vph.eq..175) then    ; minimum height
+     lbres@vpHeightF          = 0.155
+     lbres@lbLabelFontHeightF = 0.008
+  end if
+  if (vph.gt..175.and.vph.lt..8601) then
+     lbres@vpHeightF          = 0.85 * vph
+     lbres@lbLabelFontHeightF = 0.008+(((vph-.17)/.7101)*.0075)
+  end if
+  if (vph.ge..8601) then
+     lbres@vpHeightF          = 0.7 * vph
+     lbres@lbLabelFontHeightF = 0.0105-(((vph-.8601)*10)*2)
+  end if
+  lbres@lbFillColors       = colors        ; labelbar colors
+  lbres@lbMonoFillPattern  = True          ; Solid fill pattern
+
+  lbres@lbLabelAlignment   = "InteriorEdges"  ; center of box
+  lbres@lbOrientation      = "Vertical"
+  lbres@lbPerimOn          = False
+  lbres@lbFillOpacityF = 0.5
+
+  lbid = gsn_create_labelbar(wks,nboxes,labels,lbres)
+  amres                  = True
+  amres@amJust           = "CenterLeft"
+  amres@amParallelPosF   =  0.52
+  amres@amOrthogonalPosF =  0.0
+  plot@annoid = gsn_add_annotation(plot,lbid,amres)
+end
+
+;=================================================================================================
+; Given a 1D array, this function calculates the 10, 25, median, 75 and 90% values
+; of the sorted array.
+undef("boxplot_stat")
+function boxplot_stat(bparrT[*]:numeric)
+local bparrT,bparr,bpcalcarr,x10,x25,x75,x90,dimBP
+begin
+  if (.not.isatt(bparrT,"_FillValue")) then
+     bparrT@_FillValue = default_fillvalue(typeof(bparrT))
+  end if
+  bpcalcarr = new(5,typeof(bparrT))
+  bpcalcarr@_FillValue = -999
+  if (.not.all(ismissing(bparrT))) then
+     bparr = bparrT(ind(.not.ismissing(bparrT)))
+     qsort(bparr)
+     dimBP = dimsizes(bparr)
+     x10  = round(.10*dimBP,3)-1     ; -1 to account for NCL indexing starting
+     x25  = round(.25*dimBP,3)-1
+     x75  = round(.75*dimBP,3)-1
+     x90  = round(.90*dimBP,3)-1
+     if (dimBP.ge.5) then   ; only compute if dimBP.ge.5 (also=x10.ge.0)
+        bpcalcarr(0) = bparr(x10)   ;min(bparr)
+        bpcalcarr(1) = bparr(x25)
+        bpcalcarr(2) = dim_median(bparr)
+        bpcalcarr(3) = bparr(x75)
+        bpcalcarr(4) = bparr(x90)    ;max(bparr)
+     end if
+  end if
+  return(bpcalcarr)
+end
+
+;=================================================================================================
+; This function checks for the presence of two CVDP-LE files, and if present reads in the relevant
+; array from the file.
+;
+undef("read_cvdp_le_data")
+function read_cvdp_le_data(filenameT:string,filenameT2:string,vari_name:string)
+local filenameT,filenameT2,vari_name,arr_temp,coordatt
+begin
+  if (isfilepresent2(filenameT)) then   ; check to see if the file created by this script is present, if not read the summary file created earlier in this script
+     d = addfile(filenameT,"r")
+     if (isfilevar(d,vari_name)) then
+        arr_temp = d->$vari_name$
+     end if
+  end if
+  if (.not.isvar("arr_temp")) then
+     if (isfilepresent2(filenameT2)) then
+        d = addfile(filenameT2,"r")
+        if (isfilevar(d,vari_name)) then
+           arr_temp = d->$vari_name$
+        end if
+     end if
+  end if
+  if (.not.isvar("arr_temp")) then
+     arr_temp = create_empty_array(1900,1950,1,12,"lat_lon")
+  end if
+  if (isatt(arr_temp,"coordinates")) then   ; copy 2d coordinates to lat2d/lon2d for sea ice data
+     if (.not.(str_squeeze(arr_temp@coordinates).eq."")) then ; required for some data where coordinates att incorrectly set to ""
+        coordatt = str_split(arr_temp@coordinates," ")
+        if (dimsizes(coordatt).eq.2) then
+           if (coordatt(0).eq."lat2d_ice_nh".or.coordatt(0).eq."lat2d_ice_sh") then
+              if (isfilevar(d,coordatt(0))) then
+                 arr_temp@lat2d = d->$coordatt(0)$
+              end if
+              if (isfilevar(d,coordatt(1))) then
+                 arr_temp@lon2d = d->$coordatt(1)$
+              end if
+           end if
+        end if
+     end if
+  end if
+  return(arr_temp)
+end
+;=================================================================================================
+; This function sets the y-axis for power spectra plots.
+;
+undef("powspec_set_yaxis")
+function powspec_set_yaxis (psdata_max[*]:numeric,opt3[1]:logical)
+
+local psdata_max,opt3
+begin
+  if (isatt(opt3,"tmYLValues")) then
+     delete([/opt3@tmYLValues,opt3@tmYLLabels,opt3@tmYLMinorValues/])
+  end if
+  if (psdata_max.lt.70) then
+     opt3@trYMaxF = 75.
+     opt3@tmYLValues = (/0,25,50,75/)
+     opt3@tmYLLabels = opt3@tmYLValues
+     opt3@tmYLMinorValues = ispan(5,70,5)
+  end if
+  if (psdata_max.ge.70.and.psdata_max.lt.145) then
+     opt3@trYMaxF = 150.
+     opt3@tmYLValues = (/0,50,100,150/)
+     opt3@tmYLLabels = opt3@tmYLValues
+     opt3@tmYLMinorValues = ispan(10,140,10)
+  end if
+  if (psdata_max.ge.145) then
+     opt3@trYMaxF = psdata_max+15.
+  end if
+  return(opt3)
+end
+;=================================================================================================
+; This function sets colors to use in the subtitles that denote that they are part of the
+; same ensemble.
+;
+undef("set_subtitle_colors")
+function set_subtitle_colors(EM_num[1]:integer)
+local EM_num,cs_color,cs_colorT,zt,eind
+begin
+  cs_color = (/"deepskyblue4","darkseagreen4","lavenderblush4","chocolate4","mediumpurple3", "burlywood3",\
+              "cadetblue4","sienna3","lemonchiffon3","dodgerblue3","springgreen4","brown3",\
+              "blue2","mediumpurple4","lightcyan4","gray35","aquamarine3","mediumorchid2","azure3","lightpink3"/)
+  if (EM_num.gt.20) then
+     zt = (EM_num/20)+1
+     cs_colorT = cs_color
+     delete(cs_color)
+     cs_color = new((/zt*20/),string)
+     eind = 0
+     do dd = 0,zt-1
+        cs_color(eind:eind+19) = (/  cs_colorT /)
+        eind = eind+20
+     end do
+     delete(cs_colorT)
+  end if
+  return(cs_color)
+end

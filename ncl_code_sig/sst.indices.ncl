@@ -659,7 +659,7 @@ begin
               do gg = 0,dimsizes(bc)-1
                  modname = str_sub_str(modname,bc(gg),"_")
               end do
-              fn = getenv("OUTDIR")+modname+".cvdp_data.psl.sst.indices.tas."+syear_trefht(ee)+"-"+eyear_trefht(ee)+".nc"
+              fn = getenv("OUTDIR")+modname+".cvdp_data.sst.indices.tas."+syear_trefht(ee)+"-"+eyear_trefht(ee)+".nc"
               if (.not.isfilepresent2(fn)) then
                  z_tas = addfile(fn,"c")
                  z_tas@source = "NCAR Climate Analysis Section's Climate Variability Diagnostics Package v"+getenv("VERSION")

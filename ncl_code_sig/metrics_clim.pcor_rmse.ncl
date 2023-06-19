@@ -1,4 +1,4 @@
-; Calculates nino34 indices as well as nino34 index 
+; Calculates climmean indices as well as climmean index 
 ; timeseries onto selected quantities (see reg_var)
 ;
 ; Variables used: sst and selected quantities 
@@ -10,7 +10,7 @@ load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/shea_util.ncl"
 load "$CVDP_SCRIPTS/functions.ncl"
 
 begin
-  print("Starting: sst.nino34_regpatt.ncl")
+  print("Starting: metrics_clim.pcor_rmse.ncl")
   
   SCALE_TIMESERIES = getenv("SCALE_TIMESERIES")  
   OUTPUT_DATA      = getenv("OUTPUT_DATA")  
@@ -22,92 +22,82 @@ begin
   COMPUTE_MODES_MON = getenv("COMPUTE_MODES_MON")
   COLORMAP         = getenv("COLORMAP")  
   
-  nsim = numAsciiRow("namelist_byvar/namelist_ts")
-  na = asciiread("namelist_byvar/namelist_ts",(/nsim/),"string")
-  names = new(nsim,"string")
-  paths = new(nsim,"string")
-  syear = new(nsim,"integer",-999)
-  eyear = new(nsim,"integer",-999)
-  delim = "|"
-
-  do gg = 0,nsim-1
-     names(gg) = str_strip(str_get_field(na(gg),1,delim))
-     paths(gg) = str_strip(str_get_field(na(gg),2,delim))
-     syear(gg) = stringtointeger(str_strip(str_get_field(na(gg),3,delim)))
-     eyear(gg) = stringtointeger(str_strip(str_get_field(na(gg),4,delim)))
-  end do
-  nyr = eyear-syear+1
-  nyr_max = max(nyr)
-
   pi=4.*atan(1.0)
   rad=(pi/180.)
  
- regvars = (/"psl","sst","trefht","prect","u10","v10","taux","tauy","shflx","lhflx", "eth", \
-             "swcre","olr","cldtot","u850","v850","th850","z500","u200","v200","aice_nh","aice_sh"/)
- landmsk = (/    0,    1,       0,      0,    0,    0,     0,     0,   0,   0,     1, \
-                 0,      0,       0,     0,     0,      0,     0,     0,   0,      1, 1/)
- varfacs = (/3.0,   1.0,     1.0,    1.0,  1.0,  1.0,   2.0,   2.0, 5.0, 10.0,  5.0, \
-                 5.0, 5.0,     5.0,  2.0,    2.0,  1.0,   15.0,   5.0,   2.5, 5.0, 5.0/)
- nsvars  = dimsizes(regvars)
+  regvars = (/"psl","sst","trefht","prect","u10","v10", \
+              "taux","tauy","shflx","lhflx", "eth", \
+              "swcre","olr","cldtot","u850","v850", \
+              "th850","z500","u200","v200","aice_nh","aice_sh"/)
+  landmsk = (/ 0,    1,   0,   0,    0,    0, \
+               0,    0,   0,   0,    1,       \
+               0,    0,   0,   0,    0,       \
+               0,    0,   0,   0,    1,      1 /)
+  varfacs = (/3.0, 1.0,  1.0,  1.0,  1.0,  1.0,   \
+              2.0,   2.0, 5.0, 10.0,  5.0, \
+              5.0, 5.0,     5.0,  2.0,    2.0,  \
+              1.0,   15.0,   5.0,   2.5, 5.0, 5.0/)
+  nsvars  = dimsizes(regvars)
+ 
+  do ss = 0, nsvars-1,1
+   ;---------Regressions coding-------------------------------------------------
+   if(regvars(ss).eq."sst") then 
+     vnm   = "ts"
+   else 
+     vnm   = regvars(ss)
+   end if 
 
- do ss = 0, nsvars-1,1
-  ;---------Regressions coding-------------------------------------------------
-  if(regvars(ss).eq."sst") then 
-    vnm   = "ts"
-  else 
-    vnm   = regvars(ss)
-  end if 
+   lmsk  = landmsk(ss)
+   vrfac = varfacs(ss)
+   nsim_reg = numAsciiRow("namelist_byvar/namelist_"+vnm)
+   na_reg   = asciiread("namelist_byvar/namelist_"+vnm,(/nsim_reg/),"string")
 
-  lmsk  = landmsk(ss)
-  vrfac = varfacs(ss)
-  nsim_reg = numAsciiRow("namelist_byvar/namelist_"+vnm)
-  na_reg   = asciiread("namelist_byvar/namelist_"+vnm,(/nsim_reg/),"string")
+   names_reg = new(nsim_reg,"string")
+   paths_reg = new(nsim_reg,"string")
+   syear_reg = new(nsim_reg,"integer",-999)
+   eyear_reg = new(nsim_reg,"integer",-999)
 
-  names_reg = new(nsim_reg,"string")
-  paths_reg = new(nsim_reg,"string")
-  syear_reg = new(nsim_reg,"integer",-999)
-  eyear_reg = new(nsim_reg,"integer",-999)
-
-  do gg = 0,nsim_reg-1
+   do gg = 0,nsim_reg-1
      names_reg(gg) = str_strip(str_get_field(na_reg(gg),1,delim))
      paths_reg(gg) = str_strip(str_get_field(na_reg(gg),2,delim))
      syear_reg(gg) = stringtointeger(str_strip(str_get_field(na_reg(gg),3,delim)))
      eyear_reg(gg) = stringtointeger(str_strip(str_get_field(na_reg(gg),4,delim)))
-  end do
-  delete(na_reg)
-  nyr_reg = eyear_reg-syear_reg+1 
+   end do
+   delete(na_reg)
+   nyr_reg = eyear_reg-syear_reg+1 
  
-;-------------------------------------------------------------------------------------------------
+ ;-------------------------------------------------------------------------------------------------
   wks_type = OUTPUT_TYPE
   if (wks_type.eq."png") then
      wks_type@wkWidth = 1500*PNG_SCALE
      wks_type@wkHeight = 1500*PNG_SCALE
   end if
   
-  wks_nino34  = gsn_open_wks(wks_type,getenv("OUTDIR")+"nino34.vxreg")
+  wks_climmean  = gsn_open_wks(wks_type,getenv("OUTDIR")+"climmean.vxreg")
   
   if (COLORMAP.eq.0) then
-     gsn_define_colormap(wks_nino34,"MPL_RdBu")  
-     gsn_reverse_colormap(wks_nino34)           ; Reverse the color map.
+     gsn_define_colormap(wks_climmean,"MPL_RdBu")  
+     gsn_reverse_colormap(wks_climmean)           ; Reverse the color map.
   end if
   if (COLORMAP.eq.1) then
-     gsn_define_colormap(wks_nino34,"NCV_jaisnd")  
+     gsn_define_colormap(wks_climmean,"NCV_jaisnd")  
   end if
   
-  reg_nino34_djf = new(nsim,"graphic")  
-  reg_nino34_mam = new(nsim,"graphic")  
-  reg_nino34_jja = new(nsim,"graphic")  
-  reg_nino34_son = new(nsim,"graphic")  
-  reg_nino34_ann = new(nsim,"graphic")  
-  reg_nino34_mon = new(nsim,"graphic")  
-  
-  vxreg_frame    = 1 
+  reg_climmean_djf = new(nsim,"graphic")  
+  reg_climmean_mam = new(nsim,"graphic")  
+  reg_climmean_jja = new(nsim,"graphic")  
+  reg_climmean_son = new(nsim,"graphic")  
+  reg_climmean_ann = new(nsim,"graphic")  
+  reg_climmean_mon = new(nsim,"graphic")  
+  vxreg_frame      = 1 
 
   do ee = 0,nsim-1
 
-     ;check that regression var and index var contains shared range
-     ;suppose that regression var period <= index var time period 
-     if (any(ismissing((/syear(ee),syear_reg(ee),eyear(ee),eyear_reg(ee)/)))) then
+    ;assume that the first simulation is the reference to calculate RMSE and pattern correlation 
+
+    ;check that regression var and index var contains shared range
+    ;suppose that regression var period <= index var time period 
+     if (any(ismissing((/syear(0),syear_reg(ee),eyear(0),eyear_reg(ee)/)))) then
        vxreg_plot_flag = 1
      else
        if (syear_reg(ee).ge.syear(ee).and.eyear_reg(ee).le.eyear(ee)) then
@@ -244,7 +234,7 @@ begin
        delete(vregV)
      end if 
    
-;----------nino34 definition----------------------------------------------------------------------
+;----------climmean definition----------------------------------------------------------------------
      coswgt      = cos(rad*arr_djf&lat)
      coswgt!0    = "lat"
      coswgt&lat  = arr_djf&lat
@@ -259,239 +249,239 @@ begin
      llonw1 =  210.0
      llone1 =  270.0
 
-;----------nino34 calculations----------------------------------------------------------------------
+;----------climmean calculations----------------------------------------------------------------------
      pcts = wgt_areaave_Wrap(arr_djf(:,{llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0) 
-     nino34_pc_djf = dim_standardize(pcts,0)
-     nino34_djf    = arr_djf(0,:,:)
-     nino34_djf    = (/ regCoef(nino34_pc_djf,arr_djf(lat|:,lon|:,time|:)) /)
+     climmean_pc_djf = dim_standardize(pcts,0)
+     climmean_djf    = arr_djf(0,:,:)
+     climmean_djf    = (/ regCoef(climmean_pc_djf,arr_djf(lat|:,lon|:,time|:)) /)
      
      if (vxreg_plot_flag.eq.0) then
-        rc        = regCoef_n(nino34_pc_djf, vreg_djf, 0, 0) ; rc(nlat,mlon)
+        rc        = regCoef_n(climmean_pc_djf, vreg_djf, 0, 0) ; rc(nlat,mlon)
         tval      = onedtond(rc@tval , dimsizes(rc))
         df        = onedtond(rc@nptxy, dimsizes(rc)) - 2
         b         = tval    
         b         = 0.5
-        nino34_vreg_djf  = vreg_djf(0,:,:)
-        nino34_prob_djf  = vreg_djf(0,:,:)
-        nino34_vreg_djf  = (/ rc /) 
-        nino34_prob_djf  = (/(1-betainc(df/(df+tval^2),df/2.0,b))*100.0/)
-        nino34_prob_djf  = where(ismissing(nino34_vreg_djf),nino34_vreg_djf@_FillValue,nino34_prob_djf)
-        nino34_vreg_djf@units = vreg_djf@units +" (per std dev)"
+        climmean_vreg_djf  = vreg_djf(0,:,:)
+        climmean_prob_djf  = vreg_djf(0,:,:)
+        climmean_vreg_djf  = (/ rc /) 
+        climmean_prob_djf  = (/(1-betainc(df/(df+tval^2),df/2.0,b))*100.0/)
+        climmean_prob_djf  = where(ismissing(climmean_vreg_djf),climmean_vreg_djf@_FillValue,climmean_prob_djf)
+        climmean_vreg_djf@units = vreg_djf@units +" (per std dev)"
         delete([/rc,tval,df,b,vreg_djf/]) 
      end if     
 
-     if (.not.all(ismissing(nino34_djf({llats1:llatn1},{llonw1:llone1})))) then
-       if (avg(nino34_djf({llats1:llatn1},{llonw1:llone1})).le.0) then
-           nino34_djf = nino34_djf*-1.
-           nino34_pc_djf = nino34_pc_djf*-1.
+     if (.not.all(ismissing(climmean_djf({llats1:llatn1},{llonw1:llone1})))) then
+       if (avg(climmean_djf({llats1:llatn1},{llonw1:llone1})).le.0) then
+           climmean_djf = climmean_djf*-1.
+           climmean_pc_djf = climmean_pc_djf*-1.
            if (vxreg_plot_flag.eq.0) then
-              nino34_vreg_djf = nino34_vreg_djf*-1.
+              climmean_vreg_djf = climmean_vreg_djf*-1.
            end if 
        end if 
      end if
      
      rc    = arr_djf(0,:,:) 
-     rc    = (/escorc_n(nino34_pc_djf,arr_djf,0,0)/)
+     rc    = (/escorc_n(climmean_pc_djf,arr_djf,0,0)/)
      rc    = rc*rc*100.0
      pcvar = wgt_areaave_Wrap(rc({llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0)
-     nino34_djf@pcvar = tofloat(sprintf("%4.1f", pcvar))+"%"
+     climmean_djf@pcvar = tofloat(sprintf("%4.1f", pcvar))+"%"
      delete([/pcvar,rc/])    
-     nino34_pc_djf!0 = "TIME"
-     nino34_pc_djf&TIME = ispan(syear_reg(ee),eyear_reg(ee),1)
-     nino34_pc_djf&TIME@units = "YYYY"
-     nino34_pc_djf&TIME@long_name = "time"     
+     climmean_pc_djf!0 = "TIME"
+     climmean_pc_djf&TIME = ispan(syear_reg(ee),eyear_reg(ee),1)
+     climmean_pc_djf&TIME@units = "YYYY"
+     climmean_pc_djf&TIME@long_name = "time"     
      delete([/pcts/])
  
      pcts = wgt_areaave_Wrap(arr_mam(:,{llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0)
-     nino34_pc_mam = dim_standardize(pcts,0)
-     nino34_mam = arr_mam(0,:,:)
-     nino34_mam = (/ regCoef(nino34_pc_mam,arr_mam(lat|:,lon|:,time|:)) /)
+     climmean_pc_mam = dim_standardize(pcts,0)
+     climmean_mam = arr_mam(0,:,:)
+     climmean_mam = (/ regCoef(climmean_pc_mam,arr_mam(lat|:,lon|:,time|:)) /)
      if (vxreg_plot_flag.eq.0) then
-        rc        = regCoef_n(nino34_pc_mam, vreg_mam, 0, 0) ; rc(nlat,mlon)
+        rc        = regCoef_n(climmean_pc_mam, vreg_mam, 0, 0) ; rc(nlat,mlon)
         tval      = onedtond(rc@tval , dimsizes(rc))
         df        = onedtond(rc@nptxy, dimsizes(rc)) - 2
         b         = tval
         b         = 0.5
-        nino34_vreg_mam  = vreg_mam(0,:,:)
-        nino34_prob_mam  = vreg_mam(0,:,:)
-        nino34_vreg_mam  = (/ rc /)
-        nino34_prob_mam  = (/(1-betainc(df/(df+tval^2),df/2.0,b))*100.0/) 
-        nino34_prob_mam  = where(ismissing(nino34_vreg_mam),nino34_vreg_mam@_FillValue,nino34_prob_mam)
-        nino34_vreg_mam@units = vreg_mam@units +"(per std dev)"
+        climmean_vreg_mam  = vreg_mam(0,:,:)
+        climmean_prob_mam  = vreg_mam(0,:,:)
+        climmean_vreg_mam  = (/ rc /)
+        climmean_prob_mam  = (/(1-betainc(df/(df+tval^2),df/2.0,b))*100.0/) 
+        climmean_prob_mam  = where(ismissing(climmean_vreg_mam),climmean_vreg_mam@_FillValue,climmean_prob_mam)
+        climmean_vreg_mam@units = vreg_mam@units +"(per std dev)"
         delete([/rc,tval,df,b,vreg_mam/])
      end if
 
-     if (.not.all(ismissing(nino34_mam({llats1:llatn1},{llonw1:llone1})))) then
-       if (avg(nino34_mam({llats1:llatn1},{llonw1:llone1})).le.0) then
-           nino34_mam = nino34_mam*-1.
-           nino34_pc_mam = nino34_pc_mam*-1.
+     if (.not.all(ismissing(climmean_mam({llats1:llatn1},{llonw1:llone1})))) then
+       if (avg(climmean_mam({llats1:llatn1},{llonw1:llone1})).le.0) then
+           climmean_mam = climmean_mam*-1.
+           climmean_pc_mam = climmean_pc_mam*-1.
            if (vxreg_plot_flag.eq.0) then
-              nino34_vreg_mam = nino34_vreg_mam*-1.
+              climmean_vreg_mam = climmean_vreg_mam*-1.
            end if 
        end if 
      end if
 
      rc    = arr_djf(0,:,:)
-     rc    = (/escorc_n(nino34_pc_mam,arr_mam,0,0)/)
+     rc    = (/escorc_n(climmean_pc_mam,arr_mam,0,0)/)
      rc    = rc*rc*100.0
      pcvar = wgt_areaave_Wrap(rc({llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0)
-     nino34_mam@pcvar = tofloat(sprintf("%4.1f", pcvar))+"%"
+     climmean_mam@pcvar = tofloat(sprintf("%4.1f", pcvar))+"%"
      delete([/pcvar,rc/])
-     copy_VarCoords(nino34_pc_djf,nino34_pc_mam) 
+     copy_VarCoords(climmean_pc_djf,climmean_pc_mam) 
      delete([/pcts/])
      
      pcts = wgt_areaave_Wrap(arr_jja(:,{llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0)
-     nino34_pc_jja = dim_standardize(pcts,0)
-     nino34_jja = arr_jja(0,:,:)
-     nino34_jja = (/ regCoef(nino34_pc_jja,arr_jja(lat|:,lon|:,time|:)) /)
+     climmean_pc_jja = dim_standardize(pcts,0)
+     climmean_jja = arr_jja(0,:,:)
+     climmean_jja = (/ regCoef(climmean_pc_jja,arr_jja(lat|:,lon|:,time|:)) /)
      if (vxreg_plot_flag.eq.0) then
-        rc        = regCoef_n(nino34_pc_jja, vreg_jja, 0, 0) ; rc(nlat,mlon)
+        rc        = regCoef_n(climmean_pc_jja, vreg_jja, 0, 0) ; rc(nlat,mlon)
         tval      = onedtond(rc@tval , dimsizes(rc))
         df        = onedtond(rc@nptxy, dimsizes(rc)) - 2
         b         = tval
         b         = 0.5
-        nino34_vreg_jja  = vreg_jja(0,:,:)
-        nino34_prob_jja  = vreg_jja(0,:,:)
-        nino34_vreg_jja  = (/ rc /)
-        nino34_prob_jja  = (/(1-betainc(df/(df+tval^2),df/2.0,b))*100.0/) 
-        nino34_prob_jja  = where(ismissing(nino34_vreg_jja),nino34_vreg_jja@_FillValue,nino34_prob_jja)
-        nino34_vreg_jja@units = vreg_jja@units +"(per std dev)"
+        climmean_vreg_jja  = vreg_jja(0,:,:)
+        climmean_prob_jja  = vreg_jja(0,:,:)
+        climmean_vreg_jja  = (/ rc /)
+        climmean_prob_jja  = (/(1-betainc(df/(df+tval^2),df/2.0,b))*100.0/) 
+        climmean_prob_jja  = where(ismissing(climmean_vreg_jja),climmean_vreg_jja@_FillValue,climmean_prob_jja)
+        climmean_vreg_jja@units = vreg_jja@units +"(per std dev)"
         delete([/rc,tval,df,b,vreg_jja/])
      end if
 
-     if (.not.all(ismissing(nino34_jja({llats1:llatn1},{llonw1:llone1})))) then
-       if (avg(nino34_jja({llats1:llatn1},{llonw1:llone1})).le.0) then
-           nino34_jja = nino34_jja*-1.
-           nino34_pc_jja = nino34_pc_jja*-1.
+     if (.not.all(ismissing(climmean_jja({llats1:llatn1},{llonw1:llone1})))) then
+       if (avg(climmean_jja({llats1:llatn1},{llonw1:llone1})).le.0) then
+           climmean_jja = climmean_jja*-1.
+           climmean_pc_jja = climmean_pc_jja*-1.
            if (vxreg_plot_flag.eq.0) then
-              nino34_vreg_jja = nino34_vreg_jja*-1.
+              climmean_vreg_jja = climmean_vreg_jja*-1.
            end if 
        end if 
      end if
 
      rc    = arr_jja(0,:,:)
-     rc    = (/escorc_n(nino34_pc_jja,arr_jja,0,0)/)
+     rc    = (/escorc_n(climmean_pc_jja,arr_jja,0,0)/)
      rc    = rc*rc*100.0
      pcvar = wgt_areaave_Wrap(rc({llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0)
-     nino34_jja@pcvar = tofloat(sprintf("%4.1f", pcvar))+"%"
+     climmean_jja@pcvar = tofloat(sprintf("%4.1f", pcvar))+"%"
      delete([/pcvar,rc/])
-     copy_VarCoords(nino34_pc_djf,nino34_pc_jja) 
+     copy_VarCoords(climmean_pc_djf,climmean_pc_jja) 
      delete([/pcts/])
  
      pcts = wgt_areaave_Wrap(arr_son(:,{llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0)
-     nino34_pc_son = dim_standardize(pcts,0)
-     nino34_son = arr_son(0,:,:)
-     nino34_son = (/ regCoef(nino34_pc_son,arr_son(lat|:,lon|:,time|:)) /)
+     climmean_pc_son = dim_standardize(pcts,0)
+     climmean_son = arr_son(0,:,:)
+     climmean_son = (/ regCoef(climmean_pc_son,arr_son(lat|:,lon|:,time|:)) /)
      if (vxreg_plot_flag.eq.0) then
-        rc        = regCoef_n(nino34_pc_son, vreg_son, 0, 0) ; rc(nlat,mlon)
+        rc        = regCoef_n(climmean_pc_son, vreg_son, 0, 0) ; rc(nlat,mlon)
         tval      = onedtond(rc@tval , dimsizes(rc))
         df        = onedtond(rc@nptxy, dimsizes(rc)) - 2
         b         = tval
         b         = 0.5
-        nino34_vreg_son  = vreg_son(0,:,:)
-        nino34_prob_son  = vreg_son(0,:,:)
-        nino34_vreg_son  = (/ rc /)
-        nino34_prob_son  = (/(1-betainc(df/(df+tval^2),df/2.0,b))*100.0/) 
-        nino34_prob_son  = where(ismissing(nino34_vreg_son),nino34_vreg_son@_FillValue,nino34_prob_son)
-        nino34_vreg_son@units = vreg_son@units +"(per std dev)"
+        climmean_vreg_son  = vreg_son(0,:,:)
+        climmean_prob_son  = vreg_son(0,:,:)
+        climmean_vreg_son  = (/ rc /)
+        climmean_prob_son  = (/(1-betainc(df/(df+tval^2),df/2.0,b))*100.0/) 
+        climmean_prob_son  = where(ismissing(climmean_vreg_son),climmean_vreg_son@_FillValue,climmean_prob_son)
+        climmean_vreg_son@units = vreg_son@units +"(per std dev)"
         delete([/rc,tval,df,b,vreg_son/])
      end if
 
-     if (.not.all(ismissing(nino34_son({llats1:llatn1},{llonw1:llone1})))) then
-       if (avg(nino34_son({llats1:llatn1},{llonw1:llone1})).le.0) then
-           nino34_son = nino34_son*-1.
-           nino34_pc_son = nino34_pc_son*-1.
+     if (.not.all(ismissing(climmean_son({llats1:llatn1},{llonw1:llone1})))) then
+       if (avg(climmean_son({llats1:llatn1},{llonw1:llone1})).le.0) then
+           climmean_son = climmean_son*-1.
+           climmean_pc_son = climmean_pc_son*-1.
            if (vxreg_plot_flag.eq.0) then
-              nino34_vreg_son = nino34_vreg_son*-1.
+              climmean_vreg_son = climmean_vreg_son*-1.
            end if 
        end if 
      end if
 
      rc    = arr_son(0,:,:)
-     rc    = (/escorc_n(nino34_pc_son,arr_son,0,0)/)
+     rc    = (/escorc_n(climmean_pc_son,arr_son,0,0)/)
      rc    = rc*rc*100.0
      pcvar = wgt_areaave_Wrap(rc({llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0)
-     nino34_son@pcvar = tofloat(sprintf("%4.1f", pcvar))+"%"
+     climmean_son@pcvar = tofloat(sprintf("%4.1f", pcvar))+"%"
      delete([/pcvar,rc/])
-     copy_VarCoords(nino34_pc_djf,nino34_pc_son) 
+     copy_VarCoords(climmean_pc_djf,climmean_pc_son) 
      delete([/pcts/])
 
      pcts = wgt_areaave_Wrap(arr_ann(:,{llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0)
-     nino34_pc_ann = dim_standardize(pcts,0)
-     nino34_ann = arr_ann(0,:,:)
-     nino34_ann = (/ regCoef(nino34_pc_ann,arr_ann(lat|:,lon|:,time|:)) /)
+     climmean_pc_ann = dim_standardize(pcts,0)
+     climmean_ann = arr_ann(0,:,:)
+     climmean_ann = (/ regCoef(climmean_pc_ann,arr_ann(lat|:,lon|:,time|:)) /)
      if (vxreg_plot_flag.eq.0) then
-        rc        = regCoef_n(nino34_pc_ann, vreg_ann, 0, 0) ; rc(nlat,mlon)
+        rc        = regCoef_n(climmean_pc_ann, vreg_ann, 0, 0) ; rc(nlat,mlon)
         tval      = onedtond(rc@tval , dimsizes(rc))
         df        = onedtond(rc@nptxy, dimsizes(rc)) - 2
         b         = tval
         b         = 0.5
-        nino34_vreg_ann  = vreg_ann(0,:,:)
-        nino34_prob_ann  = vreg_ann(0,:,:)
-        nino34_vreg_ann  = (/ rc /)
-        nino34_prob_ann  = (/(1-betainc(df/(df+tval^2),df/2.0,b))*100.0/) 
-        nino34_prob_ann  = where(ismissing(nino34_vreg_ann),nino34_vreg_ann@_FillValue,nino34_prob_ann)
-        nino34_vreg_ann@units = vreg_ann@units +"(per std dev)"
+        climmean_vreg_ann  = vreg_ann(0,:,:)
+        climmean_prob_ann  = vreg_ann(0,:,:)
+        climmean_vreg_ann  = (/ rc /)
+        climmean_prob_ann  = (/(1-betainc(df/(df+tval^2),df/2.0,b))*100.0/) 
+        climmean_prob_ann  = where(ismissing(climmean_vreg_ann),climmean_vreg_ann@_FillValue,climmean_prob_ann)
+        climmean_vreg_ann@units = vreg_ann@units +"(per std dev)"
         delete([/rc,tval,df,b,vreg_ann/])
      end if
 
-     if (.not.all(ismissing(nino34_ann({llats1:llatn1},{llonw1:llone1})))) then
-       if (avg(nino34_ann({llats1:llatn1},{llonw1:llone1})).le.0) then
-           nino34_ann = nino34_ann*-1.
-           nino34_pc_ann = nino34_pc_ann*-1.
+     if (.not.all(ismissing(climmean_ann({llats1:llatn1},{llonw1:llone1})))) then
+       if (avg(climmean_ann({llats1:llatn1},{llonw1:llone1})).le.0) then
+           climmean_ann = climmean_ann*-1.
+           climmean_pc_ann = climmean_pc_ann*-1.
            if (vxreg_plot_flag.eq.0) then
-              nino34_vreg_ann = nino34_vreg_ann*-1.
+              climmean_vreg_ann = climmean_vreg_ann*-1.
            end if 
        end if 
      end if
 
      rc    = arr_ann(0,:,:)
-     rc    = (/escorc_n(nino34_pc_ann,arr_ann,0,0)/)
+     rc    = (/escorc_n(climmean_pc_ann,arr_ann,0,0)/)
      rc    = rc*rc*100.0
      pcvar = wgt_areaave_Wrap(rc({llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0)
-     nino34_ann@pcvar = tofloat(sprintf("%4.1f", pcvar))+"%"
+     climmean_ann@pcvar = tofloat(sprintf("%4.1f", pcvar))+"%"
      delete([/pcvar,rc/])
-     copy_VarCoords(nino34_pc_djf,nino34_pc_ann) 
+     copy_VarCoords(climmean_pc_djf,climmean_pc_ann) 
      delete([/pcts/])
      
      if (COMPUTE_MODES_MON.eq."True") then     
         pcts = wgt_areaave_Wrap(arr(:,{llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0)
-        nino34_pc_mon = dim_standardize(pcts,0)
-        nino34_mon = arr(0,:,:)
-        nino34_mon = (/ regCoef(nino34_pc_mon,arr(lat|:,lon|:,time|:)) /)
+        climmean_pc_mon = dim_standardize(pcts,0)
+        climmean_mon = arr(0,:,:)
+        climmean_mon = (/ regCoef(climmean_pc_mon,arr(lat|:,lon|:,time|:)) /)
         if (vxreg_plot_flag.eq.0) then
-           rc           = regCoef_n(nino34_pc_mon, vreg, 0, 0) ; rc(nlat,mlon)
+           rc           = regCoef_n(climmean_pc_mon, vreg, 0, 0) ; rc(nlat,mlon)
            tval         = onedtond(rc@tval , dimsizes(rc))
            df           = onedtond(rc@nptxy, dimsizes(rc)) - 2
            b            = tval
            b            = 0.5
-           nino34_vreg_mon  = vreg(0,:,:)
-           nino34_prob_mon  = vreg(0,:,:)
-           nino34_vreg_mon  = (/ rc /)
-           nino34_prob_mon  = (/(1-betainc(df/(df+tval^2),df/2.0,b))*100.0/) 
-           nino34_prob_mon  = where(ismissing(nino34_vreg_mon),nino34_vreg_mon@_FillValue,nino34_prob_mon)
-           nino34_vreg_mon@units = vreg@units +"(per std dev)"
+           climmean_vreg_mon  = vreg(0,:,:)
+           climmean_prob_mon  = vreg(0,:,:)
+           climmean_vreg_mon  = (/ rc /)
+           climmean_prob_mon  = (/(1-betainc(df/(df+tval^2),df/2.0,b))*100.0/) 
+           climmean_prob_mon  = where(ismissing(climmean_vreg_mon),climmean_vreg_mon@_FillValue,climmean_prob_mon)
+           climmean_vreg_mon@units = vreg@units +"(per std dev)"
            delete([/rc,tval,df,b,vreg/])
         end if
 
-        if (.not.all(ismissing(nino34_mon({llats1:llatn1},{llonw1:llone1})))) then
-          if (avg(nino34_mon({llats1:llatn1},{llonw1:llone1})).le.0) then
-              nino34_mon = nino34_mon*-1.
-              nino34_pc_mon = nino34_pc_mon*-1.
+        if (.not.all(ismissing(climmean_mon({llats1:llatn1},{llonw1:llone1})))) then
+          if (avg(climmean_mon({llats1:llatn1},{llonw1:llone1})).le.0) then
+              climmean_mon = climmean_mon*-1.
+              climmean_pc_mon = climmean_pc_mon*-1.
               if (vxreg_plot_flag.eq.0) then
-                 nino34_vreg_mon = nino34_vreg_mon*-1.
+                 climmean_vreg_mon = climmean_vreg_mon*-1.
               end if
           end if
         end if
 
         rc    = arr(0,:,:)
-        rc    = (/escorc_n(nino34_pc_mon,arr,0,0)/)
+        rc    = (/escorc_n(climmean_pc_mon,arr,0,0)/)
         rc    = rc*rc*100.0
         pcvar = wgt_areaave_Wrap(rc({llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0)
-        nino34_mon@pcvar = tofloat(sprintf("%4.1f", pcvar))+"%"
+        climmean_mon@pcvar = tofloat(sprintf("%4.1f", pcvar))+"%"
         delete([/pcvar,rc/])
-        nino34_pc_mon!0 = "time"
-        nino34_pc_mon&time = arr&time   
+        climmean_pc_mon!0 = "time"
+        climmean_pc_mon&time = arr&time   
         delete([/pcts,arr/])
      end if
      delete([/arr_djf,arr_mam,arr_jja,arr_son,arr_ann/])
@@ -514,7 +504,7 @@ begin
            do gg = 0,dimsizes(bc)-1
               modname = str_sub_str(modname,bc(gg),"_")
            end do
-           fn = getenv("OUTDIR")+modname+".cvdp_data.sst.nino34."+vnm+"."+syear_reg(ee)+"-"+eyear_reg(ee)+".nc"
+           fn = getenv("OUTDIR")+modname+".cvdp_data.sst.climmean."+vnm+"."+syear_reg(ee)+"-"+eyear_reg(ee)+".nc"
            if (.not.isfilepresent2(fn)) then
               z = addfile(fn,"c")
               z@source = "NCAR Climate Analysis Section's Climate Variability Diagnostics Package v"+getenv("VERSION")
@@ -533,61 +523,61 @@ begin
               z = addfile(fn,"w")
            end if
 
-           z->nino34_timeseries_djf = set_varAtts(nino34_pc_djf,"ENSO (Nino34) normalized principal component timeseries (DJF)","1","")
-           z->nino34_timeseries_mam = set_varAtts(nino34_pc_mam,"ENSO (Nino34) normalized principal component timeseries (MAM)","1","")
-           z->nino34_timeseries_jja = set_varAtts(nino34_pc_jja,"ENSO (Nino34) normalized principal component timeseries (JJA)","1","")
-           z->nino34_timeseries_son = set_varAtts(nino34_pc_son,"ENSO (Nino34) normalized principal component timeseries (SON)","1","")
-           z->nino34_timeseries_ann = set_varAtts(nino34_pc_ann,"ENSO (Nino34) normalized principal component timeseries (annual)","1","")
-           vout = "nino34_"+vnm+"_regression_djf"
+           z->climmean_timeseries_djf = set_varAtts(climmean_pc_djf,"ENSO (Nino34) normalized principal component timeseries (DJF)","1","")
+           z->climmean_timeseries_mam = set_varAtts(climmean_pc_mam,"ENSO (Nino34) normalized principal component timeseries (MAM)","1","")
+           z->climmean_timeseries_jja = set_varAtts(climmean_pc_jja,"ENSO (Nino34) normalized principal component timeseries (JJA)","1","")
+           z->climmean_timeseries_son = set_varAtts(climmean_pc_son,"ENSO (Nino34) normalized principal component timeseries (SON)","1","")
+           z->climmean_timeseries_ann = set_varAtts(climmean_pc_ann,"ENSO (Nino34) normalized principal component timeseries (annual)","1","")
+           vout = "climmean_"+vnm+"_regression_djf"
            vosr = vnm+" regression onto ENSO (Nino34) principal component timeseries (DJF)"
-           z->$vout$ = set_varAtts(nino34_vreg_djf,vosr,"","") 
-           vout = "nino34_"+vnm+"_regression_mam"
+           z->$vout$ = set_varAtts(climmean_vreg_djf,vosr,"","") 
+           vout = "climmean_"+vnm+"_regression_mam"
            vosr = vnm+" regression onto ENSO (Nino34) principal component timeseries (MAM)"
-           z->$vout$ = set_varAtts(nino34_vreg_mam,vosr,"","")  
-           vout = "nino34_"+vnm+"_regression_jja"
+           z->$vout$ = set_varAtts(climmean_vreg_mam,vosr,"","")  
+           vout = "climmean_"+vnm+"_regression_jja"
            vosr = vnm+" regression onto ENSO (Nino34) principal component timeseries (JJA)"
-           z->$vout$ = set_varAtts(nino34_vreg_jja,vosr,"","")  
-           vout = "nino34_"+vnm+"_regression_son"
+           z->$vout$ = set_varAtts(climmean_vreg_jja,vosr,"","")  
+           vout = "climmean_"+vnm+"_regression_son"
            vosr = vnm+" regression onto ENSO (Nino34) principal component timeseries (SON)"
-           z->$vout$ = set_varAtts(nino34_vreg_son,vosr,"","")  
-           vout = "nino34_"+vnm+"_regression_ann"
+           z->$vout$ = set_varAtts(climmean_vreg_son,vosr,"","")  
+           vout = "climmean_"+vnm+"_regression_ann"
            vosr = vnm+" regression onto ENSO (Nino34) principal component timeseries (annual)"
-           z->$vout$ = set_varAtts(nino34_vreg_ann,vosr,"","")  
+           z->$vout$ = set_varAtts(climmean_vreg_ann,vosr,"","")  
 
-           vout = "nino34_"+vnm+"_regprob_djf"
+           vout = "climmean_"+vnm+"_regprob_djf"
            vosr = vnm+" ENSO (Nino34) regression t-test probility(DJF)"
-           z->$vout$ = set_varAtts(nino34_prob_djf,vosr,"","")
-           vout = "nino34_"+vnm+"_regprob_mam"
+           z->$vout$ = set_varAtts(climmean_prob_djf,vosr,"","")
+           vout = "climmean_"+vnm+"_regprob_mam"
            vosr = vnm+" ENSO (Nino34) regression t-test probility(MAM)"
-           z->$vout$ = set_varAtts(nino34_prob_mam,vosr,"","")
-           vout = "nino34_"+vnm+"_regprob_jja"
+           z->$vout$ = set_varAtts(climmean_prob_mam,vosr,"","")
+           vout = "climmean_"+vnm+"_regprob_jja"
            vosr = vnm+" ENSO (Nino34) regression t-test probility(JJA)"
-           z->$vout$ = set_varAtts(nino34_prob_jja,vosr,"","")
-           vout = "nino34_"+vnm+"_regprob_son"
+           z->$vout$ = set_varAtts(climmean_prob_jja,vosr,"","")
+           vout = "climmean_"+vnm+"_regprob_son"
            vosr = vnm+" ENSO (Nino34) regression t-test probility(SON)"
-           z->$vout$ = set_varAtts(nino34_prob_son,vosr,"","")
-           vout = "nino34_"+vnm+"_regprob_ann"
+           z->$vout$ = set_varAtts(climmean_prob_son,vosr,"","")
+           vout = "climmean_"+vnm+"_regprob_ann"
            vosr = vnm+" ENSO (Nino34) regression t-test probility(annual)"
-           z->$vout$ = set_varAtts(nino34_prob_ann,vosr,"","")
+           z->$vout$ = set_varAtts(climmean_prob_ann,vosr,"","")
 
            if (COMPUTE_MODES_MON.eq."True") then   
 
-              z->nino34_timeseries_mon  = set_varAtts(nino34_pc_mon,"ENSO (Nino34) principal component timeseries (monthly)","","")
+              z->climmean_timeseries_mon  = set_varAtts(climmean_pc_mon,"ENSO (Nino34) principal component timeseries (monthly)","","")
 
-              vout = "nino34_"+vnm+"_regression_mon"
+              vout = "climmean_"+vnm+"_regression_mon"
               vosr = vnm+" regression onto ENSO (Nino34) principal component timeseries (monthly)"
-              z->$vout$ = set_varAtts(nino34_vreg_mon,vosr,"","")
+              z->$vout$ = set_varAtts(climmean_vreg_mon,vosr,"","")
 
-              vout = "nino34_"+vnm+"_regprob_mon"
+              vout = "climmean_"+vnm+"_regprob_mon"
               vosr = vnm+" ENSO (Nino34) regression t-test probility(monthly)"
-              z->$vout$ = set_varAtts(nino34_prob_mon,vosr,"","")
+              z->$vout$ = set_varAtts(climmean_prob_mon,vosr,"","")
 
            end if
            delete(z)
            delete([/modname,fn/])
         end if
      end if     
-     delete([/nino34_pc_djf,nino34_pc_jja,nino34_pc_mam,nino34_pc_son,nino34_pc_ann,nino34_pc_mon/])
+     delete([/climmean_pc_djf,climmean_pc_jja,climmean_pc_mam,climmean_pc_son,climmean_pc_ann,climmean_pc_mon/])
 
 ;========================================================================
      res = True
@@ -656,76 +646,76 @@ begin
      opt@gsnShadeFillDotSizeF  = 0.002
     
      if (isfilepresent2("obs_ts").and.ee.eq.0) then    ; for pattern correlation table. Save entire lat/lon array
-        patcor_vreg_nino34_djf = new((/nsim,dimsizes(nino34_vreg_djf&lat),dimsizes(nino34_vreg_djf&lon)/),typeof(nino34_vreg_djf))
-        patcor_vreg_nino34_djf!1 = "lat"
-        patcor_vreg_nino34_djf&lat = nino34_vreg_djf&lat
-        patcor_vreg_nino34_djf!2 = "lon"
-        patcor_vreg_nino34_djf&lon = nino34_vreg_djf&lon
-        patcor_vreg_nino34_mam = patcor_vreg_nino34_djf
-        patcor_vreg_nino34_jja = patcor_vreg_nino34_djf
-        patcor_vreg_nino34_son = patcor_vreg_nino34_djf
-        patcor_vreg_nino34_ann = patcor_vreg_nino34_djf
-        patcor_vreg_nino34_djf(ee,:,:) = (/ nino34_vreg_djf /)
-        patcor_vreg_nino34_mam(ee,:,:) = (/ nino34_vreg_mam /)
-        patcor_vreg_nino34_jja(ee,:,:) = (/ nino34_vreg_jja /)
-        patcor_vreg_nino34_son(ee,:,:) = (/ nino34_vreg_son /)
-        patcor_vreg_nino34_ann(ee,:,:) = (/ nino34_vreg_ann /)
+        patcor_vreg_climmean_djf = new((/nsim,dimsizes(climmean_vreg_djf&lat),dimsizes(climmean_vreg_djf&lon)/),typeof(climmean_vreg_djf))
+        patcor_vreg_climmean_djf!1 = "lat"
+        patcor_vreg_climmean_djf&lat = climmean_vreg_djf&lat
+        patcor_vreg_climmean_djf!2 = "lon"
+        patcor_vreg_climmean_djf&lon = climmean_vreg_djf&lon
+        patcor_vreg_climmean_mam = patcor_vreg_climmean_djf
+        patcor_vreg_climmean_jja = patcor_vreg_climmean_djf
+        patcor_vreg_climmean_son = patcor_vreg_climmean_djf
+        patcor_vreg_climmean_ann = patcor_vreg_climmean_djf
+        patcor_vreg_climmean_djf(ee,:,:) = (/ climmean_vreg_djf /)
+        patcor_vreg_climmean_mam(ee,:,:) = (/ climmean_vreg_mam /)
+        patcor_vreg_climmean_jja(ee,:,:) = (/ climmean_vreg_jja /)
+        patcor_vreg_climmean_son(ee,:,:) = (/ climmean_vreg_son /)
+        patcor_vreg_climmean_ann(ee,:,:) = (/ climmean_vreg_ann /)
         if (COMPUTE_MODES_MON.eq."True") then
-          patcor_vreg_nino34_mon = patcor_vreg_nino34_djf
-          patcor_vreg_nino34_mon(ee,:,:) = (/ nino34_vreg_mon /)
+          patcor_vreg_climmean_mon = patcor_vreg_climmean_djf
+          patcor_vreg_climmean_mon(ee,:,:) = (/ climmean_vreg_mon /)
         end if 
      end if
-     if (isfilepresent2("obs_ts").and.ee.ge.1.and.isvar("patcor_vreg_nino34_djf")) then       
-        patcor_vreg_nino34_djf(ee,:,:) = (/ totype(linint2(nino34_vreg_djf&lon,nino34_vreg_djf&lat,nino34_vreg_djf,True,patcor_vreg_nino34_djf&lon,patcor_vreg_nino34_djf&lat,0),typeof(patcor_vreg_nino34_djf)) /)
-        patcor_vreg_nino34_mam(ee,:,:) = (/ totype(linint2(nino34_vreg_mam&lon,nino34_vreg_mam&lat,nino34_vreg_mam,True,patcor_vreg_nino34_mam&lon,patcor_vreg_nino34_mam&lat,0),typeof(patcor_vreg_nino34_mam)) /)
-        patcor_vreg_nino34_jja(ee,:,:) = (/ totype(linint2(nino34_vreg_jja&lon,nino34_vreg_jja&lat,nino34_vreg_jja,True,patcor_vreg_nino34_jja&lon,patcor_vreg_nino34_jja&lat,0),typeof(patcor_vreg_nino34_jja)) /)
-        patcor_vreg_nino34_son(ee,:,:) = (/ totype(linint2(nino34_vreg_son&lon,nino34_vreg_son&lat,nino34_vreg_son,True,patcor_vreg_nino34_son&lon,patcor_vreg_nino34_son&lat,0),typeof(patcor_vreg_nino34_son)) /)
-        patcor_vreg_nino34_ann(ee,:,:) = (/ totype(linint2(nino34_vreg_ann&lon,nino34_vreg_ann&lat,nino34_vreg_ann,True,patcor_vreg_nino34_ann&lon,patcor_vreg_nino34_ann&lat,0),typeof(patcor_vreg_nino34_ann)) /)
+     if (isfilepresent2("obs_ts").and.ee.ge.1.and.isvar("patcor_vreg_climmean_djf")) then       
+        patcor_vreg_climmean_djf(ee,:,:) = (/ totype(linint2(climmean_vreg_djf&lon,climmean_vreg_djf&lat,climmean_vreg_djf,True,patcor_vreg_climmean_djf&lon,patcor_vreg_climmean_djf&lat,0),typeof(patcor_vreg_climmean_djf)) /)
+        patcor_vreg_climmean_mam(ee,:,:) = (/ totype(linint2(climmean_vreg_mam&lon,climmean_vreg_mam&lat,climmean_vreg_mam,True,patcor_vreg_climmean_mam&lon,patcor_vreg_climmean_mam&lat,0),typeof(patcor_vreg_climmean_mam)) /)
+        patcor_vreg_climmean_jja(ee,:,:) = (/ totype(linint2(climmean_vreg_jja&lon,climmean_vreg_jja&lat,climmean_vreg_jja,True,patcor_vreg_climmean_jja&lon,patcor_vreg_climmean_jja&lat,0),typeof(patcor_vreg_climmean_jja)) /)
+        patcor_vreg_climmean_son(ee,:,:) = (/ totype(linint2(climmean_vreg_son&lon,climmean_vreg_son&lat,climmean_vreg_son,True,patcor_vreg_climmean_son&lon,patcor_vreg_climmean_son&lat,0),typeof(patcor_vreg_climmean_son)) /)
+        patcor_vreg_climmean_ann(ee,:,:) = (/ totype(linint2(climmean_vreg_ann&lon,climmean_vreg_ann&lat,climmean_vreg_ann,True,patcor_vreg_climmean_ann&lon,patcor_vreg_climmean_ann&lat,0),typeof(patcor_vreg_climmean_ann)) /)
         if (COMPUTE_MODES_MON.eq."True") then
-          patcor_vreg_nino34_mon(ee,:,:) = (/ totype(linint2(nino34_vreg_mon&lon,nino34_vreg_mon&lat,nino34_vreg_mon,True,patcor_vreg_nino34_mon&lon,patcor_vreg_nino34_mon&lat,0),typeof(patcor_vreg_nino34_mon)) /)
+          patcor_vreg_climmean_mon(ee,:,:) = (/ totype(linint2(climmean_vreg_mon&lon,climmean_vreg_mon&lat,climmean_vreg_mon,True,patcor_vreg_climmean_mon&lon,patcor_vreg_climmean_mon&lat,0),typeof(patcor_vreg_climmean_mon)) /)
         end if 
      end if
       
      if (vxreg_plot_flag.eq.0) then
         res@gsnCenterString = names_reg(ee)
         res@gsnRightString = ""
-        lbunitstr = nino34_vreg_djf@units
-        res@gsnRightString = nino34_djf@pcvar
-        reg_nino34_djf(ee) = gsn_csm_contour_map(wks_nino34,nino34_vreg_djf,res)
-        res@gsnRightString = nino34_mam@pcvar
-        reg_nino34_mam(ee) = gsn_csm_contour_map(wks_nino34,nino34_vreg_mam,res)
-        res@gsnRightString = nino34_jja@pcvar
-        reg_nino34_jja(ee) = gsn_csm_contour_map(wks_nino34,nino34_vreg_jja,res)
-        res@gsnRightString = nino34_son@pcvar
-        reg_nino34_son(ee) = gsn_csm_contour_map(wks_nino34,nino34_vreg_son,res)
-        res@gsnRightString = nino34_ann@pcvar
-        reg_nino34_ann(ee) = gsn_csm_contour_map(wks_nino34,nino34_vreg_ann,res)     
-        delete([/nino34_vreg_djf,nino34_vreg_mam,nino34_vreg_jja,nino34_vreg_son,nino34_vreg_ann/])
-        o_djf = gsn_csm_contour(wks_nino34,nino34_prob_djf,res2)
+        lbunitstr = climmean_vreg_djf@units
+        res@gsnRightString = climmean_djf@pcvar
+        reg_climmean_djf(ee) = gsn_csm_contour_map(wks_climmean,climmean_vreg_djf,res)
+        res@gsnRightString = climmean_mam@pcvar
+        reg_climmean_mam(ee) = gsn_csm_contour_map(wks_climmean,climmean_vreg_mam,res)
+        res@gsnRightString = climmean_jja@pcvar
+        reg_climmean_jja(ee) = gsn_csm_contour_map(wks_climmean,climmean_vreg_jja,res)
+        res@gsnRightString = climmean_son@pcvar
+        reg_climmean_son(ee) = gsn_csm_contour_map(wks_climmean,climmean_vreg_son,res)
+        res@gsnRightString = climmean_ann@pcvar
+        reg_climmean_ann(ee) = gsn_csm_contour_map(wks_climmean,climmean_vreg_ann,res)     
+        delete([/climmean_vreg_djf,climmean_vreg_mam,climmean_vreg_jja,climmean_vreg_son,climmean_vreg_ann/])
+        o_djf = gsn_csm_contour(wks_climmean,climmean_prob_djf,res2)
         o_djf = gsn_contour_shade(o_djf,-999,95,opt) 
-        o_mam = gsn_csm_contour(wks_nino34,nino34_prob_mam,res2)
+        o_mam = gsn_csm_contour(wks_climmean,climmean_prob_mam,res2)
         o_mam = gsn_contour_shade(o_mam,-999,95,opt) 
-        o_jja = gsn_csm_contour(wks_nino34,nino34_prob_jja,res2)
+        o_jja = gsn_csm_contour(wks_climmean,climmean_prob_jja,res2)
         o_jja = gsn_contour_shade(o_jja,-999,95,opt)
-        o_son = gsn_csm_contour(wks_nino34,nino34_prob_son,res2)
+        o_son = gsn_csm_contour(wks_climmean,climmean_prob_son,res2)
         o_son = gsn_contour_shade(o_son,-999,95,opt)
-        o_ann = gsn_csm_contour(wks_nino34,nino34_prob_ann,res2)
+        o_ann = gsn_csm_contour(wks_climmean,climmean_prob_ann,res2)
         o_ann = gsn_contour_shade(o_ann,-999,95,opt)
-        delete([/nino34_prob_djf,nino34_prob_mam,nino34_prob_jja,nino34_prob_son,nino34_prob_ann/])
-        overlay(reg_nino34_djf(ee),o_djf)
-        overlay(reg_nino34_mam(ee),o_mam)
-        overlay(reg_nino34_jja(ee),o_jja)
-        overlay(reg_nino34_son(ee),o_son)
-        overlay(reg_nino34_ann(ee),o_ann)
+        delete([/climmean_prob_djf,climmean_prob_mam,climmean_prob_jja,climmean_prob_son,climmean_prob_ann/])
+        overlay(reg_climmean_djf(ee),o_djf)
+        overlay(reg_climmean_mam(ee),o_mam)
+        overlay(reg_climmean_jja(ee),o_jja)
+        overlay(reg_climmean_son(ee),o_son)
+        overlay(reg_climmean_ann(ee),o_ann)
         delete([/o_djf,o_mam,o_jja,o_son,o_ann/])
         if (COMPUTE_MODES_MON.eq."True") then 
-           res@gsnRightString = nino34_mon@pcvar                   
-           reg_nino34_mon(ee) = gsn_csm_contour_map(wks_nino34,nino34_vreg_mon,res)
-           delete([/nino34_vreg_mon/])
-           o_mon = gsn_csm_contour(wks_nino34,nino34_prob_mon,res2)
+           res@gsnRightString = climmean_mon@pcvar                   
+           reg_climmean_mon(ee) = gsn_csm_contour_map(wks_climmean,climmean_vreg_mon,res)
+           delete([/climmean_vreg_mon/])
+           o_mon = gsn_csm_contour(wks_climmean,climmean_prob_mon,res2)
            o_mon = gsn_contour_shade(o_mon,-999,95,opt)
-           overlay(reg_nino34_mon(ee),o_mon)
-           delete([/o_mon,nino34_prob_mon/])
+           overlay(reg_climmean_mon(ee),o_mon)
+           delete([/o_mon,climmean_prob_mon/])
         end if
      
      end if
@@ -740,8 +730,8 @@ begin
      delete(clim_eyear)
   end if
 
-  if (isvar("patcor_vreg_nino34_djf")) then    ; for pattern correlation table
-    mods = (/"nino34"/)
+  if (isvar("patcor_vreg_climmean_djf")) then    ; for pattern correlation table
+    mods = (/"climmean"/)
     if (COMPUTE_MODES_MON.eq."True") then
       seas = (/"djf","mam","jja","son","ann","mon"/)
     else
@@ -750,23 +740,23 @@ begin
     do kk = 0,dimsizes(seas)-1
      do ll = 0,dimsizes(mods)-1
       vreg_nam  = "patcor_vreg_"+mods(ll)+"_"+seas(kk)
-      if(vreg_nam.eq."patcor_vreg_nino34_djf") then
-        patcor_vreg = patcor_vreg_nino34_djf
+      if(vreg_nam.eq."patcor_vreg_climmean_djf") then
+        patcor_vreg = patcor_vreg_climmean_djf
       end if
-      if(vreg_nam.eq."patcor_vreg_nino34_mam") then
-        patcor_vreg = patcor_vreg_nino34_mam
+      if(vreg_nam.eq."patcor_vreg_climmean_mam") then
+        patcor_vreg = patcor_vreg_climmean_mam
       end if
-      if(vreg_nam.eq."patcor_vreg_nino34_jja") then
-        patcor_vreg = patcor_vreg_nino34_jja
+      if(vreg_nam.eq."patcor_vreg_climmean_jja") then
+        patcor_vreg = patcor_vreg_climmean_jja
       end if
-      if(vreg_nam.eq."patcor_vreg_nino34_son") then
-        patcor_vreg = patcor_vreg_nino34_son
+      if(vreg_nam.eq."patcor_vreg_climmean_son") then
+        patcor_vreg = patcor_vreg_climmean_son
       end if
-      if(vreg_nam.eq."patcor_vreg_nino34_ann") then
-        patcor_vreg = patcor_vreg_nino34_ann
+      if(vreg_nam.eq."patcor_vreg_climmean_ann") then
+        patcor_vreg = patcor_vreg_climmean_ann
       end if
-      if(vreg_nam.eq."patcor_vreg_nino34_mon") then
-        patcor_vreg = patcor_vreg_nino34_mon
+      if(vreg_nam.eq."patcor_vreg_climmean_mon") then
+        patcor_vreg = patcor_vreg_climmean_mon
       end if
       clat = cos(0.01745329*patcor_vreg&lat)
       clat!0 = "lat"
@@ -797,7 +787,7 @@ begin
          format3 = "%4.2f"
          line3 = line3+" "+ntb
          line4 = line4+" "+ntc
-         if (all(ismissing(patcor_vreg_nino34_djf(hh,:,:)))) then
+         if (all(ismissing(patcor_vreg_climmean_djf(hh,:,:)))) then
             finpr = finpr+sprintf(format2,9.99)+"/"+sprintf(format3,9.99)
          else
             finpr = finpr+sprintf(format2,(pattern_cor(patcor_vreg(0,:,:),patcor_vreg(hh,:,:),clat(:),0)))+"/"+sprintf(format3,(wgt_arearmse(patcor_vreg(0,:,:),patcor_vreg(hh,:,:),clat(:),1.0,0)))
@@ -808,21 +798,21 @@ begin
         print("Metrics table warning: Not creating regpatt_metrics.table as size of comparison results in a invalid ascii row size.")
      else
         if(kk.eq.0.and.ll.eq.0) then
-          write_table(getenv("OUTDIR")+"regpatt_metrics.sst.nino34_"+vnm+".txt","w",[/header/],"%s")
-          write_table(getenv("OUTDIR")+"regpatt_metrics.sst.nino34_"+vnm+".txt","a",[/line3/],"%s")
-          write_table(getenv("OUTDIR")+"regpatt_metrics.sst.nino34_"+vnm+".txt","a",[/line4/],"%s")
-          write_table(getenv("OUTDIR")+"regpatt_metrics.sst.nino34_"+vnm+".txt","a",[/finpr/],"%s")
+          write_table(getenv("OUTDIR")+"regpatt_metrics.sst.climmean_"+vnm+".txt","w",[/header/],"%s")
+          write_table(getenv("OUTDIR")+"regpatt_metrics.sst.climmean_"+vnm+".txt","a",[/line3/],"%s")
+          write_table(getenv("OUTDIR")+"regpatt_metrics.sst.climmean_"+vnm+".txt","a",[/line4/],"%s")
+          write_table(getenv("OUTDIR")+"regpatt_metrics.sst.climmean_"+vnm+".txt","a",[/finpr/],"%s")
         else
-          write_table(getenv("OUTDIR")+"regpatt_metrics.sst.nino34_"+vnm+".txt","a",[/finpr/],"%s")
+          write_table(getenv("OUTDIR")+"regpatt_metrics.sst.climmean_"+vnm+".txt","a",[/finpr/],"%s")
         end if
      end if
      delete([/line3,line4,format2,format3,nchar,ntc,clat,dimY,ntb,header/])
      end do
     end do
     delete([/mods,seas/])
-    delete([/patcor_vreg_nino34_djf,patcor_vreg_nino34_mam,patcor_vreg_nino34_jja,patcor_vreg_nino34_son,patcor_vreg_nino34_ann/])
+    delete([/patcor_vreg_climmean_djf,patcor_vreg_climmean_mam,patcor_vreg_climmean_jja,patcor_vreg_climmean_son,patcor_vreg_climmean_ann/])
     if (COMPUTE_MODES_MON.eq."True") then
-      delete([/patcor_vreg_nino34_mon/])
+      delete([/patcor_vreg_climmean_mon/])
     end if
   end if 
  
@@ -870,52 +860,52 @@ begin
      txt0 = str_upper(vnm)
      panres@lbTitleString = txt0 + " [" + lbunitstr +"]"  
      panres@txString = "ENSO (Nino34) Regressions (DJF)" 
-     gsn_panel2(wks_nino34,reg_nino34_djf,(/nrow,ncol/),panres)
-     delete(reg_nino34_djf)
+     gsn_panel2(wks_climmean,reg_climmean_djf,(/nrow,ncol/),panres)
+     delete(reg_climmean_djf)
      panres@txString = "ENSO (Nino34) Regressions (MAM)"
-     gsn_panel2(wks_nino34,reg_nino34_mam,(/nrow,ncol/),panres)
-     delete(reg_nino34_mam)
+     gsn_panel2(wks_climmean,reg_climmean_mam,(/nrow,ncol/),panres)
+     delete(reg_climmean_mam)
      panres@txString = "ENSO (Nino34) Regressions (JJA)"
-     gsn_panel2(wks_nino34,reg_nino34_jja,(/nrow,ncol/),panres)
-     delete(reg_nino34_jja)
+     gsn_panel2(wks_climmean,reg_climmean_jja,(/nrow,ncol/),panres)
+     delete(reg_climmean_jja)
      panres@txString = "ENSO (Nino34) Regressions (SON)"
-     gsn_panel2(wks_nino34,reg_nino34_son,(/nrow,ncol/),panres)
-     delete(reg_nino34_son)
+     gsn_panel2(wks_climmean,reg_climmean_son,(/nrow,ncol/),panres)
+     delete(reg_climmean_son)
      panres@txString = "ENSO (Nino34) Regressions (Annual)"
-     gsn_panel2(wks_nino34,reg_nino34_ann,(/nrow,ncol/),panres)
-     delete(reg_nino34_ann)
+     gsn_panel2(wks_climmean,reg_climmean_ann,(/nrow,ncol/),panres)
+     delete(reg_climmean_ann)
      if (COMPUTE_MODES_MON.eq."True") then    
         panres@txString = "ENSO (Nino34) Regressions (Monthly)"
-        gsn_panel2(wks_nino34,reg_nino34_mon,(/nrow,ncol/),panres)
-        delete(reg_nino34_mon)
+        gsn_panel2(wks_climmean,reg_climmean_mon,(/nrow,ncol/),panres)
+        delete(reg_climmean_mon)
      end if
-     delete(wks_nino34)
+     delete(wks_climmean)
   end if
   
 ;--------------------------------------------------------------------------------------------------
   OUTDIR = getenv("OUTDIR") 
   if (wks_type.eq."png") then       
      if (vxreg_frame.eq.0) then
-        system("mv "+OUTDIR+"nino34.vxreg.000001.png "+OUTDIR+"nino34."+vnm+"reg.djf.png")
-        system("mv "+OUTDIR+"nino34.vxreg.000002.png "+OUTDIR+"nino34."+vnm+"reg.mam.png")
-        system("mv "+OUTDIR+"nino34.vxreg.000003.png "+OUTDIR+"nino34."+vnm+"reg.jja.png")
-        system("mv "+OUTDIR+"nino34.vxreg.000004.png "+OUTDIR+"nino34."+vnm+"reg.son.png")
-        system("mv "+OUTDIR+"nino34.vxreg.000005.png "+OUTDIR+"nino34."+vnm+"reg.ann.png")
+        system("mv "+OUTDIR+"climmean.vxreg.000001.png "+OUTDIR+"climmean."+vnm+"reg.djf.png")
+        system("mv "+OUTDIR+"climmean.vxreg.000002.png "+OUTDIR+"climmean."+vnm+"reg.mam.png")
+        system("mv "+OUTDIR+"climmean.vxreg.000003.png "+OUTDIR+"climmean."+vnm+"reg.jja.png")
+        system("mv "+OUTDIR+"climmean.vxreg.000004.png "+OUTDIR+"climmean."+vnm+"reg.son.png")
+        system("mv "+OUTDIR+"climmean.vxreg.000005.png "+OUTDIR+"climmean."+vnm+"reg.ann.png")
         if (COMPUTE_MODES_MON.eq."True") then
-          system("mv "+OUTDIR+"nino34.vxreg.000006.png "+OUTDIR+"nino34."+vnm+"reg.mon.png")   
+          system("mv "+OUTDIR+"climmean.vxreg.000006.png "+OUTDIR+"climmean."+vnm+"reg.mon.png")   
         end if 
      end if
 
   else     
-     system("psplit "+OUTDIR+"nino34.vxreg.ps "+OUTDIR+"vx_sp")
+     system("psplit "+OUTDIR+"climmean.vxreg.ps "+OUTDIR+"vx_sp")
      if (vxreg_frame.eq.0) then
-        system("mv "+OUTDIR+"vx_sp0001.ps "+OUTDIR+"nino34."+vnm+"reg.djf.ps") 
-        system("mv "+OUTDIR+"vx_sp0002.ps "+OUTDIR+"nino34."+vnm+"reg.mam.ps") 
-        system("mv "+OUTDIR+"vx_sp0003.ps "+OUTDIR+"nino34."+vnm+"reg.jja.ps") 
-        system("mv "+OUTDIR+"vx_sp0004.ps "+OUTDIR+"nino34."+vnm+"reg.son.ps") 
-        system("mv "+OUTDIR+"vx_sp0005.ps "+OUTDIR+"nino34."+vnm+"reg.ann.ps")
+        system("mv "+OUTDIR+"vx_sp0001.ps "+OUTDIR+"climmean."+vnm+"reg.djf.ps") 
+        system("mv "+OUTDIR+"vx_sp0002.ps "+OUTDIR+"climmean."+vnm+"reg.mam.ps") 
+        system("mv "+OUTDIR+"vx_sp0003.ps "+OUTDIR+"climmean."+vnm+"reg.jja.ps") 
+        system("mv "+OUTDIR+"vx_sp0004.ps "+OUTDIR+"climmean."+vnm+"reg.son.ps") 
+        system("mv "+OUTDIR+"vx_sp0005.ps "+OUTDIR+"climmean."+vnm+"reg.ann.ps")
         if (COMPUTE_MODES_MON.eq."True") then
-           system("mv "+OUTDIR+"vx_sp0006.ps "+OUTDIR+"nino34."+vnm+"reg.mon.ps") 
+           system("mv "+OUTDIR+"vx_sp0006.ps "+OUTDIR+"climmean."+vnm+"reg.mon.ps") 
         end if
      end if
 
@@ -924,6 +914,6 @@ begin
   delete([/vnm,lmsk,nsim_reg,names_reg,paths_reg,syear_reg,syear_reg,eyear_reg,nyr_reg,vrfac/])
  end do 
     
- print("Finished: sst.nino34_regpatt.ncl")
+ print("Finished: metrics_clim.pcor_rmse.ncl")
 
 end  
