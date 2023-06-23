@@ -578,53 +578,53 @@ begin
               z = addfile(fn,"w")
            end if
 
-           z->ipo_timeseries_djf = set_varAtts(ipo_pc_djf,"ENSO (Nino34) normalized principal component timeseries (DJF)","1","")
-           z->ipo_timeseries_mam = set_varAtts(ipo_pc_mam,"ENSO (Nino34) normalized principal component timeseries (MAM)","1","")
-           z->ipo_timeseries_jja = set_varAtts(ipo_pc_jja,"ENSO (Nino34) normalized principal component timeseries (JJA)","1","")
-           z->ipo_timeseries_son = set_varAtts(ipo_pc_son,"ENSO (Nino34) normalized principal component timeseries (SON)","1","")
-           z->ipo_timeseries_ann = set_varAtts(ipo_pc_ann,"ENSO (Nino34) normalized principal component timeseries (annual)","1","")
+           z->ipo_timeseries_djf = set_varAtts(ipo_pc_djf,"IPO normalized principal component timeseries (DJF)","1","")
+           z->ipo_timeseries_mam = set_varAtts(ipo_pc_mam,"IPO normalized principal component timeseries (MAM)","1","")
+           z->ipo_timeseries_jja = set_varAtts(ipo_pc_jja,"IPO normalized principal component timeseries (JJA)","1","")
+           z->ipo_timeseries_son = set_varAtts(ipo_pc_son,"IPO normalized principal component timeseries (SON)","1","")
+           z->ipo_timeseries_ann = set_varAtts(ipo_pc_ann,"IPO normalized principal component timeseries (annual)","1","")
            vout = "ipo_"+vnm+"_regression_djf"
-           vosr = vnm+" regression onto ENSO (Nino34) principal component timeseries (DJF)"
+           vosr = vnm+" regression onto IPO principal component timeseries (DJF)"
            z->$vout$ = set_varAtts(ipo_vreg_djf,vosr,"","") 
            vout = "ipo_"+vnm+"_regression_mam"
-           vosr = vnm+" regression onto ENSO (Nino34) principal component timeseries (MAM)"
+           vosr = vnm+" regression onto IPO principal component timeseries (MAM)"
            z->$vout$ = set_varAtts(ipo_vreg_mam,vosr,"","")  
            vout = "ipo_"+vnm+"_regression_jja"
-           vosr = vnm+" regression onto ENSO (Nino34) principal component timeseries (JJA)"
+           vosr = vnm+" regression onto IPO principal component timeseries (JJA)"
            z->$vout$ = set_varAtts(ipo_vreg_jja,vosr,"","")  
            vout = "ipo_"+vnm+"_regression_son"
-           vosr = vnm+" regression onto ENSO (Nino34) principal component timeseries (SON)"
+           vosr = vnm+" regression onto IPO principal component timeseries (SON)"
            z->$vout$ = set_varAtts(ipo_vreg_son,vosr,"","")  
            vout = "ipo_"+vnm+"_regression_ann"
-           vosr = vnm+" regression onto ENSO (Nino34) principal component timeseries (annual)"
+           vosr = vnm+" regression onto IPO principal component timeseries (annual)"
            z->$vout$ = set_varAtts(ipo_vreg_ann,vosr,"","")  
 
            vout = "ipo_"+vnm+"_regprob_djf"
-           vosr = vnm+" ENSO (Nino34) regression t-test probility(DJF)"
+           vosr = vnm+" IPO regression t-test probility(DJF)"
            z->$vout$ = set_varAtts(ipo_prob_djf,vosr,"","")
            vout = "ipo_"+vnm+"_regprob_mam"
-           vosr = vnm+" ENSO (Nino34) regression t-test probility(MAM)"
+           vosr = vnm+" IPO regression t-test probility(MAM)"
            z->$vout$ = set_varAtts(ipo_prob_mam,vosr,"","")
            vout = "ipo_"+vnm+"_regprob_jja"
-           vosr = vnm+" ENSO (Nino34) regression t-test probility(JJA)"
+           vosr = vnm+" IPO regression t-test probility(JJA)"
            z->$vout$ = set_varAtts(ipo_prob_jja,vosr,"","")
            vout = "ipo_"+vnm+"_regprob_son"
-           vosr = vnm+" ENSO (Nino34) regression t-test probility(SON)"
+           vosr = vnm+" IPO regression t-test probility(SON)"
            z->$vout$ = set_varAtts(ipo_prob_son,vosr,"","")
            vout = "ipo_"+vnm+"_regprob_ann"
-           vosr = vnm+" ENSO (Nino34) regression t-test probility(annual)"
+           vosr = vnm+" IPO regression t-test probility(annual)"
            z->$vout$ = set_varAtts(ipo_prob_ann,vosr,"","")
 
            if (COMPUTE_MODES_MON.eq."True") then   
 
-              z->ipo_timeseries_mon  = set_varAtts(ipo_pc_mon,"ENSO (Nino34) principal component timeseries (monthly)","","")
+              z->ipo_timeseries_mon  = set_varAtts(ipo_pc_mon,"IPO principal component timeseries (monthly)","","")
 
               vout = "ipo_"+vnm+"_regression_mon"
-              vosr = vnm+" regression onto ENSO (Nino34) principal component timeseries (monthly)"
+              vosr = vnm+" regression onto IPO principal component timeseries (monthly)"
               z->$vout$ = set_varAtts(ipo_vreg_mon,vosr,"","")
 
               vout = "ipo_"+vnm+"_regprob_mon"
-              vosr = vnm+" ENSO (Nino34) regression t-test probility(monthly)"
+              vosr = vnm+" IPO regression t-test probility(monthly)"
               z->$vout$ = set_varAtts(ipo_prob_mon,vosr,"","")
 
            end if
@@ -914,23 +914,23 @@ begin
   if (vxreg_frame.eq.0) then
      txt0 = str_upper(vnm)
      panres@lbTitleString = txt0 + " [" + lbunitstr +"]"  
-     panres@txString = "ENSO (Nino34) Regressions (DJF)" 
+     panres@txString = "IPO Regressions (DJF)" 
      gsn_panel2(wks_ipo,reg_ipo_djf,(/nrow,ncol/),panres)
      delete(reg_ipo_djf)
-     panres@txString = "ENSO (Nino34) Regressions (MAM)"
+     panres@txString = "IPO Regressions (MAM)"
      gsn_panel2(wks_ipo,reg_ipo_mam,(/nrow,ncol/),panres)
      delete(reg_ipo_mam)
-     panres@txString = "ENSO (Nino34) Regressions (JJA)"
+     panres@txString = "IPO Regressions (JJA)"
      gsn_panel2(wks_ipo,reg_ipo_jja,(/nrow,ncol/),panres)
      delete(reg_ipo_jja)
-     panres@txString = "ENSO (Nino34) Regressions (SON)"
+     panres@txString = "IPO Regressions (SON)"
      gsn_panel2(wks_ipo,reg_ipo_son,(/nrow,ncol/),panres)
      delete(reg_ipo_son)
-     panres@txString = "ENSO (Nino34) Regressions (Annual)"
+     panres@txString = "IPO Regressions (Annual)"
      gsn_panel2(wks_ipo,reg_ipo_ann,(/nrow,ncol/),panres)
      delete(reg_ipo_ann)
      if (COMPUTE_MODES_MON.eq."True") then    
-        panres@txString = "ENSO (Nino34) Regressions (Monthly)"
+        panres@txString = "IPO Regressions (Monthly)"
         gsn_panel2(wks_ipo,reg_ipo_mon,(/nrow,ncol/),panres)
         delete(reg_ipo_mon)
      end if

@@ -165,12 +165,14 @@ begin
       coswgt      = cos(rad*sstT&lat)
       coswgt!0    = "lat"
       coswgt&lat  = sstT&lat
+
       natl_aa     = wgt_areaave(sstT(:,{llats:llatn},{llonw:llone}),coswgt({llats:llatn}),1.0,0)
       global_aa   = wgt_areaave(sstT(:,{-60:60},:),coswgt({-60.:60.}),1.0,0)
-      sstT        = (/ sstT - conform(sstT, global_aa, 0) /)  ; remove global mean from each timestep of SST anomalies prior to regressions
+      ; remove global mean from each timestep of SST anomalies prior to regressions
+      sstT        = (/ sstT - conform(sstT, global_aa, 0) /)  
       delete(arr) 
-      arr         = runave_n_Wrap(sstT,121,1,0)
-      finarr      = runave(natl_aa - global_aa,121,1)
+      arr         = sstT                ;runave_n_Wrap(sstT,121,1,0)
+      finarr      = natl_aa - global_aa ;runave(natl_aa - global_aa,121,1)
       finarr!0    = "time"
       finarr&time = sstT&time
       delete([/sstT,coswgt/])
@@ -257,10 +259,10 @@ begin
 ;      vreg = (/ dtrend_msg_n(ispan(0,dimsizes(vreg&time)-1,1),vreg,False,False,0) /)  
 
       ;apply filtering 
-       vreg0 = runave_n_Wrap(vreg,121,0,0)
-       delete(vreg)
-       vreg  = vreg0 
-       delete(vreg0)
+      ;vreg0 = runave_n_Wrap(vreg,121,0,0)
+      ;delete(vreg)
+      ;vreg  = vreg0 
+      ;delete(vreg0)
 
        vregT =  runave_n_Wrap(vreg,3,0,0)               ; form DJF averages
        vregT(0,:,:) = (/ dim_avg_n(vreg(:1,:,:),0) /)   
@@ -500,8 +502,7 @@ begin
      copy_VarCoords(amo_pc_djf,amo_pc_ann) 
      
      if (COMPUTE_MODES_MON.eq."True") then 
-        pcts       = natl_aa - global_aa 
-        pcts1      = runave(pcts,121,0)       
+        pcts1      = natl_aa - global_aa ;runave(natl_aa - global_aa,121,0)       
         amo_pc_mon = dim_standardize(pcts1,0)
         arr        = (/ arr - conform(arr, global_aa, 0) /)  ; remove global mean from each timestep of SST anomalies prior to regressions
         amo_mon    = arr(0,:,:)
@@ -509,7 +510,7 @@ begin
         do gg = 0,2
           amo_mon = (/ smth9(amo_mon,0.5,0.25,True) /)
         end do
-        delete([/natl_aa,global_aa,pcts,pcts1/])
+        delete([/natl_aa,global_aa,pcts1/])
         if (vxreg_plot_flag.eq.0) then
            rc           = regCoef_n(amo_pc_mon, vreg, 0, 0) ; rc(nlat,mlon)
            tval         = onedtond(rc@tval , dimsizes(rc))
@@ -582,53 +583,53 @@ begin
               z = addfile(fn,"w")
            end if
 
-           z->amo_timeseries_djf = set_varAtts(amo_pc_djf,"ENSO (Nino34) normalized principal component timeseries (DJF)","1","")
-           z->amo_timeseries_mam = set_varAtts(amo_pc_mam,"ENSO (Nino34) normalized principal component timeseries (MAM)","1","")
-           z->amo_timeseries_jja = set_varAtts(amo_pc_jja,"ENSO (Nino34) normalized principal component timeseries (JJA)","1","")
-           z->amo_timeseries_son = set_varAtts(amo_pc_son,"ENSO (Nino34) normalized principal component timeseries (SON)","1","")
-           z->amo_timeseries_ann = set_varAtts(amo_pc_ann,"ENSO (Nino34) normalized principal component timeseries (annual)","1","")
+           z->amo_timeseries_djf = set_varAtts(amo_pc_djf,"AMO normalized principal component timeseries (DJF)","1","")
+           z->amo_timeseries_mam = set_varAtts(amo_pc_mam,"AMO normalized principal component timeseries (MAM)","1","")
+           z->amo_timeseries_jja = set_varAtts(amo_pc_jja,"AMO normalized principal component timeseries (JJA)","1","")
+           z->amo_timeseries_son = set_varAtts(amo_pc_son,"AMO normalized principal component timeseries (SON)","1","")
+           z->amo_timeseries_ann = set_varAtts(amo_pc_ann,"AMO normalized principal component timeseries (annual)","1","")
            vout = "amo_"+vnm+"_regression_djf"
-           vosr = vnm+" regression onto ENSO (Nino34) principal component timeseries (DJF)"
+           vosr = vnm+" regression onto AMO principal component timeseries (DJF)"
            z->$vout$ = set_varAtts(amo_vreg_djf,vosr,"","") 
            vout = "amo_"+vnm+"_regression_mam"
-           vosr = vnm+" regression onto ENSO (Nino34) principal component timeseries (MAM)"
+           vosr = vnm+" regression onto AMO principal component timeseries (MAM)"
            z->$vout$ = set_varAtts(amo_vreg_mam,vosr,"","")  
            vout = "amo_"+vnm+"_regression_jja"
-           vosr = vnm+" regression onto ENSO (Nino34) principal component timeseries (JJA)"
+           vosr = vnm+" regression onto AMO principal component timeseries (JJA)"
            z->$vout$ = set_varAtts(amo_vreg_jja,vosr,"","")  
            vout = "amo_"+vnm+"_regression_son"
-           vosr = vnm+" regression onto ENSO (Nino34) principal component timeseries (SON)"
+           vosr = vnm+" regression onto AMO principal component timeseries (SON)"
            z->$vout$ = set_varAtts(amo_vreg_son,vosr,"","")  
            vout = "amo_"+vnm+"_regression_ann"
-           vosr = vnm+" regression onto ENSO (Nino34) principal component timeseries (annual)"
+           vosr = vnm+" regression onto AMO principal component timeseries (annual)"
            z->$vout$ = set_varAtts(amo_vreg_ann,vosr,"","")  
 
            vout = "amo_"+vnm+"_regprob_djf"
-           vosr = vnm+" ENSO (Nino34) regression t-test probility(DJF)"
+           vosr = vnm+" AMO regression t-test probility(DJF)"
            z->$vout$ = set_varAtts(amo_prob_djf,vosr,"","")
            vout = "amo_"+vnm+"_regprob_mam"
-           vosr = vnm+" ENSO (Nino34) regression t-test probility(MAM)"
+           vosr = vnm+" AMO regression t-test probility(MAM)"
            z->$vout$ = set_varAtts(amo_prob_mam,vosr,"","")
            vout = "amo_"+vnm+"_regprob_jja"
-           vosr = vnm+" ENSO (Nino34) regression t-test probility(JJA)"
+           vosr = vnm+" AMO regression t-test probility(JJA)"
            z->$vout$ = set_varAtts(amo_prob_jja,vosr,"","")
            vout = "amo_"+vnm+"_regprob_son"
-           vosr = vnm+" ENSO (Nino34) regression t-test probility(SON)"
+           vosr = vnm+" AMO regression t-test probility(SON)"
            z->$vout$ = set_varAtts(amo_prob_son,vosr,"","")
            vout = "amo_"+vnm+"_regprob_ann"
-           vosr = vnm+" ENSO (Nino34) regression t-test probility(annual)"
+           vosr = vnm+" AMO regression t-test probility(annual)"
            z->$vout$ = set_varAtts(amo_prob_ann,vosr,"","")
 
            if (COMPUTE_MODES_MON.eq."True") then   
 
-              z->amo_timeseries_mon  = set_varAtts(amo_pc_mon,"ENSO (Nino34) principal component timeseries (monthly)","","")
+              z->amo_timeseries_mon  = set_varAtts(amo_pc_mon,"AMO principal component timeseries (monthly)","","")
 
               vout = "amo_"+vnm+"_regression_mon"
-              vosr = vnm+" regression onto ENSO (Nino34) principal component timeseries (monthly)"
+              vosr = vnm+" regression onto AMO principal component timeseries (monthly)"
               z->$vout$ = set_varAtts(amo_vreg_mon,vosr,"","")
 
               vout = "amo_"+vnm+"_regprob_mon"
-              vosr = vnm+" ENSO (Nino34) regression t-test probility(monthly)"
+              vosr = vnm+" AMO regression t-test probility(monthly)"
               z->$vout$ = set_varAtts(amo_prob_mon,vosr,"","")
 
            end if
@@ -918,23 +919,23 @@ begin
   if (vxreg_frame.eq.0) then
      txt0 = str_upper(vnm)
      panres@lbTitleString = txt0 + " [" + lbunitstr +"]"  
-     panres@txString = "ENSO (Nino34) Regressions (DJF)" 
+     panres@txString = "AMO Regressions (DJF)" 
      gsn_panel2(wks_amo,reg_amo_djf,(/nrow,ncol/),panres)
      delete(reg_amo_djf)
-     panres@txString = "ENSO (Nino34) Regressions (MAM)"
+     panres@txString = "AMO Regressions (MAM)"
      gsn_panel2(wks_amo,reg_amo_mam,(/nrow,ncol/),panres)
      delete(reg_amo_mam)
-     panres@txString = "ENSO (Nino34) Regressions (JJA)"
+     panres@txString = "AMO Regressions (JJA)"
      gsn_panel2(wks_amo,reg_amo_jja,(/nrow,ncol/),panres)
      delete(reg_amo_jja)
-     panres@txString = "ENSO (Nino34) Regressions (SON)"
+     panres@txString = "AMO Regressions (SON)"
      gsn_panel2(wks_amo,reg_amo_son,(/nrow,ncol/),panres)
      delete(reg_amo_son)
-     panres@txString = "ENSO (Nino34) Regressions (Annual)"
+     panres@txString = "AMO Regressions (Annual)"
      gsn_panel2(wks_amo,reg_amo_ann,(/nrow,ncol/),panres)
      delete(reg_amo_ann)
      if (COMPUTE_MODES_MON.eq."True") then    
-        panres@txString = "ENSO (Nino34) Regressions (Monthly)"
+        panres@txString = "AMO Regressions (Monthly)"
         gsn_panel2(wks_amo,reg_amo_mon,(/nrow,ncol/),panres)
         delete(reg_amo_mon)
      end if

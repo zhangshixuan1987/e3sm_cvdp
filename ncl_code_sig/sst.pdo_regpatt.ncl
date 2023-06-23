@@ -558,53 +558,53 @@ begin
               z = addfile(fn,"w")
            end if
 
-           z->pdo_timeseries_djf = set_varAtts(pdo_pc_djf,"ENSO (Nino34) normalized principal component timeseries (DJF)","1","")
-           z->pdo_timeseries_mam = set_varAtts(pdo_pc_mam,"ENSO (Nino34) normalized principal component timeseries (MAM)","1","")
-           z->pdo_timeseries_jja = set_varAtts(pdo_pc_jja,"ENSO (Nino34) normalized principal component timeseries (JJA)","1","")
-           z->pdo_timeseries_son = set_varAtts(pdo_pc_son,"ENSO (Nino34) normalized principal component timeseries (SON)","1","")
-           z->pdo_timeseries_ann = set_varAtts(pdo_pc_ann,"ENSO (Nino34) normalized principal component timeseries (annual)","1","")
+           z->pdo_timeseries_djf = set_varAtts(pdo_pc_djf,"PDO normalized principal component timeseries (DJF)","1","")
+           z->pdo_timeseries_mam = set_varAtts(pdo_pc_mam,"PDO normalized principal component timeseries (MAM)","1","")
+           z->pdo_timeseries_jja = set_varAtts(pdo_pc_jja,"PDO normalized principal component timeseries (JJA)","1","")
+           z->pdo_timeseries_son = set_varAtts(pdo_pc_son,"PDO normalized principal component timeseries (SON)","1","")
+           z->pdo_timeseries_ann = set_varAtts(pdo_pc_ann,"PDO normalized principal component timeseries (annual)","1","")
            vout = "pdo_"+vnm+"_regression_djf"
-           vosr = vnm+" regression onto ENSO (Nino34) principal component timeseries (DJF)"
+           vosr = vnm+" regression onto PDO principal component timeseries (DJF)"
            z->$vout$ = set_varAtts(pdo_vreg_djf,vosr,"","") 
            vout = "pdo_"+vnm+"_regression_mam"
-           vosr = vnm+" regression onto ENSO (Nino34) principal component timeseries (MAM)"
+           vosr = vnm+" regression onto PDO principal component timeseries (MAM)"
            z->$vout$ = set_varAtts(pdo_vreg_mam,vosr,"","")  
            vout = "pdo_"+vnm+"_regression_jja"
-           vosr = vnm+" regression onto ENSO (Nino34) principal component timeseries (JJA)"
+           vosr = vnm+" regression onto PDO principal component timeseries (JJA)"
            z->$vout$ = set_varAtts(pdo_vreg_jja,vosr,"","")  
            vout = "pdo_"+vnm+"_regression_son"
-           vosr = vnm+" regression onto ENSO (Nino34) principal component timeseries (SON)"
+           vosr = vnm+" regression onto PDO principal component timeseries (SON)"
            z->$vout$ = set_varAtts(pdo_vreg_son,vosr,"","")  
            vout = "pdo_"+vnm+"_regression_ann"
-           vosr = vnm+" regression onto ENSO (Nino34) principal component timeseries (annual)"
+           vosr = vnm+" regression onto PDO principal component timeseries (annual)"
            z->$vout$ = set_varAtts(pdo_vreg_ann,vosr,"","")  
 
            vout = "pdo_"+vnm+"_regprob_djf"
-           vosr = vnm+" ENSO (Nino34) regression t-test probility(DJF)"
+           vosr = vnm+" PDO regression t-test probility(DJF)"
            z->$vout$ = set_varAtts(pdo_prob_djf,vosr,"","")
            vout = "pdo_"+vnm+"_regprob_mam"
-           vosr = vnm+" ENSO (Nino34) regression t-test probility(MAM)"
+           vosr = vnm+" PDO regression t-test probility(MAM)"
            z->$vout$ = set_varAtts(pdo_prob_mam,vosr,"","")
            vout = "pdo_"+vnm+"_regprob_jja"
-           vosr = vnm+" ENSO (Nino34) regression t-test probility(JJA)"
+           vosr = vnm+" PDO regression t-test probility(JJA)"
            z->$vout$ = set_varAtts(pdo_prob_jja,vosr,"","")
            vout = "pdo_"+vnm+"_regprob_son"
-           vosr = vnm+" ENSO (Nino34) regression t-test probility(SON)"
+           vosr = vnm+" PDO regression t-test probility(SON)"
            z->$vout$ = set_varAtts(pdo_prob_son,vosr,"","")
            vout = "pdo_"+vnm+"_regprob_ann"
-           vosr = vnm+" ENSO (Nino34) regression t-test probility(annual)"
+           vosr = vnm+" PDO regression t-test probility(annual)"
            z->$vout$ = set_varAtts(pdo_prob_ann,vosr,"","")
 
            if (COMPUTE_MODES_MON.eq."True") then   
 
-              z->pdo_timeseries_mon  = set_varAtts(pdo_pc_mon,"ENSO (Nino34) principal component timeseries (monthly)","","")
+              z->pdo_timeseries_mon  = set_varAtts(pdo_pc_mon,"PDO principal component timeseries (monthly)","","")
 
               vout = "pdo_"+vnm+"_regression_mon"
-              vosr = vnm+" regression onto ENSO (Nino34) principal component timeseries (monthly)"
+              vosr = vnm+" regression onto PDO principal component timeseries (monthly)"
               z->$vout$ = set_varAtts(pdo_vreg_mon,vosr,"","")
 
               vout = "pdo_"+vnm+"_regprob_mon"
-              vosr = vnm+" ENSO (Nino34) regression t-test probility(monthly)"
+              vosr = vnm+" PDO regression t-test probility(monthly)"
               z->$vout$ = set_varAtts(pdo_prob_mon,vosr,"","")
 
            end if
@@ -894,23 +894,23 @@ begin
   if (vxreg_frame.eq.0) then
      txt0 = str_upper(vnm)
      panres@lbTitleString = txt0 + " [" + lbunitstr +"]"  
-     panres@txString = "ENSO (Nino34) Regressions (DJF)" 
+     panres@txString = "PDO Regressions (DJF)" 
      gsn_panel2(wks_pdo,reg_pdo_djf,(/nrow,ncol/),panres)
      delete(reg_pdo_djf)
-     panres@txString = "ENSO (Nino34) Regressions (MAM)"
+     panres@txString = "PDO Regressions (MAM)"
      gsn_panel2(wks_pdo,reg_pdo_mam,(/nrow,ncol/),panres)
      delete(reg_pdo_mam)
-     panres@txString = "ENSO (Nino34) Regressions (JJA)"
+     panres@txString = "PDO Regressions (JJA)"
      gsn_panel2(wks_pdo,reg_pdo_jja,(/nrow,ncol/),panres)
      delete(reg_pdo_jja)
-     panres@txString = "ENSO (Nino34) Regressions (SON)"
+     panres@txString = "PDO Regressions (SON)"
      gsn_panel2(wks_pdo,reg_pdo_son,(/nrow,ncol/),panres)
      delete(reg_pdo_son)
-     panres@txString = "ENSO (Nino34) Regressions (Annual)"
+     panres@txString = "PDO Regressions (Annual)"
      gsn_panel2(wks_pdo,reg_pdo_ann,(/nrow,ncol/),panres)
      delete(reg_pdo_ann)
      if (COMPUTE_MODES_MON.eq."True") then    
-        panres@txString = "ENSO (Nino34) Regressions (Monthly)"
+        panres@txString = "PDO Regressions (Monthly)"
         gsn_panel2(wks_pdo,reg_pdo_mon,(/nrow,ncol/),panres)
         delete(reg_pdo_mon)
      end if
