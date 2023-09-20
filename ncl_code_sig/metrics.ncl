@@ -92,6 +92,7 @@ begin
   files = files+".txt"
   
   do gg = 0,dimsizes(files)-1
+     ;print(files(gg))
      if (.not.fileexists(OUTDIR+files(gg))) then
         print("1 or more metrics files missing, cannot create summary metrics tables, exiting metrics.ncl")
         exit

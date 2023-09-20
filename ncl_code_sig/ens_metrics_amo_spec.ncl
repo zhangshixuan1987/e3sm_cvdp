@@ -146,7 +146,7 @@ begin
   csubtitle_color  = set_subtitle_colors(max(EM_num))
   csubtitle        = new(max(EM_num),string)
 
-  csubexp          = (/"OBS"  ,"CMIP6","E3SMv3dev", "E3SMv2.1","E3SMv2.CRYO"/)
+  csubexp          = (/"OBS"  ,"CMIP6","E3SMv3dev", "E3SMv2.1","E3SMv2"/) ;,"E3SMv2.CRYO"/)
   csubexp_color    = (/"Black","Grey25","firebrick2","deepskyblue4","Green4"/)
   csubgroup        = (/"OBS"  ,"HISTORICAL", "piControl","SORRM"/)
   csubgroup_marker = (/7,4,16,3/)
@@ -350,11 +350,14 @@ begin
        boxColors = csubexp_color(2) 
      else if (isStrSubset(finEM_names(jj),"v2.1-")) then
        boxColors = csubexp_color(3)
-     else if (isStrSubset(finEM_names(jj),"SORRM.CRYO")) then
+     else if (isStrSubset(finEM_names(jj),"v2")) then
        boxColors = csubexp_color(4)
+     else if (isStrSubset(finEM_names(jj),"SORRM.CRYO")) then
+       boxColors = csubexp_color(5)
      else 
        boxColors = csubtitle_color(jj)
        csubtitle(jj) = finEM_names(jj)
+     end if 
      end if 
      end if 
      end if 

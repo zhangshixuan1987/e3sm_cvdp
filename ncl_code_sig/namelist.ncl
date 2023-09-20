@@ -483,9 +483,9 @@ begin
   end if 
 
   if (case_sens.eq."True") then
-     tstring1 = "MOC,msftmyz,msftmz,stfmmc"   ; list in order of likelihood/preference: CESM name, CMIP name, other
+     tstring1 = "AMOC,MOC,msftmyz,msftmz,stfmmc"   ; list in order of likelihood/preference: CESM name, CMIP name, other
   else
-     tstring1 = "MOC,msftmyz,msftmz,stfmmc"
+     tstring1 = "AMOC,MOC,msftmyz,msftmz,stfmmc"
   end if
   sstr := str_split(tstring1,",")
 

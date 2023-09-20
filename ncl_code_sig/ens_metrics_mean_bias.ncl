@@ -42,8 +42,8 @@ begin
 
   wks_type = OUTPUT_TYPE
   if (wks_type.eq."png") then
-     wks_type@wkWidth = 5000*PNG_SCALE
-     wks_type@wkHeight = 5000*PNG_SCALE
+     wks_type@wkWidth = 1200*PNG_SCALE
+     wks_type@wkHeight = 1200*PNG_SCALE
   end if
 
 ;---------------------
@@ -187,7 +187,7 @@ begin
 
 ;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
   nEM           = max(EM_num)
-  finEM_names   = new(nEM+1,string)
+  finEM_names   = new(nEM,string)
   metrics       = (/"Mean Bias","Std Bias ","Bias EOF1","Bias EOF2"/)
   cmip_plot     = new(9,graphic)
   esm_plot      = new(9,graphic)
@@ -249,13 +249,7 @@ begin
      end if
      finEM_names(cntr_EM) = (/"Observation"/)
      finname_obs(cntr_EM) = (/modnameT/)
-     finspec_obs = new((/numobs,dimsizes(obs0&time_mon1),dimsizes(obs0&lon0)/),typeof(obs0))
-     finspec_obs!0 = "ens"
-     finspec_obs!1 = "time_mon1"
-     finspec_obs!2 = "lon0"
-     finspec_obs&time_mon1 = obs0&time_mon1
-     finspec_obs&lon0      = obs0&lon0
-     finspec_obs(0,:,:)    = (/obs0/)
+     finspec_obs    = obs0
      if (numobs.ge.2) then     ; plot obs #2-
         do ff = 1,numobs-1
            if (variable(dd).eq."tas") then
@@ -294,14 +288,19 @@ begin
               arr_rg(hh,:) = (/ linint1(arr&lon0,arr(hh,:),False,obs0&lon0,0) /)
            end do
            arr_rg@_Fill_Value = -9999.0 
-           finspec_obs(cntr,:,:) = (/arr_rg/)
-           delete([/arr,arr_rg/])
+           x1 = finspec_obs
+           delete([/finspec_obs/])
+           finspec_obs = array_append_record (x1, arr_rg, 0)
+           delete([/arr,arr_rg,x1/])
            cntr = cntr + 1
         end do
      end if
-
+     if(dimsizes(finspec_obs).ge.3) then 
+        finspec_obs!0 = "ens"
+     end if 
      ;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
      ;read simulation data 
+     cntr_EM = 1
      cntr    = 0
      do gg = 1,nEM; operate on each ensemble mean
         nens = num(EM_num.eq.gg) ; determines how many model simulations in each ensemble
@@ -318,34 +317,25 @@ begin
           if (isatt(arr,"is_all_missing")) then
              continue
           end if
-          
           arr!0   = "time_mon1"
           arr!1   = "lon0"
           arr     = where(ismissing(arr),obs0@_FillValue,arr)
           arr@_FillValue = obs0@_FillValue
           if (ismissing(finEM_names(gg))) then
-            finEM_names(gg) = names_EM(cntr_ens(0))
+            finEM_names(cntr_EM) = names_EM(cntr_ens(0))
+            cntr_EM = cntr_EM + 1
           end if
-          arr_rg  = new((/1,dimsizes(obs0&time_mon1),dimsizes(obs0&lon0)/),typeof(obs0))
+          arr_rg := obs0
           do ii = 0,dimsizes(arr&time_mon1)-1
-             arr_rg(0,ii,:) = (/ linint1(arr&lon0,arr(ii,:),False,obs0&lon0,0) /)
+             arr_rg(ii,:) = (/ linint1(arr&lon0,arr(ii,:),False,obs0&lon0,0) /)
           end do
-          if(.not.isvar("finspec_mod"))then 
-            finspec_mod = new((/1,dimsizes(obs0&time_mon1),dimsizes(obs0&lon0)/),typeof(obs0))
-            finspec_mod!0         = "ens"
-            finspec_mod!1         = "time_mon1"
-            finspec_mod!2         = "lon0"
-            finspec_mod&time_mon1 = obs0&time_mon1
-            finspec_mod&lon0      = obs0&lon0
-            finspec_mod(0,:,:)    = (/obs0/)
-          end if 
           if (cntr.eq.0) then 
-            finname_mod = names_EM(cntr_ens(hh))
-            finspec_mod(0,:,:) = (/arr_rg/)
+            finname_mod = finEM_names(cntr_EM)
+            finspec_mod = arr_rg  
           else
             x1 = finname_mod 
             delete([/finname_mod/])
-            finname_mod = array_append_record (x1, names_EM(cntr_ens(hh)), 0)
+            finname_mod = array_append_record (x1, finEM_names(cntr_EM), 0)
             delete([/x1/])
             x1 = finspec_mod
             delete([/finspec_mod/])
@@ -355,9 +345,13 @@ begin
           cntr =  cntr + 1 
        end do 
      end do 
+     if(dimsizes(finspec_mod).ge.3) then
+        finspec_mod!0 = "ens"
+     end if
      if (isvar("obs0")) then 
         delete([/obs0/])
      end if 
+     printVarSummary(finspec_mod)
 
     ;process figures;;;;
      wks_mean = gsn_open_wks(wks_type,getenv("OUTDIR")+"mean.hov.pattern" )
@@ -401,7 +395,7 @@ begin
      res@tmYLLabelDeltaF = 1.3    ;0.05
      res@cnFillOn        = True
      res@gsnSpreadColors = True
-    ;res@gsnSpreadColorEnd = 19
+     res@gsnSpreadColorEnd = 19
 
      res@lbLabelBarOn = False
 
@@ -409,6 +403,7 @@ begin
      res@cnInfoLabelOn = False
      res@cnLinesOn = True
      res@cnMonoLineColor = False
+     res@cnLineColors = carr
      res@cnLineLabelsOn = False
      res@tmYLLabelFontHeightF = FontHeightF * 0.85
      res@tmXBLabelFontHeightF = FontHeightF * 0.85
@@ -463,41 +458,44 @@ begin
     panres@gsnPanelYWhiteSpacePercent = 4
     panres@gsnPanelXWhiteSpacePercent = 4
 
+
     ;; mean hovmoller diagrams
     res1 = res 
     res1@cnLevelSelectionMode = "ExplicitLevels"
-    res1@cnLevels = fspan(-2,2,11)
-    res1@cnLevels = res1@cnLevels* varfacts(dd)
-    carr    = new(dimsizes(res1@cnLevels),"string")
-    carr    = "transparent"
+    res1@cnLevels = fspan(-1,1,21)
+    res1@cnLevels = res@cnLevels* varfacts(dd)
+    carr = new(dimsizes(res1@cnLevels),"string")
+    carr = "transparent"
     carr(8) = "gray50"
     plot    = new(dimsizes(finEM_names),graphic)
     do kk   = 0,dimsizes(finEM_names)-1,1
-      if(finEM_names(kk).eq."Observation") then 
-        ;obs0 = dim_avg_n_Wrap(finspec_obs,0)
-         obs0 = finspec_obs(0,:,:)
-         res1@gsnLeftString   = "Observation"
-         res1@gsnRightString  = "" 
-         res1@gsnCenterString = ""
+      if(finEM_names(kk).eq."Observations") then 
+         if (dimsizes(finspec_obs).ge.3) then 
+            obs0 = finspec_obs(0,:,:)
+         else 
+            obs0 = finspec_obs
+         end if 
+         res@gsnLeftString   = "Observation (scaled by 0.5)"
+         res@gsnRightString  = finname_mod(0)
+         res@gsnCenterString = ""
+         obs0 = obs0 * 0.5
          plot(kk) = gsn_csm_hov(wks_mean,obs0,res1)
       else
-         cntr_ens := ind(finname_mod.eq.finEM_names(kk))
-         if(dimsizes(cntr_ens).gt.1) then 
-           var0  = dim_avg_n_Wrap(finspec_mod(cntr_ens,:,:),0)  
-         else
-           var0  = finspec_mod(cntr_ens,:,:)
-         end if 
+         cntr_ens = ind(finname_mod.eq.finEM_names(kk))
+         var0     = dim_avg_n_Wrap(finspec_mod(cntr_ens,:,:),0)
          patcor   = pattern_cor(var0,obs0,1.0,1)
          lxstr    = "PC w/Obs: "  +sprintf("%.2f",patcor)
-         res1@gsnCenterString  = "" ;lxstr
-         res1@gsnLeftString    = finEM_names(kk) 
-         res1@gsnRightString   = lxstr +"; ens #: " + dimsizes(cntr_ens)
+         res1@gsnCenterString  = lxstr
+         res@gsnLeftString   = finEM_names(kk) + " (scaled by 0.5)"
+         res@gsnCenterString = ""
+         res@gsnRightString  = "# of ensemble: " + dimsizes(cntr_ens)
+         var0 = var0 * 0.5
          plot(kk) = gsn_csm_hov(wks_mean,var0,res1)
-         delete([/cntr_ens,patcor,lxstr,var0/])
+         delete([/patcor,lxstr,var0/])
       end if 
     end do 
     panres@lbTitleString = ncol_labels(dd)+ " (" + ncol_units(dd)+")"
-    gsn_panel(wks_mean,plot,(/dimsizes(finEM_names),2/),panres)
+    gsn_panel(wks_mean,plot,(/dimsizes(finEM_names),1/),panres)
     ofile = varlist(dd)+".mean.pattern"
     system("convert -density 2400 -trim +repage -border 40 -bordercolor white "+OUTDIR+"mean.hov.pattern."+wks_type+" "+OUTDIR+ofile+".png")
     system("rm "+OUTDIR+"mean.hov.pattern.png")
@@ -507,63 +505,37 @@ begin
     res1 = res
     res1@cnLevelSelectionMode = "ExplicitLevels"
     res1@cnLevels = fspan(-1,1,21)
-    res1@cnLevels = res1@cnLevels * varfacts(dd)
+    res1@cnLevels = res@cnLevels* varfacts(dd)
     carr    = new(dimsizes(res1@cnLevels),"string")
     carr    = "transparent"
     carr(8) = "gray50"
-    plot    = new(dimsizes(finEM_names)-1,graphic)
+    plot    = new(dimsizes(finEM_names-1),graphic)
     do kk   = 1,dimsizes(finEM_names)-1,1
       cntr_ens = ind(finname_mod.eq.finEM_names(kk))
       nens     = num(finname_mod.eq.finEM_names(kk))
       vmod     = finspec_mod(cntr_ens,:,:)
-      if(num(cntr_ens.ge.0).gt.1) then 
-        vmod   = vmod - conform(vmod,obs0,(/1,2/)) 
-        var0   = dim_avg_n_Wrap(vmod,0)
-      else 
-        vmod   = vmod - obs0
-        var0   = vmod 
-      end if 
+      vmod     = vmod - conform(vmod,obs0,(/1,2/)) 
+      var0     = dim_avg_n_Wrap(vmod,0)
       patcor   = pattern_cor(var0,obs0,1.0,1)
       lxstr    = "PC w/Obs: "  +sprintf("%.2f",patcor)
       res1@gsnCenterString  = lxstr
-      res1@gsnLeftString   = finEM_names(kk) 
-      res1@gsnCenterString = ""
-      res1@gsnRightString  = "# of ensemble: " + dimsizes(cntr_ens)
-      plot(kk-1) = gsn_csm_hov(wks_bias,var0,res1)
-      delete([/patcor,lxstr,var0,vmod,cntr_ens/])
+      res@gsnLeftString   = finEM_names(kk) 
+      res@gsnCenterString = ""
+      res@gsnRightString  = "# of ensemble: " + dimsizes(cntr_ens)
+      plot(kk-1) = gsn_csm_hov(wks_mean,var0,res1)
+      delete([/patcor,lxstr,var0,vmod/])
     end do
     panres@lbTitleString = ncol_labels(dd)+ " (" + ncol_units(dd)+")"
-    gsn_panel(wks_bias,plot,(/dimsizes(finEM_names)-1,2/),panres)
+    gsn_panel(wks_mean,plot,(/dimsizes(finEM_names)-1,1/),panres)
     ofile = varlist(dd)+"bias.mean.pattern"
     system("convert -density 2400 -trim +repage -border 40 -bordercolor white "+OUTDIR+"bias.mean.hov.pattern."+wks_type+" "+OUTDIR+ofile+".png")
     system("rm "+OUTDIR+"bias.mean.hov.pattern.png")
     delete([/plot,carr,res1/])
 
-    ;mean biases eof analysis 
     res1 = res
-    fsubmod = (/"CMIP6","historicl","piControl"/)
-    fsubmec = metrics(1:)
-    do kk   = 1,dimsizes(fsubmod)-1,1
-      print(finname_mod)
-      cntr_ens := str_match_ind(finname_mod,fsubmod(kk))
-      nens      = dimsizes(cntr_ens)
-      print(finname_mod(cntr_ens))
-      vmod      = finspec_mod(cntr_ens,:,:)
-      if(num(cntr_ens.ge.0).gt.1) then
-        vmod   = vmod - conform(vmod,obs0,(/1,2/))
-      else
-        vmod   = vmod - obs0
-      end if
-      patcor   = pattern_cor(var0,obs0,1.0,1)
-      lxstr    = "PC w/Obs: "  +sprintf("%.2f",patcor)
-      res1@gsnCenterString  = lxstr
-      res1@gsnLeftString   = finEM_names(kk)
-      res1@gsnCenterString = ""
-      res1@gsnRightString  = "# of ensemble: " + dimsizes(cntr_ens)
-      plot(kk-1) = gsn_csm_hov(wks_bias,var0,res1)
-      delete([/patcor,lxstr,var0,vmod,cntr_ens/])
-    end do
-
+    submod  = (/"CMIP6","E3SM"/)
+    subgrp  = (/"HISTORICAL"/)
+    submec  = metrics(1:)
     do ii = 0,dimsizes(submod)-1
       do jj = 0, dimsizes(subgrp)-1,1
         do hh = 0,dimsizes(submec)-1
@@ -575,7 +547,7 @@ begin
             if(hh.eq.0) then 
               res1@gsnLeftString   = submec(hh)
               res1@gsnCenterString = ""
-              cmip_plot(kk) = gsn_csm_hov(wks_eofb,finspec_EM(imod,1,:,:),res1)
+              cmip_plot(kk) = gsn_csm_hov(wks_cmip,finspec_EM(imod,1,:,:),res1)
             end if  
             if(hh.eq.1) then
               patcor0 = (pattern_cor(finspec_EM(imod,2,:,:),obs0,1.0,0))
@@ -584,7 +556,7 @@ begin
                        "PC w/Bias: " +sprintf("%.2f",patcor1)
               res1@gsnCenterString  = lxstr
               res1@gsnLeftString  = submec(hh)+"("+finspec_EM@eof1_pcvar(imod)+")" 
-              cmip_plot(kk) = gsn_csm_hov(wks_eofb,finspec_EM(imod,2,:,:),res1)
+              cmip_plot(kk) = gsn_csm_hov(wks_cmip,finspec_EM(imod,2,:,:),res1)
             end if 
             if(hh.eq.2) then
               patcor0 = (pattern_cor(finspec_EM(imod,3,:,:),obs0,1.0,0))
@@ -593,14 +565,14 @@ begin
                        "PC w/Bias: " +sprintf("%.2f",patcor1)
               res1@gsnCenterString  = lxstr
               res1@gsnLeftString  = submec(hh)+"("+finspec_EM@eof2_pcvar(imod)+")"
-              cmip_plot(kk) = gsn_csm_hov(wks_eofb,finspec_EM(imod,3,:,:),res1)
+              cmip_plot(kk) = gsn_csm_hov(wks_cmip,finspec_EM(imod,3,:,:),res1)
             end if 
           end if 
          end do 
        end do 
     end do 
     panres@lbTitleString = ncol_labels(dd)+ " (" + ncol_units(dd)+")"
-    gsn_panel(wks_eofb,cmip_plot,(/6,3/),panres)
+    gsn_panel(wks_cmip,cmip_plot,(/6,3/),panres)
     ofile = "obs_cmip"+varlist(dd)+".pattern_bias"
     system("convert -density 2400 -trim +repage -border 40 -bordercolor white "+OUTDIR+"cmip.hov.pattern_bias."+wks_type+" "+OUTDIR+ofile+"_ensemble.png")
     system("rm "+OUTDIR+"cmip.hov.pattern_bias.png")
