@@ -1422,8 +1422,42 @@ begin
      title_n2  = "domain(20N-70N)"
      title_n3  = "domain(20N-70N)"
 
-     delete([/pnjetind_mon,finua_mave,finua_tave,pnjetisd_mon,pnjetins_mon,pnjetloc_mon/])
-     delete([/jetind_djf,jetind_mam,jetind_jja,jetind_son,jetind_ann,jetind_mon/])
+     if(isvar("pnjetind_mon")) then 
+       delete(pnjetind_mon)
+     end if 
+     if(isvar("finua_mave")) then
+       delete(finua_mave)
+     end if 
+     if(isvar("finua_tave")) then
+       delete(finua_tave)
+     end if
+     if(isvar("pnjetisd_mon")) then
+       delete(pnjetisd_mon)
+     end if
+     if(isvar("pnjetins_mon")) then
+       delete(pnjetins_mon)
+     end if
+     if(isvar("pnjetloc_mon")) then
+       delete(pnjetloc_mon)
+     end if
+     if(isvar("jetind_djf")) then
+       delete(jetind_djf)
+     end if
+     if(isvar("jetind_mam")) then
+       delete(jetind_mam)
+     end if
+     if(isvar("jetind_jja")) then
+       delete(jetind_jja)
+     end if
+     if(isvar("jetind_son")) then
+       delete(jetind_son)
+     end if
+     if(isvar("jetind_ann")) then
+       delete(jetind_ann)
+     end if
+     if(isvar("jetind_mon")) then
+       delete(jetind_mon)
+     end if
 
      if (spectra_mvf.eq.False) then
         xyres4@gsnCenterString = names(ee)

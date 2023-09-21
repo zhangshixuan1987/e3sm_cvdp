@@ -21,9 +21,22 @@ begin
   COLORMAP         = getenv("COLORMAP")  
  
   ;;;scale the trend to use the same unit: C 100yr-1
-  TREND_Unit       = "100yr~S~-1~N~"
-  TREND_NY         = 100
- 
+  if( (CLIMO_EYEAR - CLIMO_SYEAR) .ge. 100) then 
+    TREND_Unit       = "100yr~S~-1~N~"
+    TREND_NY         = 100
+  else if ( (CLIMO_EYEAR - CLIMO_SYEAR) .gt. 80) then
+    TREND_Unit       = "50yr~S~-1~N~"
+    TREND_NY         = 50
+  else if ( (CLIMO_EYEAR - CLIMO_SYEAR) .gt. 30) then
+    TREND_Unit       = "30yr~S~-1~N~"
+    TREND_NY         = 30
+  else 
+    TREND_Unit       = "10yr~S~-1~N~"
+    TREND_NY         = 10
+  end if 
+  end if 
+  end if 
+
   nsim = numAsciiRow("namelist_byvar/namelist_trefht")
   na = asciiread("namelist_byvar/namelist_trefht",(/nsim/),"string")
   names = new(nsim,"string")
@@ -195,13 +208,13 @@ begin
      if (isfilepresent2("obs_trefht").and.ee.eq.0) then
         tas_aa_seas@syear = syear(ee)
         tas_aa_seas@eyear = eyear(ee)
-        tas_aa_mon@syear = syear(ee)
-        tas_aa_mon@eyear = eyear(ee)
-        tas_aa_ann@syear = syear(ee)
-        tas_aa_ann@eyear = eyear(ee)
-        tas_aa_seas_obs = tas_aa_seas
-        tas_aa_mon_obs  = tas_aa_mon
-        tas_aa_ann_obs  = tas_aa_ann
+        tas_aa_mon@syear  = syear(ee)
+        tas_aa_mon@eyear  = eyear(ee)
+        tas_aa_ann@syear  = syear(ee)
+        tas_aa_ann@eyear  = eyear(ee)
+        tas_aa_seas_obs   = tas_aa_seas
+        tas_aa_mon_obs    = tas_aa_mon
+        tas_aa_ann_obs    = tas_aa_ann
      end if
      
      dimT = dimsizes(tas_aa_mon)      ; calculate running trends from the monthly data

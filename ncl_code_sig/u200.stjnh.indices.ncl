@@ -1408,6 +1408,9 @@ begin
      ;plot the jet position normalized index (also mark positive and negative events) 
      ;*********************************
      tttt = dtrend_msg(ispan(0,dimsizes(stjnhind_mon)-1,1),stjnhind_mon,False,True)
+     if(.not.isvar("arr")) then
+       arr = new((/3,dimsizes(stjnhind_mon)/),typeof(stjnhind_mon))
+     end if
      arr(0,:) = (/ stjnhind_mon /)
      arr(1,:) = (/ runave_n(stjnhind_mon, 11, 0, 0) /)
      arr(2,:) = (/ (ispan(0,dimsizes(stjnhind_mon)-1,1)*tttt@slope)+tttt@y_intercept /)

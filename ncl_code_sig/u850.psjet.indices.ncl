@@ -1329,7 +1329,6 @@ begin
      end do
 
      if(isvar("finua_mave")) then
-
        arr = new((/3,dimsizes(psjetloc_mon)/),typeof(psjetind_mon))
        xyres61 = xyres6
        tttt = dtrend_msg(ispan(0,dimsizes(finua_mave(0,:))-1,1),finua_mave(0,:),False,True)
@@ -1353,7 +1352,6 @@ begin
      end if 
 
      if(isvar("finua_tave")) then
-
        xyres62   = xyres6
        tttt      = avg(finua_tave(0,:))
        arr0      = new((/3,dimsizes(finua_tave(0,:))/),typeof(finua_tave))
@@ -1382,6 +1380,9 @@ begin
      ;plot the jet position normalized index (also mark positive and negative events) 
      ;*********************************
      tttt = dtrend_msg(ispan(0,dimsizes(psjetind_mon)-1,1),psjetind_mon,False,True)
+     if(.not.isvar("arr")) then 
+       arr = new((/3,dimsizes(psjetloc_mon)/),typeof(psjetind_mon))
+     end if 
      arr(0,:) = (/ psjetind_mon /)
      arr(1,:) = (/ runave_n(psjetind_mon, 11, 0, 0) /)
      arr(2,:) = (/ (ispan(0,dimsizes(psjetind_mon)-1,1)*tttt@slope)+tttt@y_intercept /)
@@ -1426,8 +1427,42 @@ begin
      title_n2  = "domain(20S-70S)"
      title_n3  = "domain(20S-70S)"
 
-     delete([/psjetind_mon,finua_mave,finua_tave,psjetisd_mon,psjetins_mon,psjetloc_mon/])
-     delete([/jetind_djf,jetind_mam,jetind_jja,jetind_son,jetind_ann,jetind_mon/])
+     if(isvar("psjetind_mon")) then
+       delete(psjetind_mon)
+     end if
+     if(isvar("finua_mave")) then
+       delete(finua_mave)
+     end if
+     if(isvar("finua_tave")) then
+       delete(finua_tave)
+     end if
+     if(isvar("psjetisd_mon")) then
+       delete(psjetisd_mon)
+     end if
+     if(isvar("psjetins_mon")) then
+       delete(psjetins_mon)
+     end if
+     if(isvar("psjetloc_mon")) then
+       delete(psjetloc_mon)
+     end if
+     if(isvar("jetind_djf")) then
+       delete(jetind_djf)
+     end if
+     if(isvar("jetind_mam")) then
+       delete(jetind_mam)
+     end if
+     if(isvar("jetind_jja")) then
+       delete(jetind_jja)
+     end if
+     if(isvar("jetind_son")) then
+       delete(jetind_son)
+     end if
+     if(isvar("jetind_ann")) then
+       delete(jetind_ann)
+     end if
+     if(isvar("jetind_mon")) then
+       delete(jetind_mon)
+     end if
 
      if (spectra_mvf.eq.False) then
         xyres4@gsnCenterString = names(ee)

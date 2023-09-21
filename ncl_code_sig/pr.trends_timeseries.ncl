@@ -21,8 +21,21 @@ begin
   COLORMAP         = getenv("COLORMAP")  
  
   ;;;scale the trend to use the same unit: C 100yr-1
-  TREND_Unit       = "100yr~S~-1~N~"
-  TREND_NY         = 100
+  if( (CLIMO_EYEAR - CLIMO_SYEAR) .ge. 100) then
+    TREND_Unit       = "100yr~S~-1~N~"
+    TREND_NY         = 100
+  else if ( (CLIMO_EYEAR - CLIMO_SYEAR) .gt. 80) then
+    TREND_Unit       = "50yr~S~-1~N~"
+    TREND_NY         = 50
+  else if ( (CLIMO_EYEAR - CLIMO_SYEAR) .gt. 30) then
+    TREND_Unit       = "30yr~S~-1~N~"
+    TREND_NY         = 30
+  else 
+    TREND_Unit       = "10yr~S~-1~N~"
+    TREND_NY         = 10
+  end if
+  end if
+  end if
  
   nsim = numAsciiRow("namelist_byvar/namelist_prect")
   na = asciiread("namelist_byvar/namelist_prect",(/nsim/),"string")
