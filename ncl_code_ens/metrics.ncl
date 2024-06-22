@@ -411,6 +411,8 @@ begin
         end do   
 
         cntr_ens = cntr_ens - 1    ; now using cntr_ens to reference arrays where the first obs is stripped out (finpc/finrms)
+        finrms_EM(gg-1,dd) = (/ avg(finrms(cntr_ens,dd)) /)
+
         pc_z := finpc(cntr_ens,dd)
         pc_z = pc_z@_FillValue
         do ii = 0,nens-1   ; use Fisher's z-transformation to translate r->z

@@ -2,6 +2,15 @@
 /data/*
 /run_script/*
 /work/*
+/pobs/*.nc
 /cvdp_polar/*.nc
 /cvdp_polar/*.csh
 /cvdp_polar/*.log
+/data_process/*/*.log
+/data_process/*/*/*.log
+/data_process/*/*/*/*.log
+/data_process/*/*/*/*/*.log
+/data_process/*/slurm*
+/data_process/*/*/slurm*
+/data_process/*/*/*/slurm*
+/data_process/*/*/*/*/slurm*
