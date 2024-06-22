@@ -1,0 +1,16 @@
+The daily NAO index correpsponds to the NAO patterns, which vary from one month to the next. Click here for the methodology used to calculate the daily NAO index.
+
+The procedure used to calculate the daily PNA and NAO teleconnection indices is based on the Rotated Principal Component Analysis (RPCA) used by Barnston and Livezey (1987, Mon. Wea. Rev., 115, 1083-1126). This procedure isolates the primary teleconnection patterns for all months and allows time series of the patterns to be constructed. To obtain the teleconnection patterns, the RPCA technique is applied to monthly standardized 500-mb height anomalies obtained from the CDAS in the analysis region 20�N-90�N between January 1950 and December 2000. Click here for more information on the teleconnection pattern calculation procedures.
+
+
+The daily NAO index for the past 120 days. Each daily value has been standardized by the standard deviation of the monthly NAO index from 1950 to 2000 interpolated to the day in question.
+
+
+Publications
+
+Barnston, A. G., and R. E. Livezey, 1987: Classification, seasonality and persistence of low-frequency atmospheric circulation patterns. Mon. Wea. Rev., 115, 1083-1126.
+
+Chen, W. Y., and H. van den Dool, 2003: Sensitivity of Teleconnection Patterns to the Sign of Their Primary Action Center, Mon. Wea. Rev., 131, 2885-2899.
+
+van den Dool, H. M., S. Saha, and Å. Johansson, 2000: Empirical Orthogonal Teleconnections. J. Climate, 13, 1421-1435.
+
