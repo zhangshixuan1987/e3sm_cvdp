@@ -1,4 +1,0 @@
-[1] 40535
-[2] 40536
-[2]  + Done                          ncl 1_gen_atm_3d.ncl >& ncl2.log
-[1]  + Done                          ncl 1_gen_atm_2d.ncl >& ncl1.log
