@@ -1,0 +1,1 @@
+/lcrc/group/e3sm/ac.xylar/analysis/20221116.CRYO1950.ne30pg2_SOwISC12to60E2r4.N2Dependent.submeso.chrysalis/yrs800-1000/timeseries/AntarcticRegions/AntarcticRegions_0800-1000.nc

@@ -1,0 +1,120 @@
+
+Lmod is automatically replacing "intel-mpi/2017.3-dfphq6k" with
+"intel-parallel-studio/cluster.2017.4-wyg4gfu".
+
+
+Lmod is automatically replacing "intel/17.0.4-74uvhji" with
+"intel-parallel-studio/cluster.2017.4-wyg4gfu".
+
+
+Lmod is automatically replacing "intel-parallel-studio/cluster.2017.4-wyg4gfu"
+with "intel-mpi/2017.3-dfphq6k".
+
+1
+LANDFRAC,LANDFRAC,OCNFRAC,ICEFRAC,PS,PSL,U10,LWCF,SWCF,PRECC,PRECL,AODVIS,AODDUST,TGCLDLWP,TGCLDIWP,CLDLOW,CLDMED,CLDHGH,CLDTOT,FLNT,FSNT,FLNTC,FSNTC,FLUT,FSUTOA,FSUTOAC,FLUTC,TMQ,TS,SHFLX,LHFLX,FSNTOA,FSNTOAC,FLNS,FLNSC,FLDS,FSNS,FSNSC,FSDS,FSDSC,SOLIN,TREFHT,TAUY,TAUX,QFLX,QREFHT,OMEGA500,PBLH,PRECSC,PRECSL,TAUGWX,TAUGWY,TGCLDCWP,TH7001000,TREFMNAV,TREFMXAV,TUQ,TVQ,TVH,TUH,TSMN,TSMX,SNOWHICE,SNOWHLND
+/blues/gpfs/home/software/spack-0.10.1/opt/spack/linux-centos7-x86_64/intel-17.0.4/nco-4.7.4-x4y66ep2ydoyegnckicvv5ljwrheniun/bin/ncremap: line 114: soft: command not found
+Input #00: /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/SE_ATM2D/v2alpha559.LR.piControl.en00.000101-005012.nc
+Map/Wgt  : /lcrc/group/acme/ac.szhang/acme_scratch/data/regrid_maps/map_ne30pg2_to_cmip6_180x360_aave.20200201.nc
+Regridded: /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/ATM_2D/v2alpha559.LR.piControl.en00.000101-005012.nc
+LANDFRAC,LANDFRAC,OCNFRAC,ICEFRAC,PS,PSL,U10,LWCF,SWCF,PRECC,PRECL,AODVIS,AODDUST,TGCLDLWP,TGCLDIWP,CLDLOW,CLDMED,CLDHGH,CLDTOT,FLNT,FSNT,FLNTC,FSNTC,FLUT,FSUTOA,FSUTOAC,FLUTC,TMQ,TS,SHFLX,LHFLX,FSNTOA,FSNTOAC,FLNS,FLNSC,FLDS,FSNS,FSNSC,FSDS,FSDSC,SOLIN,TREFHT,TAUY,TAUX,QFLX,QREFHT,OMEGA500,PBLH,PRECSC,PRECSL,TAUGWX,TAUGWY,TGCLDCWP,TH7001000,TREFMNAV,TREFMXAV,TUQ,TVQ,TVH,TUH,TSMN,TSMX,SNOWHICE,SNOWHLND
+/blues/gpfs/home/software/spack-0.10.1/opt/spack/linux-centos7-x86_64/intel-17.0.4/nco-4.7.4-x4y66ep2ydoyegnckicvv5ljwrheniun/bin/ncremap: line 114: soft: command not found
+Input #00: /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/SE_ATM2D/v2alpha559.LR.piControl.en00.005101-010012.nc
+Map/Wgt  : /lcrc/group/acme/ac.szhang/acme_scratch/data/regrid_maps/map_ne30pg2_to_cmip6_180x360_aave.20200201.nc
+Regridded: /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/ATM_2D/v2alpha559.LR.piControl.en00.005101-010012.nc
+LANDFRAC,LANDFRAC,OCNFRAC,ICEFRAC,PS,PSL,U10,LWCF,SWCF,PRECC,PRECL,AODVIS,AODDUST,TGCLDLWP,TGCLDIWP,CLDLOW,CLDMED,CLDHGH,CLDTOT,FLNT,FSNT,FLNTC,FSNTC,FLUT,FSUTOA,FSUTOAC,FLUTC,TMQ,TS,SHFLX,LHFLX,FSNTOA,FSNTOAC,FLNS,FLNSC,FLDS,FSNS,FSNSC,FSDS,FSDSC,SOLIN,TREFHT,TAUY,TAUX,QFLX,QREFHT,OMEGA500,PBLH,PRECSC,PRECSL,TAUGWX,TAUGWY,TGCLDCWP,TH7001000,TREFMNAV,TREFMXAV,TUQ,TVQ,TVH,TUH,TSMN,TSMX,SNOWHICE,SNOWHLND
+/blues/gpfs/home/software/spack-0.10.1/opt/spack/linux-centos7-x86_64/intel-17.0.4/nco-4.7.4-x4y66ep2ydoyegnckicvv5ljwrheniun/bin/ncremap: line 114: soft: command not found
+Input #00: /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/SE_ATM2D/v2alpha559.LR.piControl.en00.010101-015012.nc
+Map/Wgt  : /lcrc/group/acme/ac.szhang/acme_scratch/data/regrid_maps/map_ne30pg2_to_cmip6_180x360_aave.20200201.nc
+Regridded: /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/ATM_2D/v2alpha559.LR.piControl.en00.010101-015012.nc
+LANDFRAC,LANDFRAC,OCNFRAC,ICEFRAC,PS,PSL,U10,LWCF,SWCF,PRECC,PRECL,AODVIS,AODDUST,TGCLDLWP,TGCLDIWP,CLDLOW,CLDMED,CLDHGH,CLDTOT,FLNT,FSNT,FLNTC,FSNTC,FLUT,FSUTOA,FSUTOAC,FLUTC,TMQ,TS,SHFLX,LHFLX,FSNTOA,FSNTOAC,FLNS,FLNSC,FLDS,FSNS,FSNSC,FSDS,FSDSC,SOLIN,TREFHT,TAUY,TAUX,QFLX,QREFHT,OMEGA500,PBLH,PRECSC,PRECSL,TAUGWX,TAUGWY,TGCLDCWP,TH7001000,TREFMNAV,TREFMXAV,TUQ,TVQ,TVH,TUH,TSMN,TSMX,SNOWHICE,SNOWHLND
+/blues/gpfs/home/software/spack-0.10.1/opt/spack/linux-centos7-x86_64/intel-17.0.4/nco-4.7.4-x4y66ep2ydoyegnckicvv5ljwrheniun/bin/ncremap: line 114: soft: command not found
+Input #00: /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/SE_ATM2D/v2alpha559.LR.piControl.en00.015101-020012.nc
+Map/Wgt  : /lcrc/group/acme/ac.szhang/acme_scratch/data/regrid_maps/map_ne30pg2_to_cmip6_180x360_aave.20200201.nc
+Regridded: /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/ATM_2D/v2alpha559.LR.piControl.en00.015101-020012.nc
+LANDFRAC,LANDFRAC,OCNFRAC,ICEFRAC,PS,PSL,U10,LWCF,SWCF,PRECC,PRECL,AODVIS,AODDUST,TGCLDLWP,TGCLDIWP,CLDLOW,CLDMED,CLDHGH,CLDTOT,FLNT,FSNT,FLNTC,FSNTC,FLUT,FSUTOA,FSUTOAC,FLUTC,TMQ,TS,SHFLX,LHFLX,FSNTOA,FSNTOAC,FLNS,FLNSC,FLDS,FSNS,FSNSC,FSDS,FSDSC,SOLIN,TREFHT,TAUY,TAUX,QFLX,QREFHT,OMEGA500,PBLH,PRECSC,PRECSL,TAUGWX,TAUGWY,TGCLDCWP,TH7001000,TREFMNAV,TREFMXAV,TUQ,TVQ,TVH,TUH,TSMN,TSMX,SNOWHICE,SNOWHLND
+/blues/gpfs/home/software/spack-0.10.1/opt/spack/linux-centos7-x86_64/intel-17.0.4/nco-4.7.4-x4y66ep2ydoyegnckicvv5ljwrheniun/bin/ncremap: line 114: soft: command not found
+Input #00: /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/SE_ATM2D/v2alpha559.LR.piControl.en00.020101-025012.nc
+Map/Wgt  : /lcrc/group/acme/ac.szhang/acme_scratch/data/regrid_maps/map_ne30pg2_to_cmip6_180x360_aave.20200201.nc
+Regridded: /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/ATM_2D/v2alpha559.LR.piControl.en00.020101-025012.nc
+LANDFRAC,LANDFRAC,OCNFRAC,ICEFRAC,PS,PSL,U10,LWCF,SWCF,PRECC,PRECL,AODVIS,AODDUST,TGCLDLWP,TGCLDIWP,CLDLOW,CLDMED,CLDHGH,CLDTOT,FLNT,FSNT,FLNTC,FSNTC,FLUT,FSUTOA,FSUTOAC,FLUTC,TMQ,TS,SHFLX,LHFLX,FSNTOA,FSNTOAC,FLNS,FLNSC,FLDS,FSNS,FSNSC,FSDS,FSDSC,SOLIN,TREFHT,TAUY,TAUX,QFLX,QREFHT,OMEGA500,PBLH,PRECSC,PRECSL,TAUGWX,TAUGWY,TGCLDCWP,TH7001000,TREFMNAV,TREFMXAV,TUQ,TVQ,TVH,TUH,TSMN,TSMX,SNOWHICE,SNOWHLND
+/blues/gpfs/home/software/spack-0.10.1/opt/spack/linux-centos7-x86_64/intel-17.0.4/nco-4.7.4-x4y66ep2ydoyegnckicvv5ljwrheniun/bin/ncremap: line 114: soft: command not found
+Input #00: /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/SE_ATM2D/v2alpha559.LR.piControl.en00.025101-030012.nc
+Map/Wgt  : /lcrc/group/acme/ac.szhang/acme_scratch/data/regrid_maps/map_ne30pg2_to_cmip6_180x360_aave.20200201.nc
+Regridded: /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/ATM_2D/v2alpha559.LR.piControl.en00.025101-030012.nc
+LANDFRAC,LANDFRAC,OCNFRAC,ICEFRAC,PS,PSL,U10,LWCF,SWCF,PRECC,PRECL,AODVIS,AODDUST,TGCLDLWP,TGCLDIWP,CLDLOW,CLDMED,CLDHGH,CLDTOT,FLNT,FSNT,FLNTC,FSNTC,FLUT,FSUTOA,FSUTOAC,FLUTC,TMQ,TS,SHFLX,LHFLX,FSNTOA,FSNTOAC,FLNS,FLNSC,FLDS,FSNS,FSNSC,FSDS,FSDSC,SOLIN,TREFHT,TAUY,TAUX,QFLX,QREFHT,OMEGA500,PBLH,PRECSC,PRECSL,TAUGWX,TAUGWY,TGCLDCWP,TH7001000,TREFMNAV,TREFMXAV,TUQ,TVQ,TVH,TUH,TSMN,TSMX,SNOWHICE,SNOWHLND
+/blues/gpfs/home/software/spack-0.10.1/opt/spack/linux-centos7-x86_64/intel-17.0.4/nco-4.7.4-x4y66ep2ydoyegnckicvv5ljwrheniun/bin/ncremap: line 114: soft: command not found
+Input #00: /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/SE_ATM2D/v2alpha559.LR.piControl.en00.030101-035012.nc
+Map/Wgt  : /lcrc/group/acme/ac.szhang/acme_scratch/data/regrid_maps/map_ne30pg2_to_cmip6_180x360_aave.20200201.nc
+Regridded: /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/ATM_2D/v2alpha559.LR.piControl.en00.030101-035012.nc
+LANDFRAC,LANDFRAC,OCNFRAC,ICEFRAC,PS,PSL,U10,LWCF,SWCF,PRECC,PRECL,AODVIS,AODDUST,TGCLDLWP,TGCLDIWP,CLDLOW,CLDMED,CLDHGH,CLDTOT,FLNT,FSNT,FLNTC,FSNTC,FLUT,FSUTOA,FSUTOAC,FLUTC,TMQ,TS,SHFLX,LHFLX,FSNTOA,FSNTOAC,FLNS,FLNSC,FLDS,FSNS,FSNSC,FSDS,FSDSC,SOLIN,TREFHT,TAUY,TAUX,QFLX,QREFHT,OMEGA500,PBLH,PRECSC,PRECSL,TAUGWX,TAUGWY,TGCLDCWP,TH7001000,TREFMNAV,TREFMXAV,TUQ,TVQ,TVH,TUH,TSMN,TSMX,SNOWHICE,SNOWHLND
+/blues/gpfs/home/software/spack-0.10.1/opt/spack/linux-centos7-x86_64/intel-17.0.4/nco-4.7.4-x4y66ep2ydoyegnckicvv5ljwrheniun/bin/ncremap: line 114: soft: command not found
+Input #00: /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/SE_ATM2D/v2alpha559.LR.piControl.en00.035101-040012.nc
+Map/Wgt  : /lcrc/group/acme/ac.szhang/acme_scratch/data/regrid_maps/map_ne30pg2_to_cmip6_180x360_aave.20200201.nc
+Regridded: /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/ATM_2D/v2alpha559.LR.piControl.en00.035101-040012.nc
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/v2alpha559.LR.piControl.en00.LANDFRAC.000101-040012.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/v2alpha559.LR.piControl.en00.OCNFRAC.000101-040012.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/v2alpha559.LR.piControl.en00.ICEFRAC.000101-040012.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/v2alpha559.LR.piControl.en00.PS.000101-040012.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/v2alpha559.LR.piControl.en00.PSL.000101-040012.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/v2alpha559.LR.piControl.en00.U10.000101-040012.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/v2alpha559.LR.piControl.en00.LWCF.000101-040012.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/v2alpha559.LR.piControl.en00.SWCF.000101-040012.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/v2alpha559.LR.piControl.en00.PRECC.000101-040012.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/v2alpha559.LR.piControl.en00.PRECL.000101-040012.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/v2alpha559.LR.piControl.en00.AODVIS.000101-040012.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/v2alpha559.LR.piControl.en00.AODDUST.000101-040012.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/v2alpha559.LR.piControl.en00.TGCLDLWP.000101-040012.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/v2alpha559.LR.piControl.en00.TGCLDIWP.000101-040012.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/v2alpha559.LR.piControl.en00.CLDLOW.000101-040012.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/v2alpha559.LR.piControl.en00.CLDMED.000101-040012.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/v2alpha559.LR.piControl.en00.CLDHGH.000101-040012.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/v2alpha559.LR.piControl.en00.CLDTOT.000101-040012.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/v2alpha559.LR.piControl.en00.FLNT.000101-040012.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/v2alpha559.LR.piControl.en00.FSNT.000101-040012.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/v2alpha559.LR.piControl.en00.FLNTC.000101-040012.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/v2alpha559.LR.piControl.en00.FSNTC.000101-040012.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/v2alpha559.LR.piControl.en00.FLUT.000101-040012.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/v2alpha559.LR.piControl.en00.FSUTOA.000101-040012.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/v2alpha559.LR.piControl.en00.FSUTOAC.000101-040012.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/v2alpha559.LR.piControl.en00.FLUTC.000101-040012.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/v2alpha559.LR.piControl.en00.TMQ.000101-040012.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/v2alpha559.LR.piControl.en00.TS.000101-040012.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/v2alpha559.LR.piControl.en00.SHFLX.000101-040012.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/v2alpha559.LR.piControl.en00.LHFLX.000101-040012.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/v2alpha559.LR.piControl.en00.FSNTOA.000101-040012.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/v2alpha559.LR.piControl.en00.FSNTOAC.000101-040012.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/v2alpha559.LR.piControl.en00.FLNS.000101-040012.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/v2alpha559.LR.piControl.en00.FLNSC.000101-040012.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/v2alpha559.LR.piControl.en00.FLDS.000101-040012.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/v2alpha559.LR.piControl.en00.FSNS.000101-040012.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/v2alpha559.LR.piControl.en00.FSNSC.000101-040012.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/v2alpha559.LR.piControl.en00.FSDS.000101-040012.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/v2alpha559.LR.piControl.en00.FSDSC.000101-040012.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/v2alpha559.LR.piControl.en00.SOLIN.000101-040012.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/v2alpha559.LR.piControl.en00.TREFHT.000101-040012.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/v2alpha559.LR.piControl.en00.TAUY.000101-040012.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/v2alpha559.LR.piControl.en00.TAUX.000101-040012.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/v2alpha559.LR.piControl.en00.QFLX.000101-040012.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/v2alpha559.LR.piControl.en00.QREFHT.000101-040012.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/v2alpha559.LR.piControl.en00.OMEGA500.000101-040012.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/v2alpha559.LR.piControl.en00.PBLH.000101-040012.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/v2alpha559.LR.piControl.en00.PRECSC.000101-040012.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/v2alpha559.LR.piControl.en00.PRECSL.000101-040012.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/v2alpha559.LR.piControl.en00.TAUGWX.000101-040012.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/v2alpha559.LR.piControl.en00.TAUGWY.000101-040012.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/v2alpha559.LR.piControl.en00.TGCLDCWP.000101-040012.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/v2alpha559.LR.piControl.en00.TH7001000.000101-040012.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/v2alpha559.LR.piControl.en00.TREFMNAV.000101-040012.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/v2alpha559.LR.piControl.en00.TREFMXAV.000101-040012.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/v2alpha559.LR.piControl.en00.SNOWHICE.000101-040012.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/v2alpha559.LR.piControl.en00.SNOWHLND.000101-040012.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/SE_ATM2D/v2alpha559.LR.piControl.en00.010101-015012.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/SE_ATM2D/v2alpha559.LR.piControl.en00.025101-030012.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/SE_ATM2D/v2alpha559.LR.piControl.en00.005101-010012.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/SE_ATM2D/v2alpha559.LR.piControl.en00.020101-025012.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/SE_ATM2D/v2alpha559.LR.piControl.en00.035101-040012.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/SE_ATM2D/v2alpha559.LR.piControl.en00.000101-005012.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/SE_ATM2D/v2alpha559.LR.piControl.en00.015101-020012.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/SE_ATM2D/v2alpha559.LR.piControl.en00.030101-035012.nc’
+removed directory: ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/SE_ATM2D’
+done

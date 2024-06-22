@@ -1,0 +1,137 @@
+13
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.AODDUST.198501-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.AODVIS.198501-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.CLDHGH.198501-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.CLDLOW.198501-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.CLDMED.198501-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.CLDTOT.198501-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.CRE.198501-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.CRE_SRF.198501-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.ETH1.198501-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.ETH12.198501-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.ETH2.198501-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.FLDS.198501-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.FLDSC.198501-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.FLNS.198501-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.FLNSC.198501-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.FLNT.198501-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.FLNTC.198501-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.FLUS.198501-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.FLUT.198501-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.FLUTC.198501-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.FSDS.198501-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.FSDSC.198501-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.FSNS.198501-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.FSNSC.198501-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.FSNT.198501-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.FSNTC.198501-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.FSNTOA.198501-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.FSNTOAC.198501-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.FSUS.198501-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.FSUSC.198501-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.FSUTOA.198501-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.FSUTOAC.198501-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.ICEFRAC.198501-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.LANDFRAC.198501-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.LHFLX1.198501-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.LHFLX.198501-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.LWCF.198501-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.LWCRE.198501-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.LWCRE_SRF.198501-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.O3_SRF.198501-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.OCNFRAC.198501-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.OLR.198501-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.PRECC.198501-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.PRECL.198501-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.PRECSC.198501-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.PRECSL.198501-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.PRECST.198501-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.PRECT.198501-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.PS.198501-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.PSL.198501-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.QFLX.198501-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.QnRad_SRF.198501-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.Qn_SRF.198501-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.QnTot_SRF.198501-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.QnTur_SRF.198501-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.QREFHT.198501-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.RESTOA.198501-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.RESTOM.198501-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.S10.198501-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.SCO.198501-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.SF.198501-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.SHFLX.198501-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.SNFRAC.198501-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.SNOW.198501-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.SNOWDP.198501-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.SOILWATER.198501-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.SOLIN.198501-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.SWCF.198501-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.SWCRE.198501-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.SWCRE_SRF.198501-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.T850.198501-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.TAUX.198501-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.TAUY.198501-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.TCO.198501-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.TGCLDIWP.198501-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.TGCLDLWP.198501-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.TMQ.198501-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.TREFHT.198501-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.TREFMNAV.198501-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.TREFMXAV.198501-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.TS.198501-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.U10.198501-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.U200.198501-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.U850.198501-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.UM10.198501-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.V10.198501-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.V200.198501-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.V850.198501-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v3alpha02-Bi-ECE2r2-L80.F20TR/v3alpha02-Bi-ECE2r2-L80.F20TR.en00.Z500.198501-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+done

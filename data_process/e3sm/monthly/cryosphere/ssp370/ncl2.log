@@ -1,0 +1,62 @@
+nohup: ignoring input
+rm: cannot remove ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.SORRM.ssp370/v2_1.SORRM.ssp370.en00.SF.201501-206412.nc’: No such file or directory
+rm: cannot remove ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.SORRM.ssp370/v2_1.SORRM.ssp370.en00.SF.206501-210012.nc’: No such file or directory
+rm: cannot remove ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.SORRM.ssp370/v2_1.SORRM.ssp370.en00.SF.201501-210012.nc’: No such file or directory
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.SORRM.ssp370/v2_1.SORRM.ssp370.en00.SF.201501-206412.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.SORRM.ssp370/v2_1.SORRM.ssp370.en00.SF.206501-210012.nc’
+rm: cannot remove ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.SORRM.ssp370/v2_1.SORRM.ssp370.en00.U850.201501-206412.nc’: No such file or directory
+rm: cannot remove ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.SORRM.ssp370/v2_1.SORRM.ssp370.en00.U850.206501-210012.nc’: No such file or directory
+rm: cannot remove ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.SORRM.ssp370/v2_1.SORRM.ssp370.en00.U850.201501-210012.nc’: No such file or directory
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.SORRM.ssp370/v2_1.SORRM.ssp370.en00.U850.201501-206412.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.SORRM.ssp370/v2_1.SORRM.ssp370.en00.U850.206501-210012.nc’
+rm: cannot remove ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.SORRM.ssp370/v2_1.SORRM.ssp370.en00.V850.201501-206412.nc’: No such file or directory
+rm: cannot remove ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.SORRM.ssp370/v2_1.SORRM.ssp370.en00.V850.206501-210012.nc’: No such file or directory
+rm: cannot remove ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.SORRM.ssp370/v2_1.SORRM.ssp370.en00.V850.201501-210012.nc’: No such file or directory
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.SORRM.ssp370/v2_1.SORRM.ssp370.en00.V850.201501-206412.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.SORRM.ssp370/v2_1.SORRM.ssp370.en00.V850.206501-210012.nc’
+rm: cannot remove ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.SORRM.ssp370/v2_1.SORRM.ssp370.en00.U200.201501-206412.nc’: No such file or directory
+rm: cannot remove ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.SORRM.ssp370/v2_1.SORRM.ssp370.en00.U200.206501-210012.nc’: No such file or directory
+rm: cannot remove ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.SORRM.ssp370/v2_1.SORRM.ssp370.en00.U200.201501-210012.nc’: No such file or directory
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.SORRM.ssp370/v2_1.SORRM.ssp370.en00.U200.201501-206412.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.SORRM.ssp370/v2_1.SORRM.ssp370.en00.U200.206501-210012.nc’
+rm: cannot remove ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.SORRM.ssp370/v2_1.SORRM.ssp370.en00.V200.201501-206412.nc’: No such file or directory
+rm: cannot remove ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.SORRM.ssp370/v2_1.SORRM.ssp370.en00.V200.206501-210012.nc’: No such file or directory
+rm: cannot remove ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.SORRM.ssp370/v2_1.SORRM.ssp370.en00.V200.201501-210012.nc’: No such file or directory
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.SORRM.ssp370/v2_1.SORRM.ssp370.en00.V200.201501-206412.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.SORRM.ssp370/v2_1.SORRM.ssp370.en00.V200.206501-210012.nc’
+rm: cannot remove ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.SORRM.ssp370/v2_1.SORRM.ssp370.en00.V10.201501-206412.nc’: No such file or directory
+rm: cannot remove ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.SORRM.ssp370/v2_1.SORRM.ssp370.en00.V10.206501-210012.nc’: No such file or directory
+rm: cannot remove ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.SORRM.ssp370/v2_1.SORRM.ssp370.en00.V10.201501-210012.nc’: No such file or directory
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.SORRM.ssp370/v2_1.SORRM.ssp370.en00.V10.201501-206412.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.SORRM.ssp370/v2_1.SORRM.ssp370.en00.V10.206501-210012.nc’
+rm: cannot remove ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.SORRM.ssp370/v2_1.SORRM.ssp370.en00.S10.201501-206412.nc’: No such file or directory
+rm: cannot remove ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.SORRM.ssp370/v2_1.SORRM.ssp370.en00.S10.206501-210012.nc’: No such file or directory
+rm: cannot remove ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.SORRM.ssp370/v2_1.SORRM.ssp370.en00.S10.201501-210012.nc’: No such file or directory
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.SORRM.ssp370/v2_1.SORRM.ssp370.en00.S10.201501-206412.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.SORRM.ssp370/v2_1.SORRM.ssp370.en00.S10.206501-210012.nc’
+rm: cannot remove ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.SORRM.ssp370/v2_1.SORRM.ssp370.en00.Z500.201501-206412.nc’: No such file or directory
+rm: cannot remove ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.SORRM.ssp370/v2_1.SORRM.ssp370.en00.Z500.206501-210012.nc’: No such file or directory
+rm: cannot remove ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.SORRM.ssp370/v2_1.SORRM.ssp370.en00.Z500.201501-210012.nc’: No such file or directory
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.SORRM.ssp370/v2_1.SORRM.ssp370.en00.Z500.201501-206412.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.SORRM.ssp370/v2_1.SORRM.ssp370.en00.Z500.206501-210012.nc’
+rm: cannot remove ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.SORRM.ssp370/v2_1.SORRM.ssp370.en00.T850.201501-206412.nc’: No such file or directory
+rm: cannot remove ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.SORRM.ssp370/v2_1.SORRM.ssp370.en00.T850.206501-210012.nc’: No such file or directory
+rm: cannot remove ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.SORRM.ssp370/v2_1.SORRM.ssp370.en00.T850.201501-210012.nc’: No such file or directory
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.SORRM.ssp370/v2_1.SORRM.ssp370.en00.T850.201501-206412.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.SORRM.ssp370/v2_1.SORRM.ssp370.en00.T850.206501-210012.nc’
+input in flex scanner failed
+ Copyright (C) 1995-2019 - All Rights Reserved
+ University Corporation for Atmospheric Research
+ NCAR Command Language Version 6.6.2
+ The use of this software is governed by a License Agreement.
+ See http://www.ncl.ucar.edu/ for more details.
+(0)	working on variable SF
+(0)	working on variable U850
+(0)	working on variable V850
+(0)	working on variable U200
+(0)	working on variable V200
+(0)	working on variable U10
+(0)	working on variable V10
+(0)	working on variable S10
+(0)	working on variable Z500
+(0)	working on variable T850

@@ -1,0 +1,52 @@
+13
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.LR.historical/v2_1.LR.historical.en00.SST.185001-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.LR.historical/v2_1.LR.historical.en00.SSS.185001-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.LR.historical/v2_1.LR.historical.en00.SITIMEFRAC.185001-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.LR.historical/v2_1.LR.historical.en00.SICONC.185001-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.LR.historical/v2_1.LR.historical.en00.SITHICK.185001-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.LR.historical/v2_1.LR.historical.en00.SISNTHICK.185001-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.LR.historical/v2_1.LR.historical.en00.SIMASS.185001-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.LR.historical/v2_1.LR.historical.en01.SST.185001-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.LR.historical/v2_1.LR.historical.en01.SSS.185001-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.LR.historical/v2_1.LR.historical.en01.SITIMEFRAC.185001-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.LR.historical/v2_1.LR.historical.en01.SICONC.185001-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.LR.historical/v2_1.LR.historical.en01.SITHICK.185001-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.LR.historical/v2_1.LR.historical.en01.SISNTHICK.185001-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.LR.historical/v2_1.LR.historical.en01.SIMASS.185001-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.LR.historical/v2_1.LR.historical.en02.SST.185001-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.LR.historical/v2_1.LR.historical.en02.SSS.185001-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.LR.historical/v2_1.LR.historical.en02.SITIMEFRAC.185001-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.LR.historical/v2_1.LR.historical.en02.SICONC.185001-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.LR.historical/v2_1.LR.historical.en02.SITHICK.185001-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.LR.historical/v2_1.LR.historical.en02.SISNTHICK.185001-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.LR.historical/v2_1.LR.historical.en02.SIMASS.185001-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.LR.historical/v2_1.LR.historical.en03.SST.185001-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.LR.historical/v2_1.LR.historical.en03.SSS.185001-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.LR.historical/v2_1.LR.historical.en03.SITIMEFRAC.185001-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.LR.historical/v2_1.LR.historical.en03.SICONC.185001-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.LR.historical/v2_1.LR.historical.en03.SITHICK.185001-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.LR.historical/v2_1.LR.historical.en03.SISNTHICK.185001-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.LR.historical/v2_1.LR.historical.en03.SIMASS.185001-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.LR.historical/v2_1.LR.historical.en04.SST.185001-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.LR.historical/v2_1.LR.historical.en04.SSS.185001-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.LR.historical/v2_1.LR.historical.en04.SITIMEFRAC.185001-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.LR.historical/v2_1.LR.historical.en04.SICONC.185001-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.LR.historical/v2_1.LR.historical.en04.SITHICK.185001-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.LR.historical/v2_1.LR.historical.en04.SISNTHICK.185001-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2_1.LR.historical/v2_1.LR.historical.en04.SIMASS.185001-201412.nc
+done

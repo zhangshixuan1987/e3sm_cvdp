@@ -1,0 +1,1 @@
+/lcrc/group/acme/ac.dcomeau/scratch/chrys/E3SMv2_1/v2_1.SORRM.historical_0751/mpas_analysis_output/yrs1950-2014/timeseries/moc/mocTimeSeries_1967-1967.nc

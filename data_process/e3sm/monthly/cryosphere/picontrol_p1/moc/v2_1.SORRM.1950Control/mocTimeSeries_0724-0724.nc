@@ -1,0 +1,1 @@
+/lcrc/group/acme/ac.dcomeau/scratch/chrys/20221116.CRYO1950.ne30pg2_SOwISC12to60E2r4.N2Dependent.submeso.chrysalis/mpas_analysis_output/yrs951-1000/timeseries/moc/mocTimeSeries_0724-0724.nc

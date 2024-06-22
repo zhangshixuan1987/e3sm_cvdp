@@ -1,0 +1,49 @@
+1
+U10,U10
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/ATM_2D/v2alpha559.LR.piControl.en00.000101-005012.nc’
+Input #00: /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/SE_ATM2D/v2alpha559.LR.piControl.en00.000101-005012.nc
+Map/Wgt  : /lcrc/group/acme/ac.szhang/acme_scratch/data/regrid_maps/map_ne30pg2_to_cmip6_180x360_aave.20200201.nc
+U10,U10
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/ATM_2D/v2alpha559.LR.piControl.en00.005101-010012.nc’
+Input #00: /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/SE_ATM2D/v2alpha559.LR.piControl.en00.005101-010012.nc
+Map/Wgt  : /lcrc/group/acme/ac.szhang/acme_scratch/data/regrid_maps/map_ne30pg2_to_cmip6_180x360_aave.20200201.nc
+U10,U10
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/ATM_2D/v2alpha559.LR.piControl.en00.010101-015012.nc’
+ncrcat: ERROR file "20201124.alpha5_59_fallback.piControl.ne30pg2_r05_EC30to60E2r2-1900_ICG.compy.eam.h0.0144-07.nc" not found. It does not exist on the local filesystem, nor does it match remote filename patterns (e.g., http://foo or foo.bar.edu:file).
+ncrcat: HINT file-not-found errors usually arise from filename typos, incorrect paths, missing files, or capricious gods. Please verify spelling and location of requested file. If the file resides on a High Performance Storage System (HPSS) accessible via the 'hsi' command, then add the --hpss option and re-try command.
+Input #00: /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/SE_ATM2D/v2alpha559.LR.piControl.en00.010101-015012.nc
+Map/Wgt  : /lcrc/group/acme/ac.szhang/acme_scratch/data/regrid_maps/map_ne30pg2_to_cmip6_180x360_aave.20200201.nc
+ncks: ERROR file "/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/SE_ATM2D/v2alpha559.LR.piControl.en00.010101-015012.nc" not found. It does not exist on the local filesystem, nor does it match remote filename patterns (e.g., http://foo or foo.bar.edu:file).
+ncks: HINT file-not-found errors usually arise from filename typos, incorrect paths, missing files, or capricious gods. Please verify spelling and location of requested file. If the file resides on a High Performance Storage System (HPSS) accessible via the 'hsi' command, then add the --hpss option and re-try command.
+ncremap: ERROR Failed to horizontally regrid. cmd_rgr[0] failed. Debug this:
+ ncks -O -t 2 --no_tmp_fl --hdr_pad=10000 --gaa remap_script=ncremap --gaa remap_hostname=b534 --gaa remap_version=5.1.7    --rgr lat_nm_out=lat --rgr lon_nm_out=lon --map_fl="/lcrc/group/acme/ac.szhang/acme_scratch/data/regrid_maps/map_ne30pg2_to_cmip6_180x360_aave.20200201.nc" "/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/SE_ATM2D/v2alpha559.LR.piControl.en00.010101-015012.nc" "/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/ATM_2D/v2alpha559.LR.piControl.en00.010101-015012.nc"
+U10,U10
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/ATM_2D/v2alpha559.LR.piControl.en00.015101-020012.nc’
+Input #00: /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/SE_ATM2D/v2alpha559.LR.piControl.en00.015101-020012.nc
+Map/Wgt  : /lcrc/group/acme/ac.szhang/acme_scratch/data/regrid_maps/map_ne30pg2_to_cmip6_180x360_aave.20200201.nc
+U10,U10
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/ATM_2D/v2alpha559.LR.piControl.en00.020101-025012.nc’
+Input #00: /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/SE_ATM2D/v2alpha559.LR.piControl.en00.020101-025012.nc
+Map/Wgt  : /lcrc/group/acme/ac.szhang/acme_scratch/data/regrid_maps/map_ne30pg2_to_cmip6_180x360_aave.20200201.nc
+U10,U10
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/ATM_2D/v2alpha559.LR.piControl.en00.025101-030012.nc’
+Input #00: /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/SE_ATM2D/v2alpha559.LR.piControl.en00.025101-030012.nc
+Map/Wgt  : /lcrc/group/acme/ac.szhang/acme_scratch/data/regrid_maps/map_ne30pg2_to_cmip6_180x360_aave.20200201.nc
+U10,U10
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/ATM_2D/v2alpha559.LR.piControl.en00.030101-035012.nc’
+Input #00: /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/SE_ATM2D/v2alpha559.LR.piControl.en00.030101-035012.nc
+Map/Wgt  : /lcrc/group/acme/ac.szhang/acme_scratch/data/regrid_maps/map_ne30pg2_to_cmip6_180x360_aave.20200201.nc
+U10,U10
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/ATM_2D/v2alpha559.LR.piControl.en00.035101-040012.nc’
+Input #00: /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/SE_ATM2D/v2alpha559.LR.piControl.en00.035101-040012.nc
+Map/Wgt  : /lcrc/group/acme/ac.szhang/acme_scratch/data/regrid_maps/map_ne30pg2_to_cmip6_180x360_aave.20200201.nc
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/SE_ATM2D/v2alpha559.LR.piControl.en00.010101-015012.nc.pid143389.ncrcat.tmp’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/SE_ATM2D/v2alpha559.LR.piControl.en00.025101-030012.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/SE_ATM2D/v2alpha559.LR.piControl.en00.005101-010012.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/SE_ATM2D/v2alpha559.LR.piControl.en00.020101-025012.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/SE_ATM2D/v2alpha559.LR.piControl.en00.035101-040012.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/SE_ATM2D/v2alpha559.LR.piControl.en00.000101-005012.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/SE_ATM2D/v2alpha559.LR.piControl.en00.015101-020012.nc’
+removed ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/SE_ATM2D/v2alpha559.LR.piControl.en00.030101-035012.nc’
+removed directory: ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2alpha559.LR.piControl/SE_ATM2D’
+done

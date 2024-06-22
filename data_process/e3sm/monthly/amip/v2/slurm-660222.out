@@ -1,0 +1,111 @@
+13
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2.LR.amip/v2.LR.amip.en00.CLDLOW.197901-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2.LR.amip/v2.LR.amip.en00.CLDTOT.197901-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2.LR.amip/v2.LR.amip.en00.CRE.197901-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2.LR.amip/v2.LR.amip.en00.CRE_SRF.197901-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2.LR.amip/v2.LR.amip.en00.ETH1.197901-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2.LR.amip/v2.LR.amip.en00.ETH12.197901-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2.LR.amip/v2.LR.amip.en00.ETH2.197901-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2.LR.amip/v2.LR.amip.en00.FLDS.197901-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2.LR.amip/v2.LR.amip.en00.FLDSC.197901-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2.LR.amip/v2.LR.amip.en00.FLNS.197901-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2.LR.amip/v2.LR.amip.en00.FLNSC.197901-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2.LR.amip/v2.LR.amip.en00.FLUS.197901-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2.LR.amip/v2.LR.amip.en00.FSNS.197901-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2.LR.amip/v2.LR.amip.en00.FSNSC.197901-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2.LR.amip/v2.LR.amip.en00.LHFLX.197901-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2.LR.amip/v2.LR.amip.en00.LWCRE.197901-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2.LR.amip/v2.LR.amip.en00.LWCRE_SRF.197901-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2.LR.amip/v2.LR.amip.en00.OLR.197901-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2.LR.amip/v2.LR.amip.en00.PRECST.197901-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2.LR.amip/v2.LR.amip.en00.PRECT.197901-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2.LR.amip/v2.LR.amip.en00.PSL.197901-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2.LR.amip/v2.LR.amip.en00.Q.197901-201412.nc
+ncap2: WARNING prs_cls::ncap_var_init(): Unable to find variable time in /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2.LR.amip/v2.LR.amip.en00.Q.197901-201412.nc or /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2.LR.amip/v2.LR.amip.en00.Q.197901-201412.nc.tmp
+ncap2: ERROR out(): Could not read var time
+mv: cannot stat ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2.LR.amip/v2.LR.amip.en00.Q.197901-201412.nc.tmp’: No such file or directory
+ncap2: ERROR ncap_cst_mk(): Unrecognized dimension "time" in LHS subscripts
+mv: cannot stat ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2.LR.amip/v2.LR.amip.en00.Q.197901-201412.nc.tmp’: No such file or directory
+ncatted: ERROR File contains no variables or groups that match name "time" so attribute "units" cannot be changed
+ncatted: ERROR File contains no variables or groups that match name "time" so attribute "calendar" cannot be changed
+ncap2: WARNING prs_cls::ncap_var_init(): Unable to find variable time in /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2.LR.amip/v2.LR.amip.en00.Q.197901-201412.nc or /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2.LR.amip/v2.LR.amip.en00.Q.197901-201412.nc.tmp
+ncap2: ERROR out(): Could not read var time
+mv: cannot stat ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2.LR.amip/v2.LR.amip.en00.Q.197901-201412.nc.tmp’: No such file or directory
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2.LR.amip/v2.LR.amip.en00.QnRad_SRF.197901-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2.LR.amip/v2.LR.amip.en00.Qn_SRF.197901-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2.LR.amip/v2.LR.amip.en00.QnTot_SRF.197901-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2.LR.amip/v2.LR.amip.en00.QnTur_SRF.197901-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2.LR.amip/v2.LR.amip.en00.S10.197901-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2.LR.amip/v2.LR.amip.en00.SF.197901-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2.LR.amip/v2.LR.amip.en00.SHFLX.197901-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2.LR.amip/v2.LR.amip.en00.SWCRE.197901-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2.LR.amip/v2.LR.amip.en00.SWCRE_SRF.197901-201412.nc
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2.LR.amip/v2.LR.amip.en00.T.197901-201412.nc
+ncap2: WARNING prs_cls::ncap_var_init(): Unable to find variable time in /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2.LR.amip/v2.LR.amip.en00.T.197901-201412.nc or /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2.LR.amip/v2.LR.amip.en00.T.197901-201412.nc.tmp
+ncap2: ERROR out(): Could not read var time
+mv: cannot stat ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2.LR.amip/v2.LR.amip.en00.T.197901-201412.nc.tmp’: No such file or directory
+ncap2: ERROR ncap_cst_mk(): Unrecognized dimension "time" in LHS subscripts
+mv: cannot stat ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2.LR.amip/v2.LR.amip.en00.T.197901-201412.nc.tmp’: No such file or directory
+ncatted: ERROR File contains no variables or groups that match name "time" so attribute "units" cannot be changed
+ncatted: ERROR File contains no variables or groups that match name "time" so attribute "calendar" cannot be changed
+ncap2: WARNING prs_cls::ncap_var_init(): Unable to find variable time in /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2.LR.amip/v2.LR.amip.en00.T.197901-201412.nc or /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2.LR.amip/v2.LR.amip.en00.T.197901-201412.nc.tmp
+ncap2: ERROR out(): Could not read var time
+mv: cannot stat ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2.LR.amip/v2.LR.amip.en00.T.197901-201412.nc.tmp’: No such file or directory
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2.LR.amip/v2.LR.amip.en00.T850.197901-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2.LR.amip/v2.LR.amip.en00.TAUX.197901-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2.LR.amip/v2.LR.amip.en00.TAUY.197901-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2.LR.amip/v2.LR.amip.en00.TGCLDIWP.197901-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2.LR.amip/v2.LR.amip.en00.TGCLDLWP.197901-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2.LR.amip/v2.LR.amip.en00.TMQ.197901-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2.LR.amip/v2.LR.amip.en00.TREFHT.197901-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2.LR.amip/v2.LR.amip.en00.TS.197901-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2.LR.amip/v2.LR.amip.en00.U10.197901-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2.LR.amip/v2.LR.amip.en00.U.197901-201412.nc
+ncap2: WARNING prs_cls::ncap_var_init(): Unable to find variable time in /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2.LR.amip/v2.LR.amip.en00.U.197901-201412.nc or /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2.LR.amip/v2.LR.amip.en00.U.197901-201412.nc.tmp
+ncap2: ERROR out(): Could not read var time
+mv: cannot stat ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2.LR.amip/v2.LR.amip.en00.U.197901-201412.nc.tmp’: No such file or directory
+ncap2: ERROR ncap_cst_mk(): Unrecognized dimension "time" in LHS subscripts
+mv: cannot stat ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2.LR.amip/v2.LR.amip.en00.U.197901-201412.nc.tmp’: No such file or directory
+ncatted: ERROR File contains no variables or groups that match name "time" so attribute "units" cannot be changed
+ncatted: ERROR File contains no variables or groups that match name "time" so attribute "calendar" cannot be changed
+ncap2: WARNING prs_cls::ncap_var_init(): Unable to find variable time in /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2.LR.amip/v2.LR.amip.en00.U.197901-201412.nc or /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2.LR.amip/v2.LR.amip.en00.U.197901-201412.nc.tmp
+ncap2: ERROR out(): Could not read var time
+mv: cannot stat ‘/lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2.LR.amip/v2.LR.amip.en00.U.197901-201412.nc.tmp’: No such file or directory
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2.LR.amip/v2.LR.amip.en00.U200.197901-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2.LR.amip/v2.LR.amip.en00.U850.197901-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2.LR.amip/v2.LR.amip.en00.V10.197901-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2.LR.amip/v2.LR.amip.en00.V200.197901-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2.LR.amip/v2.LR.amip.en00.V850.197901-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+working file:  /lcrc/group/acme/ac.szhang/acme_scratch/data/CVDP_RGD/v2.LR.amip/v2.LR.amip.en00.Z500.197901-201412.nc
+ncap2: WARNING ncap_def_dim(): dim "bnds" - already exists in input/output.
+done

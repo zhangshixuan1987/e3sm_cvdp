@@ -1,0 +1,23 @@
+DEBUG: Opening index database
+INFO: Transferring file from HPSS: zstash/index.db
+For help, please see https://e3sm-project.github.io/zstash. Ask questions at https://github.com/E3SM-Project/zstash/discussions/categories/q-a.
+Traceback (most recent call last):
+  File "/lcrc/soft/climate/e3sm-unified/base/envs/e3sm_unified_1.9.0_login/bin/zstash", line 10, in <module>
+    sys.exit(main())
+  File "/lcrc/soft/climate/e3sm-unified/base/envs/e3sm_unified_1.9.0_login/lib/python3.10/site-packages/zstash/main.py", line 68, in main
+    extract()
+  File "/lcrc/soft/climate/e3sm-unified/base/envs/e3sm_unified_1.9.0_login/lib/python3.10/site-packages/zstash/extract.py", line 45, in extract
+    failures: List[FilesRow] = extract_database(args, cache, keep_files)
+  File "/lcrc/soft/climate/e3sm-unified/base/envs/e3sm_unified_1.9.0_login/lib/python3.10/site-packages/zstash/extract.py", line 173, in extract_database
+    hpss_get(hpss, get_db_filename(cache), cache)
+  File "/lcrc/soft/climate/e3sm-unified/base/envs/e3sm_unified_1.9.0_login/lib/python3.10/site-packages/zstash/hpss.py", line 118, in hpss_get
+    hpss_transfer(hpss, file_path, "get", cache, False)
+  File "/lcrc/soft/climate/e3sm-unified/base/envs/e3sm_unified_1.9.0_login/lib/python3.10/site-packages/zstash/hpss.py", line 95, in hpss_transfer
+    run_command(command, error_str)
+  File "/lcrc/soft/climate/e3sm-unified/base/envs/e3sm_unified_1.9.0_login/lib/python3.10/site-packages/zstash/utils.py", line 50, in run_command
+    p1: subprocess.Popen = subprocess.Popen(
+  File "/lcrc/soft/climate/e3sm-unified/base/envs/e3sm_unified_1.9.0_login/lib/python3.10/subprocess.py", line 971, in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+  File "/lcrc/soft/climate/e3sm-unified/base/envs/e3sm_unified_1.9.0_login/lib/python3.10/subprocess.py", line 1863, in _execute_child
+    raise child_exception_type(errno_num, err_msg, err_filename)
+FileNotFoundError: [Errno 2] No such file or directory: 'hsi'

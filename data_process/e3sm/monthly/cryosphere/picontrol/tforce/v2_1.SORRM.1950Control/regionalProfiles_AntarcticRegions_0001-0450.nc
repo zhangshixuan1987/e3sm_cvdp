@@ -1,0 +1,1 @@
+/lcrc/group/acme/ac.dcomeau/scratch/chrys/20221116.CRYO1950.ne30pg2_SOwISC12to60E2r4.N2Dependent.submeso.chrysalis/mpas_analysis_output/yrs401-450/timeseries/AntarcticRegions/regionalProfiles_AntarcticRegions_0001-0450.nc
